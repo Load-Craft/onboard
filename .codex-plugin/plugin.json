@@ -1,0 +1,22 @@
+{
+  "name": "loadcraft-preparation-skills",
+  "version": "0.1.0",
+  "description": "Source-grounded OpenAPI and frontend journey preparation for LoadCraft.",
+  "author": {
+    "name": "LoadCraft"
+  },
+  "keywords": ["loadcraft", "openapi", "load-testing", "user-journeys"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "LoadCraft Preparation Skills",
+    "shortDescription": "Prepare validated LoadCraft source artifacts.",
+    "longDescription": "Inspect customer repositories and prepare a validated OpenAPI bundle or grounded frontend journey descriptions for LoadCraft.",
+    "developerName": "LoadCraft",
+    "category": "Developer Tools",
+    "capabilities": ["Repository analysis", "Artifact generation"],
+    "defaultPrompt": [
+      "Prepare this API repository for LoadCraft.",
+      "Create LoadCraft journeys from this frontend."
+    ]
+  }
+}

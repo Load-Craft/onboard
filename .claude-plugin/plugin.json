@@ -1,0 +1,9 @@
+{
+  "name": "loadcraft-preparation-skills",
+  "version": "0.1.0",
+  "description": "Source-grounded OpenAPI and frontend journey preparation for LoadCraft.",
+  "author": {
+    "name": "LoadCraft"
+  },
+  "keywords": ["loadcraft", "openapi", "load-testing", "user-journeys"]
+}

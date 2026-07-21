@@ -1,0 +1,4 @@
+interface:
+  display_name: "LoadCraft OpenAPI"
+  short_description: "Prepare a LoadCraft-ready OpenAPI file"
+  default_prompt: "Use $loadcraft-openapi to inspect this repository and produce a validated OpenAPI file ready for LoadCraft."
