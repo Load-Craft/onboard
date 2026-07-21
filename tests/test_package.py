@@ -23,7 +23,7 @@ class PackageLayoutTestCase(unittest.TestCase):
         self.assertEqual(codex["skills"], "./skills/")
 
     def test_skills_are_self_contained_and_references_resolve(self) -> None:
-        expected_names = {"loadcraft-openapi", "loadcraft-journey-description"}
+        expected_names = {"loadcraft-openapi", "loadcraft-journeys"}
         actual_names: set[str] = set()
 
         for skill_dir in sorted(path for path in SKILLS_ROOT.iterdir() if path.is_dir()):

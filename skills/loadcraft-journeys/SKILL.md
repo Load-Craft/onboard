@@ -1,5 +1,5 @@
 ---
-name: loadcraft-journey-description
+name: loadcraft-journeys
 description: Inspect a frontend repository and create or audit grounded plain-text user journeys for LoadCraft scenario generation. Use when preparing frontend flows for LoadCraft, mapping implemented UI goals into import-ready descriptions, refreshing journeys after UI changes, or checking existing journey text against routes, labels, roles, auth guards, and asynchronous behavior. Produce one standalone LoadCraft description per text file and never invent UI details.
 ---
 

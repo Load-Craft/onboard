@@ -15,7 +15,7 @@ innym asystencie, któremu można podać plik lub wkleić tekst.
 | Skill | Wynik | Co robi |
 |---|---|---|
 | [`loadcraft-openapi`](loadcraft-openapi/) | `loadcraft/openapi.json` | Analizuje kod API (bez modyfikowania go) i buduje jeden plik OpenAPI zgodny z importerem LoadCrafta. Braków w kodzie nie zgaduje — raportuje je jako blokery. Umie też zaktualizować lub zaudytować istniejący plik. |
-| [`loadcraft-journey-description`](loadcraft-journey-description/) | `loadcraft/journeys/*.txt` | Analizuje kod frontendu i opisuje ścieżki użytkownika czystym tekstem — każdy plik `.txt` wklejasz w LoadCrafcie jako opis scenariusza, bez żadnej obróbki. |
+| [`loadcraft-journeys`](loadcraft-journeys/) | `loadcraft/journeys/*.txt` | Analizuje kod frontendu i opisuje ścieżki użytkownika czystym tekstem — każdy plik `.txt` wklejasz w LoadCrafcie jako opis scenariusza, bez żadnej obróbki. |
 
 Skille domyślnie **tylko czytają** repozytorium — zapisują wyłącznie pliki
 wynikowe w katalogu `loadcraft/`. Nie uruchamiają aplikacji ani nie instalują
@@ -36,7 +36,7 @@ i dlaczego. Wynik możesz też sprawdzić ręcznie:
 
 ```bash
 python3 skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
-python3 skills/loadcraft-journey-description/scripts/validate_journeys.py loadcraft/journeys
+python3 skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
 ```
 
 ## Instrukcje dla konkretnych narzędzi
@@ -59,7 +59,7 @@ Wgraj folder do repozytorium i dopisz w `AGENTS.md` (w katalogu głównym):
 ```
 Przy przygotowywaniu OpenAPI dla LoadCrafta wykonaj workflow
 z skills/loadcraft-openapi/SKILL.md.
-Przy opisywaniu ścieżek użytkownika — skills/loadcraft-journey-description/SKILL.md.
+Przy opisywaniu ścieżek użytkownika — skills/loadcraft-journeys/SKILL.md.
 ```
 
 Po publikacji tego repo na GitHubie skille można też instalować bezpośrednio:
@@ -86,7 +86,7 @@ warto dodać wpis w `.github/copilot-instructions.md`:
 
 ```
 Przy przygotowywaniu artefaktów LoadCrafta stosuj się do
-skills/loadcraft-openapi/SKILL.md i skills/loadcraft-journey-description/SKILL.md.
+skills/loadcraft-openapi/SKILL.md i skills/loadcraft-journeys/SKILL.md.
 ```
 
 ### Dowolne inne AI (ChatGPT, Gemini, itd.)

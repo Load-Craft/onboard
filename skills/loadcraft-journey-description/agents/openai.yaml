@@ -1,4 +1,0 @@
-interface:
-  display_name: "LoadCraft Journey Description"
-  short_description: "Create grounded LoadCraft journey descriptions"
-  default_prompt: "Use $loadcraft-journey-description to inspect this frontend and write validated journey descriptions ready to paste into LoadCraft."

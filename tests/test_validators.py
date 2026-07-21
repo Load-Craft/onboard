@@ -15,7 +15,7 @@ OPENAPI_VALIDATOR = (
 JOURNEY_VALIDATOR = (
     PACK_ROOT
     / "skills"
-    / "loadcraft-journey-description"
+    / "loadcraft-journeys"
     / "scripts"
     / "validate_journeys.py"
 )

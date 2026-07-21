@@ -8,7 +8,7 @@ narzędziach zgodnych z formatem Agent Skills.
 | Skill | Artefakt | Co robi |
 |---|---|---|
 | [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` | Analizuje kod API (read-only) i buduje jeden plik OpenAPI w profilu zgodności LoadCrafta (3.0.3, jawne `security` per operacja, bez stratnych `anyOf`), walidowany dołączonym skryptem. |
-| [`loadcraft-journey-description`](skills/loadcraft-journey-description/) | `loadcraft/journeys/*.txt` | Analizuje kod frontendu i pisze ścieżki użytkownika jako czysty tekst — każdy plik to dokładnie wartość pola opisu scenariusza w LoadCrafcie. |
+| [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` | Analizuje kod frontendu i pisze ścieżki użytkownika jako czysty tekst — każdy plik to dokładnie wartość pola opisu scenariusza w LoadCrafcie. |
 
 Oba skille mają wspólne zasady: repo klienta jest tylko do odczytu, braki
 dowodów w kodzie są raportowane jako blokery (nigdy zgadywane ani wpisywane

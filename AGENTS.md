@@ -5,7 +5,7 @@ This package has one canonical source for each skill. Keep the same `SKILL.md`, 
 ## Package invariants
 
 - `loadcraft-openapi` emits one `openapi.json` in the documented compatibility profile.
-- `loadcraft-journey-description` emits only direct-input `.txt` journey descriptions.
+- `loadcraft-journeys` emits only direct-input `.txt` journey descriptions.
 - Repository analysis is read-only by default; only explicit output artifacts may be written.
 - Unknown behavior blocks readiness. Do not add fallbacks, guessed fields, TODO markers, or best-effort normalizers.
 - Workers never update shared state. One coordinating agent owns final writes.
@@ -24,7 +24,7 @@ Run before delivery:
 ```bash
 python3 -m unittest discover -s tests -v
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-openapi
-python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-journey-description
+python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-journeys
 python3 <plugin-creator-root>/scripts/validate_plugin.py .
 ```
 
