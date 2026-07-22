@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 SLUG_FILE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*\.txt$")
+PROVENANCE_FILE = ".provenance.json"
+COMMIT_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 MARKDOWN_PATTERNS = (
     re.compile(r"^\s{0,3}#{1,6}\s+", re.MULTILINE),
     re.compile(r"```"),
@@ -70,6 +73,27 @@ class Issue:
     message: str
 
 
+def _validate_provenance_file(path: Path) -> list[Issue]:
+    issues: list[Issue] = []
+    try:
+        stamp = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return [Issue(path, "provenance stamp must be valid JSON")]
+    if not isinstance(stamp, dict):
+        return [Issue(path, "provenance stamp must be a JSON object")]
+    commit = stamp.get("commit")
+    if not isinstance(commit, str) or not COMMIT_PATTERN.match(commit):
+        issues.append(Issue(path, "provenance commit must be a git object hash"))
+    if not isinstance(stamp.get("dirty"), bool):
+        issues.append(Issue(path, "provenance dirty must be a boolean"))
+    unknown = set(stamp) - {"commit", "dirty"}
+    if unknown:
+        issues.append(
+            Issue(path, f"provenance stamp has unsupported keys: {', '.join(sorted(unknown))}")
+        )
+    return issues
+
+
 def _collect_files(targets: list[Path]) -> tuple[list[Path], list[Issue]]:
     files: set[Path] = set()
     issues: list[Issue] = []
@@ -79,6 +103,9 @@ def _collect_files(targets: list[Path]) -> tuple[list[Path], list[Issue]]:
         elif target.is_dir():
             for path in target.rglob("*"):
                 if not path.is_file():
+                    continue
+                if path.name == PROVENANCE_FILE:
+                    issues.extend(_validate_provenance_file(path))
                     continue
                 if path.suffix.lower() != ".txt":
                     issues.append(

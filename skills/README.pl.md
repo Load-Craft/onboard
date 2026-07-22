@@ -15,6 +15,7 @@ czytać kodu.
 |---|---|---|
 | `loadcraft-openapi` | Twoje API (backend) | `loadcraft/openapi.json` + raport |
 | `loadcraft-journeys` | Twoja aplikacja webowa (frontend) | `loadcraft/journeys/*.txt` + raport |
+| `loadcraft-asyncapi` | Twoje API zdarzeń/wiadomości (WebSockety, Kafka, MQTT…) | `loadcraft/asyncapi.json` + raport |
 
 ## Twoje kroki
 
@@ -32,6 +33,10 @@ W Claude Code wystarczy zwykła prośba własnymi słowami:
 albo dla frontendu:
 
 > Opisz ścieżki użytkownika w tej aplikacji pod LoadCraft.
+
+albo dla API zdarzeń/wiadomości:
+
+> Opisz asynchroniczne API tej aplikacji pod LoadCraft.
 
 Claude Code sam znajdzie skill i wykona go. W narzędziach, które nie wykrywają
 skilli automatycznie, wskaż plik wprost — dokładne sformułowanie dla każdego
@@ -58,6 +63,8 @@ użyteczny, ale traktuj go jako niekompletny, dopóki nie zostaną wyjaśnione.
   w pole opisu scenariusza w LoadCrafcie. Jeden plik = jeden scenariusz. Nie
   edytuj i nie łącz plików — każdy jest napisany tak, żeby użyć go dokładnie
   w tej formie.
+- **`loadcraft/asyncapi.json`** → zaimportuj w LoadCrafcie jako specyfikację
+  AsyncAPI.
 - Dane kont testowych podajesz bezpośrednio w konfiguracji LoadCrafta — w
   plikach celowo ich nie ma.
 - Raport nie jest wejściem do LoadCrafta — zachowaj go dla zespołu.
@@ -79,6 +86,7 @@ kontrola, nie obowiązkowy krok. W katalogu głównym projektu:
 ```bash
 python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
 python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
+python3 .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.py loadcraft/asyncapi.json
 ```
 
 (Jeśli instalowałeś skille do `skills/` — Cursor, Codex, Copilot — dostosuj
@@ -117,10 +125,10 @@ zwykłe komendy gita.
 
 ## Ponowny przebieg po zmianach w kodzie
 
-Po prostu poproś AI jeszcze raz (krok 2). Skill OpenAPI zapisuje, z której
-wersji kodu powstał plik, i aktualizuje tylko to, co się od tego czasu
-zmieniło; skill journeys porównuje istniejące pliki `.txt` z aktualną
-aplikacją i raportuje rozjazdy.
+Po prostu poproś AI jeszcze raz (krok 2). Każdy skill zapisuje, z której
+wersji kodu powstały jego pliki, i sprawdza tylko to, co się od tego czasu
+zmieniło: skille OpenAPI i AsyncAPI aktualizują dotknięte operacje, a skill
+journeys weryfikuje ponownie dotknięte pliki `.txt` i raportuje rozjazdy.
 
 ## Uwagi
 

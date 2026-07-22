@@ -1,13 +1,14 @@
 {
   "name": "loadcraft-preparation-skills",
   "version": "0.1.0",
-  "description": "Source-grounded OpenAPI and frontend journey preparation for LoadCraft.",
+  "description": "Source-grounded OpenAPI, AsyncAPI and frontend journey preparation for LoadCraft.",
   "author": {
     "name": "LoadCraft"
   },
   "keywords": [
     "loadcraft",
     "openapi",
+    "asyncapi",
     "load-testing",
     "user-journeys"
   ],
@@ -15,7 +16,7 @@
   "interface": {
     "displayName": "LoadCraft Preparation Skills",
     "shortDescription": "Prepare validated LoadCraft source artifacts.",
-    "longDescription": "Inspect customer repositories and prepare a validated OpenAPI file or grounded frontend journey descriptions for LoadCraft.",
+    "longDescription": "Inspect customer repositories and prepare a validated OpenAPI file, AsyncAPI file, or grounded frontend journey descriptions for LoadCraft.",
     "developerName": "LoadCraft",
     "category": "Developer Tools",
     "capabilities": [
@@ -24,7 +25,8 @@
     ],
     "defaultPrompt": [
       "Prepare this API repository for LoadCraft.",
-      "Create LoadCraft journeys from this frontend."
+      "Create LoadCraft journeys from this frontend.",
+      "Describe this application's asynchronous API for LoadCraft."
     ]
   },
   "repository": "https://github.com/Load-Craft/onboard",

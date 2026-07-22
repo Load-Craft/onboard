@@ -191,4 +191,9 @@ outside the scope of the evaluation run:
   `[ TODO ]` markers with inner spacing are rejected, and the journey finish
   condition tolerates a trailing parenthetical after the final instruction;
 - README/INSTALL documentation was rewritten for non-technical users
-  (English primary, Polish variants).
+  (English primary, Polish variants);
+- a third skill `loadcraft-asyncapi` was added (AsyncAPI 3.0 compatibility
+  profile derived from LoadCraft's `asyncapi_parser.py` and flow generator),
+  with a bundled validator, rule tests, and a forward-test on a synthetic
+  WebSocket+Kafka fixture whose artifact was golden-tested through the real
+  LoadCraft `AsyncAPIParser` with full channel/operation/message parity.

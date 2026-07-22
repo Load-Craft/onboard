@@ -500,6 +500,61 @@ Click "Create order".
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("final instruction", result.stderr)
 
+    def test_journey_directory_accepts_valid_provenance_stamp(self) -> None:
+        description = """Open the "Orders" page.
+
+Check that the orders list is visible.
+"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            (directory / "list-orders.txt").write_text(description, encoding="utf-8")
+            (directory / ".provenance.json").write_text(
+                json.dumps(
+                    {
+                        "commit": "0123456789abcdef0123456789abcdef01234567",
+                        "dirty": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = self._run(JOURNEY_VALIDATOR, directory)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("1 journey", result.stdout)
+
+    def test_journey_directory_rejects_malformed_provenance_stamp(self) -> None:
+        description = """Open the "Orders" page.
+
+Check that the orders list is visible.
+"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            (directory / "list-orders.txt").write_text(description, encoding="utf-8")
+            (directory / ".provenance.json").write_text(
+                json.dumps({"commit": "", "dirty": "no", "note": "x"}),
+                encoding="utf-8",
+            )
+            result = self._run(JOURNEY_VALIDATOR, directory)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("provenance commit must be a git object hash", result.stderr)
+        self.assertIn("provenance dirty must be a boolean", result.stderr)
+        self.assertIn("unsupported keys", result.stderr)
+
+    def test_journey_directory_rejects_invalid_provenance_json(self) -> None:
+        description = """Open the "Orders" page.
+
+Check that the orders list is visible.
+"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            (directory / "list-orders.txt").write_text(description, encoding="utf-8")
+            (directory / ".provenance.json").write_text("{not json", encoding="utf-8")
+            result = self._run(JOURNEY_VALIDATOR, directory)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("provenance stamp must be valid JSON", result.stderr)
+
     def test_journey_directory_rejects_non_text_artifacts(self) -> None:
         description = "Open \"Orders\". Check that the orders list is visible."
         with tempfile.TemporaryDirectory() as temp_dir:

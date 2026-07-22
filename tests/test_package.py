@@ -26,7 +26,7 @@ class PackageLayoutTestCase(unittest.TestCase):
         self.assertEqual(codex.get("homepage"), claude.get("homepage"))
 
     def test_skills_are_self_contained_and_references_resolve(self) -> None:
-        expected_names = {"loadcraft-openapi", "loadcraft-journeys"}
+        expected_names = {"loadcraft-openapi", "loadcraft-journeys", "loadcraft-asyncapi"}
         actual_names: set[str] = set()
 
         for skill_dir in sorted(path for path in SKILLS_ROOT.iterdir() if path.is_dir()):

@@ -1,11 +1,17 @@
 {
   "name": "loadcraft-preparation-skills",
   "version": "0.1.0",
-  "description": "Source-grounded OpenAPI and frontend journey preparation for LoadCraft.",
+  "description": "Source-grounded OpenAPI, AsyncAPI and frontend journey preparation for LoadCraft.",
   "author": {
     "name": "LoadCraft"
   },
-  "keywords": ["loadcraft", "openapi", "load-testing", "user-journeys"],
+  "keywords": [
+    "loadcraft",
+    "openapi",
+    "asyncapi",
+    "load-testing",
+    "user-journeys"
+  ],
   "repository": "https://github.com/Load-Craft/onboard",
   "homepage": "https://github.com/Load-Craft/onboard"
 }

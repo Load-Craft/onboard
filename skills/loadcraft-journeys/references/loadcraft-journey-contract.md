@@ -80,3 +80,4 @@ The result must be grounded in a route transition, visible content, status, noti
 - Lowercase hyphenated slug ending in `.txt`.
 - At least 10 and at most 6000 characters after trimming surrounding whitespace.
 - No surrounding README or manifest is required for LoadCraft input.
+- The output directory may additionally contain one `.provenance.json` maintenance stamp (`commit`, `dirty` — validated by the bundled validator). It records which repository state the journeys were derived from; it is not LoadCraft input and must never be pasted into a scenario description.

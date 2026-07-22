@@ -15,6 +15,7 @@ need to write or read code yourself.
 |---|---|---|
 | `loadcraft-openapi` | your API (backend) | `loadcraft/openapi.json` + a report |
 | `loadcraft-journeys` | your web app (frontend) | `loadcraft/journeys/*.txt` + a report |
+| `loadcraft-asyncapi` | your event/messaging API (WebSockets, Kafka, MQTT…) | `loadcraft/asyncapi.json` + a report |
 
 ## Your steps
 
@@ -32,6 +33,10 @@ In Claude Code a plain request in your own words is enough:
 or, for the frontend:
 
 > Describe the user journeys in this app for LoadCraft.
+
+or, for an event/messaging API:
+
+> Describe this application's asynchronous API for LoadCraft.
 
 Claude Code finds the skill and executes it by itself. In tools that do not
 detect skills automatically, point at the file explicitly — the exact phrasing
@@ -59,6 +64,8 @@ cleared.
   paste it into a scenario description field in LoadCraft. One file = one
   scenario. Do not edit or merge the files — each is written to be used
   exactly as-is.
+- **`loadcraft/asyncapi.json`** → import it in LoadCraft as your AsyncAPI
+  specification.
 - Test account credentials go directly into LoadCraft's configuration — they
   are deliberately absent from the files.
 - The report is not a LoadCraft input — keep it for your team.
@@ -80,6 +87,7 @@ check, not a required step. In the project's root directory:
 ```bash
 python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
 python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
+python3 .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.py loadcraft/asyncapi.json
 ```
 
 (If you installed the skills under `skills/` — Cursor, Codex, Copilot —
@@ -119,10 +127,10 @@ commands.
 
 ## Re-running after code changes
 
-Just ask the AI again (step 2). The OpenAPI skill records which code version
-the file was made from and updates only what changed since then; the journey
-skill compares the existing `.txt` files against the current app and reports
-drift.
+Just ask the AI again (step 2). Every skill records which code version its
+files were made from and checks only what changed since then: the OpenAPI and
+AsyncAPI skills update the affected operations, the journey skill re-verifies
+the affected `.txt` files and reports drift.
 
 ## Notes
 

@@ -35,6 +35,8 @@ The default scope is read-only repository analysis plus those output files. Do n
 
 Resolve the frontend root, output directory, requested scope, locale, and relevant user role before writing. Use `loadcraft/journeys/` when the user gives no output path. Ask only when an unresolved choice would materially change the journeys.
 
+**Scope maintenance with the provenance stamp.** After writing journeys, also write `<output-dir>/.provenance.json` with `{"commit": "<git rev-parse HEAD of the frontend repository>", "dirty": <whether the working tree had uncommitted changes>}`; omit it when the repository is not under git and say so in the report. The stamp is maintenance metadata for this skill — it is never pasted into LoadCraft. On a refresh or audit, when the stamp exists with `dirty: false` and its commit resolves, derive the scope from `git diff --name-only <commit>..HEAD` limited to the frontend root: map changed files to journeys and re-verify only those. A change in a shared layer (routing, navigation, auth guards, localization, form primitives, mutation feedback) can invalidate many journeys — re-verify all dependent ones, never a sample. Then validate the whole directory and re-stamp. When the stamp is missing, `dirty` is true, or the commit does not resolve, fall back to full verification.
+
 ## Workflow
 
 ### 1. Discover the implemented UI

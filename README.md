@@ -11,8 +11,9 @@ compatible with the Agent Skills format.
 |---|---|---|
 | [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` — a description of your API | import it in LoadCraft as the API specification |
 | [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` — user scenarios, one per file | paste each file's content into LoadCraft's scenario description field |
+| [`loadcraft-asyncapi`](skills/loadcraft-asyncapi/) | `loadcraft/asyncapi.json` — a description of your event/messaging API (WebSockets, Kafka, MQTT…) | import it in LoadCraft as the AsyncAPI specification |
 
-Both skills follow the same rules: they only read your code (nothing is
+All skills follow the same rules: they only read your code (nothing is
 modified, installed or started), they never guess — anything they cannot
 confirm is listed in the report as a question to resolve — and no passwords,
 tokens or customer data end up in the files.

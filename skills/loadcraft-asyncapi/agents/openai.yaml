@@ -1,0 +1,4 @@
+interface:
+  display_name: "LoadCraft AsyncAPI"
+  short_description: "Prepare a LoadCraft-ready AsyncAPI file"
+  default_prompt: "Use $loadcraft-asyncapi to inspect this repository's messaging interfaces and produce a validated AsyncAPI file ready for LoadCraft."

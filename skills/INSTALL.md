@@ -3,7 +3,7 @@
 # Installation — one-time setup
 
 Do this once, before first use. Pick your tool below and run the commands in
-**your project's root directory**. The commands install both skills; each
+**your project's root directory**. The commands install all three skills; each
 skill folder stays complete (`SKILL.md` + `references/` + `scripts/`), which
 is required for it to work. (Prefer ZIPs? Ready ones are in
 [`dist/`](../dist/) — unzip them into the same target folder.)
@@ -14,7 +14,7 @@ is required for it to work. (Prefer ZIPs? Ready ones are in
 rm -rf /tmp/onboard
 git clone --depth 1 https://github.com/Load-Craft/onboard /tmp/onboard
 mkdir -p .claude/skills
-cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys .claude/skills/
+cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys /tmp/onboard/skills/loadcraft-asyncapi .claude/skills/
 ```
 
 To make the skills available in **all** your projects instead of one, copy
@@ -22,7 +22,7 @@ them to your home directory instead:
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys ~/.claude/skills/
+cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys /tmp/onboard/skills/loadcraft-asyncapi ~/.claude/skills/
 ```
 
 Claude Code detects the skills automatically — after installing, just ask
@@ -34,7 +34,7 @@ Claude Code detects the skills automatically — after installing, just ask
 rm -rf /tmp/onboard
 git clone --depth 1 https://github.com/Load-Craft/onboard /tmp/onboard
 mkdir -p skills
-cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys skills/
+cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys /tmp/onboard/skills/loadcraft-asyncapi skills/
 ```
 
 Then write in the chat:
@@ -50,11 +50,12 @@ Read this instruction and execute the described workflow for this project.
 rm -rf /tmp/onboard
 git clone --depth 1 https://github.com/Load-Craft/onboard /tmp/onboard
 mkdir -p skills
-cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys skills/
+cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys /tmp/onboard/skills/loadcraft-asyncapi skills/
 cat >> AGENTS.md <<'EOF'
 When preparing OpenAPI for LoadCraft, execute the workflow
 from skills/loadcraft-openapi/SKILL.md.
 When describing user journeys — skills/loadcraft-journeys/SKILL.md.
+When preparing an asynchronous/messaging API — skills/loadcraft-asyncapi/SKILL.md.
 EOF
 ```
 
@@ -66,10 +67,10 @@ Then ask Codex e.g. *"prepare this API for LoadCraft"*.
 rm -rf /tmp/onboard
 git clone --depth 1 https://github.com/Load-Craft/onboard /tmp/onboard
 mkdir -p skills .github
-cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys skills/
+cp -r /tmp/onboard/skills/loadcraft-openapi /tmp/onboard/skills/loadcraft-journeys /tmp/onboard/skills/loadcraft-asyncapi skills/
 cat >> .github/copilot-instructions.md <<'EOF'
-When preparing LoadCraft artifacts, follow
-skills/loadcraft-openapi/SKILL.md and skills/loadcraft-journeys/SKILL.md.
+When preparing LoadCraft artifacts, follow skills/loadcraft-openapi/SKILL.md,
+skills/loadcraft-journeys/SKILL.md and skills/loadcraft-asyncapi/SKILL.md.
 EOF
 ```
 
