@@ -29,10 +29,8 @@ jako TODO do artefaktu), sekrety i dane klienta nie trafiają do wyników.
 - **[`AGENTS.md`](AGENTS.md)** — zasady utrzymania pakietu (zmiany kontraktu
   test-first, wersjonowanie, checklist przed wydaniem).
 - **[`EVALUATION.md`](EVALUATION.md)** — raport z ewaluacji skilli na projekcie
-  Shopcraft, w tym porównanie z poprzednią generacją skilli.
-- **`legacy/`** — poprzednie skille ogólnego przeznaczenia (`api-docs`,
-  `user-flows`). Produkowały dokumentację dla ludzi, nie bezpośredni input
-  LoadCrafta; zachowane jako materiał źródłowy.
+  Shopcraft, w tym porównanie z poprzednią generacją skilli (`api-docs`,
+  `user-flows` — dostępne w historii gita).
 
 Katalog `.claude/skills/` zawiera tylko symlinki do `skills/` — dzięki temu
 skille działają lokalnie w Claude Code, a źródło prawdy jest jedno.

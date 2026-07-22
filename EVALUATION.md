@@ -2,15 +2,15 @@
 
 Date: 2026-07-20
 
-This report evaluates the two alternative skills with synthetic repositories and the Shopcraft target, then compares their Shopcraft artifacts with the existing files in `Downloads`.
+This report evaluates the two alternative skills with synthetic repositories and the Shopcraft target, then compares their Shopcraft artifacts with the existing baseline files produced by the previous-generation skills.
 
 ## Method and safety boundary
 
 - All repository analysis was static.
 - No Shopcraft service was started, restarted, or called.
 - No dependency was installed.
-- Shopcraft source and the baseline files in `Downloads` remained read-only.
-- Generated artifacts were written under `/private/tmp/loadcraft-shopcraft-skill-eval`.
+- Shopcraft source and the baseline files remained read-only.
+- Generated artifacts were written under a temporary evaluation workspace outside both repositories.
 - Secret/configuration and seed-value files were excluded.
 - Both artifact validators and the real LoadCraft `OpenAPIParser` were exercised locally.
 
@@ -29,7 +29,7 @@ The cold runs exposed two issues that were fixed test-first:
 
 Final artifact:
 
-`/private/tmp/loadcraft-shopcraft-skill-eval/openapi/openapi.json`
+`<eval-workspace>/openapi/openapi.json`
 
 ### Structural result
 
@@ -64,11 +64,11 @@ The artifact is not labeled fully ready solely from structural PASS:
 
 The initial cold-run artifact also contained fixed examples on login/register email and password fields. Evaluation tightened the skill and validator: secret-bearing properties can no longer embed examples/defaults/enums, and unique or externally provisioned values must be described as feeder/credential requirements. The final temporary artifact has those examples removed and passes again.
 
-## Existing `Downloads/openapi.json` versus the new artifact
+## Existing baseline `openapi.json` versus the new artifact
 
 Both files cover the same 15 source operations, use the same server, materialize the same four protected operations, and parse without an exception. They are not equally safe for the current LoadCraft model.
 
-| Concern | `Downloads/openapi.json` | New skill artifact |
+| Concern | baseline `openapi.json` | New skill artifact |
 |---|---|---|
 | Route parity | `15/15` | `15/15` |
 | OpenAPI profile | `3.1.0` | `3.0.3` compatibility profile |
@@ -93,9 +93,9 @@ The baseline's principal advantage is richer framework-native error coverage, es
 
 Final artifacts:
 
-- `/private/tmp/loadcraft-shopcraft-skill-eval/journeys/register-account.txt`
-- `/private/tmp/loadcraft-shopcraft-skill-eval/journeys/view-product-details.txt`
-- `/private/tmp/loadcraft-shopcraft-skill-eval/journeys/purchase-product.txt`
+- `<eval-workspace>/journeys/register-account.txt`
+- `<eval-workspace>/journeys/view-product-details.txt`
+- `<eval-workspace>/journeys/purchase-product.txt`
 
 All three pass the directory validator. Every one of their 17 quoted UI strings was matched verbatim in `shopcraft/frontend/app.js`.
 
@@ -116,7 +116,7 @@ Withheld candidates were reported rather than guessed:
 - a standalone add-to-cart journey lacks an unambiguous product-correlated success signal;
 - logout was not selected as a primary load journey.
 
-## Existing `Downloads/journeys-workspace` versus the new journeys
+## Existing baseline `journeys-workspace` versus the new journeys
 
 LoadCraft's scenario endpoint accepts one raw `description: str` (`backend/api/routes/scenario_from_description.py:52-63`). The frontend trims and sends that text unchanged (`frontend/src/features/scenario-description/api/scenarioDescriptionApi.ts:113-132`). Therefore the whole contents of a selected journey file become model input.
 
