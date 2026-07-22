@@ -38,15 +38,17 @@ Use synthetic examples that demonstrate shape without revealing repository or cu
 
 An illustrative value is not automatically safe load data. For a field that must be unique, valid in an external identity system, or secret, omit the fixed example and record the provisioning/feeder requirement in the delivery report.
 
-## Parallel analysis
+## Per-endpoint task isolation
 
-When subagents are available, assign disjoint endpoints. Give each worker:
+One operation is one analysis task with a fresh focus. Above roughly five operations, delegate the tasks to subagents when the environment supports them and run them in parallel batches of 3-5. Give each worker only:
 
 - the resolved repository root;
-- exact method and path;
+- its exact method and path;
 - the relevant global contract locations;
 - this evidence protocol;
 - a strict instruction not to write shared files.
+
+A worker's prompt must not contain other endpoints' findings; isolation is what keeps each traced schema grounded in its own evidence instead of pattern-matched from a neighbor.
 
 Each worker returns a finding containing the operation's intended OpenAPI content, component candidates, evidence paths and symbols, and blockers. It does not update an endpoint registry or the final spec.
 
@@ -56,6 +58,9 @@ The coordinating agent:
 - rejects conflicting component definitions;
 - assigns stable component names;
 - writes the only canonical `openapi.json`;
-- performs the final source-route parity check.
+- performs the final source-route parity check;
+- assembles the delivery report's evidence trail and blocker list itself, from the findings the workers returned — workers supply raw evidence, they never author the report.
 
-Sequential analysis follows the same ownership model when subagents are unavailable.
+When subagents are unavailable, follow the same ownership model sequentially: trace one operation at a time and record its complete finding before opening the next.
+
+If several operations are being written from a single read of a route file, stop and return to the per-endpoint protocol. Batching is how schemas get pattern-matched instead of traced.

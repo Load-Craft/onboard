@@ -32,6 +32,8 @@ The default scope is read-only repository analysis plus that output file. Do not
 
 Resolve the repository root, output path, and requested mode before writing. Use `loadcraft/openapi.json` when the user gives no output path.
 
+**Scope maintenance with the provenance stamp.** When an existing artifact carries `info.x-loadcraft-source` with `dirty: false` and its commit resolves in the repository, derive the update scope from `git diff --name-only <commit>..HEAD`: map changed files to operations and re-analyze only those, keeping every untouched operation as-is. A change in a shared layer (auth guard, serializer base, error envelope, router prefix, request-validation layer) invalidates all dependent operations — recheck them all, never a sample. Then validate the whole artifact and re-stamp. When the stamp is missing, `dirty` is true, or the commit does not resolve, fall back to full verification against the current source.
+
 ## Workflow
 
 ### 1. Discover the contract surface
@@ -46,7 +48,7 @@ Read [references/endpoint-evidence.md](references/endpoint-evidence.md). Trace r
 
 Existing OpenAPI is not automatically authoritative. Reconcile it with executable source and tests. Record unresolved facts in the delivery report, never as `x-todo` in the artifact.
 
-If subagents are available, they may independently analyze disjoint endpoints. They must return findings only. The coordinating agent alone edits `openapi.json`; no worker may mutate shared files.
+Analyze each operation as its own isolated task so evidence from one endpoint never blends into another. When subagents are available, delegating is the default above roughly five operations: assign exactly one operation per worker and run workers in parallel batches of 3-5. Workers return findings only. The coordinating agent alone edits `openapi.json`; no worker may mutate shared files. Without subagents, trace strictly one operation at a time and complete its findings before opening the next.
 
 ### 3. Assemble the single artifact
 
@@ -59,7 +61,8 @@ Build or update `loadcraft/openapi.json` directly. Keep component names stable. 
 - an explicit `requestBody.required` value and a media type supported by the current importer;
 - explicit request and response schemas where bodies exist;
 - explicit three-digit response codes and at least one `2xx` per operation;
-- only internal, resolvable references.
+- only internal, resolvable references;
+- a provenance stamp `info.x-loadcraft-source` (`commit`, `dirty`, `method` — see the contract reference) when the repository is under git; omit it otherwise and note that in the report.
 
 Do not preserve invalid legacy constructs merely to avoid changing the file. Fail loudly when evidence cannot be represented in the compatibility profile.
 
@@ -80,6 +83,7 @@ For a full generation or update, also compare the final method/path inventory wi
 Return the path to the single JSON artifact and a concise report containing:
 
 - mode and covered source scope;
+- the provenance stamp written (commit, dirty flag, method), or why it was omitted; on a maintenance run, the commit range diffed and the operations re-analyzed because of it;
 - operation count and route-parity result;
 - validator command and result;
 - blockers that prevent a LoadCraft-ready verdict;

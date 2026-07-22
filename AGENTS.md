@@ -9,6 +9,7 @@ This package has one canonical source for each skill. Keep the same `SKILL.md`, 
 - Repository analysis is read-only by default; only explicit output artifacts may be written.
 - Unknown behavior blocks readiness. Do not add fallbacks, guessed fields, TODO markers, or best-effort normalizers.
 - Workers never update shared state. One coordinating agent owns final writes.
+- The only maintenance state is the `info.x-loadcraft-source` provenance stamp inside the OpenAPI artifact itself; no external state files.
 - References stay one level below their skill and are linked directly from `SKILL.md`.
 - Keep platform metadata outside core instructions. `agents/openai.yaml` may improve Codex presentation but cannot change behavior.
 - Keep `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` on the same semantic version.

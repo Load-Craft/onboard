@@ -66,6 +66,16 @@ Circular references are reduced by the importer. Prefer bounded response project
 
 Define every referenced scheme in `components.securitySchemes` with a complete `apiKey`, `http`, `oauth2`, or `openIdConnect` shape. API keys must use a header in the current compatibility profile. Describe only authentication behavior verified from source and global middleware. Never place a real token, cookie, key, credential, tenant identifier, or captured header value in the document.
 
+## Provenance extension
+
+`info.x-loadcraft-source` is the one supported extension. It records which repository state the artifact was derived from, so a later run can update incrementally instead of re-deriving everything:
+
+- `commit`: the analyzed repository's `git rev-parse HEAD` hash;
+- `dirty`: whether the working tree had uncommitted changes at analysis time;
+- `method`: `native-export` or `static-trace`.
+
+The bundled validator enforces this shape. Omit the stamp when the repository is not under git and say so in the delivery report. The stamp is maintenance metadata, not an unresolved marker; LoadCraft ignores it on import.
+
 ## Unsupported readiness signals
 
 Do not use `x-todo` to carry unresolved facts into a deliverable. It does not block import.

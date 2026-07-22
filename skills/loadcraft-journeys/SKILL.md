@@ -49,7 +49,7 @@ Read [references/loadcraft-journey-contract.md](references/loadcraft-journey-con
 
 Do not create a journey when essential labels, navigation, permissions, or completion feedback cannot be grounded. Report the gap as a blocker instead of inventing a step.
 
-If subagents are available, they may inspect disjoint UI areas or draft different journeys. They must return findings only. The coordinating agent alone writes output files; no worker may update shared files.
+Treat each candidate journey as its own isolated task. When subagents are available, delegate one journey (or one disjoint UI area during discovery) per worker and run workers in parallel. Workers return findings only. The coordinating agent alone writes output files and itself assembles the delivery report's grounding evidence from the returned findings; no worker may update shared files. Without subagents, ground and draft strictly one journey at a time.
 
 ### 3. Write the direct LoadCraft input
 

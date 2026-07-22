@@ -131,6 +131,42 @@ def _require_text(
     return value.strip()
 
 
+PROVENANCE_KEY = "x-loadcraft-source"
+PROVENANCE_METHODS = {"native-export", "static-trace"}
+COMMIT_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
+
+
+def _validate_provenance(info: Mapping[str, object], issues: list[Issue]) -> None:
+    stamp = info.get(PROVENANCE_KEY)
+    if stamp is None:
+        return
+    pointer = _pointer("/info", PROVENANCE_KEY)
+    if not isinstance(stamp, Mapping):
+        issues.append(Issue(pointer, "x-loadcraft-source must be an object"))
+        return
+    commit = stamp.get("commit")
+    if not isinstance(commit, str) or not COMMIT_PATTERN.match(commit):
+        issues.append(
+            Issue(_pointer(pointer, "commit"), "x-loadcraft-source commit must be a git object hash")
+        )
+    if not isinstance(stamp.get("dirty"), bool):
+        issues.append(
+            Issue(_pointer(pointer, "dirty"), "x-loadcraft-source dirty must be a boolean")
+        )
+    if stamp.get("method") not in PROVENANCE_METHODS:
+        issues.append(
+            Issue(
+                _pointer(pointer, "method"),
+                "x-loadcraft-source method must be 'native-export' or 'static-trace'",
+            )
+        )
+    unknown = set(stamp) - {"commit", "dirty", "method"}
+    if unknown:
+        issues.append(
+            Issue(pointer, f"x-loadcraft-source has unsupported keys: {', '.join(sorted(unknown))}")
+        )
+
+
 def _validate_global_markers(document: Mapping[str, object], issues: list[Issue]) -> None:
     for pointer, value in _walk(document):
         if isinstance(value, Mapping):
@@ -545,6 +581,7 @@ def validate_document(document: object) -> tuple[list[Issue], int]:
     else:
         _require_text(info, "title", "/info", issues)
         _require_text(info, "version", "/info", issues)
+        _validate_provenance(info, issues)
 
     servers = document.get("servers")
     if not isinstance(servers, list) or not servers:

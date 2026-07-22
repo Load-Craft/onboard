@@ -351,6 +351,37 @@ class ValidatorCliTestCase(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("secret-bearing field", result.stderr)
 
+    def test_openapi_accepts_valid_provenance_stamp(self) -> None:
+        document = _valid_openapi()
+        document["info"]["x-loadcraft-source"] = {
+            "commit": "0123456789abcdef0123456789abcdef01234567",
+            "dirty": False,
+            "method": "static-trace",
+        }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "openapi.json"
+            target.write_text(json.dumps(document), encoding="utf-8")
+            result = self._run(OPENAPI_VALIDATOR, target)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_openapi_rejects_malformed_provenance_stamp(self) -> None:
+        document = _valid_openapi()
+        document["info"]["x-loadcraft-source"] = {
+            "commit": "",
+            "dirty": "no",
+            "method": "guesswork",
+        }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "openapi.json"
+            target.write_text(json.dumps(document), encoding="utf-8")
+            result = self._run(OPENAPI_VALIDATOR, target)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("x-loadcraft-source", result.stderr)
+
     def test_journey_accepts_plain_grounded_description(self) -> None:
         description = """Use the provided administrator test account and start at https://app.example.com.
 
@@ -416,7 +447,7 @@ Finish when \"Order created\" is visible.
         self.assertIn("secret-like value", result.stderr)
 
     def test_journey_rejects_literal_account_credentials(self) -> None:
-        description = """Use account customer@shopcraft.test with password: sample-password.
+        description = """Use account customer@acme.test with password: sample-password.
 
 Open "Orders". Check that the orders list is visible.
 """
