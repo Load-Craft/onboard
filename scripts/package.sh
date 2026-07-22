@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pakuje każdy skill z skills/ do osobnego ZIP-a w dist/ — gotowego do pobrania.
+# Packages each skill from skills/ into its own downloadable ZIP in dist/.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
