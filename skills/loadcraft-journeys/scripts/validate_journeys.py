@@ -138,7 +138,15 @@ def validate_text(path: Path, text: str) -> list[Issue]:
             (line.strip() for line in reversed(text.splitlines()) if line.strip()),
             "",
         )
-        final_sentence = re.split(r"(?<=[.!?])\s+", final_line)[-1]
+        fragments = re.split(r"(?<=[.!?])\s+", final_line)
+        final_sentence = next(
+            (
+                fragment
+                for fragment in reversed(fragments)
+                if not re.fullmatch(r"\(.*\)", fragment.strip())
+            ),
+            "",
+        )
         if not FINISH_PATTERN.search(final_sentence):
             issues.append(
                 Issue(path, "observable finish condition must be the final instruction")

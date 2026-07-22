@@ -21,6 +21,9 @@ class PackageLayoutTestCase(unittest.TestCase):
         for key in ("name", "version", "description", "author", "keywords"):
             self.assertEqual(codex[key], claude[key], key)
         self.assertEqual(codex["skills"], "./skills/")
+        self.assertRegex(codex["version"], r"^\d+\.\d+\.\d+$")
+        self.assertEqual(codex.get("repository"), claude.get("repository"))
+        self.assertEqual(codex.get("homepage"), claude.get("homepage"))
 
     def test_skills_are_self_contained_and_references_resolve(self) -> None:
         expected_names = {"loadcraft-openapi", "loadcraft-journeys"}

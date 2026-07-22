@@ -61,7 +61,8 @@ def _pointer(parent: str, child: str) -> str:
 
 
 def _is_sensitive_property(name: str) -> bool:
-    normalized = re.sub(r"[^a-z0-9]+", "_", name.casefold()).strip("_")
+    split = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name)
+    normalized = re.sub(r"[^a-z0-9]+", "_", split.casefold()).strip("_")
     return normalized in SENSITIVE_PROPERTY_NAMES or any(
         normalized.endswith(f"_{suffix}") for suffix in SENSITIVE_PROPERTY_NAMES
     )
@@ -184,7 +185,7 @@ def _validate_global_markers(document: Mapping[str, object], issues: list[Issue]
                     )
         if not isinstance(value, str):
             continue
-        if "[TODO" in value.upper():
+        if re.search(r"\[\s*TODO\b", value, re.IGNORECASE):
             issues.append(Issue(pointer, "unresolved marker is not allowed in a deliverable"))
         if any(pattern.search(value) for pattern in SECRET_PATTERNS):
             issues.append(Issue(pointer, "secret-like value must not be embedded in the specification"))
@@ -724,7 +725,11 @@ def main() -> int:
         )
         return 1
 
-    issues, operation_count = validate_document(document)
+    try:
+        issues, operation_count = validate_document(document)
+    except RecursionError:
+        print("ERROR /: document nesting exceeds the supported depth", file=sys.stderr)
+        return 1
     if issues:
         for issue in issues:
             print(f"ERROR {issue.pointer}: {issue.message}", file=sys.stderr)
