@@ -175,3 +175,20 @@ Before a customer release, complete these gates:
 4. Add an integration evaluation proving each `.txt` produces exactly one split journey and does not duplicate the auth setup; run NL tests serially.
 5. Decide how LoadCraft will machine-enforce exclusion of admin/reset/chaos routes; a report warning alone is not sufficient for unattended generation.
 6. Add public repository, homepage, license, and release tags to both manifests before distribution.
+
+## Post-evaluation updates (2026-07-22)
+
+This report describes the package as evaluated on 2026-07-20. Applied since,
+outside the scope of the evaluation run:
+
+- the journey skill was renamed `loadcraft-journey-description` → `loadcraft-journeys`;
+- per-endpoint/per-journey task isolation is now mandatory (one operation per
+  worker, parallel batches, anti-batching guardrail) instead of optional;
+- the OpenAPI artifact carries a provenance stamp `info.x-loadcraft-source`
+  (commit, dirty, method), shape-validated, and maintenance runs scope work
+  via `git diff` from the stamped commit;
+- validator fixes: camelCase secret-bearing property names are now caught,
+  `[ TODO ]` markers with inner spacing are rejected, and the journey finish
+  condition tolerates a trailing parenthetical after the final instruction;
+- README/INSTALL documentation was rewritten for non-technical users
+  (English primary, Polish variants).

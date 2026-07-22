@@ -5,5 +5,7 @@
   "author": {
     "name": "LoadCraft"
   },
-  "keywords": ["loadcraft", "openapi", "load-testing", "user-journeys"]
+  "keywords": ["loadcraft", "openapi", "load-testing", "user-journeys"],
+  "repository": "https://github.com/Load-Craft/onboard",
+  "homepage": "https://github.com/Load-Craft/onboard"
 }

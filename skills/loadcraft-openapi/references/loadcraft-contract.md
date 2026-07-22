@@ -78,7 +78,7 @@ The bundled validator enforces this shape. Omit the stamp when the repository is
 
 ## Unsupported readiness signals
 
-Do not use `x-todo` to carry unresolved facts into a deliverable. It does not block import.
+Do not use `x-todo` or `x-loadcraft-blocker` to carry unresolved facts into a deliverable. Neither blocks import, and the bundled validator rejects both.
 
 Do not spend analysis time generating `x-perf` as a LoadCraft control contract. The current OpenAPI-to-flow path does not consume it for load safety or flow semantics. Keep operational advice in the delivery report unless a future product contract explicitly introduces a validated extension.
 

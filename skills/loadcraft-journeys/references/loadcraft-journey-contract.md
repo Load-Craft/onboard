@@ -78,5 +78,5 @@ The result must be grounded in a route transition, visible content, status, noti
 
 - UTF-8 plain text, one journey per file.
 - Lowercase hyphenated slug ending in `.txt`.
-- At least 10 and at most 6000 non-whitespace characters.
+- At least 10 and at most 6000 characters after trimming surrounding whitespace.
 - No surrounding README or manifest is required for LoadCraft input.
