@@ -7,20 +7,21 @@ które klienci uruchamiają na własnym kodzie, żeby wyprodukować **gotowe pli
 wejściowe dla LoadCrafta**. Skille działają w Claude Code, Codex i innych
 narzędziach zgodnych z formatem Agent Skills.
 
-| Skill | Artefakt | Co robi |
+| Skill | Co dostajesz | Co z tym robisz |
 |---|---|---|
-| [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` | Analizuje kod API (read-only) i buduje jeden plik OpenAPI w profilu zgodności LoadCrafta (3.0.3, jawne `security` per operacja, bez stratnych `anyOf`), walidowany dołączonym skryptem. |
-| [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` | Analizuje kod frontendu i pisze ścieżki użytkownika jako czysty tekst — każdy plik to dokładnie wartość pola opisu scenariusza w LoadCrafcie. |
+| [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` — opis Twojego API | importujesz go w LoadCrafcie jako specyfikację API |
+| [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` — scenariusze użytkownika, jeden na plik | zawartość każdego pliku wklejasz w pole opisu scenariusza w LoadCrafcie |
 
-Oba skille mają wspólne zasady: repo klienta jest tylko do odczytu, braki
-dowodów w kodzie są raportowane jako blokery (nigdy zgadywane ani wpisywane
-jako TODO do artefaktu), sekrety i dane klienta nie trafiają do wyników.
+Oba skille działają według tych samych zasad: tylko czytają Twój kod (niczego
+nie zmieniają, nie instalują ani nie uruchamiają), nigdy nie zgadują — czego
+nie mogą potwierdzić, to wypisują w raporcie jako pytanie do wyjaśnienia — a
+hasła, tokeny i dane klientów nie trafiają do plików.
 
 ## Układ repozytorium
 
-- **[`skills/`](skills/)** — źródło skilli + [instrukcja użycia](skills/README.pl.md)
-  dla każdego narzędzia. Każdy skill: `SKILL.md` + `references/` + `scripts/`
-  (walidator w czystym Pythonie, bez zależności).
+- **[`skills/`](skills/)** — źródło skilli + [przewodnik użytkownika](skills/README.pl.md)
+  i [instalacja](skills/INSTALL.pl.md). Każdy skill: `SKILL.md` +
+  `references/` + `scripts/` (walidator w czystym Pythonie, bez zależności).
 - **`dist/`** — gotowe ZIP-y do pobrania (jeden na skill). Odśwież po zmianach:
   `./scripts/package.sh`.
 - **`.claude-plugin/`, `.codex-plugin/`** — manifesty pluginów; po publikacji

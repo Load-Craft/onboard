@@ -1,110 +1,133 @@
 [English](README.md) | **Polski**
 
-# Skille AI — instrukcje do pobrania
+# Przygotowanie plików wejściowych dla LoadCrafta — przewodnik użytkownika
 
-Ten katalog zawiera gotowe "skille" — instrukcje robocze dla asystentów AI,
-które przygotowują pliki wejściowe dla LoadCrafta z kodu Twojego projektu.
-Każdy skill to **jeden folder**: plik `SKILL.md` (główna instrukcja), katalog
-`references/` z materiałami pomocniczymi oraz `scripts/` z walidatorem wyniku
-(czysty Python 3, bez instalowania zależności).
+**Cel:** LoadCraft generuje testy obciążeniowe z dwóch wejść — specyfikacji
+API i opisów scenariuszy. Te skille sprawiają, że Twój asystent AI (Claude
+Code, Codex, Cursor, GitHub Copilot…) wyprodukuje oba **z kodu Twojego
+projektu** — trafnie i bez dotykania samego kodu. Nie musisz sam pisać ani
+czytać kodu.
 
-Skille są **niezależne od narzędzia** — to zwykły Markdown + skrypt. Zadziałają
-w Claude Code, Codex, GitHub Copilot, Cursor, Windsurf, Gemini CLI i w każdym
-innym asystencie, któremu można podać plik lub wkleić tekst.
+> **Pierwsze użycie?** Najpierw zainstaluj skille: **[INSTALL.pl.md](INSTALL.pl.md)**
+> — kilka komend do skopiowania, per narzędzie. Robisz to raz.
 
-## Dostępne skille
-
-| Skill | Wynik | Co robi |
+| Skill | Na jakim projekcie | Co powstaje |
 |---|---|---|
-| [`loadcraft-openapi`](loadcraft-openapi/) | `loadcraft/openapi.json` | Analizuje kod API (bez modyfikowania go) i buduje jeden plik OpenAPI zgodny z importerem LoadCrafta. Braków w kodzie nie zgaduje — raportuje je jako blokery. Umie też zaktualizować lub zaudytować istniejący plik. |
-| [`loadcraft-journeys`](loadcraft-journeys/) | `loadcraft/journeys/*.txt` | Analizuje kod frontendu i opisuje ścieżki użytkownika czystym tekstem — każdy plik `.txt` wklejasz w LoadCrafcie jako opis scenariusza, bez żadnej obróbki. |
+| `loadcraft-openapi` | Twoje API (backend) | `loadcraft/openapi.json` + raport |
+| `loadcraft-journeys` | Twoja aplikacja webowa (frontend) | `loadcraft/journeys/*.txt` + raport |
 
-Skille domyślnie **tylko czytają** repozytorium — zapisują wyłącznie pliki
-wynikowe w katalogu `loadcraft/`. Nie uruchamiają aplikacji ani nie instalują
-zależności.
+## Twoje kroki
 
-## Jak użyć — zasada ogólna
+### 1. Zainstaluj skille (raz)
 
-1. **Pobierz cały folder skilla** (SKILL.md + references/ + scripts/ muszą być
-   razem — instrukcja odwołuje się do tych plików, a walidator jest częścią
-   workflow).
-2. Udostępnij go swojemu AI (sposoby poniżej).
-3. Poproś AI: *"Przeczytaj plik SKILL.md i wykonaj opisany tam workflow dla
-   tego projektu."*
+Uruchom komendy dla swojego narzędzia z [INSTALL.pl.md](INSTALL.pl.md). Już
+zainstalowane? Przejdź od razu do kroku 2.
 
-Skill prowadzi AI przez analizę kodu, zapis wyniku i walidację. Na końcu
-dostajesz plik(i) w `loadcraft/` oraz raport: co zostało pokryte, co pominięto
-i dlaczego. Wynik możesz też sprawdzić ręcznie:
+### 2. Poproś AI
+
+W Claude Code wystarczy zwykła prośba własnymi słowami:
+
+> Przygotuj to API pod LoadCraft.
+
+albo dla frontendu:
+
+> Opisz ścieżki użytkownika w tej aplikacji pod LoadCraft.
+
+Claude Code sam znajdzie skill i wykona go. W narzędziach, które nie wykrywają
+skilli automatycznie, wskaż plik wprost — dokładne sformułowanie dla każdego
+narzędzia jest w [INSTALL.pl.md](INSTALL.pl.md).
+
+Od tego momentu skill działa sam: analizuje kod, zapisuje pliki i je waliduje.
+Przy większym projekcie może to chwilę potrwać — celowo pracuje endpoint po
+endpoincie i ekran po ekranie, dla trafności. Ty nie robisz nic, aż pojawi się
+raport.
+
+### 3. Przeczytaj raport
+
+Na końcu AI przedstawia raport: co zostało pokryte i listę **blokerów**, jeśli
+są. Bloker znaczy, że AI nie mogło czegoś potwierdzić w kodzie i odmówiło
+zgadywania. Blokery przekaż swoim deweloperom albo zespołowi LoadCrafta —
+każdy to konkretne pytanie, nie ogólny błąd. Plik z otwartymi blokerami jest
+użyteczny, ale traktuj go jako niekompletny, dopóki nie zostaną wyjaśnione.
+
+### 4. Przekaż pliki do LoadCrafta
+
+- **`loadcraft/openapi.json`** → zaimportuj w LoadCrafcie jako specyfikację
+  swojego API.
+- **każdy `loadcraft/journeys/*.txt`** → skopiuj całą zawartość pliku i wklej
+  w pole opisu scenariusza w LoadCrafcie. Jeden plik = jeden scenariusz. Nie
+  edytuj i nie łącz plików — każdy jest napisany tak, żeby użyć go dokładnie
+  w tej formie.
+- Dane kont testowych podajesz bezpośrednio w konfiguracji LoadCrafta — w
+  plikach celowo ich nie ma.
+- Raport nie jest wejściem do LoadCrafta — zachowaj go dla zespołu.
+
+## Co się wydarzy podczas przebiegu — a co na pewno nie
+
+- AI **tylko czyta** Twój kod. Niczego w projekcie nie zmienia, niczego nie
+  instaluje i nie uruchamia Twojej aplikacji.
+- Wyniki lądują w nowym katalogu `loadcraft/` w Twoim projekcie.
+- Jeśli AI nie może czegoś potwierdzić w kodzie, nie zgaduje — wymienia to w
+  raporcie jako bloker.
+- Do plików wynikowych nie trafiają żadne hasła, tokeny ani dane klientów.
+
+## Samodzielne sprawdzenie wyniku (opcjonalne)
+
+Skill waliduje swój wynik sam, zanim go dostarczy — to jest więc dodatkowa
+kontrola, nie obowiązkowy krok. W katalogu głównym projektu:
 
 ```bash
-python3 skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
-python3 skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
+python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
+python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
 ```
 
-## Instrukcje dla konkretnych narzędzi
+(Jeśli instalowałeś skille do `skills/` — Cursor, Codex, Copilot — dostosuj
+ścieżkę.) `PASS` oznacza, że pliki są strukturalnie gotowe dla LoadCrafta.
+Możesz też po prostu poprosić AI, żeby uruchomiło te komendy za Ciebie.
 
-### Claude Code
-Skopiuj folder skilla do projektu, do `.claude/skills/`:
+## Jak nie zaśmiecać głównego brancha swojego repozytorium
+
+Katalog `loadcraft/` nie musi żyć na głównym branchu. Żeby utrzymać główny
+branch repozytorium z kodem w czystości, uruchom skill na dedykowanym branchu:
 
 ```bash
-mkdir -p .claude/skills
-cp -r loadcraft-openapi .claude/skills/
+git checkout -b loadcraft-artifacts   # jednorazowo: utwórz branch
+# ... tutaj uruchom skill (krok 2) ...
+git add loadcraft/
+git commit -m "Pliki wejściowe LoadCrafta"
 ```
 
-Claude Code wykryje skill automatycznie — wystarczy poprosić np.
-*"przygotuj to API pod LoadCraft"* albo wywołać go po nazwie. Możesz też
-skopiować do `~/.claude/skills/`, żeby był dostępny we wszystkich projektach.
-
-### Codex (OpenAI)
-Wgraj folder do repozytorium i dopisz w `AGENTS.md` (w katalogu głównym):
-
-```
-Przy przygotowywaniu OpenAPI dla LoadCrafta wykonaj workflow
-z skills/loadcraft-openapi/SKILL.md.
-Przy opisywaniu ścieżek użytkownika — skills/loadcraft-journeys/SKILL.md.
-```
-
-Po publikacji tego repo na GitHubie skille można też instalować bezpośrednio:
+Przy kolejnym odświeżeniu najpierw zaktualizuj branch o bieżący kod, potem
+poproś AI ponownie:
 
 ```bash
-npx skills add <owner>/<repo> --skill loadcraft-openapi
+git checkout loadcraft-artifacts
+git merge main                        # AI musi widzieć aktualny kod
+# ... poproś AI o aktualizację plików ...
+git add loadcraft/
+git commit -m "Odśwież pliki wejściowe LoadCrafta"
 ```
 
-### Cursor
-Wgraj folder skilla do repozytorium (np. do `skills/`), a w czacie napisz:
+Plik OpenAPI zapisuje, z którego commita kodu powstał, więc aktualizacja na
+bocznym branchu działa dokładnie tak samo jak na głównym. Alternatywnie dodaj
+`loadcraft/` do `.gitignore` i trzymaj pliki całkiem poza kontrolą wersji —
+LoadCraft potrzebuje tylko plików, nie Twojego repozytorium. Jeśli cokolwiek z
+tego brzmi obco, poproś swojego asystenta AI, żeby zrobił to za Ciebie — to
+zwykłe komendy gita.
 
-```
-@skills/loadcraft-openapi/SKILL.md
-Przeczytaj tę instrukcję i wykonaj opisany workflow dla tego projektu.
-```
+## Ponowny przebieg po zmianach w kodzie
 
-Opcjonalnie dodaj regułę w `.cursor/rules/`, która wskazuje na plik skilla,
-żeby Cursor sięgał po niego automatycznie.
-
-### GitHub Copilot (VS Code / JetBrains)
-W oknie czatu Copilota dodaj plik jako kontekst (**Add Context → Files** lub
-`#file`), wskaż `SKILL.md` i poproś o wykonanie workflow. Przy dłuższej pracy
-warto dodać wpis w `.github/copilot-instructions.md`:
-
-```
-Przy przygotowywaniu artefaktów LoadCrafta stosuj się do
-skills/loadcraft-openapi/SKILL.md i skills/loadcraft-journeys/SKILL.md.
-```
-
-### Dowolne inne AI (ChatGPT, Gemini, itd.)
-Wklej lub załącz zawartość `SKILL.md` oraz plików z `references/` i napisz:
-*"To jest instrukcja robocza. Zastosuj ją do mojego projektu, faza po fazie."*
-Walidator ze `scripts/` uruchom ręcznie na wyniku.
+Po prostu poproś AI jeszcze raz (krok 2). Skill OpenAPI zapisuje, z której
+wersji kodu powstał plik, i aktualizuje tylko to, co się od tego czasu
+zmieniło; skill journeys porównuje istniejące pliki `.txt` z aktualną
+aplikacją i raportuje rozjazdy.
 
 ## Uwagi
 
 - Skille są napisane po angielsku (lepiej rozumiane przez wszystkie modele),
-  ale możesz rozmawiać z AI po polsku — raporty będą w języku rozmowy.
-  Pliki wynikowe (`openapi.json`, `journeys/*.txt`) powstają w formacie
-  wymaganym przez LoadCraft niezależnie od języka rozmowy.
+  ale możesz rozmawiać z AI po polsku — raporty będą w języku rozmowy. Pliki
+  wynikowe powstają w formacie wymaganym przez LoadCraft niezależnie od
+  języka rozmowy.
 - Fragmenty o "subagentach" dotyczą narzędzi, które je wspierają (np. Claude
-  Code); w narzędziach bez subagentów skill wykonuje te same kroki sekwencyjnie.
-- Dane logowania do testów podajesz w LoadCrafcie osobno — skille celowo
-  nie wpisują żadnych credentiali ani sekretów do plików wynikowych.
-- Jeśli skill czegoś nie może potwierdzić w kodzie, nie zgaduje — pomija ten
-  fragment i wymienia go w raporcie jako bloker do wyjaśnienia.
+  Code); w narzędziach bez subagentów skill wykonuje te same kroki
+  sekwencyjnie.

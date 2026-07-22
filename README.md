@@ -7,21 +7,21 @@ that customers run on their own codebase to produce **ready-to-import LoadCraft
 input files**. The skills work in Claude Code, Codex and any other tool
 compatible with the Agent Skills format.
 
-| Skill | Artifact | What it does |
+| Skill | You get | You do with it |
 |---|---|---|
-| [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` | Analyzes API code (read-only) and builds one OpenAPI file in the LoadCraft compatibility profile (3.0.3, explicit per-operation `security`, no lossy `anyOf`), validated by the bundled script. |
-| [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` | Analyzes frontend code and writes user journeys as plain text — each file is exactly the value of the scenario description field in LoadCraft. |
+| [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` — a description of your API | import it in LoadCraft as the API specification |
+| [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` — user scenarios, one per file | paste each file's content into LoadCraft's scenario description field |
 
-Both skills share the same principles: the customer repository is read-only,
-missing evidence in the code is reported as a blocker (never guessed, never
-written into the artifact as a TODO), and secrets or customer data never end
-up in the outputs.
+Both skills follow the same rules: they only read your code (nothing is
+modified, installed or started), they never guess — anything they cannot
+confirm is listed in the report as a question to resolve — and no passwords,
+tokens or customer data end up in the files.
 
 ## Repository layout
 
-- **[`skills/`](skills/)** — skill sources + [usage instructions](skills/README.md)
-  for each tool. Each skill: `SKILL.md` + `references/` + `scripts/`
-  (a validator in pure Python, no dependencies).
+- **[`skills/`](skills/)** — skill sources + the [user guide](skills/README.md)
+  and [installation](skills/INSTALL.md). Each skill: `SKILL.md` +
+  `references/` + `scripts/` (a validator in pure Python, no dependencies).
 - **`dist/`** — ready-to-download ZIPs (one per skill). Refresh after changes:
   `./scripts/package.sh`.
 - **`.claude-plugin/`, `.codex-plugin/`** — plugin manifests; once the repo is
