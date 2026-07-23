@@ -17,6 +17,20 @@ For each endpoint follow:
 
 Source closer to the executable boundary normally outweighs prose documentation, but conflicts must be reported rather than silently resolved.
 
+## Branch-aware examples
+
+Endpoints rarely do one thing. When the handler or a service it calls branches on a request value — an `if`/guard/threshold on a body field, query parameter, path parameter, or header — each branch is a distinct observable behavior with its own load profile, and the artifact must let a reader say "call this endpoint with THESE values and THIS happens."
+
+For each in-scope operation, find the conditionals that depend on a request value and, for every distinct behavior branch, record:
+
+- the **triggering value(s)**: the request field and the concrete value or range that selects the branch (`quantity > 50`, `order_id == "missing"`, `?expand=full`, absent `Authorization` header);
+- the **observable outcome**: the status code, and how the work differs — a rollback, a different serialized state, an extra downstream call, a synchronous vs. deferred path, a paginated vs. full scan;
+- the **code evidence**: the file and symbol where the condition and its outcome are written, plus any test that pins the boundary.
+
+Only branches that a caller can select through request values count here. Do not record internal branches a client cannot steer (a cache hit, a random retry, a clock-based path); note them as report context if they matter, but they are not example-bearing branches. Never invent a branch to look thorough — each one must come from a traced code path.
+
+A worker returns its branch findings as part of the same per-endpoint finding, not as a separate artifact: the branch table (trigger → outcome → evidence) travels with the operation's proposed OpenAPI content so the coordinating agent can place each branch where the importer retains it.
+
 ## Evidence quality
 
 Use evidence strong enough for each emitted statement:
@@ -50,7 +64,7 @@ One operation is one analysis task with a fresh focus. Above roughly five operat
 
 A worker's prompt must not contain other endpoints' findings; isolation is what keeps each traced schema grounded in its own evidence instead of pattern-matched from a neighbor.
 
-Each worker returns a finding containing the operation's intended OpenAPI content, component candidates, evidence paths and symbols, and blockers. It does not update an endpoint registry or the final spec.
+Each worker returns a finding containing the operation's intended OpenAPI content, component candidates, evidence paths and symbols, its value-driven branch table (trigger → outcome → evidence, per the Branch-aware examples section), and blockers. It does not update an endpoint registry or the final spec.
 
 The coordinating agent:
 

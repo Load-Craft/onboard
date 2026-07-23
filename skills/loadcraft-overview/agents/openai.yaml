@@ -1,0 +1,4 @@
+interface:
+  display_name: "LoadCraft Overview"
+  short_description: "Prepare a LoadCraft-ready project description"
+  default_prompt: "Use $loadcraft-overview to inspect this repository and write a validated project overview ready to paste into LoadCraft's description field."

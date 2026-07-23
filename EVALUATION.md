@@ -196,4 +196,14 @@ outside the scope of the evaluation run:
   profile derived from LoadCraft's `asyncapi_parser.py` and flow generator),
   with a bundled validator, rule tests, and a forward-test on a synthetic
   WebSocket+Kafka fixture whose artifact was golden-tested through the real
-  LoadCraft `AsyncAPIParser` with full channel/operation/message parity.
+  LoadCraft `AsyncAPIParser` with full channel/operation/message parity;
+- both API skills now require branch-aware examples: value-driven code
+  branches (thresholds, guards, discriminants) must be visible in the
+  artifact's examples and descriptions, one grounded example per behavior
+  branch, verified to survive projection through both real LoadCraft parsers;
+- a fourth skill `loadcraft-overview` was added: one Markdown project
+  overview whose whole content fills the project description field at setup
+  (grounded in the description's real consumers: the setup gate, flow
+  generation and feeder-data synthesis prompts), with a sidecar provenance
+  stamp, diff-scoped impact judgment on refresh, a bundled validator, and a
+  golden check through LoadCraft's `sanitize_prompt_input`.

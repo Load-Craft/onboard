@@ -12,6 +12,7 @@ narzędziach zgodnych z formatem Agent Skills.
 | [`loadcraft-openapi`](skills/loadcraft-openapi/) | `loadcraft/openapi.json` — opis Twojego API | importujesz go w LoadCrafcie jako specyfikację API |
 | [`loadcraft-journeys`](skills/loadcraft-journeys/) | `loadcraft/journeys/*.txt` — scenariusze użytkownika, jeden na plik | zawartość każdego pliku wklejasz w pole opisu scenariusza w LoadCrafcie |
 | [`loadcraft-asyncapi`](skills/loadcraft-asyncapi/) | `loadcraft/asyncapi.json` — opis Twojego API zdarzeń/wiadomości (WebSockety, Kafka, MQTT…) | importujesz go w LoadCrafcie jako specyfikację AsyncAPI |
+| [`loadcraft-overview`](skills/loadcraft-overview/) | `loadcraft/overview.md` — opis zwykłym językiem, o czym jest Twój projekt | zawartość wklejasz w pole description przy setupie projektu w LoadCrafcie |
 
 Wszystkie skille działają według tych samych zasad: tylko czytają Twój kod (niczego
 nie zmieniają, nie instalują ani nie uruchamiają), nigdy nie zgadują — czego

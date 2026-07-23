@@ -7,10 +7,11 @@ This package has one canonical source for each skill. Keep the same `SKILL.md`, 
 - `loadcraft-openapi` emits one `openapi.json` in the documented compatibility profile.
 - `loadcraft-journeys` emits only direct-input `.txt` journey descriptions.
 - `loadcraft-asyncapi` emits one `asyncapi.json` (AsyncAPI 3.0) in its documented compatibility profile.
+- `loadcraft-overview` emits one `overview.md` whose whole content is the project description field value.
 - Repository analysis is read-only by default; only explicit output artifacts may be written.
 - Unknown behavior blocks readiness. Do not add fallbacks, guessed fields, TODO markers, or best-effort normalizers.
 - Workers never update shared state. One coordinating agent owns final writes.
-- The only maintenance state is the provenance stamp: `info.x-loadcraft-source` inside the OpenAPI and AsyncAPI artifacts, and `.provenance.json` beside the journey files (journey payloads cannot carry metadata). No other state files.
+- The only maintenance state is the provenance stamp: `info.x-loadcraft-source` inside the OpenAPI and AsyncAPI artifacts, and a `.provenance.json` sidecar beside the journey files and the overview (those payloads cannot carry metadata). No other state files.
 - References stay one level below their skill and are linked directly from `SKILL.md`.
 - Keep platform metadata outside core instructions. `agents/openai.yaml` may improve Codex presentation but cannot change behavior.
 - Keep `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` on the same semantic version.
@@ -28,6 +29,7 @@ python3 -m unittest discover -s tests -v
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-openapi
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-journeys
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-asyncapi
+python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-overview
 python3 <plugin-creator-root>/scripts/validate_plugin.py .
 ```
 

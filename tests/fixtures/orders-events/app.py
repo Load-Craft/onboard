@@ -13,6 +13,10 @@ from pydantic import BaseModel, Field
 
 WS_PUBLIC_URL = 'ws://app.example.com/ws/orders'
 
+# Orders above this quantity cannot be auto-confirmed and are routed to a
+# manual review queue instead, which exercises a different processing path.
+MANUAL_REVIEW_QUANTITY_THRESHOLD = 10
+
 
 class OrderCommand(BaseModel):
     """Command sent by a connected client to place an order."""
@@ -39,6 +43,9 @@ async def orders_socket(websocket: WebSocket) -> None:
     while True:
         raw = await websocket.receive_json()
         command = OrderCommand.model_validate(raw)
-        status = OrderStatus(order_id='order-example', state='CREATED')
-        del command
+        if command.quantity > MANUAL_REVIEW_QUANTITY_THRESHOLD:
+            state = 'PENDING_REVIEW'
+        else:
+            state = 'CREATED'
+        status = OrderStatus(order_id='order-example', state=state)
         await websocket.send_json(status.model_dump())

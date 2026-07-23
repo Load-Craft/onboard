@@ -12,7 +12,20 @@ For each operation follow:
 4. the payload shape, traced to the serializer, DTO, schema class, or validation model actually used at that site;
 5. headers, correlation identifiers, and content type (serializer defaults count as evidence);
 6. the observable acknowledgement, reply message, or state change that proves the interaction completed;
-7. connection and authentication setup shared by the channel (recorded as evidence for the report, never as literal credentials in the document).
+7. connection and authentication setup shared by the channel (recorded as evidence for the report, never as literal credentials in the document);
+8. the value-driven branches: conditionals at the traced handler or consumer whose outcome depends on a payload value (an `if`/`switch`/guard on a field, a threshold comparison, a status enum). See below.
+
+## Branch-aware examples
+
+A single sent payload hides behavior when the receiving logic branches on one of its values. A load engineer reading the artifact must be able to tell that changing that value changes the executed code path, and therefore the performance profile.
+
+While tracing an operation, identify every conditional at the traced handler or consumer that depends on a value carried by the message the application `receive`s (a threshold on a numeric field, a discriminant string, a boolean flag, a status enum). For each **distinct behavior branch** record:
+
+- the triggering value or value range (e.g. `quantity > 10`, `state == 'PENDING_REVIEW'`);
+- the resulting behavior the branch executes (e.g. "routed to the manual-review queue instead of auto-confirmation");
+- the code evidence (file, symbol, line) that proves the branch exists.
+
+The primary/most common path is the one branch; each additional grounded branch is another. Report these as part of the operation's per-operation finding so the coordinating agent can turn each into its own example (first example = primary path; one additional example per branch, its `name` and `summary` stating the trigger and the resulting behavior). A branch you cannot exemplify — because the triggering value must be externally provisioned, or the behavior cannot be resolved from source — is a blocker, not something to omit silently. Never invent a branch: each must be grounded in a traced code path.
 
 ## Evidence quality
 
@@ -42,7 +55,7 @@ One operation is one analysis task with a fresh focus. Above roughly five operat
 
 A worker's prompt must not contain other operations' findings; isolation is what keeps each traced schema grounded in its own evidence instead of pattern-matched from a neighbor.
 
-Each worker returns a finding containing the operation's intended AsyncAPI content, message component candidates, evidence paths and symbols, and blockers. It does not update a registry or the final spec.
+Each worker returns a finding containing the operation's intended AsyncAPI content, message component candidates, evidence paths and symbols, the value-driven branch findings (triggering value, resulting behavior, code evidence — one entry per distinct branch), and blockers. It does not update a registry or the final spec.
 
 The coordinating agent:
 

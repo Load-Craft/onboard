@@ -6,6 +6,9 @@ from fastapi import Depends, FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, Field
 
 
+AVAILABLE_STOCK = 50
+
+
 class CreateOrder(BaseModel):
     item_id: str = Field(min_length=1)
     quantity: int = Field(ge=1, le=100)
@@ -41,6 +44,7 @@ app = FastAPI(title="Orders API", version="1.0.0", servers=[{"url": "https://app
     responses={
         400: {"model": ApiError, "description": "Invalid order"},
         401: {"model": ApiError, "description": "Authentication required"},
+        409: {"model": ApiError, "description": "Requested quantity exceeds available stock"},
     },
 )
 async def create_order(
@@ -48,6 +52,11 @@ async def create_order(
     user_id: Annotated[str, Depends(require_user)],
 ) -> Order:
     del user_id
+    if order.quantity > AVAILABLE_STOCK:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Requested quantity exceeds available stock",
+        )
     return Order(
         id="order-example",
         item_id=order.item_id,

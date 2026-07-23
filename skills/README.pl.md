@@ -16,6 +16,7 @@ czytać kodu.
 | `loadcraft-openapi` | Twoje API (backend) | `loadcraft/openapi.json` + raport |
 | `loadcraft-journeys` | Twoja aplikacja webowa (frontend) | `loadcraft/journeys/*.txt` + raport |
 | `loadcraft-asyncapi` | Twoje API zdarzeń/wiadomości (WebSockety, Kafka, MQTT…) | `loadcraft/asyncapi.json` + raport |
+| `loadcraft-overview` | cały projekt (o czym jest) | `loadcraft/overview.md` + raport |
 
 ## Twoje kroki
 
@@ -37,6 +38,10 @@ albo dla frontendu:
 albo dla API zdarzeń/wiadomości:
 
 > Opisz asynchroniczne API tej aplikacji pod LoadCraft.
+
+albo dla opisu projektu:
+
+> Napisz opis tego projektu pod LoadCraft (overview).
 
 Claude Code sam znajdzie skill i wykona go. W narzędziach, które nie wykrywają
 skilli automatycznie, wskaż plik wprost — dokładne sformułowanie dla każdego
@@ -65,6 +70,8 @@ użyteczny, ale traktuj go jako niekompletny, dopóki nie zostaną wyjaśnione.
   w tej formie.
 - **`loadcraft/asyncapi.json`** → zaimportuj w LoadCrafcie jako specyfikację
   AsyncAPI.
+- **`loadcraft/overview.md`** → skopiuj całą zawartość pliku i wklej w pole
+  **description** przy setupie projektu w LoadCrafcie.
 - Dane kont testowych podajesz bezpośrednio w konfiguracji LoadCrafta — w
   plikach celowo ich nie ma.
 - Raport nie jest wejściem do LoadCrafta — zachowaj go dla zespołu.
@@ -87,6 +94,7 @@ kontrola, nie obowiązkowy krok. W katalogu głównym projektu:
 python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
 python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
 python3 .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.py loadcraft/asyncapi.json
+python3 .claude/skills/loadcraft-overview/scripts/validate_overview.py loadcraft/overview.md
 ```
 
 (Jeśli instalowałeś skille do `skills/` — Cursor, Codex, Copilot — dostosuj

@@ -36,6 +36,7 @@ Do not use `default`, `2XX`, or other response ranges. The current parser projec
 - Parameter enum values must be strings in this compatibility profile.
 - Keep parameter schema details explicit: type, format, constraints, default, and a synthetic example when source evidence supports them.
 - Do not rely on parameter `content`, plural `examples`, `style`, or `explode` for behavior that LoadCraft must understand; these fields are not retained in the canonical internal parameter model.
+- When a parameter value selects a behavior branch (a path id that 404s, a query flag that changes the work done), state the trigger→behavior mapping in the parameter `description` and put the triggering value in the single `example`. Both are retained per parameter; the plural `examples` map is not, so a parameter with several material branches spends its one `example` on the most load-relevant branch and names the rest in the description.
 
 ## Request bodies
 
@@ -47,6 +48,8 @@ Do not use `default`, `2XX`, or other response ranges. The current parser projec
 - Put safe synthetic examples on properties only when a required value cannot be derived from its type or constraints alone. Never put an example/default/enum on a password, token, secret, authorization, or API-key field. Do not freeze unique or externally provisioned values such as registration identities; describe the data requirement and report the required feeder or credential source instead.
 
 Never add a body merely because the method is mutating. Absence of a body can be the correct contract.
+
+When a body field selects a behavior branch, both the single `example` and the named `examples` map on the request media type are retained, and so are per-property `description` and `example` inside the schema. Use them to make each branch callable: state the trigger→behavior mapping on the property `description` (and the operation `description`), and give the `examples` map one named entry per material branch whose `value` carries the branch-selecting inputs (for example `withinStock` and `exceedsStock`). Keep the single `example` for the ordinary success branch. This is the profile's richest place to exemplify request-value branching, so prefer it over prose alone.
 
 Recognized request media types are `application/json`, `application/xml`, `application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain`, `text/html`, `text/event-stream`, `application/octet-stream`, `application/pdf`, and the supported PNG/JPEG/GIF/WebP image types. Do not let an unknown vendor media type be silently coerced to JSON.
 
@@ -61,6 +64,8 @@ Recognized request media types are `application/json`, `application/xml`, `appli
 - Use `allOf` only when its flattened result is unambiguous and preserves the intended required fields.
 
 Circular references are reduced by the importer. Prefer bounded response projections when a recursive domain model is not necessary for load generation.
+
+The importer retains a response `description` and a single `example` per status, but not a named `examples` map on a response. So express an output branch through its own response status: give each branch-caused status its own response object whose `description` names the triggering condition ("returned when `quantity` exceeds available stock") and whose single `example` shows that branch's body. Do not try to pack several output branches into one status via a named `examples` map — it is dropped on import. Two success branches that share a status and differ only in body content collapse to one retained `example`; note the second branch in the `description` and, if the distinction matters for load, report it.
 
 ## Security schemes
 

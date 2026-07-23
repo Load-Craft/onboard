@@ -16,6 +16,7 @@ need to write or read code yourself.
 | `loadcraft-openapi` | your API (backend) | `loadcraft/openapi.json` + a report |
 | `loadcraft-journeys` | your web app (frontend) | `loadcraft/journeys/*.txt` + a report |
 | `loadcraft-asyncapi` | your event/messaging API (WebSockets, Kafka, MQTT…) | `loadcraft/asyncapi.json` + a report |
+| `loadcraft-overview` | the whole project (what it is about) | `loadcraft/overview.md` + a report |
 
 ## Your steps
 
@@ -37,6 +38,10 @@ or, for the frontend:
 or, for an event/messaging API:
 
 > Describe this application's asynchronous API for LoadCraft.
+
+or, for the project description:
+
+> Write a LoadCraft project overview for this repository.
 
 Claude Code finds the skill and executes it by itself. In tools that do not
 detect skills automatically, point at the file explicitly — the exact phrasing
@@ -66,6 +71,8 @@ cleared.
   exactly as-is.
 - **`loadcraft/asyncapi.json`** → import it in LoadCraft as your AsyncAPI
   specification.
+- **`loadcraft/overview.md`** → copy the file's whole content and paste it
+  into the **description** field when setting up the project in LoadCraft.
 - Test account credentials go directly into LoadCraft's configuration — they
   are deliberately absent from the files.
 - The report is not a LoadCraft input — keep it for your team.
@@ -88,6 +95,7 @@ check, not a required step. In the project's root directory:
 python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
 python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
 python3 .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.py loadcraft/asyncapi.json
+python3 .claude/skills/loadcraft-overview/scripts/validate_overview.py loadcraft/overview.md
 ```
 
 (If you installed the skills under `skills/` — Cursor, Codex, Copilot —
