@@ -17,7 +17,7 @@ The default scope is read-only repository analysis plus those output files. Do n
 
 - One file contains one coherent user goal and stands alone.
 - Use short, ordered, imperative plain text grounded in current routes, UI labels, accessible names, guards, and feedback.
-- End with an observable completion condition.
+- End with an observable completion condition that the service had to answer for — a value it computed, a state it stored, or a status it decided. A closing check the browser could satisfy from data it already holds generates nothing, because the generated load test can only assert on what the service sent. See the finish-condition rules in [references/loadcraft-journey-contract.md](references/loadcraft-journey-contract.md).
 - Do not include Markdown, metadata, selector tables, locator syntax, file references, test-runner code, variants, or TODOs.
 - Do not include credentials or secret values. Authentication credentials are supplied to LoadCraft separately.
 - Do not copy literal test-account emails or passwords from source, even when the UI pre-fills them.
@@ -50,6 +50,8 @@ Never scan secrets, captured sessions, build output, dependencies, or generated 
 Read [references/loadcraft-journey-contract.md](references/loadcraft-journey-contract.md). Build a candidate inventory in working memory covering implemented navigation, reads, mutations, transactions, and observable cross-step state changes. Split independent business goals into separate files. Keep tightly related actions in one file only when they form a single coherent journey, such as creating an entity and cancelling that same entity. Do not persist the inventory as another format.
 
 Do not create a journey when essential labels, navigation, permissions, or completion feedback cannot be grounded. Report the gap as a blocker instead of inventing a step.
+
+Reject a candidate at this stage when its goal cannot close on something the service answers for. A goal that only observes the interface — which timing fields render, how a control looks once disabled, a value the page formats from its own constants, an age counted down locally, an absence of activity — makes a sound acceptance test and a load journey that generates nothing. Either extend the goal until it reaches the service, or report it as withheld. Catching this while selecting goals costs a sentence; catching it after generation costs a rejected scenario that looks like a tooling fault.
 
 Treat each candidate journey as its own isolated task. When subagents are available, delegate one journey (or one disjoint UI area during discovery) per worker and run workers in parallel. Workers return findings only. The coordinating agent alone writes output files and itself assembles the delivery report's grounding evidence from the returned findings; no worker may update shared files. Without subagents, ground and draft strictly one journey at a time.
 
