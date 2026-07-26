@@ -74,6 +74,31 @@ End every file with an observable result. Use a clear phrase such as:
 
 The result must be grounded in a route transition, visible content, status, notification, or persisted read-back present in source.
 
+### The verification must be answered by the service
+
+LoadCraft generates load tests, not interface acceptance tests. A journey is captured as traffic, and the generated test can only assert on what the service sent. So the closing verification must be something **the service had to answer for** — a value it computed, a state it stored, a status it decided.
+
+A verification the browser could satisfy on its own produces a journey that reads perfectly and generates nothing. It fails at generation time, and the failure looks like a defect in the tooling rather than in the text.
+
+Passes, because the service must answer:
+
+- an identifier, total or timestamp that came back in a response — an order number, a report duration, a stored version;
+- a list or count re-read after a change, where the service decides the contents;
+- a status that only the service can move — queued becoming completed;
+- one figure cross-checked against another the service serves through a different call.
+
+Fails, because the browser already knows:
+
+- a rendering decision made from data the page holds — a dash instead of a number because that path measures nothing, a control switching to a disabled state;
+- a value computed in the page from constants compiled into it — a size label, a per-item description, a formatted range;
+- a locally derived elapsed time or freshness, computed from timestamps the page already has;
+- a number compared against the length of the very list it was derived from, which is true whatever the service replied;
+- an input echoed back on screen after being typed.
+
+A goal whose whole point is the absence of activity — watching something go quiet, decay, or stop — cannot be closed this way and does not belong in a journey. Report it as a candidate withheld rather than dressing it up.
+
+When the natural end of a goal is client-side, do not abandon the goal: keep the client-side observation as an intermediate step and close on the read-back that proves it reached the service. Sending two messages and checking which timing fields render is a client-side end; sending two messages and checking that the session's message count rose by four is the same journey with a verifiable close.
+
 ## File rules
 
 - UTF-8 plain text, one journey per file.
