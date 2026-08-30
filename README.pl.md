@@ -39,3 +39,10 @@ hasła, tokeny i dane klientów nie trafiają do plików.
 
 Katalog `.claude/skills/` zawiera tylko symlinki do `skills/` — dzięki temu
 skille działają lokalnie w Claude Code, a źródło prawdy jest jedno.
+
+## Licencja
+
+[Apache-2.0](LICENSE). Możesz uruchamiać te skille na własnym kodzie,
+zmieniać je i rozpowszechniać, także komercyjnie. Licencja niesie jawną klauzulę
+patentową — to pierwsze pytanie działu prawnego o narzędzie, które czyta Wasze
+źródła.
