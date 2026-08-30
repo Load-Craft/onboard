@@ -39,3 +39,10 @@ tokens or customer data end up in the files.
 
 The `.claude/skills/` directory contains only symlinks to `skills/` — the
 skills work locally in Claude Code while there is a single source of truth.
+
+## License
+
+[Apache-2.0](LICENSE). You may run these skills on your own code,
+modify them and redistribute them, including commercially. The license carries
+an explicit patent grant — the question your legal review will ask first about a
+tool that reads your source.
