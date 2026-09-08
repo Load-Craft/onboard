@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Validate the single-file OpenAPI contract consumed reliably by LoadCraft."""
+"""Validate the single-file OpenAPI contract consumed reliably by LoadCraft.
+
+Errors block a structural import. Warnings do not, but they describe artifacts the
+importer accepts while generating materially worse flows and feeder data; use
+--strict to fail on them too.
+"""
 
 from __future__ import annotations
 
@@ -32,6 +37,11 @@ SUPPORTED_CONTENT_TYPES = {
     "text/html",
     "text/plain",
 }
+EXAMPLE_EXEMPT_CONTENT_TYPES = {
+    "application/octet-stream",
+    "application/pdf",
+    "text/event-stream",
+}
 SECRET_PATTERNS = (
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     re.compile(r"\bBearer\s+[A-Za-z0-9._~-]{20,}\b", re.IGNORECASE),
@@ -51,6 +61,20 @@ SENSITIVE_PROPERTY_NAMES = {
 
 @dataclass(frozen=True, order=True)
 class Issue:
+    pointer: str
+    message: str
+
+
+@dataclass(frozen=True, order=True)
+class Warning_:
+    """A LoadCraft-degrading defect that does not block a structural import.
+
+    Warnings exist because the importer accepts these artifacts but generates
+    materially worse flows and feeder data from them. Resolve them, or name the
+    ones you deliberately accept in the delivery report. `--strict` promotes
+    every warning to an error.
+    """
+
     pointer: str
     message: str
 
@@ -99,6 +123,27 @@ def _resolve_ref(document: Mapping[str, object], ref: str) -> object | None:
     return current
 
 
+def _follow_refs(
+    value: object,
+    document: Mapping[str, object],
+) -> tuple[object, str | None]:
+    """Follow a chain of `$ref` hops. Returns (target, error_kind)."""
+    seen: set[str] = set()
+    current: object = value
+    while isinstance(current, Mapping) and isinstance(current.get("$ref"), str):
+        ref = str(current["$ref"])
+        if ref in seen:
+            return None, "circular $ref"
+        seen.add(ref)
+        if not ref.startswith("#/"):
+            return None, f"external $ref is not allowed: {ref}"
+        resolved = _resolve_ref(document, ref)
+        if resolved is None:
+            return None, f"unresolved $ref: {ref}"
+        current = resolved
+    return current, None
+
+
 def _resolved_mapping(
     value: object,
     document: Mapping[str, object],
@@ -108,13 +153,11 @@ def _resolved_mapping(
     if not isinstance(value, Mapping):
         issues.append(Issue(pointer, "must be an object"))
         return None
-    ref = value.get("$ref")
-    if not isinstance(ref, str):
+    if not isinstance(value.get("$ref"), str):
         return value
-    resolved = _resolve_ref(document, ref)
-    if resolved is None:
-        kind = "external $ref is not allowed" if not ref.startswith("#/") else "unresolved $ref"
-        issues.append(Issue(_pointer(pointer, "$ref"), f"{kind}: {ref}"))
+    resolved, error = _follow_refs(value, document)
+    if error is not None:
+        issues.append(Issue(_pointer(pointer, "$ref"), error))
         return None
     if not isinstance(resolved, Mapping):
         issues.append(Issue(_pointer(pointer, "$ref"), "$ref must resolve to an object"))
@@ -133,7 +176,7 @@ def _require_text(
 
 
 PROVENANCE_KEY = "x-loadcraft-source"
-PROVENANCE_METHODS = {"native-export", "static-trace"}
+PROVENANCE_METHODS = {"native-export", "platform-export", "static-trace"}
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 
 
@@ -170,13 +213,16 @@ def _validate_provenance(info: Mapping[str, object], issues: list[Issue]) -> Non
 
 def _validate_global_markers(document: Mapping[str, object], issues: list[Issue]) -> None:
     for pointer, value in _walk(document):
+        # An OAuth2 scope name is defined by the identity provider and cannot be
+        # renamed or moved into prose, so the secret heuristic must not fire on it.
+        in_scopes = pointer.endswith("/scopes")
         if isinstance(value, Mapping):
             for key, child in value.items():
                 if str(key).lower() in UNRESOLVED_KEYS:
                     issues.append(
                         Issue(_pointer("" if pointer == "/" else pointer, str(key)), "unresolved marker is not allowed in a deliverable")
                     )
-                if _is_sensitive_property(str(key)) and not isinstance(child, Mapping):
+                if not in_scopes and _is_sensitive_property(str(key)) and not isinstance(child, Mapping):
                     issues.append(
                         Issue(
                             _pointer("" if pointer == "/" else pointer, str(key)),
@@ -185,7 +231,9 @@ def _validate_global_markers(document: Mapping[str, object], issues: list[Issue]
                     )
         if not isinstance(value, str):
             continue
-        if re.search(r"\[\s*TODO\b", value, re.IGNORECASE):
+        if re.search(r"\[\s*TODO\b", value, re.IGNORECASE) or re.search(
+            r"\[\s*TBD\b|\bTBD\b", value
+        ):
             issues.append(Issue(pointer, "unresolved marker is not allowed in a deliverable"))
         if any(pattern.search(value) for pattern in SECRET_PATTERNS):
             issues.append(Issue(pointer, "secret-like value must not be embedded in the specification"))
@@ -205,10 +253,70 @@ def _validate_refs(document: Mapping[str, object], issues: list[Issue]) -> None:
             issues.append(Issue(ref_pointer, f"unresolved $ref: {ref}"))
 
 
+def _enum_behind_ref(
+    value: object,
+    document: Mapping[str, object],
+    pointer: str,
+    issues: list[Issue],
+    _depth: int = 0,
+) -> None:
+    """Reject an enum that is only reachable through a `$ref`.
+
+    LoadCraft's canonical property model does not follow a `$ref` for a leaf
+    schema, so an enum parked in `components.schemas` and referenced from a
+    property, an array item, an `additionalProperties` schema, an `allOf` member
+    or a parameter disappears on import: the consumer sees an untyped string and
+    neither a flow nor a feeder learns the allowed values. Inline the enum at
+    every use site instead.
+
+    Object schemas may still be referenced, and so may the schema of a whole
+    request or response body, because those positions are projected as objects
+    and their references are followed. Only leaf enums must be inlined.
+
+    This checks enums only. Other leaf constraints behind a reference (`pattern`,
+    length and numeric bounds) are equally lost, but they are guidance in the
+    compatibility profile rather than a gate, because they cannot be told apart
+    from a legitimately shared value object.
+    """
+    if _depth > 8 or not isinstance(value, Mapping) or "$ref" not in value:
+        return
+    target, error = _follow_refs(value, document)
+    if error is not None or not isinstance(target, Mapping):
+        return  # shape errors are reported by _validate_refs / _resolved_mapping
+    if target.get("type") == "object" or "properties" in target:
+        return
+    if "enum" in target:
+        issues.append(
+            Issue(
+                _pointer(pointer, "$ref"),
+                "enum-bearing schema must be inlined here; a $ref to a leaf schema loses "
+                "its enum on import",
+            )
+        )
+        return
+    all_of = target.get("allOf")
+    if isinstance(all_of, list):
+        for member in all_of:
+            _enum_behind_ref(member, document, pointer, issues, _depth + 1)
+    items = target.get("items")
+    if isinstance(items, Mapping):
+        if "enum" in items:
+            issues.append(
+                Issue(
+                    _pointer(pointer, "$ref"),
+                    "referenced array schema hides an enum in its items; inline the array "
+                    "and its enum here",
+                )
+            )
+        else:
+            _enum_behind_ref(items, document, pointer, issues, _depth + 1)
+
+
 def _validate_schema_object(
     value: object,
     pointer: str,
     issues: list[Issue],
+    document: Mapping[str, object],
 ) -> None:
     """Validate one Schema Object and its schema-bearing children."""
     if isinstance(value, bool):
@@ -291,30 +399,49 @@ def _validate_schema_object(
                                 "secret-bearing property must not embed a literal value",
                             )
                         )
+            _enum_behind_ref(
+                    property_schema,
+                    document,
+                    _pointer(_pointer(pointer, "properties"), str(property_name)),
+                    issues,
+            )
             _validate_schema_object(
                 property_schema,
                 _pointer(_pointer(pointer, "properties"), str(property_name)),
                 issues,
+                document,
             )
 
     if "items" in value:
-        _validate_schema_object(value["items"], _pointer(pointer, "items"), issues)
+        _enum_behind_ref(value["items"], document, _pointer(pointer, "items"), issues)
+        _validate_schema_object(value["items"], _pointer(pointer, "items"), issues, document)
 
     additional_properties = value.get("additionalProperties")
     if isinstance(additional_properties, Mapping):
+        _enum_behind_ref(
+            additional_properties,
+            document,
+            _pointer(pointer, "additionalProperties"),
+            issues,
+        )
         _validate_schema_object(
             additional_properties,
             _pointer(pointer, "additionalProperties"),
             issues,
+            document,
         )
 
     all_of = value.get("allOf")
     if isinstance(all_of, list):
         for index, member in enumerate(all_of):
+            _enum_behind_ref(
+                member, document, _pointer(_pointer(pointer, "allOf"), str(index)), issues
+            )
             _validate_schema_object(
                 member,
                 _pointer(_pointer(pointer, "allOf"), str(index)),
                 issues,
+                document,
             )
 
 
@@ -338,7 +465,7 @@ def _validate_schema_subset(document: Mapping[str, object], issues: list[Issue])
         roots.setdefault(schema_pointer, value["schema"])
 
     for pointer, schema in sorted(roots.items()):
-        _validate_schema_object(schema, pointer, issues)
+        _validate_schema_object(schema, pointer, issues, document)
 
 
 def _collect_parameters(
@@ -371,9 +498,20 @@ def _collect_parameters(
             if location not in {"path", "query", "header", "cookie"}:
                 issues.append(Issue(_pointer(parameter_pointer, "in"), "must be path, query, header, or cookie"))
                 continue
+            # Once name and location are known, address the parameter by them, so an
+            # error and a warning about the same parameter share one pointer.
+            parameter_pointer = _pointer(
+                _pointer(pointer, "parameters"), f"{location}-{name}"
+            )
             if not isinstance(parameter.get("schema"), Mapping):
                 issues.append(Issue(_pointer(parameter_pointer, "schema"), "parameter schema is required"))
             else:
+                _enum_behind_ref(
+                    parameter["schema"],
+                    document,
+                    _pointer(parameter_pointer, "schema"),
+                    issues,
+                )
                 raw_schema = parameter["schema"]
                 schema = _resolved_mapping(
                     raw_schema,
@@ -400,8 +538,70 @@ def _collect_parameters(
                                 "parameter enum values must all be strings for LoadCraft",
                             )
                         )
-            collected[(str(location), name)] = parameter
+            collected[(str(location), name)] = {
+                **parameter,
+                "x-validator-pointer": parameter_pointer,
+            }
     return collected
+
+
+def _warn_unusable_parameters(
+    method: str,
+    parameters: Mapping[tuple[str, str], Mapping[str, object]],
+    document: Mapping[str, object],
+    security_scheme_headers: set[str],
+    pointer: str,
+    warnings: list[Warning_],
+) -> None:
+    """Warn about a parameter a generated caller cannot produce a value for.
+
+    Exempt, because for these an example is either meaningless or forbidden:
+
+    - an OPTIONS preflight, answered at the edge without reading any value;
+    - a parameter whose name trips the secret heuristic, where the compatibility
+      profile forbids a literal;
+    - a header that carries a declared security scheme, supplied by the harness
+      rather than by the artifact.
+
+    Anything else must offer an `example`, an `enum` or a `default`. The profile
+    wants it on the parameter's `schema`; a parameter-level `example` is accepted
+    because OpenAPI 3.0 permits it, and both are retained per parameter.
+    """
+    if method == "options":
+        return
+    for (location, name), parameter in sorted(parameters.items()):
+        if _is_sensitive_property(name):
+            continue
+        if location == "header" and name.casefold() in security_scheme_headers:
+            continue
+        if "example" in parameter:
+            continue
+        if "examples" in parameter:
+            warnings.append(
+                Warning_(
+                    _pointer(
+                        str(parameter.get("x-validator-pointer") or pointer), "examples"
+                    ),
+                    "a named examples map on a parameter is dropped on import; move the "
+                    "load-relevant value into the single example and name the rest in the "
+                    "description",
+                )
+            )
+        schema = parameter.get("schema")
+        if isinstance(schema, Mapping) and "$ref" in schema:
+            resolved, _error = _follow_refs(schema, document)
+            schema = resolved if isinstance(resolved, Mapping) else {}
+        if not isinstance(schema, Mapping):
+            continue
+        if any(key in schema for key in ("example", "enum", "default")):
+            continue
+        warnings.append(
+            Warning_(
+                str(parameter.get("x-validator-pointer") or pointer),
+                "parameter has no example, enum or default, so a generated caller has no "
+                "value to send; put a synthetic example on its schema",
+            )
+        )
 
 
 def _validate_security(
@@ -516,6 +716,7 @@ def _validate_responses(
     document: Mapping[str, object],
     pointer: str,
     issues: list[Issue],
+    warnings: list[Warning_],
 ) -> None:
     if not isinstance(raw_responses, Mapping) or not raw_responses:
         issues.append(Issue(pointer, "responses must be a non-empty object"))
@@ -552,16 +753,47 @@ def _validate_responses(
         for media_type, raw_media in content.items():
             media_pointer = _pointer(_pointer(response_pointer, "content"), str(media_type))
             media = _resolved_mapping(raw_media, document, media_pointer, issues)
-            if media is not None and not isinstance(media.get("schema"), Mapping):
+            if media is None:
+                continue
+            if not isinstance(media.get("schema"), Mapping):
                 issues.append(Issue(_pointer(media_pointer, "schema"), "response schema is required"))
+            media_schema = media.get("schema")
+            binary_schema = (
+                isinstance(media_schema, Mapping)
+                and media_schema.get("format") == "binary"
+            )
+            if (
+                "example" not in media
+                and str(media_type) not in EXAMPLE_EXEMPT_CONTENT_TYPES
+                and not str(media_type).startswith("image/")
+                and not binary_schema
+            ):
+                warnings.append(
+                    Warning_(
+                        media_pointer,
+                        "body-bearing response has no example; LoadCraft retains one example "
+                        "per status and generates weaker assertions without it",
+                    )
+                )
+            if "examples" in media:
+                warnings.append(
+                    Warning_(
+                        _pointer(media_pointer, "examples"),
+                        "a named examples map on a response is dropped on import; express the "
+                        "branch through its own status code and a single example",
+                    )
+                )
     if not success_codes:
         issues.append(Issue(pointer, "at least one explicit 2xx response is required"))
 
 
-def validate_document(document: object) -> tuple[list[Issue], int]:
+def validate_document(
+    document: object,
+) -> tuple[list[Issue], list[Warning_], int]:
     issues: list[Issue] = []
+    warnings: list[Warning_] = []
     if not isinstance(document, Mapping):
-        return [Issue("/", "document must be a JSON object")], 0
+        return [Issue("/", "document must be a JSON object")], warnings, 0
 
     _validate_global_markers(document, issues)
     _validate_refs(document, issues)
@@ -601,11 +833,18 @@ def validate_document(document: object) -> tuple[list[Issue], int]:
         issues.append(Issue("/components/securitySchemes", "must be an object"))
         security_schemes = {}
     _validate_security_schemes(security_schemes, document, issues)
+    security_scheme_headers = {
+        str(scheme["name"]).casefold()
+        for scheme in security_schemes.values()
+        if isinstance(scheme, Mapping)
+        and scheme.get("in") == "header"
+        and isinstance(scheme.get("name"), str)
+    }
 
     paths = document.get("paths")
     if not isinstance(paths, Mapping) or not paths:
         issues.append(Issue("/paths", "must be a non-empty object"))
-        return sorted(set(issues)), 0
+        return sorted(set(issues)), sorted(set(warnings)), 0
 
     seen_operation_ids: dict[str, str] = {}
     operation_count = 0
@@ -653,6 +892,15 @@ def validate_document(document: object) -> tuple[list[Issue], int]:
                 operation_pointer,
                 issues,
             )
+            _warn_unusable_parameters(
+                method,
+                parameters,
+                document,
+                security_scheme_headers,
+                operation_pointer,
+                warnings,
+            )
+
             for variable in re.findall(r"\{([^{}]+)\}", str(path)):
                 parameter = parameters.get(("path", variable))
                 if parameter is None:
@@ -675,7 +923,7 @@ def validate_document(document: object) -> tuple[list[Issue], int]:
                     issues.append(
                         Issue(
                             _pointer(operation_pointer, "requestBody"),
-                            "GET/DELETE request bodies are rejected by LoadCraft flow validation",
+                            "GET/HEAD/DELETE request bodies are rejected by LoadCraft flow validation",
                         )
                     )
                 _validate_request_body(
@@ -689,11 +937,12 @@ def validate_document(document: object) -> tuple[list[Issue], int]:
                 document,
                 _pointer(operation_pointer, "responses"),
                 issues,
+                warnings,
             )
 
     if operation_count == 0:
         issues.append(Issue("/paths", "contains no supported HTTP operations"))
-    return sorted(set(issues)), operation_count
+    return sorted(set(issues)), sorted(set(warnings)), operation_count
 
 
 def _parse_args() -> argparse.Namespace:
@@ -701,6 +950,14 @@ def _parse_args() -> argparse.Namespace:
         description="Validate a self-contained OpenAPI JSON file for LoadCraft."
     )
     parser.add_argument("spec", type=Path, help="Path to the canonical openapi.json")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help=(
+            "Treat LoadCraft-degrading warnings (missing response example, unusable "
+            "parameter, dropped examples map) as errors."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -715,6 +972,12 @@ def main() -> int:
     except FileNotFoundError:
         print(f"ERROR /: file not found: {path}", file=sys.stderr)
         return 1
+    except IsADirectoryError:
+        print(f"ERROR /: path is a directory, not a file: {path}", file=sys.stderr)
+        return 1
+    except OSError as exc:
+        print(f"ERROR /: cannot read {path}: {exc}", file=sys.stderr)
+        return 1
     except UnicodeDecodeError as exc:
         print(f"ERROR /: file must be UTF-8: {exc}", file=sys.stderr)
         return 1
@@ -724,21 +987,40 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-
-    try:
-        issues, operation_count = validate_document(document)
     except RecursionError:
         print("ERROR /: document nesting exceeds the supported depth", file=sys.stderr)
         return 1
+
+    try:
+        issues, warnings, operation_count = validate_document(document)
+    except RecursionError:
+        print("ERROR /: document nesting exceeds the supported depth", file=sys.stderr)
+        return 1
+
+    if args.strict:
+        issues = sorted(set(issues) | {Issue(w.pointer, w.message) for w in warnings})
+        warnings = []
+
+    for warning in warnings:
+        print(f"WARN {warning.pointer}: {warning.message}", file=sys.stderr)
+
     if issues:
         for issue in issues:
             print(f"ERROR {issue.pointer}: {issue.message}", file=sys.stderr)
         return 1
+
     noun = "operation" if operation_count == 1 else "operations"
-    print(
+    summary = (
         f"PASS: {path} passes LoadCraft structural preflight "
         f"({operation_count} {noun})."
     )
+    if warnings:
+        plural = "warning" if len(warnings) == 1 else "warnings"
+        summary += (
+            f" {len(warnings)} {plural} above degrade flow and feeder quality:"
+            " resolve them, or name the ones you accept in the delivery report."
+        )
+    print(summary)
     return 0
 
 
