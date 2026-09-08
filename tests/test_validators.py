@@ -263,7 +263,7 @@ class ValidatorCliTestCase(unittest.TestCase):
             result = self._run(OPENAPI_VALIDATOR, target)
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("GET/DELETE request bodies", result.stderr)
+        self.assertIn("GET/HEAD/DELETE request bodies", result.stderr)
         self.assertIn("oneOf/anyOf", result.stderr)
 
     def test_openapi_rejects_missing_required_properties(self) -> None:

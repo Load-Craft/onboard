@@ -1,6 +1,6 @@
 {
   "name": "loadcraft-preparation-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Source-grounded OpenAPI, AsyncAPI, journey and project-overview preparation for LoadCraft.",
   "author": {
     "name": "LoadCraft"
