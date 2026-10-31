@@ -22,21 +22,22 @@ UNSUPPORTED_METHODS = {"trace"}
 UNRESOLVED_KEYS = {"x-todo", "x-loadcraft-blocker"}
 SCHEMA_TYPES = {"string", "number", "integer", "boolean", "array", "object"}
 SECURITY_SCHEME_TYPES = {"apiKey", "http", "oauth2", "openIdConnect"}
-SUPPORTED_CONTENT_TYPES = {
-    "application/json",
-    "application/pdf",
-    "application/xml",
-    "application/octet-stream",
-    "application/x-www-form-urlencoded",
-    "image/gif",
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "multipart/form-data",
-    "text/event-stream",
-    "text/html",
-    "text/plain",
-}
+# The importer carries a request body with exactly the media type the spec
+# declares, so any concrete RFC 6838 `type/subtype` (with optional parameters)
+# is accepted; a wildcard range or a malformed key is rejected at import.
+_RESTRICTED_NAME = r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}"
+_TOKEN = r"[!#$%&'*+.^_`|~0-9A-Za-z-]+"
+_QUOTED_STRING = r'"(?:[^"\\\r\n{}]|\\[^{}\r\n])*"'
+REQUEST_MEDIA_TYPE_RE = re.compile(
+    rf"{_RESTRICTED_NAME}/{_RESTRICTED_NAME}"
+    rf"(?:[ \t]*;[ \t]*(?:{_TOKEN}=(?:{_TOKEN}|{_QUOTED_STRING}))?)*"
+)
+# A redirect-only operation imports, and the generated client follows the
+# redirect and asserts the final response.
+REDIRECT_STATUSES = {301, 302, 303, 307, 308}
+# Success statuses that may legitimately carry no body: 202 Accepted for work
+# handed off without a representation, 204/205 by definition.
+NO_CONTENT_SUCCESS_STATUSES = {202, 204, 205}
 EXAMPLE_EXEMPT_CONTENT_TYPES = {
     "application/octet-stream",
     "application/pdf",
@@ -699,11 +700,12 @@ def _validate_request_body(
         )
     for media_type, raw_media in content.items():
         media_pointer = _pointer(_pointer(pointer, "content"), str(media_type))
-        if media_type not in SUPPORTED_CONTENT_TYPES:
+        if REQUEST_MEDIA_TYPE_RE.fullmatch(str(media_type)) is None or "*" in str(media_type).split(";")[0]:
             issues.append(
                 Issue(
                     media_pointer,
-                    f"unsupported request media type for LoadCraft: {media_type}",
+                    f"unsupported request media type for LoadCraft: {media_type} "
+                    "(declare one concrete type/subtype; wildcards cannot be sent)",
                 )
             )
         media = _resolved_mapping(raw_media, document, media_pointer, issues)
@@ -742,9 +744,12 @@ def _validate_responses(
         _require_text(response, "description", response_pointer, issues)
         content = response.get("content")
         if content is None:
-            if 200 <= status_code < 300 and status_code not in {204, 205}:
+            if 200 <= status_code < 300 and status_code not in NO_CONTENT_SUCCESS_STATUSES:
                 issues.append(
-                    Issue(_pointer(response_pointer, "content"), "successful response content is required except for 204/205")
+                    Issue(
+                        _pointer(response_pointer, "content"),
+                        "successful response content is required except for 202/204/205",
+                    )
                 )
             continue
         if not isinstance(content, Mapping) or not content:
@@ -784,7 +789,22 @@ def _validate_responses(
                     )
                 )
     if not success_codes:
-        issues.append(Issue(pointer, "at least one explicit 2xx response is required"))
+        redirects = sorted(
+            int(str(status))
+            for status in raw_responses
+            if re.fullmatch(r"[0-9]{3}", str(status)) and int(str(status)) in REDIRECT_STATUSES
+        )
+        if redirects:
+            warnings.append(
+                Warning_(
+                    pointer,
+                    f"redirect-only operation ({', '.join(map(str, redirects))}); the generated client "
+                    "follows the redirect and asserts the final response, so name the target "
+                    "operation in the description",
+                )
+            )
+        else:
+            issues.append(Issue(pointer, "at least one explicit 2xx (or 3xx redirect) response is required"))
 
 
 def validate_document(

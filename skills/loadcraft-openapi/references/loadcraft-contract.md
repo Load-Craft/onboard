@@ -23,7 +23,7 @@ Every operation must have:
 - a non-empty `summary` or `description`;
 - an explicit operation-level `security` array;
 - explicit three-digit response codes;
-- at least one explicit success response in the `200`–`299` range.
+- at least one explicit success response in the `200`–`299` range. The one exception is a redirect-only operation (`301`, `302`, `303`, `307`, `308` and no `2xx`, such as a lookup-by-slug that answers with `Location`): the importer accepts it, and the generated client follows the redirect and asserts the final response, so name the target operation in the `description`. The validator reports it as a warning, not an error.
 
 Root-level security is not inherited by the current parsed endpoint model. Copy the verified effective requirement onto each protected operation. Set `security: []` only when the operation is actually public.
 
@@ -71,16 +71,16 @@ Never add a body merely because the method is mutating. Absence of a body can be
 
 When a body field selects a behavior branch, both the single `example` and the named `examples` map on the request media type are retained, and so are per-property `description` and `example` inside the schema. Use them to make each branch callable: state the trigger→behavior mapping on the property `description` (and the operation `description`), and give the `examples` map one named entry per material branch whose `value` carries the branch-selecting inputs (for example `withinStock` and `exceedsStock`). Keep the single `example` for the ordinary success branch. This is the profile's richest place to exemplify request-value branching, so prefer it over prose alone.
 
-Recognized request media types are `application/json`, `application/xml`, `application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain`, `text/html`, `text/event-stream`, `application/octet-stream`, `application/pdf`, and the supported PNG/JPEG/GIF/WebP image types. Do not let an unknown vendor media type be silently coerced to JSON.
+Any concrete `type/subtype` is accepted as the request media type, with optional `;name=value` parameters: the importer sends the body with exactly the declared type, so `application/merge-patch+json` for a JSON Merge Patch endpoint is the truthful declaration and must not be replaced by `application/json` (the server would answer `415`). A wildcard range (`*/*`, `application/*`) or a malformed key cannot be sent and is rejected. The generator builds a body for JSON-family types (anything containing `json`), `application/x-www-form-urlencoded` and `multipart/form-data`; a required body of any other type fails flow generation, so prefer those when the server accepts several.
 
 ## Responses and schemas
 
 - Give every response a description.
 - Give body-bearing responses a schema.
 - **Give every body-bearing response one `example`.** The importer retains one example per status, and it is the only place a flow generator learns what a real body looks like; an absent example is a silently weaker artifact rather than an import failure, so the bundled validator warns about it — per media type, since it cannot know which one the importer will keep. A response that declares two media types is therefore asked for two examples while only one survives: prefer one media type per response, exactly as request bodies are capped at one.
-- Exempt from that rule, and not warned about: a `204`/`205` with no content, and a body whose bytes are not text — `application/octet-stream`, `application/pdf`, any `image/*`, `text/event-stream`, or any schema with `format: binary`. Describe such a body in the response `description` instead.
+- Exempt from that rule, and not warned about: a `202`/`204`/`205` with no content, and a body whose bytes are not text — `application/octet-stream`, `application/pdf`, any `image/*`, `text/event-stream`, or any schema with `format: binary`. Describe such a body in the response `description` instead.
 - Response media types are **not** restricted to the recognized list, which applies to request bodies only. That is a known gap rather than a licence: an unusual response media type may or may not survive the importer's own handling, so name it in the delivery report when you emit one.
-- A `204` or `205` may omit content; other successful responses should describe their content.
+- A `202`, `204` or `205` may omit content (`202 Accepted` for work handed off without a representation); other successful responses must describe their content. A `202` without content does not prove the work happened, so say where the caller must assert instead.
 - Required property names must exist in the same schema's `properties`.
 - Use single JSON Schema types. Avoid boolean schemas and OpenAPI 3.1 unions.
 - Do not use `oneOf` or `anyOf` where exact request or response structure matters. The current importer flattens them lossily.
