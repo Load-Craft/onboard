@@ -79,7 +79,7 @@ Build or update `loadcraft/openapi.json` directly. Keep component names stable. 
 - exactly one truthful request media type per request body;
 - an explicit `requestBody.required` value and a media type supported by the current importer;
 - explicit request and response schemas where bodies exist, with every enum inlined at its use site rather than referenced;
-- explicit three-digit response codes and at least one `2xx` per operation, and one example on every body-bearing response;
+- explicit three-digit response codes and at least one `2xx` per operation (a redirect-only `3xx` operation is the one documented exception), and one example on every body-bearing response;
 - an `example`, an `enum` or a `default` on the schema of every parameter, required or optional alike, except an OPTIONS preflight, a secret-named parameter and a header carrying a declared security scheme;
 - for every traced value-driven branch: an explicit trigger→behavior mapping in a retained description, an example demonstrating each material branch's inputs, and a triggering-condition description on each branch-caused error response;
 - only internal, resolvable references;

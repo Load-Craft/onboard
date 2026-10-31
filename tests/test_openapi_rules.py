@@ -302,7 +302,7 @@ class OpenapiRuleTestCase(unittest.TestCase):
         del responses["201"]
         result = self._run_document(document)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("at least one explicit 2xx response is required", result.stderr)
+        self.assertIn("at least one explicit 2xx (or 3xx redirect) response is required", result.stderr)
 
     def test_rejects_response_media_without_schema(self) -> None:
         document = copy.deepcopy(_valid_openapi())
@@ -367,9 +367,10 @@ class OpenapiRuleTestCase(unittest.TestCase):
         )
 
     def test_rejects_unsupported_request_media_type(self) -> None:
+        # A wildcard range names no concrete type; the importer cannot send it.
         document = copy.deepcopy(_valid_openapi())
         content = self._operation(document)["requestBody"]["content"]
-        content["application/vnd.orders+json"] = content.pop("application/json")
+        content["*/*"] = content.pop("application/json")
         result = self._run_document(document)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("unsupported request media type", result.stderr)

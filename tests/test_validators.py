@@ -311,7 +311,7 @@ class ValidatorCliTestCase(unittest.TestCase):
         request_body = document["paths"]["/api/orders"]["post"]["requestBody"]
         del request_body["required"]
         media = request_body["content"].pop("application/json")
-        request_body["content"]["application/vnd.orders+json"] = media
+        request_body["content"]["application/*"] = media
 
         with tempfile.TemporaryDirectory() as temp_dir:
             target = Path(temp_dir) / "openapi.json"
@@ -321,6 +321,71 @@ class ValidatorCliTestCase(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("requestBody.required", result.stderr)
         self.assertIn("unsupported request media type", result.stderr)
+
+    def test_openapi_accepts_concrete_vendor_request_media_types(self) -> None:
+        # The importer sends the declared type verbatim (JSON Merge Patch included).
+        for media_type in ("application/merge-patch+json", "application/vnd.orders+json; charset=utf-8"):
+            document = _valid_openapi()
+            content = document["paths"]["/api/orders"]["post"]["requestBody"]["content"]
+            content[media_type] = content.pop("application/json")
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                target = Path(temp_dir) / "openapi.json"
+                target.write_text(json.dumps(document), encoding="utf-8")
+                result = self._run(OPENAPI_VALIDATOR, target)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_openapi_accepts_202_without_content(self) -> None:
+        document = _valid_openapi()
+        responses = document["paths"]["/api/orders"]["post"]["responses"]
+        del responses["201"]
+        responses["202"] = {"description": "Accepted; processed asynchronously, no body"}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "openapi.json"
+            target.write_text(json.dumps(document), encoding="utf-8")
+            result = self._run(OPENAPI_VALIDATOR, target)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_openapi_still_requires_content_on_200_and_201(self) -> None:
+        document = _valid_openapi()
+        del document["paths"]["/api/orders"]["post"]["responses"]["201"]["content"]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "openapi.json"
+            target.write_text(json.dumps(document), encoding="utf-8")
+            result = self._run(OPENAPI_VALIDATOR, target)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("except for 202/204/205", result.stderr)
+
+    def test_openapi_warns_but_accepts_redirect_only_operation(self) -> None:
+        document = _valid_openapi()
+        responses = document["paths"]["/api/orders"]["post"]["responses"]
+        del responses["201"]
+        responses["301"] = {"description": "Redirects to GET /api/orders/{id}"}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "openapi.json"
+            target.write_text(json.dumps(document), encoding="utf-8")
+            result = self._run(OPENAPI_VALIDATOR, target)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("redirect-only operation", result.stdout + result.stderr)
+
+    def test_openapi_rejects_operation_without_success_or_redirect(self) -> None:
+        document = _valid_openapi()
+        del document["paths"]["/api/orders"]["post"]["responses"]["201"]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "openapi.json"
+            target.write_text(json.dumps(document), encoding="utf-8")
+            result = self._run(OPENAPI_VALIDATOR, target)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("at least one explicit 2xx (or 3xx redirect)", result.stderr)
 
     def test_openapi_rejects_examples_on_secret_bearing_properties(self) -> None:
         document = _valid_openapi()
