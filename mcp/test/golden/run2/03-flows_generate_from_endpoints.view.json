@@ -1,0 +1,164 @@
+{
+  "built": [
+    {
+      "flowId": "a7d2e914-3c5b-4e8f-b061-9f4c2d7e8a35",
+      "name": "zakupy",
+      "version": 1,
+      "stepCount": 9,
+      "requestCount": 5,
+      "pauseCount": 4,
+      "steps": [
+        {
+          "num": "1",
+          "kind": "request",
+          "blockType": "request",
+          "depth": 0,
+          "name": "Log in",
+          "uses": [],
+          "produces": ["token"],
+          "feederVars": ["email", "password"],
+          "expectedStatuses": [],
+          "validators": [],
+          "method": "POST",
+          "path": "/auth/login"
+        },
+        {
+          "num": "2",
+          "kind": "pause",
+          "blockType": "pause",
+          "depth": 0,
+          "name": "Pause",
+          "description": "Assumed default think time before an API call (not measured)",
+          "uses": [],
+          "produces": [],
+          "feederVars": [],
+          "expectedStatuses": [],
+          "validators": [],
+          "pause": {
+            "minMs": 3000,
+            "maxMs": 8000,
+            "source": "default_human",
+            "actionClass": "form_submit"
+          }
+        },
+        {
+          "num": "3",
+          "kind": "request",
+          "blockType": "request",
+          "depth": 0,
+          "name": "Search products",
+          "uses": ["token"],
+          "produces": ["productId"],
+          "feederVars": ["q"],
+          "expectedStatuses": [],
+          "validators": [],
+          "method": "GET",
+          "path": "/products?q=#{q}"
+        },
+        {
+          "num": "4",
+          "kind": "pause",
+          "blockType": "pause",
+          "depth": 0,
+          "name": "Pause",
+          "description": "Assumed default think time before an API call (not measured)",
+          "uses": [],
+          "produces": [],
+          "feederVars": [],
+          "expectedStatuses": [],
+          "validators": [],
+          "pause": {
+            "minMs": 10000,
+            "maxMs": 30000,
+            "source": "default_human",
+            "actionClass": "in_page"
+          }
+        },
+        {
+          "num": "5",
+          "kind": "request",
+          "blockType": "request",
+          "depth": 0,
+          "name": "Add to cart",
+          "uses": ["token", "productId"],
+          "produces": ["cartId"],
+          "feederVars": ["quantity"],
+          "expectedStatuses": [],
+          "validators": [],
+          "method": "POST",
+          "path": "/cart/items"
+        },
+        {
+          "num": "6",
+          "kind": "pause",
+          "blockType": "pause",
+          "depth": 0,
+          "name": "Pause",
+          "description": "Assumed default think time before an API call (not measured)",
+          "uses": [],
+          "produces": [],
+          "feederVars": [],
+          "expectedStatuses": [],
+          "validators": [],
+          "pause": {
+            "minMs": 2000,
+            "maxMs": 5000,
+            "source": "default_human",
+            "actionClass": "page"
+          }
+        },
+        {
+          "num": "7",
+          "kind": "request",
+          "blockType": "request",
+          "depth": 0,
+          "name": "Show cart",
+          "uses": ["token", "cartId"],
+          "produces": [],
+          "feederVars": [],
+          "expectedStatuses": [],
+          "validators": [],
+          "method": "GET",
+          "path": "/cart"
+        },
+        {
+          "num": "8",
+          "kind": "pause",
+          "blockType": "pause",
+          "depth": 0,
+          "name": "Pause",
+          "description": "Assumed default think time before an API call (not measured)",
+          "uses": [],
+          "produces": [],
+          "feederVars": [],
+          "expectedStatuses": [],
+          "validators": [],
+          "pause": {
+            "minMs": 20000,
+            "maxMs": 45000,
+            "source": "default_human",
+            "actionClass": "form_submit"
+          }
+        },
+        {
+          "num": "9",
+          "kind": "request",
+          "blockType": "request",
+          "depth": 0,
+          "name": "Check out",
+          "uses": ["token", "cartId"],
+          "produces": [],
+          "feederVars": ["cardNumber"],
+          "expectedStatuses": [201, 409],
+          "validators": [],
+          "method": "POST",
+          "path": "/checkout"
+        }
+      ],
+      "truncated": false
+    }
+  ],
+  "questions": [],
+  "failed": [],
+  "lead": "single"
+}

@@ -1,0 +1,241 @@
+name: Evals
+
+# Plugin evaluations (`claude plugin eval`, see evals/README.md). Every run is a full agent session
+# billed to the repository secret ANTHROPIC_API_KEY, so the workflow starts by hand only: run it
+# before a release, never on a push. About 15 to 20 USD for the whole suite with 3 runs per case.
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Which cases to run (a tag of the cases in evals/)
+        type: choice
+        default: all
+        options:
+          - all
+          - run1
+          - run2
+          - run3
+          - run4
+          - run5
+          - repair
+          - negative
+          - trigger
+      case:
+        description: Optional case name pattern (only * and ?), for example 'run1-*'; replaces the suite
+        type: string
+        default: ""
+      runs:
+        description: Runs per case (1 to 5)
+        type: string
+        default: "3"
+      max_cost_usd:
+        description: Cost ceiling in USD for the whole workflow (at most the hard ceiling below)
+        type: string
+        default: "20"
+      model:
+        description: Model the cases run on (the cases pin the same one)
+        type: string
+        default: claude-sonnet-5-5
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evals
+  cancel-in-progress: false
+
+jobs:
+  evals:
+    name: plugin evaluations
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      CLAUDE_CODE_VERSION: 2.1.325
+      # No input can raise the budget above this value.
+      HARD_CEILING_USD: "30"
+    steps:
+      - name: Check the API key and the inputs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUITE: ${{ inputs.suite }}
+          CASE: ${{ inputs.case }}
+          RUNS: ${{ inputs.runs }}
+          MAX_COST_USD: ${{ inputs.max_cost_usd }}
+          MODEL: ${{ inputs.model }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::The repository secret ANTHROPIC_API_KEY is not set. Add it in Settings > Secrets and variables > Actions, then run the workflow again. Nothing was run."
+            exit 1
+          fi
+          if ! [[ "$RUNS" =~ ^[1-5]$ ]]; then
+            echo "::error::runs must be a number from 1 to 5."
+            exit 1
+          fi
+          if ! [[ "$MAX_COST_USD" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "::error::max_cost_usd must be a number of USD, for example 20."
+            exit 1
+          fi
+          if ! node -e "const [a, b] = process.argv.slice(1).map(Number); process.exit(a > 0 && a <= b ? 0 : 1)" "$MAX_COST_USD" "$HARD_CEILING_USD"; then
+            echo "::error::max_cost_usd $MAX_COST_USD is zero or exceeds the ceiling of $HARD_CEILING_USD USD."
+            exit 1
+          fi
+          if ! [[ "$CASE" =~ ^[A-Za-z0-9*?_-]*$ ]]; then
+            echo "::error::case may hold only letters, digits, - _ * and ?."
+            exit 1
+          fi
+          if ! [[ "$MODEL" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::model may hold only letters, digits, . _ and -."
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.x
+
+      - name: Install Claude Code
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Validate the plugin
+        run: claude plugin validate .
+
+      - name: Run the evaluations
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUITE: ${{ inputs.suite }}
+          CASE: ${{ inputs.case }}
+          RUNS: ${{ inputs.runs }}
+          MAX_COST_USD: ${{ inputs.max_cost_usd }}
+          MODEL: ${{ inputs.model }}
+        run: |
+          set -uo pipefail
+          out="$PWD/evals-out"
+          mkdir -p "$out"
+
+          cat > "$RUNNER_TEMP/gate.mjs" <<'GATE'
+          // Pass or fail one group of results: gate.mjs <group> <aggregate-result.json>.
+          import { readFileSync } from "node:fs";
+
+          const [group, path] = process.argv.slice(2);
+          const cases = JSON.parse(readFileSync(path, "utf8")).cases;
+          const problems = [];
+
+          const runs = (c) => c.arms.with;
+
+          const hardFailures = (c) =>
+            runs(c).flatMap((run, index) =>
+              run.graders
+                .filter((g) => !g.passed && !g.name.startsWith("soft-"))
+                .map((g) => `${c.name} run ${index}: ${g.name}`),
+            );
+
+          const runErrors = (c) =>
+            runs(c).flatMap((run, index) => (run.error ? [`${c.name} run ${index}: ${run.error}`] : []));
+
+          if (cases.length === 0) problems.push("no case was run");
+          for (const c of cases) problems.push(...runErrors(c));
+          if (group === "negative" || group === "trigger") {
+            for (const c of cases) {
+              if (!c.name.startsWith("trigger-positive-")) problems.push(...hardFailures(c));
+            }
+          }
+          if (group === "trigger") {
+            const positives = cases.filter((c) => c.name.startsWith("trigger-positive-"));
+            const loaded = positives.filter(
+              (c) =>
+                runs(c).filter((run) => run.graders.some((g) => g.name === "skill-loaded" && g.passed))
+                  .length >= 2,
+            );
+            console.log(
+              `trigger-positive: skill loaded in 2 of 3 runs in ${loaded.length} of ${positives.length} cases`,
+            );
+            if (loaded.length < 5) {
+              problems.push("fewer than 5 positive trigger cases load the skill in at least 2 runs");
+            }
+          }
+          if (group !== "negative" && group !== "trigger") {
+            for (const c of cases) {
+              const rate = c.aggregates.passRate;
+              console.log(`${c.name}: passRate ${rate.toFixed(2)}`);
+              if (rate < 0.66) problems.push(`${c.name}: passRate ${rate.toFixed(2)} is below 0.66`);
+            }
+          }
+          console.log(problems.join("\n") || `${group}: every gate passed`);
+          process.exit(problems.length > 0 ? 1 : 0);
+          GATE
+
+          spent() {
+            node --input-type=module - "$out" <<'SUM'
+          import { readdirSync, readFileSync, existsSync } from "node:fs";
+          import { join } from "node:path";
+
+          const root = process.argv[2];
+          let total = 0;
+          for (const entry of readdirSync(root, { withFileTypes: true })) {
+            const file = join(root, entry.name, "aggregate-result.json");
+            if (!entry.isDirectory() || !existsSync(file)) continue;
+            for (const c of JSON.parse(readFileSync(file, "utf8")).cases) {
+              for (const arm of Object.values(c.arms)) {
+                for (const run of arm) total += run.costUsd || 0;
+              }
+            }
+          }
+          console.log(total.toFixed(4));
+          SUM
+          }
+
+          failed=0
+          stop=0
+          run_group() {
+            local group="$1"; shift
+            local used remaining
+            used=$(spent)
+            remaining=$(node -e "console.log(Math.max(Number(process.argv[1]) - Number(process.argv[2]), 0).toFixed(2))" "$MAX_COST_USD" "$used")
+            if node -e "process.exit(Number(process.argv[1]) < 0.05 ? 0 : 1)" "$remaining"; then
+              echo "::error::Cost ceiling of $MAX_COST_USD USD reached ($used USD spent); group $group was not run."
+              failed=1; stop=1; return
+            fi
+            echo "::group::$group (up to $remaining USD of $MAX_COST_USD USD, $used USD spent so far)"
+            claude plugin eval . "$@" --runs "$RUNS" --model "$MODEL" --scaffold --ablation none \
+              --no-publish --trust-plugin --threshold 0 -j 1 --max-cost-usd "$remaining" \
+              --output-dir "$out/$group" --report "$out/$group/report.html"
+            local rc=$?
+            echo "::endgroup::"
+            if [ "$rc" -eq 2 ]; then
+              echo "::error::Cost ceiling of $MAX_COST_USD USD reached during group $group; the result is partial."
+              failed=1; stop=1
+            elif [ "$rc" -ne 0 ]; then
+              echo "::error::claude plugin eval exited with $rc in group $group."
+              failed=1; return
+            fi
+            if [ -f "$out/$group/aggregate-result.json" ]; then
+              node "$RUNNER_TEMP/gate.mjs" "$group" "$out/$group/aggregate-result.json" || failed=1
+            else
+              echo "::error::No result for group $group."
+              failed=1
+            fi
+          }
+
+          if [ -n "$CASE" ]; then
+            run_group custom --case "$CASE"
+          else
+            for group in run1 run2 run3 run4 run5 repair negative trigger; do
+              [ "$SUITE" = all ] || [ "$SUITE" = "$group" ] || continue
+              [ "$stop" -eq 0 ] || break
+              run_group "$group" --tag "$group"
+            done
+          fi
+
+          echo "Spent $(spent) USD of $MAX_COST_USD USD." | tee -a "$GITHUB_STEP_SUMMARY"
+          exit "$failed"
+
+      - name: Upload the results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-results
+          path: evals-out/
+          retention-days: 14
+          if-no-files-found: ignore

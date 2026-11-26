@@ -18,6 +18,15 @@ need to write or read code yourself.
 | `loadcraft-asyncapi` | your event/messaging API (WebSockets, Kafka, MQTT…) | `loadcraft/asyncapi.json` + a report |
 | `loadcraft-overview` | the whole project (what it is about) | `loadcraft/overview.md` + a report |
 
+The table lists the four stand-alone preparation skills; each works on its
+own, with nothing but your AI assistant. The plugin adds three more:
+`loadcraft-test` is a guiding skill that takes you through a whole load test —
+documentation, project, flows, scenario, data, run, report and diagnosis — and
+the commands `/loadcraft:status` and `/loadcraft:doctor`. They talk to
+LoadCraft through the plugin's MCP server, so they exist only in the plugin,
+not as separate downloads. To use them, install the LoadCraft plugin in Claude
+Code (the `/plugin` command); the full plugin guide is published separately.
+
 ## Your steps
 
 ### 1. Install the skills (once)
@@ -89,13 +98,13 @@ cleared.
 ## Double-checking the result (optional)
 
 The skill validates its own output before delivering it, so this is an extra
-check, not a required step. In the project's root directory:
+check, not a required step. It needs Node.js 22.17 or newer, nothing else to install. In the project's root directory:
 
 ```bash
-python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
-python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
-python3 .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.py loadcraft/asyncapi.json
-python3 .claude/skills/loadcraft-overview/scripts/validate_overview.py loadcraft/overview.md
+node .claude/skills/loadcraft-openapi/scripts/validate_openapi.mjs loadcraft/openapi.json
+node .claude/skills/loadcraft-journeys/scripts/validate_journeys.mjs loadcraft/journeys
+node .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.mjs loadcraft/asyncapi.json
+node .claude/skills/loadcraft-overview/scripts/validate_overview.mjs loadcraft/overview.md
 ```
 
 (If you installed the skills under `skills/` — Cursor, Codex, Copilot —

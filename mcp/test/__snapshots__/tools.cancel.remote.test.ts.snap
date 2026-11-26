@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cancel view of a test found in LoadCraft > draws the same text in en as the snapshot 1`] = `
+"test_run:3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42 has already ended (completed),
+  so there was nothing to stop.
+→ Call results_get_report with e-3f9a12c4 to see how it ended."
+`;
+
+exports[`cancel view of a test found in LoadCraft > draws the same text in en as the snapshot 2`] = `"No test is running in project sklep, so there is nothing to stop."`;

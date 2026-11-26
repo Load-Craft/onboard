@@ -1,0 +1,13 @@
+data plan · 3 slots
+Search terms (slot: search_phrases) auto
+  q · Samples a model wrote · zakupy
+Quantity & cardnumber (slot: order_details) auto
+  quantity 1–5 · cardNumber Visa, Mastercard · zakupy
+User accounts (slot: accounts) missing
+  email, password · exclusive · zakupy, konto
+1 fix before the test: User accounts must exist on perf
+consent card · suggest the test data for checkout
+  For: checkout
+  Cost: up to 3 LLM calls of the data hub · nothing is saved
+→ ask the user; only after their yes call data_suggest_actions again with the
+  same arguments and confirm: "<token>"

@@ -1,0 +1,531 @@
+{
+  "docs-empty": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search",
+      "query": {
+        "q": "sklep",
+        "limit": "50"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "body": {
+        "name": "sklep",
+        "project_type": "api",
+        "environment_name": "perf",
+        "base_url": "https://api.perf.example.com",
+        "frontend_url": "https://perf.example.com"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "qa",
+        "base_url": "https://api.qa.example.com",
+        "frontend_url": "https://qa.example.com",
+        "auth_type": "none",
+        "is_default": false,
+        "protected": true,
+        "workload_caps": {
+          "max_vu": 100,
+          "max_rps": 20
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "dev",
+        "base_url": "https://api.dev.example.com",
+        "frontend_url": "https://dev.example.com",
+        "auth_type": "none",
+        "default_headers": {
+          "x-api-key": "k-123"
+        },
+        "is_default": false,
+        "protected": false
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "prod",
+        "base_url": "https://api.example.com",
+        "frontend_url": "https://example.com",
+        "auth_type": "none",
+        "is_default": false,
+        "protected": true,
+        "workload_caps": {
+          "max_vu": 20,
+          "max_rps": 5
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/openapi"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/analyze",
+      "body": {
+        "metadata": "{}",
+        "openApiFiles": {
+          "file": "openapi.json",
+          "size": 257
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/apply",
+      "body": {
+        "project_profile": {
+          "additional_notes": null,
+          "agent_guidance": [],
+          "api_area_prefixes": null,
+          "api_protocol": "rest",
+          "app_architecture": "spa",
+          "app_description": null,
+          "auth_method": "bearer_jwt",
+          "auth_token_endpoint": null,
+          "graphql_endpoint": null,
+          "has_async_operations": true,
+          "has_file_uploads": false,
+          "has_mfa": false,
+          "has_multi_tenant": false,
+          "has_pagination": true,
+          "has_presigned_urls": false,
+          "has_sse": false,
+          "has_websockets": false,
+          "idp_domains": [],
+          "known_third_party_domains": [],
+          "self_check_enabled": true,
+          "uses_csrf": false
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/auto-provision",
+      "body": {
+        "force": false
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/api-map"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/conformance"
+    }
+  ],
+  "description-empty": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search",
+      "query": {
+        "q": "sklep",
+        "limit": "50"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "body": {
+        "name": "sklep",
+        "description": "Sklep API",
+        "project_type": "api",
+        "environment_name": "perf",
+        "base_url": "https://api.perf.example.com",
+        "frontend_url": "https://perf.example.com"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "qa",
+        "base_url": "https://api.qa.example.com",
+        "frontend_url": "https://qa.example.com",
+        "auth_type": "none",
+        "is_default": false,
+        "protected": true,
+        "workload_caps": {
+          "max_vu": 100,
+          "max_rps": 20
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "dev",
+        "base_url": "https://api.dev.example.com",
+        "frontend_url": "https://dev.example.com",
+        "auth_type": "none",
+        "default_headers": {
+          "x-api-key": "k-123"
+        },
+        "is_default": false,
+        "protected": false
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "prod",
+        "base_url": "https://api.example.com",
+        "frontend_url": "https://example.com",
+        "auth_type": "none",
+        "is_default": false,
+        "protected": true,
+        "workload_caps": {
+          "max_vu": 20,
+          "max_rps": 5
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/analyze",
+      "body": {
+        "metadata": "{\"app_summary\":\"Sklep API\"}"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/project-setup/runs/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/apply",
+      "body": {
+        "project_profile": {
+          "additional_notes": null,
+          "agent_guidance": [],
+          "api_area_prefixes": null,
+          "api_protocol": "rest",
+          "app_architecture": "spa",
+          "app_description": null,
+          "auth_method": "bearer_jwt",
+          "auth_token_endpoint": null,
+          "graphql_endpoint": null,
+          "has_async_operations": true,
+          "has_file_uploads": false,
+          "has_mfa": false,
+          "has_multi_tenant": false,
+          "has_pagination": true,
+          "has_presigned_urls": false,
+          "has_sse": false,
+          "has_websockets": false,
+          "idp_domains": [],
+          "known_third_party_domains": [],
+          "self_check_enabled": true,
+          "uses_csrf": false
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/auto-provision",
+      "body": {
+        "force": false
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    }
+  ],
+  "nothing-empty": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search",
+      "query": {
+        "q": "sklep",
+        "limit": "50"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "body": {
+        "name": "sklep",
+        "project_type": "api",
+        "environment_name": "perf",
+        "base_url": "https://api.perf.example.com",
+        "frontend_url": "https://perf.example.com"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "qa",
+        "base_url": "https://api.qa.example.com",
+        "frontend_url": "https://qa.example.com",
+        "auth_type": "none",
+        "is_default": false,
+        "protected": true,
+        "workload_caps": {
+          "max_vu": 100,
+          "max_rps": 20
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "dev",
+        "base_url": "https://api.dev.example.com",
+        "frontend_url": "https://dev.example.com",
+        "auth_type": "none",
+        "default_headers": {
+          "x-api-key": "k-123"
+        },
+        "is_default": false,
+        "protected": false
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments",
+      "body": {
+        "name": "prod",
+        "base_url": "https://api.example.com",
+        "frontend_url": "https://example.com",
+        "auth_type": "none",
+        "is_default": false,
+        "protected": true,
+        "workload_caps": {
+          "max_vu": 20,
+          "max_rps": 5
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/setup/auto-provision",
+      "body": {
+        "force": false
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    }
+  ],
+  "docs-project": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search",
+      "query": {
+        "q": "sklep",
+        "limit": "50"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/environments/:id",
+      "body": {
+        "default_headers": {
+          "x-api-key": "k-123"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/test-connection"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/setup/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/api-map"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/environments/:id/conformance"
+    }
+  ]
+}

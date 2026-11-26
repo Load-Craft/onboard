@@ -1,0 +1,17 @@
+Playwright · Chromium · perf.example.com
+↗ live preview: https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/scenario-from-description/runs/2481a3f0-9e6c-4d5b-b7a2-1f8e3c0d6a94
+  there you take over the browser if the agent gets stuck
+zakupy         flow ready ✓ · 9 steps
+przeglądanie   flow ready ✓ · 3 steps
+konto          flow ready ✓ · 3 steps
+3 flows saved
+zakupy · 9 steps (5 requests · 4 pauses)
+  1  POST   /auth/login            → token
+  2  PAUSE  3–8 s                  assumed · form
+  3  GET    /products?q=#{q}       uses: token · → productId
+  4  PAUSE  10–30 s                assumed · in-page action
+  5  POST   /cart/items            uses: token, productId · → cartId
+  6  PAUSE  5–15 s                 assumed · form
+  7  POST   /cart/coupon           uses: token, cartId
+  8  PAUSE  20–45 s                assumed · form
+  9  POST   /checkout              uses: token, cartId · ✓ 201 · 409

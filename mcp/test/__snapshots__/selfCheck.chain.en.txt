@@ -1,0 +1,10 @@
+zakupy  attempt 1 · version 1 ✕
+        logowanie ✓ → wyszukanie ✓ → koszyk ✓ → podgląd koszyka ✓
+        → zamówienie ✕ 403
+        ✕ zamówienie 403: HTTP 403 Forbidden
+        AI repair: dodano nagłówek X-CSRF-Token · version 2
+        attempt 2 · version 2 ✓
+        logowanie ✓ → wyszukanie ✓ → koszyk ✓ → podgląd koszyka ✓
+        → zamówienie ✓
+        ✓ after 1 repair · 5 requests · 1.4 s
+konto   logowanie ✓ → zamówienia ✓ · 2 requests · 0.4 s

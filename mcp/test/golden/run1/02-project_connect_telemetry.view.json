@@ -1,0 +1,10 @@
+{
+  "label": "sklep-logs",
+  "connected": true,
+  "tools": [
+    { "name": "logs_summary", "eligible": true, "enabled": true },
+    { "name": "container_events", "eligible": true, "enabled": true },
+    { "name": "trace_search", "eligible": false, "enabled": false, "reason": "extra_input" }
+  ],
+  "window": "whole_run_±120s"
+}

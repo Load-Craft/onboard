@@ -1,0 +1,31 @@
+{
+  "analysis": "analyzed",
+  "fieldsTotal": 9,
+  "needsReview": [
+    {
+      "field": "app_architecture",
+      "value": "spa",
+      "source": "llm"
+    },
+    {
+      "field": "has_async_operations",
+      "value": true,
+      "source": "openapi"
+    }
+  ],
+  "uncertain": [
+    {
+      "field": "has_async_operations",
+      "value": true,
+      "confidence": 0.6,
+      "conflicted": false
+    },
+    {
+      "field": "uses_csrf",
+      "value": false,
+      "confidence": 0.93,
+      "conflicted": true
+    }
+  ],
+  "operation": "setup_analysis:6e3f9a1c-2b7d-4c58-8a04-d1f5b9e2c763"
+}

@@ -1,0 +1,2 @@
+# Local environment files: addresses and test accounts stay out of the history.
+.env.*

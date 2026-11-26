@@ -1,0 +1,39 @@
+{
+  "suggestions": [
+    {
+      "name": "zakupy",
+      "steps": ["logowanie", "wyszukanie", "koszyk", "zamówienie"],
+      "patternType": "semantic"
+    },
+    {
+      "name": "przeglądanie",
+      "steps": ["kategorie", "produkt"],
+      "patternType": "semantic"
+    },
+    {
+      "name": "konto",
+      "steps": ["logowanie", "zamówienia"],
+      "patternType": "semantic"
+    },
+    {
+      "name": "status zamówienia",
+      "steps": ["zamówienie", "odpytywanie o status"],
+      "patternType": "async_polling"
+    }
+  ],
+  "more": 0,
+  "coverage": {
+    "covered": 8,
+    "total": 43,
+    "uncovered": [
+      "Register an account",
+      "Log out",
+      "Refresh the token",
+      "Request a password reset",
+      "Current user"
+    ],
+    "more": 30
+  },
+  "failedUnits": [],
+  "refined": true
+}

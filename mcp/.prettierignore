@@ -1,0 +1,9 @@
+node_modules
+dist
+package-lock.json
+src/http/generated
+src/ws/generated
+gate-reports
+catalog
+src/catalog.generated.ts
+src/workspace/processState.ts

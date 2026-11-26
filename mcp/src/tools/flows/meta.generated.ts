@@ -1,0 +1,2241 @@
+/**
+ * Generated file - do not edit.
+ * Source: catalog/katalog.json, module flows. Regenerate with "npm run gen:tools" (from mcp/).
+ */
+
+import type { ToolMeta } from '../moduleTool.js';
+
+/** `flows_suggest_journeys`: Suggest user journeys from the API docs: a free heuristic first, then LLM refinement (refine=false skips the paid part). */
+export const FLOWS_SUGGEST_JOURNEYS = {
+  name: 'flows_suggest_journeys',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_suggest_journeys',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: {
+      when: 'refine=false (sama darmowa heurystyka)',
+      level: 1,
+      why: null,
+      card: null,
+    },
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:build',
+      target: null,
+    },
+    cost: 'about one LLM call (refinement)',
+    card: {
+      title: 'Suggest journeys from the API docs',
+      fields: [
+        {
+          label: 'Docs',
+          from: 'docs_id',
+          source: 'args',
+        },
+        {
+          label: 'LLM refinement',
+          from: 'refine',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: ['flows_generate_from_suggestions'],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.docs_id',
+        arg: 'docs_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'nothing',
+    ways: [],
+    reason: 'proposes only, nothing is saved',
+  },
+  log: {
+    args: 'Suggest journeys from the API docs',
+    result: '{count} journeys proposed',
+  },
+  route: null,
+  description:
+    'Suggest user journeys from the API docs: a free heuristic first, then LLM refinement (refine=false skips the paid part).',
+  operations: [
+    {
+      operationId: 'suggest_heuristic_api_v1_projects__project_id__flow_suggestions_heuristic_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flow-suggestions/heuristic',
+    },
+    {
+      operationId: 'suggest_refined_api_v1_projects__project_id__flow_suggestions_refine_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flow-suggestions/refine',
+    },
+  ],
+  also_calls: [],
+  channels: ['refine'],
+  state_reads: [
+    'ids.project_id',
+    'ids.docs_id',
+    'steps.project.docs_imported',
+    'steps.project.setup_applied',
+  ],
+  state_writes: ['steps.flows.journeys_suggested', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_generate_from_suggestions`: Generate flows for the approved journey proposals. */
+export const FLOWS_GENERATE_FROM_SUGGESTIONS = {
+  name: 'flows_generate_from_suggestions',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_generate_from_suggestions',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:build',
+      target: null,
+    },
+    cost: 'about one LLM generation per journey',
+    card: {
+      title: 'Generate {n} flows from journeys',
+      fields: [
+        {
+          label: 'Journeys',
+          from: 'journeys',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'choices.flows.journeys',
+        arg: 'journeys',
+        explicit: true,
+      },
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the new flows',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Generate {n} flows from journeys',
+    result: '{built} flows saved, {failed} failed',
+  },
+  route: null,
+  description: 'Generate flows for the approved journey proposals.',
+  operations: [
+    {
+      operationId:
+        'batch_generate_flows_api_v1_projects__project_id__flow_suggestions_batch_generate_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flow-suggestions/batch-generate',
+    },
+  ],
+  also_calls: [],
+  channels: ['batch'],
+  state_reads: ['ids.project_id', 'choices.flows.journeys', 'steps.flows.journeys_suggested'],
+  state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt:
+    'Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód.',
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_generate_from_endpoints`: Generate one flow from a description and chosen endpoints. */
+export const FLOWS_GENERATE_FROM_ENDPOINTS = {
+  name: 'flows_generate_from_endpoints',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_generate_from_endpoints',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:build',
+      target: null,
+    },
+    cost: 'about one LLM generation',
+    card: {
+      title: 'Generate a flow from {n} endpoints',
+      fields: [
+        {
+          label: 'Name',
+          from: 'name',
+          source: 'args',
+        },
+        {
+          label: 'Description',
+          from: 'description',
+          source: 'args',
+        },
+        {
+          label: 'Endpoints',
+          from: 'endpoints',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.docs_id',
+        arg: 'docs_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the new flow',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Generate a flow from {n} endpoints',
+    result: 'flow {name} saved',
+  },
+  route: null,
+  description: 'Generate one flow from a description and chosen endpoints.',
+  operations: [
+    {
+      operationId: 'generate_flow_async_api_v1_projects__project_id__flows_generate_async_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/generate-async',
+    },
+    {
+      operationId:
+        'get_flow_generation_status_api_v1_projects__project_id__flows_flow_generation__run_id__status_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows/flow-generation/{run_id}/status',
+    },
+  ],
+  also_calls: [],
+  channels: ['flowGeneration'],
+  state_reads: ['ids.project_id', 'ids.docs_id'],
+  state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt:
+    'Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód.',
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_generate_from_har`: Generate flows from an analyzed HAR session; split=true lets the backend propose journeys first. */
+export const FLOWS_GENERATE_FROM_HAR = {
+  name: 'flows_generate_from_har',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_generate_from_har',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:build',
+      target: null,
+    },
+    cost: 'about one LLM generation per journey',
+    card: {
+      title: 'Generate flows from the HAR session',
+      fields: [
+        {
+          label: 'Name',
+          from: 'name',
+          source: 'args',
+        },
+        {
+          label: 'HAR session',
+          from: 'har_session_id',
+          source: 'args',
+        },
+        {
+          label: 'Split into journeys',
+          from: 'split',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'choices.flows.har_split',
+        arg: 'split',
+        explicit: true,
+      },
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.har_session_id',
+        arg: 'har_session_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the new flows',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Generate flows from the HAR session',
+    result: '{built} flows saved',
+  },
+  route: null,
+  description:
+    'Generate flows from an analyzed HAR session; split=true lets the backend propose journeys first.',
+  operations: [
+    {
+      operationId: 'generate_flow_api_v1_projects__project_id__har__har_session_id__generate_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/har/{har_session_id}/generate',
+    },
+  ],
+  also_calls: [],
+  channels: ['har'],
+  state_reads: [
+    'ids.project_id',
+    'ids.har_session_id',
+    'choices.flows.har_split',
+    'steps.flows.har_analyzed',
+  ],
+  state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt:
+    'Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód.',
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_regenerate`: Regenerate a flow from its recorded sources; saved as a new version. */
+export const FLOWS_REGENERATE = {
+  name: 'flows_regenerate',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_regenerate',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:build',
+      target: null,
+    },
+    cost: 'about one LLM generation',
+    card: {
+      title: 'Regenerate flow {name}',
+      fields: [
+        {
+          label: 'Flow',
+          from: 'flow_id',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.flow_ids',
+        arg: 'flow_ids',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_restore_version',
+        how: 'the previous version',
+        for: 'update',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Regenerate flow {name}',
+    result: 'flow {name} v{version}',
+  },
+  route: null,
+  description: 'Regenerate a flow from its recorded sources; saved as a new version.',
+  operations: [
+    {
+      operationId: 'regenerate_flow_api_v1_projects__project_id__flows__flow_id__regenerate_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/regenerate',
+    },
+  ],
+  also_calls: [],
+  channels: ['flowGeneration'],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: ['steps.flows.flows_built', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_import_har`: Import a HAR recording and analyze it: kept and noise requests, login, groups, values passed between requests. */
+export const FLOWS_IMPORT_HAR = {
+  name: 'flows_import_har',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_import_har',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'composite',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:build',
+      target: null,
+    },
+    cost: 'uploads the recording; about one LLM analysis',
+    card: {
+      title: 'Import HAR {file}',
+      fields: [
+        {
+          label: 'File',
+          from: 'file',
+          source: 'args',
+        },
+        {
+          label: 'Size',
+          from: '(from the file)',
+          source: 'resolve',
+        },
+      ],
+    },
+    resolve: [
+      {
+        card: 'main',
+        via: 'file',
+        argument: 'file',
+        provides: 'size and sha256 of the HAR file',
+        protected: false,
+        hash: ['size', 'sha256'],
+        volatile: [],
+      },
+    ],
+    snapshot: true,
+    follow_ups: ['flows_generate_from_har'],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'nothing',
+    ways: [],
+    reason: 'the uploaded session expires on the backend',
+  },
+  log: {
+    args: 'Import HAR {file}',
+    result: '{kept} requests kept, {noise} dropped',
+  },
+  route: null,
+  description:
+    'Import a HAR recording and analyze it: kept and noise requests, login, groups, values passed between requests.',
+  operations: [
+    {
+      operationId: 'upload_har_api_v1_projects__project_id__har_upload_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/har/upload',
+    },
+    {
+      operationId: 'analyze_har_api_v1_projects__project_id__har__har_session_id__analyze_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/har/{har_session_id}/analyze',
+    },
+  ],
+  also_calls: [],
+  channels: ['har'],
+  state_reads: ['ids.project_id'],
+  state_writes: ['ids.har_session_id', 'steps.flows.har_analyzed', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_describe_journeys`: Describe journeys in plain words: a backend browser opens the app, signs in with a test account and returns the path plan. */
+export const FLOWS_DESCRIBE_JOURNEYS = {
+  name: 'flows_describe_journeys',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_describe_journeys',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 3,
+    level3_reason: 'traffic',
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: 'run',
+    scope: null,
+    cost: 'LLM agent with a browser session; one sign-in in the target',
+    card: {
+      title: 'Open {env} in the backend browser and sign in',
+      fields: [
+        {
+          label: 'Description',
+          from: 'description',
+          source: 'args',
+        },
+        {
+          label: 'Environment',
+          from: 'env',
+          source: 'args',
+        },
+        {
+          label: 'Test account from',
+          from: 'account.from_env',
+          source: 'args',
+        },
+        {
+          label: 'Account file content',
+          from: '(sha256 of the file; values are never shown)',
+          source: 'resolve',
+        },
+      ],
+    },
+    resolve: [
+      {
+        card: 'main',
+        via: 'file',
+        argument: 'account',
+        provides: 'sha256 of the test account file',
+        protected: false,
+        hash: ['size', 'sha256'],
+        volatile: [],
+      },
+    ],
+    snapshot: true,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'choices.flows.account_ref',
+        arg: 'account',
+        explicit: true,
+      },
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.env_id',
+        arg: 'env',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'no',
+    ways: [],
+    reason: 'the sign-in already happened in the target',
+  },
+  log: {
+    args: 'Open {env} in the backend browser and sign in',
+    result: '{paths} paths planned',
+  },
+  route: null,
+  description:
+    'Describe journeys in plain words: a backend browser opens the app, signs in with a test account and returns the path plan.',
+  operations: [
+    {
+      operationId:
+        'generate_scenario_api_v1_projects__project_id__scenario_from_description_generate_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/generate',
+    },
+  ],
+  also_calls: [],
+  channels: ['describe'],
+  state_reads: ['ids.project_id', 'ids.env_id', 'choices.flows.account_ref'],
+  state_writes: ['ids.walk_id', 'steps.flows.plan_described', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_record_journeys`: Record the approved plan (all or chosen paths): the backend browser walks it until the flows are saved. */
+export const FLOWS_RECORD_JOURNEYS = {
+  name: 'flows_record_journeys',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_record_journeys',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'process',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 3,
+    level3_reason: 'traffic',
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: 'run',
+    scope: null,
+    cost: 'LLM agent per path; real actions in the target',
+    card: {
+      title: 'Walk {n} paths in the backend browser',
+      fields: [
+        {
+          label: 'Walk',
+          from: 'walk_id',
+          source: 'args',
+        },
+        {
+          label: 'Paths',
+          from: 'paths',
+          source: 'args',
+        },
+        {
+          label: 'Environment',
+          from: '(from the walk)',
+          source: 'resolve',
+        },
+      ],
+    },
+    resolve: [
+      {
+        card: 'main',
+        via: 'get',
+        operationId:
+          'get_scenario_run_api_v1_projects__project_id__scenario_from_description_runs__run_id__get',
+        method: 'GET',
+        path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}',
+        provides: 'the walk: its target',
+        protected: false,
+        hash: ['run_id', 'target_url', 'target_host'],
+        volatile: [],
+      },
+    ],
+    snapshot: true,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'choices.flows.journeys',
+        arg: 'paths',
+        explicit: true,
+      },
+      {
+        path: 'ids.walk_id',
+        arg: 'walk_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the new flows; what the walk did in the target stays',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Walk {n} paths in the backend browser',
+    result: '{built} flows saved, {failed} paths failed',
+  },
+  route: null,
+  description:
+    'Record the approved plan (all or chosen paths): the backend browser walks it until the flows are saved.',
+  operations: [],
+  also_calls: [],
+  channels: ['describe'],
+  state_reads: [
+    'ids.walk_id',
+    'choices.flows.journeys',
+    'steps.flows.plan_described',
+    'operations',
+  ],
+  state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_get_walks`: Get description runs (browser walks): the list, or one with its paths and optional review timeline. */
+export const FLOWS_GET_WALKS = {
+  name: 'flows_get_walks',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_get_walks',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'read',
+  safety: 'read',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: null,
+    ways: [],
+    reason: null,
+  },
+  log: {
+    args: '{walk_id}',
+    result: '{count} walks',
+  },
+  route: null,
+  description:
+    'Get description runs (browser walks): the list, or one with its paths and optional review timeline.',
+  operations: [
+    {
+      operationId:
+        'list_scenario_runs_api_v1_projects__project_id__scenario_from_description_runs_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs',
+    },
+    {
+      operationId:
+        'get_scenario_run_api_v1_projects__project_id__scenario_from_description_runs__run_id__get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}',
+    },
+    {
+      operationId:
+        'get_run_timeline_api_v1_projects__project_id__scenario_from_description_runs__run_id__timeline_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/timeline',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.walk_id'],
+  state_writes: [],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: true,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_retry_walk`: Retry one path of a finished walk: preview and re-drive it in the browser (part=path), or save its flow again as a new flow (part=flow). */
+export const FLOWS_RETRY_WALK = {
+  name: 'flows_retry_walk',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_retry_walk',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'composite',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 3,
+    level3_reason: 'traffic',
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: 'run',
+    scope: null,
+    cost: 'LLM agent; real actions in the target when part=path',
+    card: {
+      title: 'Retry path {path_index} of the walk',
+      fields: [
+        {
+          label: 'Walk',
+          from: 'walk_id',
+          source: 'args',
+        },
+        {
+          label: 'Path',
+          from: 'path_index',
+          source: 'args',
+        },
+        {
+          label: 'Part',
+          from: 'part',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.walk_id',
+        arg: 'walk_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the new flow; what the walk did in the target stays',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Retry path {path_index} of the walk',
+    result: 'path {path_index}: {status}',
+  },
+  route: null,
+  description:
+    'Retry one path of a finished walk: preview and re-drive it in the browser (part=path), or save its flow again as a new flow (part=flow).',
+  operations: [
+    {
+      operationId:
+        'preview_redrive_api_v1_projects__project_id__scenario_from_description_runs__run_id__paths__path_index__redrive_preview_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/paths/{path_index}/redrive-preview',
+    },
+    {
+      operationId:
+        'retry_scenario_path_drive_api_v1_projects__project_id__scenario_from_description_runs__run_id__paths__path_index__retry_drive_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/paths/{path_index}/retry-drive',
+    },
+    {
+      operationId:
+        'retry_scenario_flow_api_v1_projects__project_id__scenario_from_description_runs__run_id__flows__path_index__retry_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/flows/{path_index}/retry',
+    },
+  ],
+  also_calls: [],
+  channels: ['describe'],
+  state_reads: ['ids.project_id', 'ids.walk_id'],
+  state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'operations', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_save_walk_note`: Save a note at a step of a walk (new or changed); notes steer the next retry. */
+export const FLOWS_SAVE_WALK_NOTE = {
+  name: 'flows_save_walk_note',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_save_walk_note',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_save_walk_note',
+        how: 'the previous text',
+        for: 'update',
+      },
+      {
+        tool: 'flows_delete',
+        how: 'kind=walk_note, for a new one',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{walk_id} step {step}',
+    result: 'note at step {step}',
+  },
+  route: null,
+  description: 'Save a note at a step of a walk (new or changed); notes steer the next retry.',
+  operations: [
+    {
+      operationId:
+        'add_step_note_api_v1_projects__project_id__scenario_from_description_runs__run_id__notes_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/notes',
+    },
+    {
+      operationId:
+        'update_step_note_api_v1_projects__project_id__scenario_from_description_runs__run_id__notes__note_id__patch',
+      method: 'PATCH',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/notes/{note_id}',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.walk_id'],
+  state_writes: [],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_export_walk_image`: Export a walk image to a local file and return its path: a live snapshot of a path attempt, or a timeline still. */
+export const FLOWS_EXPORT_WALK_IMAGE = {
+  name: 'flows_export_walk_image',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_export_walk_image',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'read',
+  safety: 'read',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: null,
+    ways: [],
+    reason: null,
+  },
+  log: {
+    args: '{walk_id} {path_index}',
+    result: '{path}',
+  },
+  route: null,
+  description:
+    'Export a walk image to a local file and return its path: a live snapshot of a path attempt, or a timeline still.',
+  operations: [
+    {
+      operationId:
+        'take_run_snapshot_api_v1_projects__project_id__scenario_from_description_runs__run_id__paths__path_index__attempts__attempt__snapshot_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/paths/{path_index}/attempts/{attempt}/snapshot',
+    },
+    {
+      operationId:
+        'get_run_still_api_v1_projects__project_id__scenario_from_description_runs__run_id__stills__still_id__get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/stills/{still_id}',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.walk_id'],
+  state_writes: [],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: true,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_list`: List the project's flows: name, type, version, step count. */
+export const FLOWS_LIST = {
+  name: 'flows_list',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_list',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'read',
+  safety: 'read',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: null,
+    ways: [],
+    reason: null,
+  },
+  log: {
+    args: '',
+    result: '{count} flows',
+  },
+  route: null,
+  description: "List the project's flows: name, type, version, step count.",
+  operations: [
+    {
+      operationId: 'list_flows_api_v1_projects__project_id__flows_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id'],
+  state_writes: ['problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: true,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_get`: Get one flow as a numbered outline with variables, pauses and open questions. */
+export const FLOWS_GET = {
+  name: 'flows_get',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_get',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'read',
+  safety: 'read',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: null,
+    ways: [],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id}',
+    result: '{name} v{version}: {steps} steps; needs input: {needs_input} ({definite} definite)',
+  },
+  route: null,
+  description: 'Get one flow as a numbered outline with variables, pauses and open questions.',
+  operations: [
+    {
+      operationId: 'get_flow_api_v1_projects__project_id__flows__flow_id__get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids', 'problems'],
+  state_writes: ['steps.flows.questions_answered', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: [
+    {
+      include: 'steps',
+      item: 'StepView',
+      page: {
+        default: 150,
+        max: 150,
+      },
+      args: [],
+      ref: null,
+    },
+  ],
+  arguments: null,
+  shows_content: null,
+  install_allow: true,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_get_versions`: Get a flow's stored versions: the list, or one version as an outline. */
+export const FLOWS_GET_VERSIONS = {
+  name: 'flows_get_versions',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_get_versions',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'read',
+  safety: 'read',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: null,
+    ways: [],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id}',
+    result: '{count} versions',
+  },
+  route: null,
+  description: "Get a flow's stored versions: the list, or one version as an outline.",
+  operations: [
+    {
+      operationId: 'list_flow_versions_api_v1_projects__project_id__flows__flow_id__versions_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/versions',
+    },
+    {
+      operationId:
+        'get_flow_version_api_v1_projects__project_id__flows__flow_id__versions__version__get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/versions/{version}',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: [],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: true,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_restore_version`: Restore an older flow version as the newest one. */
+export const FLOWS_RESTORE_VERSION = {
+  name: 'flows_restore_version',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_restore_version',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_restore_version',
+        how: 'the version that was current',
+        for: 'update',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id} v{version}',
+    result: '{name}: v{version} restored as v{new}; warnings: {warnings}',
+  },
+  route: null,
+  description: 'Restore an older flow version as the newest one.',
+  operations: [
+    {
+      operationId:
+        'restore_flow_version_api_v1_projects__project_id__flows__flow_id__versions_restore_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/versions/restore',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: ['steps.flows.flows_built'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_save`: Save a flow from blocks (flow_id: new version; none: new flow). Direct edit, only on the user's request; normally use flows_ask_copilot. */
+export const FLOWS_SAVE = {
+  name: 'flows_save',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_save',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_restore_version',
+        how: 'the previous version',
+        for: 'update',
+      },
+      {
+        tool: 'flows_delete',
+        how: 'the new flow',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id}',
+    result: '{name} v{version} saved',
+  },
+  route: 'direct',
+  description:
+    "Save a flow from blocks (flow_id: new version; none: new flow). Direct edit, only on the user's request; normally use flows_ask_copilot.",
+  operations: [
+    {
+      operationId: 'create_flow_api_v1_projects__project_id__flows_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows',
+    },
+    {
+      operationId: 'update_flow_api_v1_projects__project_id__flows__flow_id__put',
+      method: 'PUT',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id'],
+  state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_delete`: Delete flows, walk notes, or a walk's review (kind=review: its timeline, stills, notes and browser recordings; flows stay). */
+export const FLOWS_DELETE = {
+  name: 'flows_delete',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_delete',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'destructive',
+  safety: 'destructive',
+  secret: false,
+  consent: {
+    level: 3,
+    level3_reason: 'delete',
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: {
+      title: 'Delete {kind}: {names}',
+      fields: [
+        {
+          label: 'Kind',
+          from: 'kind',
+          source: 'args',
+        },
+        {
+          label: 'Items',
+          from: 'ids (names resolved by the registry)',
+          source: 'labels',
+        },
+        {
+          label: 'Max per card',
+          from: '(20 flows)',
+          source: 'derived',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.flow_ids',
+        arg: 'flow_ids',
+        explicit: true,
+      },
+      {
+        path: 'ids.walk_id',
+        arg: 'walk_id',
+        explicit: true,
+      },
+    ],
+    max_items: 20,
+  },
+  undo: {
+    reversible: 'no',
+    ways: [],
+    reason: 'permanent',
+  },
+  log: {
+    args: 'Delete {kind}: {names}',
+    result: '{count} {kind} deleted',
+  },
+  route: null,
+  description:
+    "Delete flows, walk notes, or a walk's review (kind=review: its timeline, stills, notes and browser recordings; flows stay).",
+  operations: [
+    {
+      operationId: 'delete_flow_api_v1_projects__project_id__flows__flow_id__delete',
+      method: 'DELETE',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}',
+    },
+    {
+      operationId: 'batch_delete_flows_api_v1_projects__project_id__flows_batch_delete_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/batch-delete',
+    },
+    {
+      operationId:
+        'finish_review_api_v1_projects__project_id__scenario_from_description_runs__run_id__finish_review_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/finish-review',
+    },
+    {
+      operationId:
+        'delete_step_note_api_v1_projects__project_id__scenario_from_description_runs__run_id__notes__note_id__delete',
+      method: 'DELETE',
+      path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/notes/{note_id}',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids', 'ids.walk_id'],
+  state_writes: ['ids.flow_ids', 'problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: true,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_duplicate`: Duplicate flows, or copy one flow onto another docs version (docs_id). */
+export const FLOWS_DUPLICATE = {
+  name: 'flows_duplicate',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_duplicate',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the copies',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{flow_ids}',
+    result: '{count} copies',
+  },
+  route: null,
+  description: 'Duplicate flows, or copy one flow onto another docs version (docs_id).',
+  operations: [
+    {
+      operationId: 'batch_duplicate_flows_api_v1_projects__project_id__flows_batch_duplicate_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/batch-duplicate',
+    },
+    {
+      operationId:
+        'duplicate_flow_for_spec_api_v1_projects__project_id__flows__flow_id__duplicate_for_spec_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/duplicate-for-spec',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids', 'ids.docs_id'],
+  state_writes: ['ids.flow_ids'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_migrate_docs`: Migrate flows to the current docs version in place; preview=true saves nothing, adopt_values adopts new example values. */
+export const FLOWS_MIGRATE_DOCS = {
+  name: 'flows_migrate_docs',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_migrate_docs',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: {
+      when: 'preview=true (niczego nie zapisuje)',
+      level: 1,
+      why: null,
+      card: null,
+    },
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:migrate',
+      target: null,
+    },
+    cost: null,
+    card: {
+      title: 'Migrate {n} flows to the current docs version',
+      fields: [
+        {
+          label: 'Flows',
+          from: 'flow_ids',
+          source: 'args',
+        },
+        {
+          label: 'Target docs version',
+          from: 'target_spec_id',
+          source: 'args',
+        },
+        {
+          label: 'Adopt example values',
+          from: 'adopt_values | adopt_value_ids',
+          source: 'args',
+        },
+        {
+          label: 'ALLOW UNMATCHED blocks',
+          from: 'allow_unmatched',
+          source: 'args',
+        },
+        {
+          label: 'Docs version',
+          from: '(current version of the project)',
+          source: 'resolve',
+        },
+        {
+          label: 'Outdated flows',
+          from: '(flows with spec_status outdated)',
+          source: 'resolve',
+        },
+      ],
+    },
+    resolve: [
+      {
+        card: 'main',
+        via: 'get',
+        operationId: 'list_project_openapi_specs_api_v1_projects__project_id__openapi_specs_get',
+        method: 'GET',
+        path: '/api/v1/projects/{project_id}/openapi-specs',
+        provides: 'the current docs version of the project',
+        protected: false,
+        hash: ['current_spec_id'],
+        volatile: [],
+      },
+      {
+        card: 'main',
+        via: 'get',
+        operationId: 'list_flows_api_v1_projects__project_id__flows_get',
+        method: 'GET',
+        path: '/api/v1/projects/{project_id}/flows',
+        provides: 'the flows and their spec_status (flow_ids omitted = all outdated)',
+        protected: false,
+        hash: ['flows'],
+        volatile: [],
+      },
+    ],
+    snapshot: true,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.flow_ids',
+        arg: 'flow_ids',
+        explicit: true,
+      },
+      {
+        path: 'ids.docs_id',
+        arg: 'target_spec_id',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_restore_version',
+        how: 'the previous version of each flow',
+        for: 'update',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: 'Migrate {n} flows to the current docs version',
+    result: '{count} flows migrated: {matched} matched, {changed} changed, {unmatched} unmatched',
+  },
+  route: null,
+  description:
+    'Migrate flows to the current docs version in place; preview=true saves nothing, adopt_values adopts new example values.',
+  operations: [
+    {
+      operationId:
+        'preview_flows_spec_migration_api_v1_projects__project_id__flows_spec_migration_preview_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/spec-migration/preview',
+    },
+    {
+      operationId: 'migrate_flows_to_spec_api_v1_projects__project_id__flows_spec_migration_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/spec-migration',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids', 'ids.docs_id'],
+  state_writes: ['problems'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: 'flows_spec_migration',
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt:
+    'Karta zgody poziomu 2 działa wzorcem confirm z tokenem, bo ogólnych kart pending i process_answer jeszcze nie ma; po ich wdrożeniu narzędzie przechodzi na kartę z katalogu.',
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_merge`: Merge several flows into one new flow (the first kept whole, later ones lose their leading reads). */
+export const FLOWS_MERGE = {
+  name: 'flows_merge',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_merge',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_delete',
+        how: 'the merged flow',
+        for: 'create',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{flow_ids}',
+    result: '{name} created from {count} flows',
+  },
+  route: null,
+  description:
+    'Merge several flows into one new flow (the first kept whole, later ones lose their leading reads).',
+  operations: [
+    {
+      operationId: 'merge_flows_route_api_v1_projects__project_id__flows_merge_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/merge',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: ['ids.flow_ids'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_set_poll_terminals`: Set the success and failure terminal statuses that answer a flow's open poll-loop questions. */
+export const FLOWS_SET_POLL_TERMINALS = {
+  name: 'flows_set_poll_terminals',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_set_poll_terminals',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_set_poll_terminals',
+        how: 'answer again with other statuses',
+        for: 'update',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id}',
+    result: '{count} poll questions answered',
+  },
+  route: null,
+  description:
+    "Set the success and failure terminal statuses that answer a flow's open poll-loop questions.",
+  operations: [
+    {
+      operationId:
+        'resolve_poll_terminals_api_v1_projects__project_id__flows__flow_id__poll_terminals_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/poll-terminals',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'steps.flows.questions_answered'],
+  state_writes: ['steps.flows.questions_answered'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_ask_copilot`: Ask the flow copilot for changes to a flow; without a message it runs its standard review. Returns a proposal, changes nothing. */
+export const FLOWS_ASK_COPILOT = {
+  name: 'flows_ask_copilot',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_ask_copilot',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'costly',
+  safety: 'costly',
+  secret: false,
+  consent: {
+    level: 2,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: {
+      group: 'flows:copilot',
+      target: 'flow_id',
+    },
+    cost: '1-2 LLM calls per turn',
+    card: {
+      title: 'Ask the flow copilot about {name}',
+      fields: [
+        {
+          label: 'Flow',
+          from: 'flow_id',
+          source: 'args',
+        },
+        {
+          label: 'Message',
+          from: 'message',
+          source: 'args',
+        },
+      ],
+    },
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [
+      {
+        path: 'ids.project_id',
+        arg: 'project_id',
+        explicit: true,
+      },
+      {
+        path: 'ids.flow_ids',
+        arg: 'flow_ids',
+        explicit: true,
+      },
+    ],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'nothing',
+    ways: [],
+    reason: 'proposes only, nothing is saved',
+  },
+  log: {
+    args: 'Ask the flow copilot about {name}',
+    result: '{changes} changes proposed',
+  },
+  route: 'copilot',
+  description:
+    'Ask the flow copilot for changes to a flow; without a message it runs its standard review. Returns a proposal, changes nothing.',
+  operations: [
+    {
+      operationId:
+        'send_copilot_message_api_v1_projects__project_id__flows__flow_id__copilot_messages_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/messages',
+    },
+    {
+      operationId:
+        'review_flow_api_v1_projects__project_id__flows__flow_id__copilot_messages_review_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/messages/review',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: [],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_apply_copilot_changes`: Apply the accepted copilot changes to a flow as one new version and record what was rejected. */
+export const FLOWS_APPLY_COPILOT_CHANGES = {
+  name: 'flows_apply_copilot_changes',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_apply_copilot_changes',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'composite',
+  class: 'write',
+  safety: 'write',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: 'yes',
+    ways: [
+      {
+        tool: 'flows_restore_version',
+        how: 'the previous version',
+        for: 'update',
+      },
+    ],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id}',
+    result: '{applied}/{requested} changes applied as v{version}',
+  },
+  route: 'copilot',
+  description:
+    'Apply the accepted copilot changes to a flow as one new version and record what was rejected.',
+  operations: [
+    {
+      operationId:
+        'apply_copilot_proposal_api_v1_projects__project_id__flows__flow_id__copilot_apply_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/apply',
+    },
+    {
+      operationId:
+        'record_change_resolution_api_v1_projects__project_id__flows__flow_id__copilot_changes__change_id__resolution_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/changes/{change_id}/resolution',
+    },
+    {
+      operationId:
+        'record_change_resolutions_api_v1_projects__project_id__flows__flow_id__copilot_resolutions_post',
+      method: 'POST',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/resolutions',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: ['steps.flows.flows_built'],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: false,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;
+
+/** `flows_get_copilot_history`: Get a flow's copilot conversation, or its improvement suggestions. */
+export const FLOWS_GET_COPILOT_HISTORY = {
+  name: 'flows_get_copilot_history',
+  module: 'flows',
+  full_name: 'mcp__plugin_loadcraft_lc__flows_get_copilot_history',
+  tier: 'pipeline',
+  audience: 'model',
+  always_load: false,
+  kind: 'atomic',
+  class: 'read',
+  safety: 'read',
+  secret: false,
+  consent: {
+    level: 1,
+    level3_reason: null,
+    by_argument: null,
+    escalate_to_3: [],
+    target_traffic: null,
+    scope: null,
+    cost: null,
+    card: null,
+    resolve: [],
+    snapshot: false,
+    follow_ups: [],
+    freeze: [],
+    max_items: null,
+  },
+  undo: {
+    reversible: null,
+    ways: [],
+    reason: null,
+  },
+  log: {
+    args: '{flow_id}',
+    result: '{turns} turns',
+  },
+  route: 'copilot',
+  description: "Get a flow's copilot conversation, or its improvement suggestions.",
+  operations: [
+    {
+      operationId:
+        'get_copilot_history_api_v1_projects__project_id__flows__flow_id__copilot_history_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/history',
+    },
+    {
+      operationId:
+        'get_copilot_suggestions_api_v1_projects__project_id__flows__flow_id__copilot_suggestions_get',
+      method: 'GET',
+      path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/suggestions',
+    },
+  ],
+  also_calls: [],
+  channels: [],
+  state_reads: ['ids.project_id', 'ids.flow_ids'],
+  state_writes: [],
+  next_steps: [],
+  pending_operations: null,
+  requires_capability: null,
+  requires_user_interaction: false,
+  views: null,
+  arguments: null,
+  shows_content: null,
+  install_allow: true,
+  known_debt: null,
+  annotations: null,
+} as const satisfies ToolMeta;

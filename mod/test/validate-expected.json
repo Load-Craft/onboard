@@ -1,0 +1,11 @@
+{
+  "hooks": "session.start, tool.call{tool=mcp__plugin_loadcraft_lc__run_start|mcp__plugin_loadcraft_lc__data_create_accounts|mcp__plugin_loadcraft_lc__flows_describe_journeys|mcp__plugin_loadcraft_lc__process_cancel}, tool.call{tool=mcp__plugin_loadcraft_lc__process_get_status}, tool.call{tool=/\"^mcp__plugin_loadcraft_lc__\"/}, ui.render{component=AbovePrompt} (default matcher key: plugin), ui.render{component=ToolUse}, ui.render{component=ToolResult}, ui.render{component=ToolProgress}, command.run{command=loadcraft-panel}, ui.focus{requestId=loadcraft} (default matcher key: plugin, component), ui.render{component=Pane} (default matcher key: plugin)",
+  "calls": "$.clock.after, $.clock.every, $.clock.now, $.command.register, $.mcp.call, $.prompt.submit (via sendChoice), $.session.surfaces, $.state.get, $.state.set, $.store.get (via loadAuto, loadClosedCards, rememberKeys), $.store.set (via pressPane, rememberKeys), $.ui.ask, $.ui.focus (via pressList), $.ui.invalidate, $.ui.notify, $.ui.open, $.ui.resolve, $.ui.status, $.ui.toast",
+  "state writes": "loadcraft.bars, loadcraft.cards, loadcraft.consent, loadcraft.panel, loadcraft.progress, loadcraft.session",
+  "state reads": "loadcraft.bars, loadcraft.cards, loadcraft.consent, loadcraft.panel, loadcraft.progress, loadcraft.session",
+  "gating hook with .catch": [
+    "tool.call{tool=mcp__plugin_loadcraft_lc__run_start|mcp__plugin_loadcraft_lc__data_create_accounts|mcp__plugin_loadcraft_lc__flows_describe_journeys|mcp__plugin_loadcraft_lc__process_cancel}",
+    "tool.call{tool=mcp__plugin_loadcraft_lc__process_get_status}",
+    "tool.call{tool=/\"^mcp__plugin_loadcraft_lc__\"/}"
+  ]
+}

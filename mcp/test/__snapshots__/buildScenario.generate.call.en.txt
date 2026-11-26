@@ -1,0 +1,17 @@
+3 scenarios + composition "checkout" · code compiled ✓
+przeglądanie   40%  ████████
+zakupy         50%  ██████████
+konto          10%  ██
+data: 95% typical · 4% invalid · 1% edge cases
+self-check · perf (default) · 1 user · one pass
+przeglądanie  kategorie ✓ → produkt ✓ · 2 requests · 0.3 s
+zakupy        waiting for data: User accounts (slot: accounts)
+              → read data_check_readiness: it names what fills each slot
+              (data_create_dataset for plain data or a CSV file,
+              data_create_accounts for accounts after the user agrees); then
+              run scenario_check_self again.
+konto         waiting for data: User accounts (slot: accounts)
+              → read data_check_readiness: it names what fills each slot
+              (data_create_dataset for plain data or a CSV file,
+              data_create_accounts for accounts after the user agrees); then
+              run scenario_check_self again.

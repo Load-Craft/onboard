@@ -23,7 +23,7 @@ Every operation must have:
 - a non-empty `summary` or `description`;
 - an explicit operation-level `security` array;
 - explicit three-digit response codes;
-- at least one explicit success response in the `200`–`299` range.
+- at least one explicit success response in the `200`–`299` range. The one exception is a redirect-only operation (`301`, `302`, `303`, `307`, `308` and no `2xx`, such as a lookup-by-slug that answers with `Location`): the importer accepts it, and the generated client follows the redirect and asserts the final response, so name the target operation in the `description`. The validator reports it as a warning, not an error.
 
 Root-level security is not inherited by the current parsed endpoint model. Copy the verified effective requirement onto each protected operation. Set `security: []` only when the operation is actually public.
 
@@ -65,22 +65,30 @@ So when two operations expose the same domain field with different reachable val
 - Set `requestBody.required` explicitly from handler evidence.
 - Always declare the request schema.
 - Prefer an object schema with explicit `properties` and `required` for mutable JSON operations.
-- Put safe synthetic examples on properties only when a required value cannot be derived from its type or constraints alone. Never put an example/default/enum on a password, token, secret, authorization, or API-key field. Do not freeze unique or externally provisioned values such as registration identities; describe the data requirement and report the required feeder or credential source instead.
+- An example on a property, an optional one included, is allowed when a user journey sends that field and the value is grounded in code and consistent with its related fields. An optional field that no journey needs and whose value cannot be grounded stays without an example. Never put an example/default/enum on a password, token, secret, authorization, or API-key field. Do not freeze unique or externally provisioned values such as registration identities; describe the data requirement and report the required feeder or credential source instead.
+
+An example is input to the test-data generator: it may be read as a format pattern and repeated in every row, so it must be valid for the code, not merely plausible. Where examples are given:
+
+- Fields that together describe one thing (a location, an amount and its currency, a date and its time zone, a value and its unit) get examples that agree with each other and follow one convention, the one the code expects.
+- A field the code does not validate says so in its description (free text, not validated); its example, if any, must not look like a code from a standard vocabulary the code does not enforce.
+- A field validated against a vocabulary names that vocabulary and the exact form of a value (letter case, separator, standard) in its description, and its example belongs to it.
+
+The bundled validator checks every example against the schema of its own place (parameter, property, the single `example` of a request and a response body: type, enum, bounds, lengths, the formats `date`, `date-time`, `uuid` and `email`, a plain pattern, required properties and `readOnly` fields of a request, `writeOnly` fields of a response) and warns when it breaks one. Fix whichever of the two the code contradicts; a schema it cannot decide (`oneOf`/`anyOf`, no single type, `additionalProperties`) is not checked, and neither is a named example, which may break the schema on purpose to show an error branch, so a clean run is not proof of consistency.
 
 Never add a body merely because the method is mutating. Absence of a body can be the correct contract.
 
-When a body field selects a behavior branch, both the single `example` and the named `examples` map on the request media type are retained, and so are per-property `description` and `example` inside the schema. Use them to make each branch callable: state the trigger→behavior mapping on the property `description` (and the operation `description`), and give the `examples` map one named entry per material branch whose `value` carries the branch-selecting inputs (for example `withinStock` and `exceedsStock`). Keep the single `example` for the ordinary success branch. This is the profile's richest place to exemplify request-value branching, so prefer it over prose alone.
+When a body field selects a behavior branch, both the single `example` and the named `examples` map on the request media type are retained, and so are per-property `description` and `example` inside the schema. Use them to make each branch callable: state the trigger→behavior mapping on the property `description` (and the operation `description`), and give the `examples` map one named entry per material branch whose `value` carries the branch-selecting inputs (for example `withinStock` and `exceedsStock`). Keep the single `example` for the ordinary success branch. A branch selector may be set in a named example even when it is optional; the other fields of the branch get examples only under the same rule (the branch sends them and the value is grounded). This is the profile's richest place to exemplify request-value branching, so prefer it over prose alone.
 
-Recognized request media types are `application/json`, `application/xml`, `application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain`, `text/html`, `text/event-stream`, `application/octet-stream`, `application/pdf`, and the supported PNG/JPEG/GIF/WebP image types. Do not let an unknown vendor media type be silently coerced to JSON.
+Any concrete `type/subtype` is accepted as the request media type, with optional `;name=value` parameters: the importer sends the body with exactly the declared type, so `application/merge-patch+json` for a JSON Merge Patch endpoint is the truthful declaration and must not be replaced by `application/json` (the server would answer `415`). A wildcard range (`*/*`, `application/*`) or a malformed key cannot be sent and is rejected. The generator builds a body for JSON-family types (anything containing `json`), `application/x-www-form-urlencoded` and `multipart/form-data`; a required body of any other type fails flow generation, so prefer those when the server accepts several.
 
 ## Responses and schemas
 
 - Give every response a description.
 - Give body-bearing responses a schema.
 - **Give every body-bearing response one `example`.** The importer retains one example per status, and it is the only place a flow generator learns what a real body looks like; an absent example is a silently weaker artifact rather than an import failure, so the bundled validator warns about it — per media type, since it cannot know which one the importer will keep. A response that declares two media types is therefore asked for two examples while only one survives: prefer one media type per response, exactly as request bodies are capped at one.
-- Exempt from that rule, and not warned about: a `204`/`205` with no content, and a body whose bytes are not text — `application/octet-stream`, `application/pdf`, any `image/*`, `text/event-stream`, or any schema with `format: binary`. Describe such a body in the response `description` instead.
+- Exempt from that rule, and not warned about: a `202`/`204`/`205` with no content, and a body whose bytes are not text — `application/octet-stream`, `application/pdf`, any `image/*`, `text/event-stream`, or any schema with `format: binary`. Describe such a body in the response `description` instead.
 - Response media types are **not** restricted to the recognized list, which applies to request bodies only. That is a known gap rather than a licence: an unusual response media type may or may not survive the importer's own handling, so name it in the delivery report when you emit one.
-- A `204` or `205` may omit content; other successful responses should describe their content.
+- A `202`, `204` or `205` may omit content (`202 Accepted` for work handed off without a representation); other successful responses must describe their content. A `202` without content does not prove the work happened, so say where the caller must assert instead.
 - Required property names must exist in the same schema's `properties`.
 - Use single JSON Schema types. Avoid boolean schemas and OpenAPI 3.1 unions.
 - Do not use `oneOf` or `anyOf` where exact request or response structure matters. The current importer flattens them lossily.
@@ -92,7 +100,37 @@ The importer retains a response `description` and a single `example` per status,
 
 ## Security schemes
 
+When an application key is required on every request and a user token is optional, write alternative requirements: `[{"appKeyHeader": [], "userBearer": []}, {"appKeyHeader": []}]` (every scheme inside one object is required together, the objects are alternatives). The importer carries the `security` array unchanged, so say in the operation `description` which form is the one a journey should send and what the token adds.
+
 Define every referenced scheme in `components.securitySchemes` with a complete `apiKey`, `http`, `oauth2`, or `openIdConnect` shape. API keys must use a header in the current compatibility profile. Describe only authentication behavior verified from source and global middleware. Never place a real token, cookie, key, credential, tenant identifier, or captured header value in the document.
+
+### Tokens of different power
+
+When a system issues tokens with different powers (an intermediate or single-use token narrowed to one action, a full token after login), each kind of token gets its own security scheme, and each operation declares in `security` only the scheme it actually accepts. The scheme `description` names the operation that issues it, in which response field, and what it is exchanged for. Never share one scheme between tokens that are not interchangeable: a consumer that reads only the structure would send the wrong token, and a difference written only in prose is lost.
+
+```yaml
+components:
+  securitySchemes:
+    pendingToken:
+      type: http
+      scheme: bearer
+      description: Issued by startSignup in the `pending` field; accepted only by completeSignup, which exchanges it for a session token.
+    sessionToken:
+      type: http
+      scheme: bearer
+      description: Issued by completeSignup and login in the `session` field; accepted by every operation that acts as the signed-in user.
+paths:
+  /signup/complete:
+    post:
+      operationId: completeSignup
+      security:
+        - pendingToken: []
+  /profile:
+    get:
+      operationId: getProfile
+      security:
+        - sessionToken: []
+```
 
 ## Naming that trips the secret heuristic
 
@@ -100,8 +138,9 @@ The bundled validator refuses to let a literal value sit on a secret-bearing nam
 
 Three positions where that bites, and what to do:
 
-- **A security scheme name.** A requirement object is `{"schemeName": []}`, and its value is an array, so a scheme whose name ends in a sensitive word — `apiToken`, `bearerToken` — reads as a secret carrying a literal and is rejected. Name the scheme after the mechanism, the header or the issuer, so that the sensitive word is not the last segment: `identityHeader`, `tenantApiKeyHeader` and `serviceIdentity` all pass.
+- **A security scheme name.** A requirement object is `{"schemeName": []}`: the key names a scheme and the value is a scope list, not a literal, so the validator skips the heuristic for it and a scheme called `storeApiKey` or `bearerToken` is accepted. Prefer a name after the mechanism or the header (`storeKeyHeader`) for readability, but never rename a scheme to satisfy the validator. A string value under such a key, or a literal anywhere else, is still rejected.
 - **A property key.** A field genuinely called `nextToken` keeps its schema, because there the value is a schema object. It must not appear as a key inside an `example`, where the value is a string. Describe the value in the property `description`, and put the illustrative value on the *parameter* that accepts it, where the key is `name` rather than the field name.
+- **A response whose only field is a secret.** A login or registration response often has just a `token`, and the one-example rule still applies. The single place a secret-named key may hold a string is the `example` of a response, and only as an angle-bracket placeholder (`{"token": "<token>"}`: a letter first, then letters, digits, space, `_`, `.` or `-`, at most 40 characters). The importer keeps response examples verbatim and does not interpret them, so the placeholder shows the generator the shape of the body while the value comes from the live response at run time. The same placeholder in a request example, a schema property, a parameter or a named `examples` map is still rejected: a request field is filled by a feeder, not by the artifact.
 - **An OAuth2 scope name** is chosen by the identity provider and cannot be renamed or moved into prose, and the `scopes` map requires a string description. The validator therefore skips the heuristic inside a `scopes` map; a scope called `read:secret` is accepted as it stands.
 
 None of this is cosmetic: the heuristic exists so a captured credential cannot reach an artifact, and renaming a real field to satisfy it would be worse than describing the value in prose.
@@ -112,13 +151,27 @@ None of this is cosmetic: the heuristic exists so a captured credential cannot r
 
 - `commit`: the analyzed repository's `git rev-parse HEAD` hash;
 - `dirty`: whether the working tree had uncommitted changes at analysis time;
+- `dependencies` (optional): an object mapping package name to the exact version, written when routes, validators or serializers were read from a package in a dependency directory instead of from the repository's own files. Take the versions from the lockfile. A maintenance run compares them with the current lockfile, and a difference invalidates every operation that package contributes;
 - `method`: `native-export` when a framework's own generator produced the shapes, `platform-export` when the routes came from a platform's exported document and the bodies were traced by hand, `static-trace` otherwise.
 
-The stamp accepts exactly those three keys. Anything else — which repository, which environment, which of several commits — is a hard validation error here and belongs in the delivery report instead.
+The stamp accepts exactly those keys (`dependencies` being optional). Anything else — which repository, which environment, which of several commits — is a hard validation error here and belongs in the delivery report instead.
 
 When the artifact describes a **deployed environment** rather than a checkout — a gateway stage, a running service — the stamp still records the repository state you traced, because that is what an incremental update can diff. Say so in the delivery report, name the environment, and note that the deployment may not correspond to that commit. Establishing whether it does requires reading the deployment, which is outside the default read-only scope: without expanded scope, record the divergence as unverified rather than asserting either way. A single stamp cannot express two sources; the report is where the divergence belongs. When the traced repository is dirty, or the artifact spans several repositories and only one commit can be recorded, say which repository the stamp refers to and expect the next run to re-verify everything.
 
 The bundled validator enforces this shape. Omit the stamp when the repository is not under git and say so in the delivery report. The stamp is maintenance metadata, not an unresolved marker; LoadCraft ignores it on import.
+
+## Size budget
+
+The backend does not read the file as written. It expands every `$ref` in a parameter, request body or response schema in full at each use, carries the success schema a second time, and sends all operations of one generated path in a single prompt limited to 400,000 characters (`llm.prompt_budget_chars.sub_flow`). A path that exceeds the limit is refused with a "too large" error and nothing is generated. Dividing 400,000 by the roughly ten operations of a typical path gives the artifact's budget: **40,000 characters per expanded operation**. The limit itself lives in backend configuration, not in a document this profile can read, so the validator holds it as a constant (`EXPANDED_OPERATION_BUDGET_CHARS`, override with `--budget-chars`) and warns above it.
+
+A shared component does not shrink the cost: reuse makes the file shorter and the expansion no smaller. To stay under the budget:
+
+- reduce a large response object to the fields a journey correlates (identifiers, totals, states) or asserts on, and say in the response `description` that the real body carries more;
+- describe nesting deeper than about three levels as `type: object` with a `description` of what it holds;
+- keep the single success example proportionate to the trimmed schema;
+- keep the descriptions of branches that matter, and shorten prose that restates the schema.
+
+`validate_openapi.mjs --measure` prints every operation's expanded size, largest first; a figure with a `+` is a lower bound because the expansion was stopped.
 
 ## Unsupported readiness signals
 

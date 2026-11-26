@@ -1,0 +1,2 @@
+[agent_browsers_busy] Both agent browsers are busy with other runs.
+→ Try again in a few minutes, or use a HAR recording instead.

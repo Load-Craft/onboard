@@ -1,0 +1,6 @@
+Test „checkout” nie został uruchomiony: profil przekracza limit środowiska
+  perf i zostanie przycięty; nic nie wysłano.
+Żądany profil: Ramp load (closed), 2 000 · pójdzie z: 500 · limit środowiska
+  perf: 500 użytkowników
+Zapytaj użytkownika i dopiero po zgodzie powtórz wywołanie z tymi samymi
+  argumentami i confirm_capped: true.

@@ -1,0 +1,15 @@
+zalogowany jako user@example.com · LoadCraft 0.0.0-fake · API 1 ✓
+Projekt „sklep” · konfiguracja kompletna ✓
+perf ★  domyślne
+qa      chronione · limit 100 użytkowników / 20 zapytań/s
+dev     bez limitu
+prod    chronione · limit 20 użytkowników / 5 zapytań/s
+3 flowy · 3 scenariusze · 1 kompozycja
+jeszcze żaden test nie był uruchomiony
+sloty danych
+  zakupy  Search terms (slot: search_phrases) · Quantity & cardnumber (slot:
+          order_details) · User accounts (slot: accounts) ✕
+  konto   User accounts (slot: accounts) ✕
+  ✓ zbiór przypięty · ✕ brak, self-check na niego czeka
+dalej: data_check_readiness — scenariusze czekają na dane: User accounts
+  (slot: accounts)

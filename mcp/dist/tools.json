@@ -1,0 +1,471 @@
+{
+  "tools": [
+    {
+      "name": "data_check_readiness",
+      "title": "Check the test data of a scenario",
+      "params": [
+        "environment",
+        "project",
+        "scenario"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_create_accounts",
+      "title": "Create test accounts",
+      "params": [
+        "confirm_protected",
+        "count",
+        "environment",
+        "max_wait_s",
+        "project",
+        "register_operation",
+        "scenario",
+        "slot"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_create_dataset",
+      "title": "Create a dataset",
+      "params": [
+        "confirm",
+        "file",
+        "name",
+        "project",
+        "rows",
+        "rules",
+        "scenario",
+        "slot"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_set_bindings",
+      "title": "Set the datasets of the data slots",
+      "params": [
+        "bindings",
+        "project",
+        "scenario"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_suggest_actions",
+      "title": "Suggest the test data of a scenario",
+      "params": [
+        "confirm",
+        "environment",
+        "project",
+        "scenario"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_delete",
+      "title": "Delete flows of a LoadCraft project for good",
+      "params": [
+        "confirm",
+        "flow_ids",
+        "kind",
+        "names",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_describe_journeys",
+      "title": "Plan flows from a description",
+      "params": [
+        "account",
+        "description",
+        "environment",
+        "max_steps",
+        "max_wait_s",
+        "project"
+      ],
+      "fields": [
+        "email_key",
+        "from_env",
+        "password_key"
+      ]
+    },
+    {
+      "name": "flows_generate_from_endpoints",
+      "title": "Generate a flow from endpoints",
+      "params": [
+        "description",
+        "endpoints",
+        "max_wait_s",
+        "name",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_generate_from_har",
+      "title": "Generate flows from a recording",
+      "params": [
+        "har",
+        "max_wait_s",
+        "name",
+        "paths",
+        "project",
+        "split"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_generate_from_suggestions",
+      "title": "Generate flows from proposals",
+      "params": [
+        "max_wait_s",
+        "project",
+        "suggestions"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_get",
+      "title": "Flow outline",
+      "params": [
+        "flow",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_import_har",
+      "title": "Import a HAR recording",
+      "params": [
+        "file",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_migrate_docs",
+      "title": "Move flows to the current docs version",
+      "params": [
+        "adopt_value_ids",
+        "adopt_values",
+        "allow_unmatched",
+        "confirm",
+        "flow_ids",
+        "preview",
+        "project",
+        "target_spec_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_record_journeys",
+      "title": "Approve and record flows from a description",
+      "params": [
+        "max_wait_s",
+        "paths",
+        "plan"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_suggest_journeys",
+      "title": "Suggest user journeys",
+      "params": [
+        "force",
+        "max_wait_s",
+        "project",
+        "refine"
+      ],
+      "fields": []
+    },
+    {
+      "name": "process_cancel",
+      "title": "Cancel an operation",
+      "params": [
+        "from_panel",
+        "operation",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "process_get_status",
+      "title": "LoadCraft status",
+      "params": [
+        "detail",
+        "format",
+        "from_panel",
+        "operation",
+        "preflight",
+        "progress",
+        "project",
+        "result"
+      ],
+      "fields": [
+        "environment",
+        "hold",
+        "id",
+        "kind",
+        "profile",
+        "ramp",
+        "scenario",
+        "type",
+        "vusers"
+      ]
+    },
+    {
+      "name": "process_wait",
+      "title": "Wait for an operation",
+      "params": [
+        "max_wait_s",
+        "operation"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_analyze_setup",
+      "title": "Analyze the setup of a LoadCraft project",
+      "params": [
+        "asyncapi",
+        "description",
+        "max_wait_s",
+        "openapi",
+        "overview"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_apply_setup",
+      "title": "Apply the setup of a LoadCraft project",
+      "params": [
+        "analysis"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_check_env",
+      "title": "Test the connection of LoadCraft environments",
+      "params": [
+        "environment"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_connect_telemetry",
+      "title": "Connect a log server",
+      "params": [
+        "enabled_tools",
+        "label",
+        "url"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_create",
+      "title": "Create a LoadCraft project",
+      "params": [
+        "description",
+        "environment",
+        "name",
+        "overview"
+      ],
+      "fields": [
+        "api",
+        "frontend"
+      ]
+    },
+    {
+      "name": "project_delete",
+      "title": "Delete LoadCraft projects for good",
+      "params": [
+        "confirm",
+        "ids",
+        "kind",
+        "names"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get",
+      "title": "Get the profile of a LoadCraft project",
+      "params": [
+        "include"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_import_docs",
+      "title": "Update the API documentation",
+      "params": [
+        "environment",
+        "openapi",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_list_notes",
+      "title": "List the notes the agent learned about the project",
+      "params": [
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_save_env",
+      "title": "Save the environments of a LoadCraft project",
+      "params": [
+        "env_file",
+        "environments"
+      ],
+      "fields": [
+        "api",
+        "default",
+        "from_env",
+        "frontend",
+        "headers",
+        "limit",
+        "name"
+      ]
+    },
+    {
+      "name": "project_set_profile",
+      "title": "Set fields of the profile of a LoadCraft project",
+      "params": [
+        "confirm",
+        "fields"
+      ],
+      "fields": [
+        "additional_notes",
+        "api_protocol",
+        "app_architecture",
+        "auth_method",
+        "auth_token_endpoint",
+        "graphql_endpoint",
+        "has_async_operations",
+        "has_file_uploads",
+        "has_mfa",
+        "has_multi_tenant",
+        "has_pagination",
+        "has_presigned_urls",
+        "has_sse",
+        "has_websockets",
+        "idp_domains",
+        "known_third_party_domains",
+        "self_check_enabled",
+        "uses_csrf"
+      ]
+    },
+    {
+      "name": "results_analyze_run",
+      "title": "Diagnose a test run",
+      "params": [
+        "execution",
+        "force",
+        "max_wait_s",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_get_errors",
+      "title": "Get the errors of a run",
+      "params": [
+        "execution",
+        "format",
+        "hash",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_get_report",
+      "title": "Report on a test run",
+      "params": [
+        "compare_to",
+        "execution",
+        "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_get_traces",
+      "title": "Get the requests of a run",
+      "params": [
+        "execution",
+        "failed_only",
+        "format",
+        "limit",
+        "project",
+        "request",
+        "trace"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_plan",
+      "title": "Load profiles",
+      "params": [
+        "environment",
+        "include_data",
+        "scenario",
+        "target_users"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_start",
+      "title": "Run a load test",
+      "params": [
+        "confirm_capped",
+        "environment",
+        "max_wait_s",
+        "profile",
+        "project",
+        "scenario",
+        "thresholds"
+      ],
+      "fields": [
+        "error_rate_pct",
+        "hold",
+        "p95_ms",
+        "ramp",
+        "type",
+        "vusers"
+      ]
+    },
+    {
+      "name": "scenario_check_self",
+      "title": "Check scenarios again",
+      "params": [
+        "project",
+        "scenarios"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_generate",
+      "title": "Generate a load scenario",
+      "params": [
+        "data_mix",
+        "flows",
+        "max_wait_s",
+        "name",
+        "project",
+        "proportions"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_suggest_split",
+      "title": "Suggest the traffic split",
+      "params": [
+        "flows",
+        "name",
+        "project"
+      ],
+      "fields": []
+    }
+  ]
+}

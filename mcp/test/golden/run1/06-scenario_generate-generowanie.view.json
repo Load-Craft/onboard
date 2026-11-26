@@ -1,0 +1,129 @@
+{
+  "name": "checkout",
+  "composition": "created",
+  "scenarios": 3,
+  "compiled": true,
+  "split": [
+    {
+      "flow": "przeglądanie",
+      "percent": 40
+    },
+    {
+      "flow": "zakupy",
+      "percent": 50
+    },
+    {
+      "flow": "konto",
+      "percent": 10
+    }
+  ],
+  "dataMix": {
+    "kind": "realistic",
+    "shares": [
+      {
+        "type": "happy_path",
+        "role": "typical",
+        "label": "happy_path",
+        "percent": 95
+      },
+      {
+        "type": "invalid_input",
+        "role": "invalid",
+        "label": "Invalid input",
+        "percent": 4
+      },
+      {
+        "type": "boundary_values",
+        "role": "edge",
+        "label": "Boundary values",
+        "percent": 1
+      }
+    ]
+  },
+  "selfCheck": {
+    "environment": "perf",
+    "chains": [
+      {
+        "name": "przeglądanie",
+        "status": "passed",
+        "steps": [],
+        "requests": 2,
+        "responseMs": 300,
+        "failure": null,
+        "notes": [],
+        "missingSlots": [],
+        "repairs": [],
+        "runs": [
+          {
+            "executionId": "c7702e5a-4b1f-4d93-a6c8-3e9f0b2d7c14",
+            "version": 1,
+            "status": "passed",
+            "stepsOmitted": 0,
+            "steps": [
+              {
+                "name": "kategorie",
+                "group": null,
+                "planIndex": 0,
+                "isPreflight": false,
+                "method": "GET",
+                "path": "/categories",
+                "result": "ok",
+                "httpStatus": 200,
+                "reason": null
+              },
+              {
+                "name": "produkt",
+                "group": null,
+                "planIndex": 1,
+                "isPreflight": false,
+                "method": "GET",
+                "path": "/products",
+                "result": "ok",
+                "httpStatus": 200,
+                "reason": null
+              }
+            ]
+          }
+        ],
+        "maxRepairRounds": 2
+      },
+      {
+        "name": "zakupy",
+        "status": "waiting_for_data",
+        "steps": [],
+        "requests": 0,
+        "responseMs": 0,
+        "failure": null,
+        "notes": [],
+        "missingSlots": [
+          {
+            "slot": "accounts",
+            "label": "User accounts"
+          }
+        ],
+        "repairs": [],
+        "runs": [],
+        "maxRepairRounds": 2
+      },
+      {
+        "name": "konto",
+        "status": "waiting_for_data",
+        "steps": [],
+        "requests": 0,
+        "responseMs": 0,
+        "failure": null,
+        "notes": [],
+        "missingSlots": [
+          {
+            "slot": "accounts",
+            "label": "User accounts"
+          }
+        ],
+        "repairs": [],
+        "runs": [],
+        "maxRepairRounds": 2
+      }
+    ]
+  },
+  "regenerated": true
+}

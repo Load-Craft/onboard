@@ -1,0 +1,6 @@
+propozycja podziału ruchu:
+przeglądanie   34%  ███████
+zakupy         33%  ███████
+konto          33%  ███████
+Model nie zaproponował podziału, więc ruch jest podzielony równo; powiedz,
+jeśli chcesz inne proporcje.

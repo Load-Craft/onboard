@@ -1,0 +1,5 @@
+Project “sklep” · Sklep API · 42 operations · 6 areas
+project analysis  ████████████████████ 100%
+profile applied ✓ · validators 0 · test types 3
+setup incomplete · missing: validators
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/settings#application-profile

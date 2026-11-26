@@ -22,7 +22,7 @@ Exclude:
 
 - `.env`, `.env.*`, credential stores, key and certificate files;
 - database dumps, production exports, request captures, cookies, and browser storage state;
-- dependency trees such as `node_modules` and `vendor`;
+- dependency trees such as `node_modules` and `vendor`, except the packages named under *When routes come from a dependency* below;
 - build, coverage, cache, generated, minified, and binary output;
 - files outside the repository or user-approved scope.
 
@@ -42,6 +42,19 @@ Identify the framework and route registration mechanism from manifests and sourc
 - content negotiation and file/binary endpoints.
 
 Resolve dynamically registered routes and inherited router dependencies. Do not inventory only obvious controller filenames.
+
+## When routes come from a dependency
+
+Some frameworks register the API from a package: the repository holds configuration, plugins and overrides, while routes, validators, serializers and the error mapping sit in a package under the dependency directory. When the route inventory built from the repository is far smaller than the API the application exposes, or the route files are absent, look there.
+
+- Read the package in the version the lockfile pins, from the already-installed dependency directory. Do not install, upgrade or run anything, and do not write into that directory.
+- Read only the contract-bearing files (route registration, validators, serializers, error handlers), never environment or credential files that happen to sit nearby.
+- Combine the package's behavior with the repository's overrides: an override can replace a route, add middleware or change a default, and the effective contract is the result.
+- Record each package and its exact version in the stamp's `dependencies`, and name in the report which routes came from a dependency. A later run re-verifies those operations whenever the lockfile entry changes.
+
+## Shared layer checklist
+
+Before tracing operations, find what applies to a whole prefix and therefore to many operations at once: global or prefix-level middleware, the required key or header, the authentication guard, query and body parsing defaults, locale or tenant parameters, pagination defaults and the error envelope. Check whether a global key requirement covers the whole prefix or only part of it, since operations under a different prefix (for instance authentication endpoints) often have different security from the rest. Shared parameters and headers belong on every operation they affect.
 
 ## Existing OpenAPI generation
 

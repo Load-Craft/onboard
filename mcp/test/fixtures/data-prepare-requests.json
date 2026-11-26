@@ -1,0 +1,787 @@
+{
+  "plan-composition": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [],
+        "composition_id": ":id"
+      }
+    }
+  ],
+  "plan-qa": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [],
+        "composition_id": ":id"
+      }
+    }
+  ],
+  "plan-scenario": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [":id"]
+      }
+    }
+  ],
+  "plan-ready": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    }
+  ],
+  "file-new": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [],
+        "composition_id": ":id"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/feeders",
+      "body": {
+        "name": "konta",
+        "feeder_type": "csv",
+        "strategy": "queue",
+        "columns": ["email", "password"],
+        "file_name": "accounts.csv",
+        "content": "email,password\nanna@example.com,Pw-CANARY-SECRET-7f3a-1\njan@example.com,\"Pw,\"\"CANARY-SECRET-7f3a\"\"-2\"\n",
+        "record_count": 2
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "accounts": "created-feeder-3"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "accounts": "created-feeder-3"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "accounts": "created-feeder-3"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    }
+  ],
+  "file-twice": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [],
+        "composition_id": ":id"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/feeders",
+      "body": {
+        "name": "konta",
+        "feeder_type": "csv",
+        "strategy": "queue",
+        "columns": ["email", "password"],
+        "file_name": "accounts.csv",
+        "content": "email,password\nanna@example.com,Pw-CANARY-SECRET-7f3a-1\njan@example.com,\"Pw,\"\"CANARY-SECRET-7f3a\"\"-2\"\n",
+        "record_count": 2
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "accounts": "created-feeder-3"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "accounts": "created-feeder-3"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "accounts": "created-feeder-3"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/feeders/created-feeder-3/content",
+      "body": {
+        "content": "email,password\nzoe@example.com,Pw-CANARY-SECRET-7f3a-1\n",
+        "file_name": "accounts.csv"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    }
+  ],
+  "apply-composition": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [],
+        "composition_id": ":id"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "search_phrases": ":id"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "search_phrases": ":id"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/feeders/generate-from-rules",
+      "body": {
+        "name": "rozmiary",
+        "columns": [
+          {
+            "column_name": "size",
+            "generation_hint": "enum",
+            "pattern": null,
+            "min_value": null,
+            "max_value": null,
+            "enum_values": ["S", "M"],
+            "ref_feeder": null,
+            "ref_column": null,
+            "semantics": null,
+            "card_networks": []
+          }
+        ],
+        "row_count": 300
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "search_phrases": ":id",
+          "order_details": "generated-feeder-1"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slots/scenario_auto_data/generate-feeder",
+      "body": {
+        "row_count": 100,
+        "enrich_with_llm": false
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "search_phrases": ":id",
+          "order_details": "generated-feeder-1",
+          "scenario_auto_data": "slot-feeder-1"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "search_phrases": ":id",
+          "scenario_auto_data": "slot-feeder-1"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight"
+    }
+  ],
+  "apply-scenario": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/data-hub/auto-plan",
+      "body": {
+        "scenario_ids": [":id"]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slots/scenario_auto_data/generate-feeder",
+      "body": {
+        "row_count": 100,
+        "enrich_with_llm": false
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id/slot-bindings",
+      "body": {
+        "bindings": {
+          "scenario_auto_data": "slot-feeder-1"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/feeders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id"
+      }
+    }
+  ]
+}

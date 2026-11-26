@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`results_get_report: the golden texts > renders the same data in en 1`] = `
+"verdict        SLA FAILED
+thresholds     p95 1,120 ms > 400 ms ✕ · errors 0.6% < 1% ✓
+run            10 min · planned 0 → 2,000 concurrent
+peak           not available: the server is older and does not measure it
+requests       412,300 · 690 per second
+latency        p50 180 ms · p95 1,120 ms · p99 2,900 ms
+errors         504 Gateway Timeout × 2,480 · only POST /checkout
+p95 by request (estimate)
+  POST /checkout     1,840 ms
+  POST /cart/items     620 ms
+  GET  /products       290 ms
+  GET  /categories     110 ms
+p95 over the threshold from around 6:10"
+`;
+
+exports[`results_get_report: the golden texts > renders the same data in en 2`] = `
+"verdict        SLA PASSED
+thresholds     p95 210 ms < 400 ms ✓ · errors 0% < 1% ✓
+note           load limited by the environment (100 of 2,000)
+run            10 min · planned 0 → 100 concurrent
+peak           not available: the server is older and does not measure it
+requests       10,900 · 18 per second"
+`;
+
+exports[`results_get_report: the golden texts > shows the same report in en 1`] = `
+"verdict        SLA FAILED
+thresholds     p95 1,120 ms > 400 ms ✕ · errors 0.6% < 1% ✓
+run            10 min · planned 0 → 2,000 concurrent
+peak           not available: the server is older and does not measure it
+requests       412,300 · 690 per second
+latency        p50 180 ms · p95 1,120 ms · p99 2,900 ms
+errors         504 Gateway Timeout × 2,480 · only POST /checkout
+p95 by request (estimate)
+  POST /checkout     1,840 ms
+  POST /cart/items     620 ms
+  GET  /products       290 ms
+  GET  /categories     110 ms
+p95 over the threshold from around 6:10
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/gatling/executions/3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42?tab=Overview"
+`;

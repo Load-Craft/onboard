@@ -15,6 +15,9 @@ This package has one canonical source for each skill. Keep the same `SKILL.md`, 
 - References stay one level below their skill and are linked directly from `SKILL.md`.
 - Keep platform metadata outside core instructions. `agents/openai.yaml` may improve Codex presentation but cannot change behavior.
 - Keep `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` on the same semantic version.
+- `mcp/dist/server.mjs` always corresponds to the sources in `mcp/src` (`npm run check:dist` in `mcp/`).
+- `skills/*/scripts/validate_*.mjs` are built from `validators/src` (`npm run build:skills` in `mcp/`; `npm run check:skills` fails when they differ). Edit the TypeScript, never the built file. They run with a bare `node` and no install step, so they have no runtime dependencies.
+- The MCP server assumes nothing specific to Claude Code: it speaks plain MCP over stdio and is configured only through `LOADCRAFT_*` environment variables.
 
 ## Change protocol
 
@@ -25,7 +28,7 @@ Use only neutral fixtures such as `app.example.com`, `/api/orders`, `order-examp
 Run before delivery:
 
 ```bash
-python3 -m unittest discover -s tests -v
+(cd mcp && npm ci && npm run test:skills && npm run check:skills)
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-openapi
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-journeys
 python3 <skill-creator-root>/scripts/quick_validate.py skills/loadcraft-asyncapi

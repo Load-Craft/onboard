@@ -1,0 +1,279 @@
+{
+  "id": "6e2f8a14-9c37-4d05-b8a1-3f7e0c5d2b96",
+  "project_id": "5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61",
+  "name": "zakupy",
+  "description": "Klient loguje się, szuka produktu, dodaje go do koszyka i składa zamówienie.",
+  "flow_type": "api",
+  "blocks": [
+    {
+      "id": "zakupy-reczne-1",
+      "type": "request",
+      "name": "Log in",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "b229f78d-8c9c-4a29-a325-a0525f7690bb",
+        "method": "POST",
+        "path": "/auth/login",
+        "headers": {},
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "email": "#{email}",
+          "password": "#{password}"
+        },
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.token",
+            "save_as": "token"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {}
+      }
+    },
+    {
+      "id": "zakupy-reczne-2",
+      "type": "pause",
+      "name": "Pause",
+      "description": "Assumed default think time before an API call (not measured)",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 3000,
+        "delay_max_ms": 8000,
+        "distribution": "uniform",
+        "source": "default_human"
+      }
+    },
+    {
+      "id": "zakupy-reczne-3",
+      "type": "request",
+      "name": "Search products",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "b7dab4b7-5c5f-42db-a7bd-8802df901ba4",
+        "method": "GET",
+        "path": "/products",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {
+          "q": "#{q}"
+        },
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.items[0].id",
+            "save_as": "productId"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "form_submit"
+        }
+      }
+    },
+    {
+      "id": "zakupy-reczne-4",
+      "type": "pause",
+      "name": "Pause",
+      "description": "Assumed default think time before an API call (not measured)",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 10000,
+        "delay_max_ms": 30000,
+        "distribution": "uniform",
+        "source": "default_human"
+      }
+    },
+    {
+      "id": "zakupy-reczne-5",
+      "type": "request",
+      "name": "Add to cart",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "392eaa85-a66d-466c-83d2-c4b1924e8c75",
+        "method": "POST",
+        "path": "/cart/items",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "productId": "#{productId}",
+          "quantity": "#{quantity}"
+        },
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.cartId",
+            "save_as": "cartId"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "in_page"
+        }
+      }
+    },
+    {
+      "id": "zakupy-reczne-6",
+      "type": "pause",
+      "name": "Pause",
+      "description": "Assumed default think time before an API call (not measured)",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 2000,
+        "delay_max_ms": 5000,
+        "distribution": "uniform",
+        "source": "default_human"
+      }
+    },
+    {
+      "id": "zakupy-reczne-7",
+      "type": "request",
+      "name": "Show cart",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "c4a1e7d2-5b38-4f90-8e16-2d7a9c0b3f45",
+        "method": "GET",
+        "path": "/cart",
+        "headers": {
+          "Authorization": "Bearer #{token}",
+          "X-Cart-Id": "#{cartId}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "page"
+        }
+      }
+    },
+    {
+      "id": "zakupy-reczne-8",
+      "type": "pause",
+      "name": "Pause",
+      "description": "Assumed default think time before an API call (not measured)",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 20000,
+        "delay_max_ms": 45000,
+        "distribution": "uniform",
+        "source": "default_human"
+      }
+    },
+    {
+      "id": "zakupy-reczne-9",
+      "type": "request",
+      "name": "Check out",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "50b1ba7d-377f-4b38-a7e0-477f7e64c7ab",
+        "method": "POST",
+        "path": "/checkout",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "cartId": "#{cartId}",
+          "paymentMethod": "card",
+          "cardNumber": "#{cardNumber}"
+        },
+        "expected_statuses": [201, 409],
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "form_submit"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "zakupy-reczne-edge-1",
+      "source": "zakupy-reczne-1",
+      "target": "zakupy-reczne-2"
+    },
+    {
+      "id": "zakupy-reczne-edge-2",
+      "source": "zakupy-reczne-2",
+      "target": "zakupy-reczne-3"
+    },
+    {
+      "id": "zakupy-reczne-edge-3",
+      "source": "zakupy-reczne-3",
+      "target": "zakupy-reczne-4"
+    },
+    {
+      "id": "zakupy-reczne-edge-4",
+      "source": "zakupy-reczne-4",
+      "target": "zakupy-reczne-5"
+    },
+    {
+      "id": "zakupy-reczne-edge-5",
+      "source": "zakupy-reczne-5",
+      "target": "zakupy-reczne-6"
+    },
+    {
+      "id": "zakupy-reczne-edge-6",
+      "source": "zakupy-reczne-6",
+      "target": "zakupy-reczne-7"
+    },
+    {
+      "id": "zakupy-reczne-edge-7",
+      "source": "zakupy-reczne-7",
+      "target": "zakupy-reczne-8"
+    },
+    {
+      "id": "zakupy-reczne-edge-8",
+      "source": "zakupy-reczne-8",
+      "target": "zakupy-reczne-9"
+    }
+  ],
+  "entry_block_id": "zakupy-reczne-1",
+  "variables": {},
+  "timeout_ms": 30000,
+  "retry_count": 0,
+  "retry_delay_ms": 1000,
+  "generated_by": "ai",
+  "generated_on_environment_id": "4d8f1c63-2a9e-4b70-8e35-6c1a0f7d9b52",
+  "generation_target_url": "https://api.perf.example.com",
+  "generation_description": "Klient loguje się, szuka produktu, dodaje go do koszyka i składa zamówienie.",
+  "openapi_spec_id": "0e6b4a91-3d27-4c58-9f10-7a2e5d8b3c64",
+  "source_endpoints": [
+    "POST:/auth/login",
+    "GET:/products",
+    "POST:/cart/items",
+    "GET:/cart",
+    "POST:/checkout"
+  ],
+  "source_operations": [],
+  "tags": [],
+  "is_active": true,
+  "can_regenerate": true,
+  "current_version": 1,
+  "created_at": "2026-11-22T10:05:00Z",
+  "updated_at": "2026-11-22T10:05:00Z",
+  "created_by": "user@example.com"
+}

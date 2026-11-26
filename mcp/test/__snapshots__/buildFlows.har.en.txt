@@ -1,0 +1,30 @@
+3 flows ready
+zakupy · 7 steps (4 requests · 3 pauses)
+  1  POST   /auth/login            → token
+  2  PAUSE  4.2 s                  recorded · form
+  3  GET    /products?q=#{q}       uses: token · → productId
+  4  PAUSE  10 s                   recorded · in-page action
+  5  POST   /cart/items            uses: token, productId · → cartId
+  6  PAUSE  10 s                   recorded · form
+  7  POST   /checkout              uses: token, cartId · ✓ 201 · 409
+przeglądanie · 3 steps     konto · 3 steps
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/flows/a7d2e914-3c5b-4e8f-b061-9f4c2d7e8a35
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/flows/d3a6f0b8-9e41-4725-8c1d-5b7e2a9f4c06
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/flows/1f8c4e72-6a0d-4b39-a5e8-9c2d7b3f0a15
+---
+flow "sesja" ready · 7 steps (4 requests · 3 pauses)
+  1  POST   /auth/login
+  2  PAUSE  2 s                    recorded
+  3  GET    /products
+  4  PAUSE  2 s                    recorded
+  5  POST   /cart/items
+  6  PAUSE  2 s                    recorded
+  7  POST   /checkout
+The recording holds one journey, so LoadCraft built one flow without a split.
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/flows/ca16810c-0b41-4363-9d9a-84fe34bc5ca6
+---
+[har_split_unknown_paths] LoadCraft proposed no journey named "koszyk"; it proposed: "zakupy", "przeglądanie", "konto". The run was cancelled and nothing was built.
+→ Call flows_generate_from_har again with paths from this list, or without paths to build them all.
+---
+[har_split_interrupted] The connection to LoadCraft broke while it was splitting the recording; LoadCraft drops such a run, and no flow was built.
+→ Call flows_generate_from_har again with the same arguments: the whole split runs again. If the connection keeps breaking, use split: false.

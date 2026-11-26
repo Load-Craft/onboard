@@ -1,0 +1,8 @@
+new current version of the documentation · 43 operations (+1)
+previous (a41f9c2) stays in the history · flows to migrate: 3
+3 flows on an older docs version: konto, przeglądanie, zakupy
+→ flows_migrate_docs preview: true shows what moves to the current version;
+  the migration itself asks for consent
+the profile and the test types are not refreshed automatically: they were
+  made from the previous version
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/settings#application-profile

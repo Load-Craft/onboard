@@ -1,0 +1,1 @@
+Sprawdzenie przed testem, nic nie uruchomiono: checkout na qa · chronione, limit 100 użytkowników / 20 nowych/s · Ramp load (closed) 2 000 → 100 (przycięte) · przed prawdziwym testem potrzebna zgoda · dane gotowe · plan 10:00 · środowisko wolne

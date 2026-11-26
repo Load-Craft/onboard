@@ -1,0 +1,13 @@
+konta  500 założonych przez POST /auth/register (10 × 50)
+       nieudanych: 50
+       cel odpowiedział 409: 20×
+       LoadCraft przerwał serię po kolejnych porażkach
+       → odczytaj status: 400 lub 422, żądanie rejestracji nie pasuje do celu
+       (sprawdź flow albo podaj register_operation); 401 lub 403, cel wymaga
+       klucza albo nagłówka (project_save_env z headers) albo nie pozwala na
+       rejestrację; 409, takie konta już istnieją (podaj je w pliku:
+       data_create_dataset z file i slot); 429 lub błąd serwera, cel jest
+       przeciążony (powtórz raz z mniejszą liczbą).
+       hasła zamaskowane
+istnieje 500 z 2 000 kont · test nie jest gotowy; powtórz wywołanie, aby
+dołożyć resztę

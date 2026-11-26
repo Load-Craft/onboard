@@ -1,0 +1,8 @@
+plan danych · 3 sloty
+Search terms (slot: search_phrases) przypięty
+  q · Samples a model wrote · zakupy
+Quantity & cardnumber (slot: order_details) przypięty
+  quantity 1–5 · cardNumber Visa, Mastercard · zakupy
+User accounts (slot: accounts) przypięty
+  email, password · wyłączne · zakupy, konto
+każdy slot wypełniony · test może ruszyć

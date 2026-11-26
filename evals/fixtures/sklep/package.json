@@ -1,0 +1,13 @@
+{
+  "name": "sklep-api",
+  "version": "2.14.0",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic customer repository for exercising the LoadCraft plugin. Not a real shop.",
+  "scripts": {
+    "start": "node src/server.ts"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

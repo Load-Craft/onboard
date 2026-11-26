@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sklep-logs": {
+      "type": "http",
+      "url": "https://logs.example.com/mcp"
+    }
+  }
+}

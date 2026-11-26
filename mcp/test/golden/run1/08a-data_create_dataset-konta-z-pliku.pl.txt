@@ -1,0 +1,3 @@
+konta  2 wiersze z data/konta.csv · hasła zamaskowane
+→ dalej: data_set_bindings scenario: "checkout",
+  bindings: {"accounts": "konta"}

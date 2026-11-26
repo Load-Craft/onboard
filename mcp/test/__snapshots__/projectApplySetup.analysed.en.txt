@@ -1,0 +1,10 @@
+Project “sklep” · Sklep API · 3 operations · 1 area
+project analysis  ████████████████████ 100%
+profile: 9 fields, 2 to check · login: JWT token
+profile applied ✓ · validators 5 · test types 3 (to review)
+perf ★ conformance: 3 GET ✓
+to check, ask the user:
+  app_architecture: spa (model)
+  has_async_operations: true (openapi)
+still unsure after the analysis: uses_csrf → ask the user about them
+↗ https://app.loadcraft.io/projects/f3c9ebfd-2b30-405c-b071-0a2ebd22e0b2/settings#application-profile

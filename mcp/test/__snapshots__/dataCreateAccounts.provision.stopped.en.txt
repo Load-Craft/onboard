@@ -1,0 +1,13 @@
+konta  500 created through POST /auth/register (10 × 50)
+       failed: 50
+       target answered 409: 20×
+       LoadCraft stopped the series after a run of failures
+       → read the status: 400 or 422, the registration request does not fit
+       the target (check the flow, or give register_operation); 401 or 403,
+       the target needs a key or a header (project_save_env with headers) or
+       does not allow registration; 409, such accounts exist (give them in a
+       file: data_create_dataset with file and slot); 429 or a server error,
+       the target is overloaded (repeat once with a smaller count).
+       passwords masked
+500 of 2,000 accounts exist · the test is not ready; repeat the call to add
+the rest

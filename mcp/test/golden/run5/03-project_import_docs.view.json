@@ -1,0 +1,16 @@
+{
+  "changed": true,
+  "operations": 43,
+  "delta": 1,
+  "previousCommit": "a41f9c2d83b05e17c6a94f0b2d38e5a1c7f09b46",
+  "previousVersion": "2.14.0",
+  "flowsOnPrevious": 0,
+  "flowsOnPreviousPartial": false,
+  "conformance": {
+    "environment": "qa",
+    "result": {
+      "state": "skipped"
+    }
+  },
+  "notes": []
+}

@@ -1,0 +1,3 @@
+konta  2 000 założonych przez POST /auth/register na qa (40 × 50)
+       hasła zamaskowane
+każdy slot wypełniony · test może ruszyć

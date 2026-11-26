@@ -1,0 +1,8 @@
+1 journey proposal from the API documentation:
+  Steps joined by · are a set: the generator sets the order of steps when it
+  builds.
+cart and orders   [feature] Get the cart · Place an order
+2 of 42 operations · 40 outside the journeys
+outside the journeys: Log in and get a token, Register an account, Log out,
+  Refresh the token, Request a password reset and 35 more
+heuristic proposals, not refined by the model (refine: false)

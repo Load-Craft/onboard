@@ -1,0 +1,12 @@
+4 propozycje ścieżek z dokumentacji API:
+  Kroki rozdzielone znakiem · to zbiór: kolejność kroków ustala generator
+  przy budowie.
+zakupy              [ścieżka] Log in and get a token · Search products · Add
+                    an item to the cart · Place an order
+przeglądanie        [ścieżka] List categories · Get a product
+konto               [ścieżka] Log in and get a token · List my orders
+status zamówienia   [odpytywanie] Place an order → Poll the status of an
+                    order
+8 z 42 operacji · 34 poza ścieżkami
+poza ścieżkami: Register an account, Log out, Refresh the token, Request a
+  password reset, Current user i jeszcze 29

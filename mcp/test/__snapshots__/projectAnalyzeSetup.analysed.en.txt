@@ -1,0 +1,10 @@
+project analysis  ████████████████████ 100%
+proposed profile: 9 fields, 2 to check
+2 fields unsure (low confidence or sources disagree), ask the user before
+  applying:
+  has_async_operations: true (confidence 60%)
+  uses_csrf: false (sources disagree)
+a correction after applying: project_set_profile
+→ next: project_apply_setup with analysis
+  "setup_analysis:<id>"; it applies the
+  proposed profile and adds the default validators and test types

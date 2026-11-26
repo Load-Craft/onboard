@@ -1,0 +1,4 @@
+sent 1 KB · 6 requests · 2 filtered out as noise
+login: token from POST /auth/login · address: perf (default)
+3 action groups in the recording: auth, shop, cart
+correlations: 1 accepted automatically · 1 uncertain (cartId)

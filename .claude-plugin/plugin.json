@@ -1,18 +1,63 @@
 {
-  "name": "loadcraft-preparation-skills",
-  "version": "0.2.0",
-  "description": "Source-grounded OpenAPI, AsyncAPI, journey and project-overview preparation for LoadCraft.",
+  "name": "loadcraft",
+  "version": "1.0.0-alpha.1",
+  "description": "Run load tests on LoadCraft from your editor: prepare source-grounded OpenAPI, AsyncAPI, journey and project-overview artifacts, then create, run and read load tests.",
   "author": {
     "name": "LoadCraft"
   },
   "keywords": [
     "loadcraft",
+    "load-testing",
+    "performance-testing",
+    "mcp",
     "openapi",
     "asyncapi",
-    "load-testing",
     "user-journeys",
     "project-overview"
   ],
+  "displayName": "LoadCraft",
+  "license": "Apache-2.0",
   "repository": "https://github.com/Load-Craft/onboard",
-  "homepage": "https://github.com/Load-Craft/onboard"
+  "homepage": "https://github.com/Load-Craft/onboard",
+  "engines": {
+    "claude-code": ">=2.1.271"
+  },
+  "mcpServers": "./.mcp.json",
+  "types": "./mod/types/index.d.ts",
+  "userConfig": {
+    "loadcraft_url": {
+      "type": "string",
+      "title": "LoadCraft web app (browser address)",
+      "description": "Only for a local or self-hosted LoadCraft. The address you open in the browser to use LoadCraft; links in tool results point here. Not the backend API address. Default: https://app.loadcraft.io.",
+      "default": "https://app.loadcraft.io"
+    },
+    "api_token": {
+      "type": "string",
+      "title": "LoadCraft API token",
+      "description": "API token created in LoadCraft settings. Stored in the system credential store.",
+      "sensitive": true,
+      "required": true
+    },
+    "locale": {
+      "type": "string",
+      "title": "Language",
+      "description": "Language of tool results.",
+      "options": [
+        "en",
+        "pl"
+      ],
+      "default": "en"
+    },
+    "demo": {
+      "type": "boolean",
+      "title": "Demo mode",
+      "description": "Try the plugin with sample data, without a LoadCraft account.",
+      "default": false
+    },
+    "api_url": {
+      "type": "string",
+      "title": "Backend API address (leave empty if same as web app)",
+      "description": "Only when the backend runs at a different address than the web app, e.g. local development with separate ports. Full address including /api/v1. Empty: <web app address>/api/v1."
+    }
+  }
 }

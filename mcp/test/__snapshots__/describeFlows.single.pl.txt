@@ -1,0 +1,5 @@
+plan r-2481a3f0 · 1 ścieżka
+zakupy
+Jedna ścieżka: LoadCraft nie pyta o podział i już przechodzi aplikację.
+→ dalej: flows_record_journeys z planem r-2481a3f0
+↗ podgląd na żywo: https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/scenario-from-description/runs/2481a3f0-9e6c-4d5b-b7a2-1f8e3c0d6a94

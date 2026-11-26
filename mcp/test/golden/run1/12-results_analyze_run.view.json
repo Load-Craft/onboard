@@ -1,0 +1,20 @@
+{
+  "verdict": "fail",
+  "confidence": "high",
+  "cause": {
+    "endpoint": "POST /checkout",
+    "text": "POST /checkout: transakcja bazy obejmuje wywołanie bramki płatności · blokada wiersza w tabeli orders"
+  },
+  "step": { "offsetS": 370, "endpoint": "POST /checkout", "beforeMs": 240, "afterMs": 1310 },
+  "errors": [{ "status": 504, "count": 2480, "endpoint": "POST /checkout" }],
+  "evidence": [
+    {
+      "quote": "Lock wait timeout exceeded; try restarting transaction",
+      "source": { "kind": "mcp", "label": "sklep-logs", "tool": "logs_summary" },
+      "window": { "start": "2026-11-22T10:28:00Z", "end": "2026-11-22T10:42:18Z" }
+    }
+  ],
+  "recommendation": "zapis zamówienia poza transakcją płatności",
+  "costUsd": 0.07,
+  "cached": false
+}

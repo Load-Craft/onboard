@@ -1,0 +1,61 @@
+{
+  "execution": {
+    "id": "3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42",
+    "handle": "e-3f9a12c4"
+  },
+  "target": {
+    "kind": "composition",
+    "name": "checkout"
+  },
+  "environment": {
+    "name": "perf",
+    "protected": false,
+    "caps": {}
+  },
+  "label": "Ramp load (closed)",
+  "requested": {
+    "type": "ramp_concurrency",
+    "vusers": 2000,
+    "ramp": 600
+  },
+  "effective": {
+    "type": "ramp_concurrency",
+    "vusers": 2000,
+    "ramp": 600
+  },
+  "clamped": false,
+  "thresholds": [],
+  "dataCheck": [
+    {
+      "slot": "Search terms",
+      "dataset": "frazy wyszukiwania",
+      "have": 500,
+      "need": null
+    },
+    {
+      "slot": "Quantity & cardnumber",
+      "dataset": "zamówienia",
+      "have": 2000,
+      "need": null
+    },
+    {
+      "slot": "User accounts",
+      "dataset": "konta",
+      "have": 2000,
+      "need": 1200
+    }
+  ],
+  "link": "https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/gatling/executions/3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42/live",
+  "end": {
+    "outcome": "completed",
+    "buildS": 18,
+    "elapsedS": 600,
+    "plannedS": 600,
+    "numbers": {
+      "rps": 1035,
+      "p95Ms": 1120,
+      "errorRate": 0.006
+    },
+    "series": [0, 0, 150, 150, 150, 290, 290, 290, 430, 570, 710, 860, 1000, 1000]
+  }
+}

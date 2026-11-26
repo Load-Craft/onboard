@@ -1,0 +1,4 @@
+wysłano 1 KB · 6 żądań · 2 odfiltrowane jako szum
+logowanie: token z POST /auth/login · adres: perf (domyślne)
+3 grupy akcji w nagraniu: auth, shop, cart
+korelacje: 1 przyjęta automatycznie · 1 niepewna (cartId)

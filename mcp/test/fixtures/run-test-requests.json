@@ -1,0 +1,2786 @@
+{
+  "plan-composition": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    }
+  ],
+  "plan-scenario": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    }
+  ],
+  "plan-with-data": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "smoke",
+          "vusers": 1,
+          "ramp": 0,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "constant",
+          "vusers": 4,
+          "ramp": 0,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_hold",
+          "vusers": 4,
+          "ramp": 60,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "stress",
+          "vusers": 10,
+          "ramp": 180,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "constant_concurrency",
+          "vusers": 2000,
+          "ramp": 0,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "spike",
+          "vusers": 1000,
+          "ramp": 60,
+          "hold": 60
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "soak",
+          "vusers": 1000,
+          "ramp": 60,
+          "hold": 7200
+        }
+      }
+    }
+  ],
+  "plan-with-data-scenario": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    }
+  ],
+  "plan-protected-clamped": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    }
+  ],
+  "start-composition-thresholds": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/execute",
+      "body": {
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0,
+          "thresholds": [
+            {
+              "type": "responseTime",
+              "percentile": 95,
+              "max_ms": 1500
+            },
+            {
+              "type": "failedRequests",
+              "max_percent": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 7
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    }
+  ],
+  "start-scenario": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "constant",
+          "vusers": 4,
+          "ramp": 0,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "constant",
+          "vusers": 4,
+          "ramp": 0,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 7
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    }
+  ],
+  "start-default-profile": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "smoke",
+          "vusers": 1,
+          "ramp": 0,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/execute",
+      "body": {
+        "environment_id": ":id",
+        "workload": {
+          "type": "smoke",
+          "vusers": 1,
+          "ramp": 0,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 7
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    }
+  ],
+  "start-left-running": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/execute",
+      "body": {
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    }
+  ],
+  "start-protected-asks-consent": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    }
+  ],
+  "start-protected-confirmed": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 100,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/execute",
+      "body": {
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 100,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 7
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 4
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id/result"
+    }
+  ],
+  "start-data-short": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 5000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    }
+  ],
+  "start-same-load-joins": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/execute",
+      "body": {
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 3
+    }
+  ],
+  "start-other-load-refused": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/feeders/preflight",
+      "body": {
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/compositions/:id/execute",
+      "body": {
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 2000,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/compositions",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/scenarios",
+      "query": {
+        "limit": "100"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/environments",
+      "times": 2
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/:id/gatling/executions/:id"
+    }
+  ]
+}

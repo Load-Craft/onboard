@@ -1,0 +1,8 @@
+connection ok: perf, qa, dev, prod (API and frontend)
+connection local: API blocked: a private address LoadCraft cannot reach
+→ LoadCraft could not reach the address above: check it with the user and
+  correct it (a blocked address is a private one, which LoadCraft cannot
+  reach), then correct it in the environment settings in LoadCraft
+  (project_save_env adds environments, it never changes the address of one)
+  and call project_check_env again; run no test and create no accounts on
+  that environment until it answers.

@@ -1,0 +1,10 @@
+Projekt „sklep” · Sklep API · 3 operacje · 1 obszar
+analiza projektu  ████████████████████ 100%
+profil: 9 pól, 2 do sprawdzenia · logowanie: token JWT
+profil zastosowany ✓ · walidatory 5 · typy testów 3 (do przejrzenia)
+perf ★ zgodność: 3 GET ✓
+do sprawdzenia, zapytaj użytkownika:
+  app_architecture: spa (model)
+  has_async_operations: true (openapi)
+nadal niepewne po analizie: uses_csrf → zapytaj o nie użytkownika
+↗ https://app.loadcraft.io/projects/f3c9ebfd-2b30-405c-b071-0a2ebd22e0b2/settings#application-profile

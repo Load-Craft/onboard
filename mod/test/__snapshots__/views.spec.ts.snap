@@ -1,0 +1,4083 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the drawings agree with the golden texts > flows_generate_from_endpoints (run2): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy · 9 steps (5 requests · 4 pauses)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/auth/login          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "3–8 s                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · form",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/products?q=#{q}     ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token · → productId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "4",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "10–30 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · in-page action",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "5",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/cart/items          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token, productId · → cartId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "6",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "2–5 s                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · page",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "7",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/cart                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token, cartId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "8",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "20–45 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · form",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "9",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/checkout            ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token, cartId · ✓ 201 · 409",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > flows_generate_from_endpoints (run2): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy · 9 kroków (5 żądań · 4 pauzy)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/auth/login          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "3–8 s                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · formularz",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/products?q=#{q}     ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token · → productId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "4",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "10–30 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · akcja w stronie",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "5",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/cart/items          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token, productId · → cartId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "6",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "2–5 s                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · strona",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "7",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/cart                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token, cartId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "8",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "20–45 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · formularz",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "9",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/checkout            ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token, cartId · ✓ 201 · 409",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > flows_generate_from_suggestions (run1): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy · 7 steps (4 requests · 3 pauses)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/auth/login          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "3–8 s                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · form",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/products?q=#{q}     ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token · → productId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "4",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "10–30 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · in-page action",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "5",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/cart/items          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token, productId · → cartId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "6",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "20–45 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · form",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "7",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/checkout            ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token, cartId · ✓ 201 · 409",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przeglądanie · 3 steps (2 requests · 1 pause)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/categories                       ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ categoryId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "4–12 s                            ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · page",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/products?categoryId=#{categoryId}",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: categoryId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "konto · 3 steps (2 requests · 1 pause)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/auth/login          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "4–12 s               ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "assumed · page",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/orders              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "uses: token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > flows_generate_from_suggestions (run1): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy · 7 kroków (4 żądania · 3 pauzy)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/auth/login          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "3–8 s                ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · formularz",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/products?q=#{q}     ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token · → productId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "4",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "10–30 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · akcja w stronie",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "5",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/cart/items          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token, productId · → cartId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "6",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "20–45 s              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · formularz",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "7",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/checkout            ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token, cartId · ✓ 201 · 409",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przeglądanie · 3 kroki (2 żądania · 1 pauza)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/categories                       ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ categoryId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "4–12 s                            ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · strona",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/products?categoryId=#{categoryId}",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: categoryId",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "konto · 3 kroki (2 żądania · 1 pauza)",
+          ],
+          "props": {
+            "bold": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "1",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "POST ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "suggestion",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/auth/login          ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "→ token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "2",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "PAUSE",
+              ],
+              "props": {
+                "bold": true,
+                "color": "inactive",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "4–12 s               ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "założona · strona",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "3",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "GET  ",
+              ],
+              "props": {
+                "bold": true,
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "/orders              ",
+              ],
+              "props": {
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "używa: token",
+              ],
+              "props": {
+                "dimColor": true,
+                "wrap": "truncate-end",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "flexDirection": "column",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > results_analyze_run (run1): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "verdict       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "fail",
+              ],
+              "props": {
+                "bold": true,
+                "color": "error",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "·",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "high confidence",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 1,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "cause         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "POST /checkout: transakcja bazy obejmuje wywołanie bramki płatności · blokada wiersza w tabeli orders",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "step change   ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "T+6:10 · POST /checkout mean 240 → 1,310 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "errors        ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "504 × 2,480 · only POST /checkout",
+              ],
+              "props": {
+                "color": "error",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "flexDirection": "column",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        "evidence (via MCP · sklep-logs, whole test)",
+      ],
+      "props": {
+        "dimColor": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "             ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "“Lock wait timeout exceeded; try restarting transaction”",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "recommendation",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "zapis zamówienia poza transakcją płatności",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > results_analyze_run (run1): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "werdykt       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "fail",
+              ],
+              "props": {
+                "bold": true,
+                "color": "error",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "·",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "pewność wysoka",
+              ],
+              "props": {
+                "dimColor": true,
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 1,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przyczyna     ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "POST /checkout: transakcja bazy obejmuje wywołanie bramki płatności · blokada wiersza w tabeli orders",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "zmiana skokowa",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "T+6:10 · POST /checkout średnio 240 → 1 310 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "błędy         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "504 × 2 480 · tylko POST /checkout",
+              ],
+              "props": {
+                "color": "error",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "flexDirection": "column",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        "dowody (via MCP · sklep-logs, cały test)",
+      ],
+      "props": {
+        "dimColor": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "             ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "„Lock wait timeout exceeded; try restarting transaction”",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "rekomendacja  ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "zapis zamówienia poza transakcją płatności",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > results_get_report (run1): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "verdict       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "SLA FAILED",
+          ],
+          "props": {
+            "bold": true,
+            "color": "error",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "thresholds    ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "p95 1,120 ms > 400 ms ✕",
+              ],
+              "props": {
+                "color": "error",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "errors 0.6% < 1% ✓",
+              ],
+              "props": {
+                "color": "success",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "run           ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "10 min · planned 0 → 2,000 concurrent",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "requests      ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "412,300 · 690 per second",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "latency       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "p50 180 ms · p95 1,120 ms · p99 2,900 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "errors        ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "504 Gateway Timeout × 2,480 · only POST /checkout",
+              ],
+              "props": {
+                "color": "error",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "flexDirection": "column",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        "p95 by request (estimate)",
+      ],
+      "props": {
+        "dimColor": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "POST /checkout  ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "1,840 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "POST /cart/items",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "620 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "GET /products   ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "290 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "GET /categories ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "110 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        "p95 over the threshold from around 6:10",
+      ],
+      "props": {
+        "color": "warning",
+      },
+      "type": "Text",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > results_get_report (run1): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "werdykt       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "SLA FAILED",
+          ],
+          "props": {
+            "bold": true,
+            "color": "error",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "progi         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "p95 1 120 ms > 400 ms ✕",
+              ],
+              "props": {
+                "color": "error",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "błędy 0,6% < 1% ✓",
+              ],
+              "props": {
+                "color": "success",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przebieg      ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "10 min · planowane 0 → 2 000 jednocześnie",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "żądania       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "412 300 · 690 na sekundę",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "czasy         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "p50 180 ms · p95 1 120 ms · p99 2 900 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "błędy         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "504 Gateway Timeout × 2 480 · tylko POST /checkout",
+              ],
+              "props": {
+                "color": "error",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "flexDirection": "column",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        "p95 według żądań (szacunek)",
+      ],
+      "props": {
+        "dimColor": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "POST /checkout  ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "1 840 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "POST /cart/items",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "620 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "GET /products   ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "290 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "GET /categories ",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "110 ms",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 3,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        "p95 ponad progiem od około 6:10",
+      ],
+      "props": {
+        "color": "warning",
+      },
+      "type": "Text",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > results_get_report capped (run5): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "verdict       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "SLA PASSED",
+          ],
+          "props": {
+            "bold": true,
+            "color": "success",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "thresholds    ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "p95 210 ms < 400 ms ✓",
+              ],
+              "props": {
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "errors 0% < 1% ✓",
+              ],
+              "props": {
+                "color": "success",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "note          ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "load limited by the environment (100 of 2,000)",
+          ],
+          "props": {
+            "color": "warning",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "run           ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "10 min · planned 0 → 100 concurrent",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "requests      ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "10,900 · 18 per second",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > results_get_report capped (run5): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            "werdykt       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "SLA PASSED",
+          ],
+          "props": {
+            "bold": true,
+            "color": "success",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "progi         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "p95 210 ms < 400 ms ✓",
+              ],
+              "props": {
+                "color": "success",
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                "błędy 0% < 1% ✓",
+              ],
+              "props": {
+                "color": "success",
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "columnGap": 2,
+            "flexDirection": "row",
+          },
+          "type": "Box",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "uwaga         ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "obciążenie ograniczone limitem środowiska (100 z 2 000)",
+          ],
+          "props": {
+            "color": "warning",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przebieg      ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "10 min · planowane 0 → 100 jednocześnie",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "żądania       ",
+          ],
+          "props": {
+            "dimColor": true,
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            "10 900 · 18 na sekundę",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 1,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > scenario_generate composition (run1): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        "checkout",
+      ],
+      "props": {
+        "bold": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przeglądanie",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 40%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "████████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy      ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 50%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██████████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "konto       ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 10%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > scenario_generate composition (run1): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        "checkout",
+      ],
+      "props": {
+        "bold": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przeglądanie",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 40%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "████████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy      ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 50%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██████████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "konto       ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 10%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > scenario_suggest_split proposal (run1): structure in en 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        "proposed traffic split:",
+      ],
+      "props": {
+        "bold": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przeglądanie",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 60%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "████████████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy      ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 30%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "konto       ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 10%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;
+
+exports[`the drawings agree with the golden texts > scenario_suggest_split proposal (run1): structure in pl 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        "propozycja podziału ruchu:",
+      ],
+      "props": {
+        "bold": true,
+      },
+      "type": "Text",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "przeglądanie",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 60%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "████████████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "zakupy      ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 30%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██████",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            "konto       ",
+          ],
+          "props": {
+            "wrap": "truncate-end",
+          },
+          "type": "Text",
+        },
+        {
+          "children": [
+            " 10%",
+          ],
+          "props": {},
+          "type": "Text",
+        },
+        {
+          "children": [
+            "██",
+          ],
+          "props": {
+            "color": "claude",
+          },
+          "type": "Text",
+        },
+      ],
+      "props": {
+        "columnGap": 2,
+        "flexDirection": "row",
+      },
+      "type": "Box",
+    },
+  ],
+  "props": {
+    "flexDirection": "column",
+  },
+  "type": "Box",
+}
+`;

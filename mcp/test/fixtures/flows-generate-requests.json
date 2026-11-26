@@ -1,0 +1,292 @@
+{
+  "suggestions": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/flow-suggestions/heuristic"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/flow-suggestions/batch-generate",
+        "body": {
+          "baskets": [
+            {
+              "basket_id": "b1",
+              "name": "zakupy",
+              "description": "Log in, search for a product, add it to the cart and place the order.",
+              "endpoint_ids": [
+                "b229f78d-8c9c-4a29-a325-a0525f7690bb",
+                "b7dab4b7-5c5f-42db-a7bd-8802df901ba4",
+                "392eaa85-a66d-466c-83d2-c4b1924e8c75",
+                "50b1ba7d-377f-4b38-a7e0-477f7e64c7ab"
+              ],
+              "pattern_type": "semantic",
+              "tags": ["sklep", "mcp-:tag"]
+            },
+            {
+              "basket_id": "b2",
+              "name": "przeglądanie",
+              "description": "Browse the categories and open a product page.",
+              "endpoint_ids": [
+                "2955caeb-226b-449e-8cbc-7abea6f3bbbd",
+                "8fa892ec-0edf-4a8b-af6d-f58e12a15eb0"
+              ],
+              "pattern_type": "semantic",
+              "tags": ["sklep", "mcp-:tag"]
+            },
+            {
+              "basket_id": "b3",
+              "name": "konto",
+              "description": "Log in and look at the orders of the account.",
+              "endpoint_ids": [
+                "b229f78d-8c9c-4a29-a325-a0525f7690bb",
+                "d4fed798-a38a-4e62-91ed-4fcbf559bd40"
+              ],
+              "pattern_type": "semantic",
+              "tags": ["sklep", "mcp-:tag"]
+            }
+          ],
+          "skip_validators": false
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      }
+    ],
+    "channel": []
+  },
+  "endpoints": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/flows/generate-async",
+        "body": {
+          "description": "Log in, search the shop, put an item in the cart and pay for it",
+          "flow_name": "zakupy",
+          "endpoint_ids": [
+            "POST:/auth/login",
+            "GET:/products",
+            "POST:/cart/items",
+            "GET:/cart",
+            "POST:/checkout"
+          ],
+          "flow_type": "api",
+          "skip_validators": false
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/flow-generation/:id/status"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/flow-generation/:id/status"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/flow-generation/:id/status"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/flow-generation/:id/status"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      }
+    ],
+    "channel": []
+  },
+  "har-one": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/har/upload",
+        "body": {
+          "file": {
+            "file": "sesja.har",
+            "size": 1002
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/har/:id/analyze"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/environments"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/har/:id/generate",
+        "body": {
+          "flow_name": "zakupy"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      }
+    ],
+    "channel": []
+  },
+  "har-split": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/har/upload",
+        "body": {
+          "file": {
+            "file": "sesja.har",
+            "size": 1002
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/har/:id/analyze"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/environments"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      }
+    ],
+    "channel": [
+      {
+        "type": "har:generate",
+        "flow_name": "sesja"
+      },
+      {
+        "type": "split_resume",
+        "paths": [
+          {
+            "name": "zakupy",
+            "steps": ["POST /auth/login", "GET /products", "POST /cart/items", "POST /checkout"],
+            "depends_on_prior": false,
+            "rationale": "The recording shows zakupy as its own journey."
+          },
+          {
+            "name": "przeglądanie",
+            "steps": ["GET /categories", "GET /products"],
+            "depends_on_prior": false,
+            "rationale": "The recording shows przeglądanie as its own journey."
+          },
+          {
+            "name": "konto",
+            "steps": ["POST /auth/login", "GET /orders"],
+            "depends_on_prior": false,
+            "rationale": "The recording shows konto as its own journey."
+          }
+        ]
+      }
+    ]
+  },
+  "har-split-imported": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows/:id"
+      }
+    ],
+    "channel": [
+      {
+        "type": "har:generate",
+        "flow_name": "sesja"
+      },
+      {
+        "type": "split_resume",
+        "paths": [
+          {
+            "name": "zakupy",
+            "steps": ["POST /auth/login", "GET /products", "POST /cart/items", "POST /checkout"],
+            "depends_on_prior": false,
+            "rationale": "The recording shows zakupy as its own journey."
+          },
+          {
+            "name": "konto",
+            "steps": ["POST /auth/login", "GET /orders"],
+            "depends_on_prior": false,
+            "rationale": "The recording shows konto as its own journey."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "id": "9e4c2b71-6d08-4a35-b7f2-1c8a5e3d0f64",
+  "project_id": "5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61",
+  "name": "katalog",
+  "description": "Klient przegląda produkty w pętli i płaci, z koszykiem albo bez.",
+  "flow_type": "api",
+  "blocks": [
+    {
+      "id": "k-login",
+      "type": "request",
+      "name": "Log in",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": null,
+        "method": "POST",
+        "path": "/auth/login",
+        "headers": {},
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "email": "#{email}",
+          "password": "#{password}"
+        },
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.token",
+            "save_as": "token"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {}
+      }
+    },
+    {
+      "id": "k-list",
+      "type": "request",
+      "name": "List products",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": null,
+        "method": "GET",
+        "path": "/products",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {
+          "items": "$.items"
+        },
+        "action_start": {
+          "class": "page"
+        }
+      }
+    },
+    {
+      "id": "k-loop",
+      "type": "loop",
+      "name": "For each product",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "loop_type": "foreach",
+        "foreach_source": "items",
+        "foreach_variable": "item",
+        "max_iterations": 5,
+        "body_blocks": ["k-view", "k-think"]
+      }
+    },
+    {
+      "id": "k-view",
+      "type": "request",
+      "name": "Show product",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": null,
+        "method": "GET",
+        "path": "/products/#{item}",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "in_page"
+        }
+      }
+    },
+    {
+      "id": "k-think",
+      "type": "pause",
+      "name": "Pause",
+      "description": "ogląda produkt",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 1000,
+        "delay_max_ms": 4000,
+        "distribution": "uniform",
+        "source": "default_human"
+      }
+    },
+    {
+      "id": "k-wishlist",
+      "type": "request",
+      "name": "Save wishlist",
+      "description": "",
+      "enabled": false,
+      "config": {
+        "endpoint_id": null,
+        "method": "PUT",
+        "path": "/wishlist",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {
+          "ghost": "$.id"
+        }
+      }
+    },
+    {
+      "id": "k-if",
+      "type": "conditional",
+      "name": "Has a cart?",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "switch_type": "if_else",
+        "condition_source": "#{items}",
+        "condition_operator": "exists",
+        "true_branch": "k-add",
+        "false_branch": "k-pick"
+      }
+    },
+    {
+      "id": "k-add",
+      "type": "request",
+      "name": "Add to cart",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": null,
+        "method": "POST",
+        "path": "/cart/items",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "productId": "#{item}"
+        },
+        "expected_statuses": null,
+        "request_checks": [],
+        "response_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.cartId",
+            "save_as": "cartId"
+          }
+        ],
+        "save_variables": {},
+        "action_start": {
+          "class": "in_page"
+        }
+      }
+    },
+    {
+      "id": "k-wait",
+      "type": "pause",
+      "name": "Wait after add",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 500,
+        "delay_max_ms": 500,
+        "distribution": "fixed",
+        "source": "machine_wait"
+      }
+    },
+    {
+      "id": "k-pick",
+      "type": "transform",
+      "name": "Pick a cart",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "transforms": [
+          {
+            "source": "$.carts[0].id",
+            "target": "cartId",
+            "operation": "extract"
+          }
+        ]
+      }
+    },
+    {
+      "id": "k-checkout",
+      "type": "request",
+      "name": "Check out",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": null,
+        "method": "POST",
+        "path": "/checkout",
+        "headers": {
+          "Authorization": "Bearer #{token}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "cartId": "#{cartId}"
+        },
+        "expected_statuses": [201],
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "form_submit"
+        }
+      }
+    },
+    {
+      "id": "k-orders-group",
+      "type": "group",
+      "name": "Orders",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "body_blocks": ["k-orders"]
+      }
+    },
+    {
+      "id": "k-orders",
+      "type": "request",
+      "name": "List my orders",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": null,
+        "method": "GET",
+        "path": "/orders",
+        "headers": {
+          "Authorization": "Bearer #{token}",
+          "X-Wishlist": "#{ghost}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "page"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "k-e1",
+      "source": "k-login",
+      "target": "k-list"
+    },
+    {
+      "id": "k-b1",
+      "source": "k-list",
+      "target": "k-checkout",
+      "type": "binding"
+    },
+    {
+      "id": "k-e2",
+      "source": "k-list",
+      "target": "k-loop"
+    },
+    {
+      "id": "k-e3",
+      "source": "k-loop",
+      "target": "k-wishlist"
+    },
+    {
+      "id": "k-e4",
+      "source": "k-wishlist",
+      "target": "k-if"
+    },
+    {
+      "id": "k-e5",
+      "source": "k-if",
+      "target": "k-add",
+      "label": "true"
+    },
+    {
+      "id": "k-e6",
+      "source": "k-if",
+      "target": "k-pick",
+      "label": "false"
+    },
+    {
+      "id": "k-e7",
+      "source": "k-add",
+      "target": "k-wait"
+    },
+    {
+      "id": "k-e8",
+      "source": "k-wait",
+      "target": "k-checkout"
+    },
+    {
+      "id": "k-e9",
+      "source": "k-pick",
+      "target": "k-checkout"
+    },
+    {
+      "id": "k-e10",
+      "source": "k-checkout",
+      "target": "k-orders-group"
+    }
+  ],
+  "entry_block_id": "k-login",
+  "variables": {},
+  "timeout_ms": 30000,
+  "retry_count": 0,
+  "retry_delay_ms": 1000,
+  "generated_by": "ai",
+  "generated_on_environment_id": "4d8f1c63-2a9e-4b70-8e35-6c1a0f7d9b52",
+  "generation_target_url": "https://api.perf.example.com",
+  "generation_description": "Klient przegląda produkty w pętli i płaci, z koszykiem albo bez.",
+  "openapi_spec_id": "0e6b4a91-3d27-4c58-9f10-7a2e5d8b3c64",
+  "source_endpoints": [
+    "POST:/auth/login",
+    "GET:/products",
+    "GET:/products/{id}",
+    "POST:/cart/items",
+    "POST:/checkout",
+    "GET:/orders"
+  ],
+  "source_operations": [],
+  "tags": ["katalog"],
+  "is_active": true,
+  "can_regenerate": true,
+  "current_version": 1,
+  "created_at": "2026-11-22T10:05:00Z",
+  "updated_at": "2026-11-22T10:05:00Z",
+  "created_by": "user@example.com"
+}

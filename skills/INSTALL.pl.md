@@ -4,12 +4,20 @@
 
 Zrób to raz, przed pierwszym użyciem. Wybierz swoje narzędzie poniżej i
 uruchom komendy w **katalogu głównym swojego projektu**. Komendy instalują
-wszystkie trzy skille; folder każdego skilla zostaje kompletny (`SKILL.md` +
+wszystkie cztery skille przygotowania; folder każdego skilla zostaje kompletny (`SKILL.md` +
 `references/` + `scripts/`), co jest wymagane do działania. (Wolisz ZIP-y?
 Gotowe są w [`dist/`](../dist/) — rozpakuj je do tego samego katalogu
 docelowego.)
 
 ## Claude Code
+
+**Zalecane: zainstaluj plugin.** Zawiera cztery skille przygotowania, a ponad nimi skill prowadzący
+`loadcraft-test`, komendy `/loadcraft:status` i `/loadcraft:doctor` oraz serwer rozmawiający z LoadCraftem.
+Postępuj według [instrukcji instalacji pluginu](../docs/plugin/INSTALL.pl.md); zajmuje kilka minut i wymaga tokenu
+API LoadCrafta.
+
+**Same skille przygotowania, bez pluginu:** skopiuj foldery jak niżej. Skilla prowadzącego `loadcraft-test` wśród
+nich nie ma: potrzebuje serwera MCP z pluginu i skopiowany nie działa.
 
 ```bash
 rm -rf /tmp/onboard
@@ -46,6 +54,8 @@ Przeczytaj tę instrukcję i wykonaj opisany workflow dla tego projektu.
 ```
 
 ## Codex (OpenAI)
+
+Plugin jest dla Claude Code. W Codeksie skille przygotowania instaluje się przez kopiowanie, jak niżej.
 
 ```bash
 rm -rf /tmp/onboard

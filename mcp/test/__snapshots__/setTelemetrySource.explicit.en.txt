@@ -1,0 +1,5 @@
+connected ✓ · 1 tool: logs_summary
+called after the test · window: whole test ±2 min
+never called, it needs more than start and end: trace_search
+not offered by the server: gone_tool
+available but not enabled: container_events

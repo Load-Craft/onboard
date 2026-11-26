@@ -1,0 +1,20 @@
+Preview, nothing was saved: 3 flows → docs version 2.16.0 (2026-11-22,
+  f3c9ebfd)
+konto v1 · 2.14.0 → 2.16.0 · 2 steps: 1 matched, 0 changed, 1 unmatched
+  moves only with allow_unmatched: a step lost its endpoint
+  step List my orders · GET /orders (endpoint removed)
+  endpoints dropped from the flow: GET /orders
+  scenarios that go stale: konto
+przeglądanie v1 · 2.14.0 → 2.16.0 · 2 steps: 2 matched, 0 changed, 0
+  unmatched
+  scenarios that go stale: przeglądanie
+zakupy v1 · 2.14.0 → 2.16.0 · 4 steps: 3 matched, 1 changed, 0 unmatched
+  value Check out · body.paymentMethod "card" → "blik" (example changed)
+    id a7d2e914-3c5b-4e8f-b061-9f4c2d7e8a35:1:f3c9ebfd-2b30-405c-b071-0a2ebd22e0b2:zakupy-7:body:paymentMethod
+  scenarios that go stale: zakupy
+→ Show this to the user and ask which value differences to adopt. Then call
+  flows_migrate_docs without preview, with the same flow_ids and
+  adopt_value_ids (or adopt_values: "all"): it returns the consent card.
+→ A flow marked "moves only with allow_unmatched" stays where it is unless
+  the user agrees to allow_unmatched: true; its steps without an endpoint
+  keep their request but lose the link to the docs.

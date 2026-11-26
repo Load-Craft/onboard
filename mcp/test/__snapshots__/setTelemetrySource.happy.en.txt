@@ -1,0 +1,2 @@
+connected ✓ · 2 tools: logs_summary, container_events
+called after the test · window: whole test ±2 min

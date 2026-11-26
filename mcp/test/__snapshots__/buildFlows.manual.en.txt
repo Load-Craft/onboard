@@ -1,0 +1,11 @@
+flow "zakupy" ready · 9 steps (5 requests · 4 pauses)
+  1  POST   /auth/login            → token
+  2  PAUSE  3–8 s                  assumed · form
+  3  GET    /products?q=#{q}       uses: token · → productId
+  4  PAUSE  10–30 s                assumed · in-page action
+  5  POST   /cart/items            uses: token, productId · → cartId
+  6  PAUSE  2–5 s                  assumed · page
+  7  GET    /cart                  uses: token, cartId
+  8  PAUSE  20–45 s                assumed · form
+  9  POST   /checkout              uses: token, cartId · ✓ 201 · 409
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/flows/a7d2e914-3c5b-4e8f-b061-9f4c2d7e8a35

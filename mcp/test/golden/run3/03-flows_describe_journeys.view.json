@@ -1,0 +1,28 @@
+{
+  "plan": "r-2481a3f0",
+  "paths": [
+    {
+      "name": "zakupy",
+      "steps": ["logowanie", "wyszukanie", "koszyk", "kod rabatowy", "płatność"],
+      "dependsOnPrior": false,
+      "ownIdentity": false
+    },
+    {
+      "name": "przeglądanie",
+      "steps": ["kategoria", "produkt"],
+      "dependsOnPrior": false,
+      "ownIdentity": false
+    },
+    {
+      "name": "konto",
+      "steps": ["logowanie", "zamówienia"],
+      "dependsOnPrior": false,
+      "ownIdentity": false
+    }
+  ],
+  "sharedSignIn": ["zakupy", "przeglądanie", "konto"],
+  "single": false,
+  "started": false,
+  "accountUsed": { "file": ".env.perf", "emailKey": "TEST_USER_EMAIL" },
+  "link": "https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/scenario-from-description/runs/2481a3f0-9e6c-4d5b-b7a2-1f8e3c0d6a94"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "checkout",
+  "proposal": [
+    { "flow": "przeglądanie", "percent": 60 },
+    { "flow": "zakupy", "percent": 30 },
+    { "flow": "konto", "percent": 10 }
+  ],
+  "source": "model"
+}

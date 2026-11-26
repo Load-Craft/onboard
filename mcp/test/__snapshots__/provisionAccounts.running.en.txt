@@ -1,0 +1,7 @@
+Accounts for slot accounts: the plugin server goes on creating them after
+this call. Call process_wait with operation
+"account_provision:<id>" to follow it; do not
+call data_create_accounts again for it.
+450 / 2,000 accounts
+The operation is still running in LoadCraft: account_provision:<id>.
+→ Call process_wait with operation "account_provision:<id>" to keep waiting; LoadCraft keeps working meanwhile.

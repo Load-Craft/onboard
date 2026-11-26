@@ -1,0 +1,670 @@
+{
+  "$comment": "WebSocket frames the LoadCraft plugin reads and sends. Only keys the plugin reads are listed; other keys may be present and are ignored. Source references are backend file:line at loadcraft d93e08d80. Key types: string, integer, boolean, object, array. required=false means the key may be absent; nullable=true means null is accepted.",
+  "version": 1,
+  "backend_ref": "d93e08d80",
+  "channels": {
+    "refine": {
+      "path": "/ws/flow-suggestions-refine/{job_id}",
+      "envelope": "payload",
+      "requires": "none",
+      "close_codes": {
+        "4404": "unknown job; an error frame with reason job_not_found precedes the close"
+      },
+      "notes": "The current job state is sent right after the connection opens. Client messages are ignored.",
+      "server": [
+        {
+          "type": "flow-suggestions-refine:progress",
+          "source": "backend/api/websocket/flow_suggestions_refine_ws.py:59-63",
+          "keys": [
+            { "name": "job_id", "type": "string", "required": true },
+            { "name": "status", "type": "string", "required": true },
+            { "name": "progress", "type": "integer", "required": true },
+            { "name": "current_step", "type": "string", "required": false },
+            { "name": "step_label", "type": "string", "required": false },
+            {
+              "name": "described",
+              "type": "integer",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "total",
+              "type": "integer",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "flow-suggestions-refine:complete",
+          "source": "backend/api/websocket/flow_suggestions_refine_ws.py:65-66",
+          "keys": [
+            { "name": "job_id", "type": "string", "required": true },
+            { "name": "status", "type": "string", "required": true },
+            { "name": "result", "type": "object", "required": true }
+          ]
+        },
+        {
+          "type": "flow-suggestions-refine:error",
+          "source": "backend/api/websocket/flow_suggestions_refine_ws.py:68-69,75-87",
+          "keys": [
+            { "name": "job_id", "type": "string", "required": true },
+            {
+              "name": "error",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "recoverable",
+              "type": "boolean",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "reason",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "flow-suggestions-refine:cancelled",
+          "source": "backend/api/websocket/flow_suggestions_refine_ws.py:71",
+          "keys": [{ "name": "job_id", "type": "string", "required": true }]
+        }
+      ],
+      "client": []
+    },
+    "batch": {
+      "path": "/ws/batch-generation/{run_id}",
+      "envelope": "payload",
+      "requires": "none",
+      "close_codes": {
+        "4404": "unknown run; an error frame with reason run_not_found precedes the close"
+      },
+      "notes": "After the connection opens the last event of every basket is replayed in request order, then the run end if it has ended. Client messages are ignored.",
+      "server": [
+        {
+          "type": "batch-generation:basket-progress",
+          "source": "backend/api/websocket/batch_generation_ws.py:164-172",
+          "keys": [
+            { "name": "basket_id", "type": "string", "required": true },
+            { "name": "step_label", "type": "string", "required": false },
+            { "name": "progress", "type": "integer", "required": false }
+          ]
+        },
+        {
+          "type": "batch-generation:basket-complete",
+          "source": "backend/api/websocket/batch_generation_ws.py:191-199",
+          "keys": [
+            { "name": "basket_id", "type": "string", "required": true },
+            { "name": "flow_id", "type": "string", "required": true },
+            { "name": "flow_name", "type": "string", "required": false },
+            {
+              "name": "needs_input",
+              "type": "array",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "batch-generation:basket-error",
+          "source": "backend/api/websocket/batch_generation_ws.py:210-218",
+          "keys": [
+            { "name": "basket_id", "type": "string", "required": true },
+            { "name": "error", "type": "string", "required": true },
+            { "name": "retryable", "type": "boolean", "required": false }
+          ]
+        },
+        {
+          "type": "batch-generation:complete",
+          "source": "backend/api/websocket/batch_generation_ws.py:66-72",
+          "keys": [
+            { "name": "success_count", "type": "integer", "required": true },
+            { "name": "failed_count", "type": "integer", "required": true }
+          ]
+        },
+        {
+          "type": "batch-generation:error",
+          "source": "backend/api/websocket/batch_generation_ws.py:75-84,103-106",
+          "keys": [
+            {
+              "name": "error",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "recoverable",
+              "type": "boolean",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "reason",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            { "name": "success_count", "type": "integer", "required": false },
+            { "name": "failed_count", "type": "integer", "required": false }
+          ]
+        }
+      ],
+      "client": []
+    },
+    "scenario": {
+      "path": "/ws/gatling-scenario/{run_id}",
+      "envelope": "payload",
+      "requires": "none",
+      "close_codes": {},
+      "notes": "Only the last terminal frame of a run is replayed to a socket opened after the run ended; progress frames are not replayed. Client messages are ignored.",
+      "server": [
+        {
+          "type": "gatling-scenario:progress",
+          "source": "backend/api/websocket/gatling_scenario_ws.py:111-121",
+          "keys": [
+            { "name": "progress", "type": "integer", "required": true },
+            { "name": "current_step", "type": "string", "required": false },
+            { "name": "step_label", "type": "string", "required": false },
+            { "name": "planner_path", "type": "string", "required": false },
+            {
+              "name": "planner_path_reason",
+              "type": "string",
+              "required": false
+            }
+          ]
+        },
+        {
+          "type": "gatling-scenario:complete",
+          "source": "backend/api/websocket/gatling_scenario_ws.py:128-137",
+          "keys": [
+            { "name": "run_id", "type": "string", "required": false },
+            { "name": "scenario_id", "type": "string", "required": true }
+          ]
+        },
+        {
+          "type": "gatling-scenario:error",
+          "source": "backend/api/websocket/gatling_scenario_ws.py:150-159",
+          "keys": [
+            { "name": "error", "type": "string", "required": true },
+            { "name": "recoverable", "type": "boolean", "required": false },
+            { "name": "status_code", "type": "integer", "required": false }
+          ]
+        },
+        {
+          "type": "gatling-scenario:cancelled",
+          "source": "backend/api/websocket/gatling_scenario_ws.py:164-171",
+          "keys": [{ "name": "run_id", "type": "string", "required": false }]
+        }
+      ],
+      "client": []
+    },
+    "analysis": {
+      "path": "/ws/gatling-analysis/{run_id}",
+      "envelope": "payload",
+      "requires": "none",
+      "close_codes": {},
+      "notes": "Frames are not replayed after the run ended; the stored analysis is read over REST. Client messages are ignored.",
+      "server": [
+        {
+          "type": "gatling-analysis:progress",
+          "source": "backend/api/websocket/gatling_analysis_ws.py:35-45",
+          "keys": [
+            { "name": "progress", "type": "integer", "required": true },
+            { "name": "current_step", "type": "string", "required": false },
+            { "name": "step_label", "type": "string", "required": false }
+          ]
+        },
+        {
+          "type": "gatling-analysis:complete",
+          "source": "backend/api/websocket/gatling_analysis_ws.py:52-60",
+          "keys": [
+            { "name": "run_id", "type": "string", "required": false },
+            { "name": "analysis", "type": "object", "required": true }
+          ]
+        },
+        {
+          "type": "gatling-analysis:error",
+          "source": "backend/api/websocket/gatling_analysis_ws.py:71-78",
+          "keys": [
+            { "name": "error", "type": "string", "required": true },
+            { "name": "recoverable", "type": "boolean", "required": false }
+          ]
+        }
+      ],
+      "client": []
+    },
+    "har": {
+      "path": "/ws/projects/{pid}/har/{sid}",
+      "envelope": "payload",
+      "requires": "identity",
+      "identity": "Authorization: Bearer header",
+      "close_codes": {
+        "4001": "no identity presented",
+        "4003": "no access to the project"
+      },
+      "notes": "The sid in the path is the HAR session id returned by the REST upload. split_proposal is sent without an envelope. A second har:generate while generating is ignored.",
+      "server": [
+        {
+          "type": "har:progress",
+          "source": "backend/api/websocket/har_ws.py:149-157",
+          "keys": [
+            { "name": "status", "type": "string", "required": false },
+            { "name": "progress", "type": "integer", "required": true },
+            { "name": "current_step", "type": "string", "required": false },
+            { "name": "step_label", "type": "string", "required": false }
+          ]
+        },
+        {
+          "type": "split_proposal",
+          "envelope": "flat",
+          "source": "backend/api/websocket/har_ws.py:120-127",
+          "keys": [
+            {
+              "name": "proposed_paths",
+              "type": "array",
+              "required": true,
+              "items": [
+                { "name": "name", "type": "string", "required": true },
+                { "name": "steps", "type": "array", "required": true },
+                {
+                  "name": "depends_on_prior",
+                  "type": "boolean",
+                  "required": false
+                },
+                { "name": "rationale", "type": "string", "required": false }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "har:complete",
+          "source": "backend/api/websocket/har_ws.py:179-186,313-325,420-428,529-536",
+          "keys": [
+            { "name": "session_id", "type": "string", "required": false },
+            { "name": "status", "type": "string", "required": false },
+            { "name": "flow_id", "type": "string", "required": false },
+            { "name": "flow_name", "type": "string", "required": false },
+            {
+              "name": "flows",
+              "type": "array",
+              "required": false,
+              "nullable": true,
+              "items": [
+                { "name": "flow_id", "type": "string", "required": true },
+                { "name": "flow_name", "type": "string", "required": true }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "har:error",
+          "source": "backend/api/websocket/har_ws.py:195-202",
+          "keys": [
+            { "name": "error", "type": "string", "required": true },
+            { "name": "recoverable", "type": "boolean", "required": false }
+          ]
+        },
+        {
+          "type": "har:cancelled",
+          "source": "backend/api/websocket/har_ws.py:214-218",
+          "keys": [
+            { "name": "session_id", "type": "string", "required": false }
+          ]
+        }
+      ],
+      "client": [
+        {
+          "type": "har:generate",
+          "envelope": "flat",
+          "source": "backend/api/websocket/har_ws.py:632-645",
+          "keys": [
+            { "name": "flow_name", "type": "string", "required": true },
+            { "name": "action_groups", "type": "array", "required": false },
+            {
+              "name": "rejected_correlations",
+              "type": "array",
+              "required": false
+            },
+            {
+              "name": "excluded_entry_indices",
+              "type": "array",
+              "required": false
+            },
+            { "name": "auth_username", "type": "string", "required": false },
+            { "name": "auth_password", "type": "string", "required": false }
+          ]
+        },
+        {
+          "type": "split_resume",
+          "envelope": "flat",
+          "source": "backend/api/websocket/har_ws.py:658-664",
+          "keys": [
+            {
+              "name": "paths",
+              "type": "array",
+              "required": true,
+              "items": [
+                { "name": "name", "type": "string", "required": true },
+                { "name": "steps", "type": "array", "required": true }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "har:cancel",
+          "envelope": "flat",
+          "source": "backend/api/websocket/har_ws.py:648-657",
+          "keys": []
+        }
+      ]
+    },
+    "describe": {
+      "path": "/ws/projects/{pid}/scenario-from-description/runs/{run_id}",
+      "envelope": "flat",
+      "requires": "identity_and_origin",
+      "identity": "Authorization: Bearer header",
+      "origin": "Origin header present, with the same host and port as the Host header",
+      "close_codes": {
+        "4001": "no identity presented",
+        "4003": "origin not accepted, or no access to the project",
+        "4404": "unknown run"
+      },
+      "notes": "Frames are flat objects: the type and its keys sit side by side, with no payload wrapper. A late socket gets the terminal frame of the run, and drive_snapshot while a drive is in progress.",
+      "server": [
+        {
+          "type": "split_proposal",
+          "source": "backend/api/websocket/scenario_from_description_ws.py:368-375",
+          "keys": [
+            {
+              "name": "proposed_paths",
+              "type": "array",
+              "required": true,
+              "items": [
+                { "name": "name", "type": "string", "required": true },
+                { "name": "steps", "type": "array", "required": true },
+                {
+                  "name": "depends_on_prior",
+                  "type": "boolean",
+                  "required": false
+                },
+                {
+                  "name": "creates_own_identity",
+                  "type": "boolean",
+                  "required": false
+                }
+              ]
+            },
+            { "name": "shared_sign_in", "type": "boolean", "required": false }
+          ]
+        },
+        {
+          "type": "drive_snapshot",
+          "source": "backend/api/websocket/scenario_from_description_ws.py:53-117",
+          "keys": [
+            { "name": "setup", "type": "string", "required": true },
+            {
+              "name": "paths",
+              "type": "array",
+              "required": true,
+              "items": [
+                { "name": "path_index", "type": "integer", "required": true },
+                { "name": "name", "type": "string", "required": false },
+                { "name": "state", "type": "string", "required": true },
+                {
+                  "name": "stop_cause",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                },
+                {
+                  "name": "reason",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                },
+                { "name": "not_driven", "type": "boolean", "required": false }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "path_stage",
+          "source": "backend/domain/services/browser/per_path_drive_coordinator.py:1941-1976",
+          "keys": [
+            { "name": "path_index", "type": "integer", "required": true },
+            { "name": "attempt", "type": "integer", "required": false },
+            { "name": "stage", "type": "string", "required": true }
+          ]
+        },
+        {
+          "type": "path_done",
+          "source": "backend/domain/services/browser/per_path_drive_coordinator.py:2350-2355",
+          "keys": [
+            { "name": "path_index", "type": "integer", "required": true },
+            { "name": "path_name", "type": "string", "required": false }
+          ]
+        },
+        {
+          "type": "path_failed",
+          "source": "backend/domain/services/browser/per_path_drive_coordinator.py:2373-2381,2399-2407",
+          "keys": [
+            { "name": "path_index", "type": "integer", "required": true },
+            { "name": "path_name", "type": "string", "required": false },
+            { "name": "reason", "type": "string", "required": false },
+            { "name": "attempt", "type": "integer", "required": false },
+            { "name": "will_retry", "type": "boolean", "required": true },
+            { "name": "not_driven", "type": "boolean", "required": false }
+          ]
+        },
+        {
+          "type": "agent_step",
+          "source": "backend/domain/services/scenario_runs/review_session.py:220-253,271-273",
+          "keys": [
+            {
+              "name": "step",
+              "type": "object",
+              "required": true,
+              "items": [
+                { "name": "path_index", "type": "integer", "required": true },
+                {
+                  "name": "attempt",
+                  "type": "integer",
+                  "required": false,
+                  "nullable": true
+                },
+                {
+                  "name": "step_number",
+                  "type": "integer",
+                  "required": false,
+                  "nullable": true
+                },
+                { "name": "label", "type": "string", "required": true },
+                {
+                  "name": "plan_step_index",
+                  "type": "integer",
+                  "required": false,
+                  "nullable": true
+                },
+                { "name": "outcome", "type": "string", "required": true },
+                {
+                  "name": "failure",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "help_requested",
+          "source": "backend/domain/services/scenario_runs/review_session.py:395-401",
+          "keys": [
+            { "name": "path_index", "type": "integer", "required": true },
+            { "name": "attempt", "type": "integer", "required": false },
+            { "name": "reason", "type": "string", "required": true },
+            {
+              "name": "agent_says",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "expires_at",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "control_returned",
+          "source": "backend/domain/services/scenario_runs/review_session.py:428-436",
+          "keys": [
+            { "name": "path_index", "type": "integer", "required": true },
+            { "name": "attempt", "type": "integer", "required": false },
+            { "name": "reason", "type": "string", "required": true },
+            {
+              "name": "choice",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "obstacle_kind",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "stop_accepted",
+          "source": "backend/domain/services/scenario_runs/review_session.py:296-304",
+          "keys": [
+            { "name": "reason", "type": "string", "required": false },
+            {
+              "name": "path_index",
+              "type": "integer",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "attempt",
+              "type": "integer",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "stop_refused",
+          "source": "backend/api/routes/scenario_from_description.py:977",
+          "keys": [{ "name": "code", "type": "string", "required": true }]
+        },
+        {
+          "type": "split_resume_refused",
+          "source": "backend/api/websocket/scenario_from_description_ws.py:50,378-386",
+          "keys": [
+            {
+              "name": "detail",
+              "type": "object",
+              "required": true,
+              "items": [
+                { "name": "error", "type": "string", "required": false },
+                { "name": "message", "type": "string", "required": false },
+                { "name": "limit", "type": "integer", "required": false }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "message_denied",
+          "source": "backend/api/websocket/access.py:85-116,406-410",
+          "keys": [
+            {
+              "name": "message_type",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            { "name": "code", "type": "string", "required": true }
+          ]
+        },
+        {
+          "type": "complete",
+          "source": "backend/api/websocket/base_progress_manager.py:85-93",
+          "keys": [{ "name": "result", "type": "object", "required": true }]
+        },
+        {
+          "type": "error",
+          "source": "backend/api/websocket/base_progress_manager.py:96-116",
+          "keys": [
+            { "name": "error", "type": "string", "required": true },
+            {
+              "name": "node",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "technical",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "type": "cancelled",
+          "source": "backend/api/websocket/base_progress_manager.py:118-124",
+          "keys": []
+        },
+        {
+          "type": "interrupted",
+          "source": "backend/api/websocket/scenario_from_description_ws.py:47-48,449-455",
+          "keys": [
+            {
+              "name": "error",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        }
+      ],
+      "client": [
+        {
+          "type": "split_resume",
+          "source": "backend/api/websocket/scenario_from_description_ws.py:471-480,509",
+          "keys": [
+            {
+              "name": "paths",
+              "type": "array",
+              "required": true,
+              "items": [
+                { "name": "name", "type": "string", "required": true },
+                { "name": "steps", "type": "array", "required": true },
+                {
+                  "name": "depends_on_prior",
+                  "type": "boolean",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "stop",
+          "source": "backend/api/websocket/scenario_from_description_ws.py:483-486,504",
+          "keys": []
+        }
+      ]
+    }
+  }
+}

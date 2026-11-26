@@ -1,0 +1,11 @@
+Migracja 3 flowów na bieżącą wersję dokumentacji
+  Flowy                     konto, przeglądanie, zakupy
+  Wersja docelowa           2.16.0 (2026-11-22, f3c9ebfd)
+  Przyjęcie przykładów      żadne
+  KROKI BEZ ODPOWIEDNIKA    nie
+  Bieżąca wersja            2.16.0 (2026-11-22, f3c9ebfd)
+  Flowy na starszej wersji  3
+Nic jeszcze nie zmigrowano; zapytaj użytkownika. Każdy flow zachowa id i
+  dostanie nową wersję; jego scenariusze zostaną podpięte i staną się
+  nieaktualne.
+→ Dopiero po „tak”: to samo wywołanie z confirm: "<token>".

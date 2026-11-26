@@ -1,0 +1,29 @@
+{
+  "backend": { "url": "http://127.0.0.1:8100", "appUrl": "http://127.0.0.1:5180" },
+  "workspace": { "openapi": "../../path/to/demo-app/loadcraft/openapi.json" },
+  "har": { "file": "../../path/to/recordings/demo-shop.har", "minFlows": 3 },
+  "describe": {
+    "description": "Customers log in, search for a product, add it to the cart and check out; some only browse the catalogue.",
+    "envFile": "../../path/to/demo-app/.env",
+    "minPaths": 2,
+    "timeoutMin": 20
+  },
+  "projectPrefix": "live-gate",
+  "composition": "gate-mix",
+  "environments": {
+    "main": {
+      "name": "gate",
+      "api": "http://127.0.0.1:8080",
+      "frontend": "http://127.0.0.1:8080"
+    },
+    "capped": { "name": "gate-capped", "api": "http://127.0.0.1:8080", "limit": [5, 5] }
+  },
+  "journeys": { "prefer": ["browse|catalog|product", "cart|checkout|order"] },
+  "accounts": 30,
+  "profile": { "type": "ramp_concurrency", "vusers": 20, "ramp": 60 },
+  "thresholds": { "p95_ms": 2000, "error_rate_pct": 5 },
+  "costLimitUsd": 3,
+  "langfuse": { "url": "https://cloud.langfuse.com", "api": "v2", "environment": "mcp-live-gate" },
+  "timeoutMin": 45,
+  "forbiddenBackends": []
+}

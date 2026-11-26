@@ -1,0 +1,321 @@
+{
+  "id": "f1b8d3a6-4e27-4c90-a5d2-8c3e7f0b6a19",
+  "project_id": "5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61",
+  "name": "zakupy",
+  "description": "Klient loguje się, szuka produktu, dodaje go do koszyka i składa zamówienie.",
+  "flow_type": "api",
+  "blocks": [
+    {
+      "id": "zakupy-har-r1",
+      "type": "request",
+      "name": "Log in",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "b229f78d-8c9c-4a29-a325-a0525f7690bb",
+        "method": "POST",
+        "path": "/auth/login",
+        "headers": {},
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "email": "{{email}}",
+          "password": "{{password}}"
+        },
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.token",
+            "save_as": "token"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {}
+      }
+    },
+    {
+      "id": "zakupy-har-v1",
+      "type": "validator",
+      "name": "Status code",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "validator_id": "status-code",
+        "validator_name": "Status code",
+        "bound_to_request_id": "zakupy-har-r1",
+        "failure_mode": "fail",
+        "parameter_overrides": {}
+      }
+    },
+    {
+      "id": "zakupy-har-p1",
+      "type": "pause",
+      "name": "Pause",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 4200,
+        "delay_max_ms": 4200,
+        "distribution": "uniform",
+        "source": "recording"
+      }
+    },
+    {
+      "id": "zakupy-har-r2",
+      "type": "request",
+      "name": "Search products",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "b7dab4b7-5c5f-42db-a7bd-8802df901ba4",
+        "method": "GET",
+        "path": "/products",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "query_params": {
+          "q": "{{q}}"
+        },
+        "path_params": {},
+        "body": null,
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.items[0].id",
+            "save_as": "productId"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "form_submit"
+        }
+      }
+    },
+    {
+      "id": "zakupy-har-v2",
+      "type": "validator",
+      "name": "Status code",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "validator_id": "status-code",
+        "validator_name": "Status code",
+        "bound_to_request_id": "zakupy-har-r2",
+        "failure_mode": "fail",
+        "parameter_overrides": {}
+      }
+    },
+    {
+      "id": "zakupy-har-p2",
+      "type": "pause",
+      "name": "Pause",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 10000,
+        "delay_max_ms": 10000,
+        "distribution": "uniform",
+        "source": "recording"
+      }
+    },
+    {
+      "id": "zakupy-har-r3",
+      "type": "request",
+      "name": "Add to cart",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "392eaa85-a66d-466c-83d2-c4b1924e8c75",
+        "method": "POST",
+        "path": "/cart/items",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "productId": "{{productId}}",
+          "quantity": "{{quantity}}"
+        },
+        "expected_statuses": null,
+        "request_checks": [
+          {
+            "check_type": "json_path",
+            "selector": "$.cartId",
+            "save_as": "cartId"
+          }
+        ],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "in_page"
+        }
+      }
+    },
+    {
+      "id": "zakupy-har-v3",
+      "type": "validator",
+      "name": "Status code",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "validator_id": "status-code",
+        "validator_name": "Status code",
+        "bound_to_request_id": "zakupy-har-r3",
+        "failure_mode": "fail",
+        "parameter_overrides": {}
+      }
+    },
+    {
+      "id": "zakupy-har-p3",
+      "type": "pause",
+      "name": "Pause",
+      "enabled": true,
+      "config": {
+        "delay_min_ms": 10000,
+        "delay_max_ms": 10000,
+        "distribution": "uniform",
+        "source": "recording"
+      }
+    },
+    {
+      "id": "zakupy-har-r4",
+      "type": "request",
+      "name": "Check out",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "endpoint_id": "50b1ba7d-377f-4b38-a7e0-477f7e64c7ab",
+        "method": "POST",
+        "path": "/checkout",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "query_params": {},
+        "path_params": {},
+        "body": {
+          "cartId": "{{cartId}}",
+          "paymentMethod": "card",
+          "cardNumber": "{{cardNumber}}"
+        },
+        "expected_statuses": [201, 409],
+        "request_checks": [],
+        "response_checks": [],
+        "save_variables": {},
+        "action_start": {
+          "class": "form_submit"
+        }
+      }
+    },
+    {
+      "id": "zakupy-har-v4",
+      "type": "validator",
+      "name": "Status code",
+      "description": "",
+      "enabled": true,
+      "config": {
+        "validator_id": "status-code",
+        "validator_name": "Status code",
+        "bound_to_request_id": "zakupy-har-r4",
+        "failure_mode": "fail",
+        "parameter_overrides": {}
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "zakupy-har-edge-1",
+      "source": "zakupy-har-r1",
+      "target": "zakupy-har-v1"
+    },
+    {
+      "id": "zakupy-har-edge-2",
+      "source": "zakupy-har-v1",
+      "target": "zakupy-har-p1"
+    },
+    {
+      "id": "zakupy-har-edge-3",
+      "source": "zakupy-har-p1",
+      "target": "zakupy-har-r2"
+    },
+    {
+      "id": "zakupy-har-edge-4",
+      "source": "zakupy-har-r2",
+      "target": "zakupy-har-v2"
+    },
+    {
+      "id": "zakupy-har-edge-5",
+      "source": "zakupy-har-v2",
+      "target": "zakupy-har-p2"
+    },
+    {
+      "id": "zakupy-har-edge-6",
+      "source": "zakupy-har-p2",
+      "target": "zakupy-har-r3"
+    },
+    {
+      "id": "zakupy-har-edge-7",
+      "source": "zakupy-har-r3",
+      "target": "zakupy-har-v3"
+    },
+    {
+      "id": "zakupy-har-edge-8",
+      "source": "zakupy-har-v3",
+      "target": "zakupy-har-p3"
+    },
+    {
+      "id": "zakupy-har-edge-9",
+      "source": "zakupy-har-p3",
+      "target": "zakupy-har-r4"
+    },
+    {
+      "id": "zakupy-har-edge-10",
+      "source": "zakupy-har-r4",
+      "target": "zakupy-har-v4"
+    },
+    {
+      "id": "zakupy-har-binding-1",
+      "source": "zakupy-har-v1",
+      "target": "zakupy-har-r1",
+      "type": "binding"
+    },
+    {
+      "id": "zakupy-har-binding-2",
+      "source": "zakupy-har-v2",
+      "target": "zakupy-har-r2",
+      "type": "binding"
+    },
+    {
+      "id": "zakupy-har-binding-3",
+      "source": "zakupy-har-v3",
+      "target": "zakupy-har-r3",
+      "type": "binding"
+    },
+    {
+      "id": "zakupy-har-binding-4",
+      "source": "zakupy-har-v4",
+      "target": "zakupy-har-r4",
+      "type": "binding"
+    }
+  ],
+  "entry_block_id": "zakupy-har-r1",
+  "variables": {},
+  "timeout_ms": 30000,
+  "retry_count": 0,
+  "retry_delay_ms": 1000,
+  "generated_by": "har_import",
+  "generated_on_environment_id": "4d8f1c63-2a9e-4b70-8e35-6c1a0f7d9b52",
+  "generation_target_url": "https://api.perf.example.com",
+  "generation_description": null,
+  "openapi_spec_id": null,
+  "source_endpoints": ["POST:/auth/login", "GET:/products", "POST:/cart/items", "POST:/checkout"],
+  "source_operations": [],
+  "tags": [],
+  "is_active": true,
+  "can_regenerate": false,
+  "current_version": 1,
+  "created_at": "2026-11-22T10:05:00Z",
+  "updated_at": "2026-11-22T10:05:00Z",
+  "created_by": "user@example.com"
+}
