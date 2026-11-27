@@ -49,7 +49,7 @@ const GIVE_UP_MS = 5 * 60_000;
 const CHANNEL_SILENCE_MS = 120_000;
 const STEP_LABEL_LIMIT = 80;
 
-/** The refusal for a run whose metric series have aged out (`analyzer_service.py:83-108`). */
+/** The refusal for a run whose metric series have aged out. */
 const SERIES_EXPIRED = /^No metrics series for execution/u;
 
 // ---- the operation ----------------------------------------------------------------------
@@ -363,6 +363,8 @@ export const resultsAnalyzeRun = defineTool({
   input,
   // Costly in the catalog (a model call, a stored result): never a free read for a client.
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   async run(ctx, args): Promise<ToolOutcome<DiagnosisData>> {
     await getCompat(ctx);
     const resolver = createResolver(ctx);

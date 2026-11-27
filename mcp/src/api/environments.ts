@@ -37,7 +37,7 @@ export interface HeaderToSet {
   readonly value: Secret;
 }
 
-/** What the backend shows in place of a masked value (`MASKED_VALUE`, `domain/utils/sensitive_data.py:30`). */
+/** What the backend shows in place of a masked value (`MASKED_VALUE`). */
 export const MASKED_VALUE = '«masked»';
 
 export interface NewEnvironment {
@@ -52,7 +52,7 @@ export interface NewEnvironment {
 
 /**
  * `ok` | `unreachable` | `tls_error` | `blocked` | `too_many_redirects`
- * (`project_environments.py:1178-1323`); `not_checked` when the answer has no probe of the address.
+ * as the backend's probe reports them; `not_checked` when the answer has no probe of the address.
  */
 export interface ProbeResult {
   readonly status: string;
@@ -170,7 +170,7 @@ export async function protectEnvironment(
 
 /**
  * `PUT …/environments/{id}` with `default_headers` only: the backend replaces the whole set with
- * the dict it is given (`project_environments.py`, `update_environment`), so the caller sends every
+ * the dict it is given (`update_environment`), so the caller sends every
  * header the environment is to have. `keep` are the unmasked headers the environment already has.
  */
 export async function setEnvironmentHeaders(

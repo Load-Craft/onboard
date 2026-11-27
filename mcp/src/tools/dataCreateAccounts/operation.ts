@@ -45,6 +45,7 @@ import {
   type ProvisionSaved,
   type SeriesResult,
 } from './provision.js';
+import { settleAll } from '../../http/operation.js';
 
 const KIND = 'account_provision';
 
@@ -122,7 +123,7 @@ function stateOf(series: Series): ProvisionState {
 /** Whether every scenario that reads the slot has the dataset as its pick; `null` when it cannot tell. */
 async function isPinned(ctx: ToolContext, saved: ProvisionSaved): Promise<boolean | null> {
   if (saved.scenarioIds.length === 0) return null;
-  const scenarios = await Promise.all(
+  const scenarios = await settleAll(
     saved.scenarioIds.map((id) => getScenarioSlots(ctx, saved.projectId, id)),
   );
   return scenarios.every((scenario) => scenario.bindings[saved.slot] === saved.dataset.id);
@@ -225,6 +226,10 @@ function startSeries(ctx: ToolContext, id: string, plan: Parameters<typeof runSe
       scrub: (text) => scope.scrub(text),
       scrubDeep: (value) => scope.scrubDeep(value),
       containsSecret: (value) => scope.containsSecret(value),
+      get incomplete() {
+        return scope.incomplete;
+      },
+      markIncomplete: () => scope.markIncomplete(),
     },
   };
   const series: Series = {

@@ -119,6 +119,7 @@ import {
   runsLoaded,
   wantedReads,
   withFailed,
+  readFailure,
   withFlows,
   withMarksAdded,
   withMarksCleared,
@@ -1059,56 +1060,60 @@ const LIST_READ_GAP_MS = 2_000;
 
 /**
  * The read-only status call that gives the data of `wanted`: the first 20 flows, the first 20 runs,
- * or the outline of a flow. It does not start, change or spend anything. The answer is the parsed
- * data block, or `undefined` when it is not one.
+ * or the outline of a flow. It does not start, change or spend anything. The answer comes back as the
+ * server gave it: the data block is parsed by the caller, which also tells why a read failed.
  */
 async function fetchList($: Mods, wanted: WantedRead): Promise<unknown> {
   switch (wanted.kind) {
     case 'flows':
-      return parseDataBlock(
-        await $.mcp.call(SERVER, 'process_get_status', {
-          format: 'data',
-          from_panel: true,
-          detail: 'flows',
-        }),
-      );
+      return await $.mcp.call(SERVER, 'process_get_status', {
+        format: 'data',
+        from_panel: true,
+        detail: 'flows',
+      });
     case 'runs':
-      return parseDataBlock(
-        await $.mcp.call(SERVER, 'process_get_status', {
-          format: 'data',
-          from_panel: true,
-          detail: 'runs',
-        }),
-      );
+      return await $.mcp.call(SERVER, 'process_get_status', {
+        format: 'data',
+        from_panel: true,
+        detail: 'runs',
+      });
     case 'outline':
-      return parseDataBlock(
-        await $.mcp.call(SERVER, 'process_get_status', {
-          format: 'data',
-          from_panel: true,
-          result: { kind: 'flow', id: wanted.flow },
-        }),
-      );
+      return await $.mcp.call(SERVER, 'process_get_status', {
+        format: 'data',
+        from_panel: true,
+        result: { kind: 'flow', id: wanted.flow },
+      });
   }
 }
 
-/** The panel after the data `data` of the read `wanted` (made for `project`); a read with no usable data failed. */
+/**
+ * The panel after the answer `answer` of the read `wanted` (made for `project`); a read with no usable
+ * data failed, with why: `failure` when the reader knows it (`busy`, `exception`), else from the answer.
+ */
 function withListRead(
   known: PanelData,
   wanted: WantedRead,
-  data: unknown,
+  answer: unknown,
   project: PanelData['project'],
+  failure?: string,
 ): PanelData {
+  const data = failure === undefined ? parseDataBlock(answer) : undefined;
+  const why = (): string => failure ?? readFailure(answer);
   if (wanted.kind === 'flows') {
     const loaded = flowsLoaded(data, project);
-    return loaded === undefined ? withFailed(known, 'flows') : withFlows(known, loaded);
+    return loaded === undefined
+      ? withFailed(known, 'flows', undefined, why())
+      : withFlows(known, loaded);
   }
   if (wanted.kind === 'runs') {
     const loaded = runsLoaded(data, project);
-    return loaded === undefined ? withFailed(known, 'runs') : withRuns(known, loaded);
+    return loaded === undefined
+      ? withFailed(known, 'runs', undefined, why())
+      : withRuns(known, loaded);
   }
   const outline = outlineLoaded(data, wanted.flow);
   return outline === undefined
-    ? withFailed(known, 'outline', wanted.flow)
+    ? withFailed(known, 'outline', wanted.flow, why())
     : withOutline(known, outline);
 }
 
@@ -1133,11 +1138,14 @@ async function runListRead(
   }
   const project = (await read($, panel)).project;
   try {
-    if (ticket === undefined) throw new Error('the gate stayed busy');
-    const data = await fetchList($, wanted);
-    await remember($, (known) => withListRead(known, wanted, data, project));
+    if (ticket === undefined) {
+      await remember($, (known) => withListRead(known, wanted, undefined, project, 'busy'));
+      return;
+    }
+    const answer = await fetchList($, wanted);
+    await remember($, (known) => withListRead(known, wanted, answer, project));
   } catch {
-    await remember($, (known) => withListRead(known, wanted, undefined, project));
+    await remember($, (known) => withListRead(known, wanted, undefined, project, 'exception'));
   } finally {
     const queued = ticket !== undefined && gate.end(ticket);
     view.reading.delete(key);

@@ -23,6 +23,7 @@ import type { ToolContext } from '../../context.js';
 import type { DataPlanView } from '../../render/views/data.js';
 import type { RunTarget } from '../../resolve/handles.js';
 import { composePlan } from './plan.js';
+import { settleAll } from '../../http/operation.js';
 
 /** The slots of the scenarios, each once, with the scenarios that read it in the order given. */
 export function mergeSlots(scenarios: readonly ScenarioSlots[], shown: boolean) {
@@ -97,7 +98,7 @@ export async function readTarget(
 ): Promise<TargetRead> {
   const datasets = await listDatasets(ctx, projectId);
   const { members, composition } = await membersOf(ctx, projectId, target);
-  const scenarios = await Promise.all(
+  const scenarios = await settleAll(
     members.map((member) => getScenarioSlots(ctx, projectId, member.id)),
   );
   return { datasets, scenarios, composition };
@@ -110,15 +111,15 @@ export async function readSlots(
 ): Promise<SlotsRead> {
   const { projectId, target, environment } = request;
   // The datasets first, for the secrets of their content (see `readTarget`).
-  const [environments, datasets] = await Promise.all([
+  const [environments, datasets] = await settleAll([
     listEnvironmentStates(ctx, projectId),
     listDatasets(ctx, projectId),
   ]);
   const environmentName =
     environment?.name ?? environments.find((item) => item.isDefault)?.name ?? null;
   const { members, composition } = await membersOf(ctx, projectId, target);
-  const [scenarios, verdicts] = await Promise.all([
-    Promise.all(members.map((member) => getScenarioSlots(ctx, projectId, member.id))),
+  const [scenarios, verdicts] = await settleAll([
+    settleAll(members.map((member) => getScenarioSlots(ctx, projectId, member.id))),
     target.kind === 'composition'
       ? preflightComposition(ctx, projectId, target.id)
       : preflightScenario(ctx, projectId, target.id, environment?.id),

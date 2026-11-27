@@ -2,5 +2,6 @@
 // offers a tool to the client once its file has `run` and `render` (docs/module-tools.md).
 
 import type { ModuleTool } from '../moduleTool.js';
+import { processSetChoices } from './setChoices.js';
 
-export const tools: readonly ModuleTool[] = [];
+export const tools: readonly ModuleTool[] = [processSetChoices];

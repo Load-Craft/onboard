@@ -16,6 +16,7 @@ import {
 import type { ToolContext } from '../../context.js';
 import { ToolError } from '../../errors.js';
 import { needsInputUpdate, type FlowNeeds } from '../../flow/needsInput.js';
+import { maskOutline, maskQuestion, shownNameOf } from '../../flow/maskOutline.js';
 import { buildOutline, type FlowOutline } from '../../flow/outline.js';
 import { LoadcraftApiError } from '../../http/apiError.js';
 import { startOrJoin, defineOperationKind, type OperationOutcome } from '../../ops/operation.js';
@@ -34,6 +35,8 @@ import {
 } from '../../render/views/buildFlows.js';
 import { inline } from '../../render/primitives.js';
 import { createResolver } from '../../resolve/handles.js';
+import { settleAll } from '../../http/operation.js';
+import { content as shownText } from '../moduleCall.js';
 
 /** Flows read at a time; the backend generates five baskets at a time too. */
 const CONCURRENCY = 5;
@@ -83,8 +86,11 @@ function pickProposals(
   const exact = new Map(proposals.baskets.map((basket) => [basket.name, basket]));
   const loose = new Map<string, SavedBasket>();
   for (const basket of proposals.baskets) {
-    const key = basket.name.trim().toLowerCase();
-    if (!loose.has(key)) loose.set(key, basket);
+    // the raw name, and the name the views showed masked (FIX-76)
+    for (const shown of [basket.name, shownNameOf(basket.name)]) {
+      const key = shown.trim().toLowerCase();
+      if (!loose.has(key)) loose.set(key, basket);
+    }
   }
   const picked = new Map<string, SavedBasket>();
   const unknown: string[] = [];
@@ -94,11 +100,11 @@ function pickProposals(
     else picked.set(found.name, found);
   }
   if (unknown.length > 0) {
-    const known = proposals.baskets.slice(0, SHOWN_NAMES).map((basket) => quoted(basket.name));
+    const known = proposals.baskets.slice(0, SHOWN_NAMES).map((basket) => quoted(ctx, basket.name));
     const more = proposals.baskets.length - known.length;
     throw new ToolError('unknown_suggestions', {
       params: {
-        names: unknown.map(quoted).join(', '),
+        names: unknown.map((name) => quoted(ctx, name)).join(', '),
         available:
           more > 0
             ? ctx.t('resolve.more', { names: known.join(', '), count: more })
@@ -109,7 +115,8 @@ function pickProposals(
   return [...picked.values()];
 }
 
-const quoted = (name: string): string => `"${inline(name, 80)}"`;
+/** A name of a proposal (the generator's text) or one the model gave, masked (FIX-76). */
+const quoted = (ctx: ToolContext, name: string): string => `"${shownText(ctx, name, 80)}"`;
 
 // ---- the run ------------------------------------------------------------------------------------
 
@@ -236,8 +243,8 @@ export const batchGenerationOperation = defineOperationKind({
         case 'batch-generation:basket-error': {
           // The text of the frame is not kept: it is backend text the model is not shown. Only the
           // cause it names is: the frame has no code field, an over-budget prompt names its code in
-          // the text (backend/domain/services/prompt_budget.py:271), and `retryable` says whether a
-          // second try can help (backend/api/routes/flow_suggestions.py:1032-1051).
+          // the text (the backend's prompt budget), and `retryable` says whether a
+          // second try can help (the backend's suggestion frame).
           const cause = causeOf(frame.data.error, frame.data.retryable);
           return withBasket(state, frame.data.basket_id, (basket) =>
             basket.status === 'complete'
@@ -353,6 +360,8 @@ export interface BuiltFlow {
 
 /** Longest name of an object the process keeps for display. */
 const MAX_LABEL = 120;
+/** A name of a proposal as the progress, the results and the state show it. */
+const NAME_SHOWN = 120;
 
 /**
  * What built flows change in the process: their ids join `ids.flow_ids`, their names the labels,
@@ -392,8 +401,9 @@ export async function readBuilt(
 ): Promise<BuiltFlow | undefined> {
   try {
     const flow = await getFlow(ctx, projectId, flowId);
-    const outline = buildOutline(flow);
-    const questions = flowQuestions(flow);
+    // shown to the model and kept in the state: every name and text masked (FIX-76)
+    const outline = maskOutline(ctx, buildOutline(flow));
+    const questions = flowQuestions(flow).map((item) => maskQuestion(ctx, item));
     return {
       outline,
       needs: needsOfDetail(flow),
@@ -430,7 +440,7 @@ async function mapLimit<T, R>(
       results[index] = await work(item);
     }
   };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  await settleAll(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;
 }
 
@@ -508,7 +518,8 @@ export async function buildFromSuggestions(
       picked.forEach((basket, index) => {
         const basketId = `b${String(index + 1)}`;
         const tag = newTag();
-        saved[basketId] = { name: basket.name, tag };
+        // the name is only shown (progress, results, state); the backend gets the raw one below
+        saved[basketId] = { name: shownText(ctx, basket.name, NAME_SHOWN), tag };
         baskets.push({
           basket_id: basketId,
           name: basket.name,

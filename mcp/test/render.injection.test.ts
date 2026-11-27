@@ -1613,7 +1613,7 @@ const CASES: readonly ViewCase[] = [
     data: {
       ...json<ProfilesData>('./golden/run1/09a-run_plan.view.json'),
       target: { kind: 'scenario', name: 'zakupy' },
-      dataCheck: 'composition_only',
+      dataCheck: 'done',
       environment: { name: 'prod', protected: true, caps: {} },
     } satisfies ProfilesData,
     render: renderRunPlan,

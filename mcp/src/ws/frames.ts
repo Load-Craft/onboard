@@ -1,5 +1,5 @@
 /**
- * Frames of the six WebSocket channels the plugin uses.
+ * Frames of the ten WebSocket channels the plugin uses.
  *
  * The schemas below are written by hand from `contracts/ws-frames.json`, which is the
  * contract; `test/ws.frames.test.ts` checks that both lists agree (frames, keys, required
@@ -11,7 +11,18 @@ import * as z from 'zod';
 
 import { readsTable, sendsTable } from '../contract/reads.js';
 
-export const CHANNELS = ['refine', 'batch', 'scenario', 'analysis', 'har', 'describe'] as const;
+export const CHANNELS = [
+  'refine',
+  'batch',
+  'scenario',
+  'analysis',
+  'har',
+  'describe',
+  'healthCheck',
+  'testTypes',
+  'payloadGen',
+  'gatlingFeeder',
+] as const;
 export type Channel = (typeof CHANNELS)[number];
 
 const str = z.string();
@@ -266,6 +277,71 @@ const describeClient = sendsTable<'describe'>()({
   stop: z.looseObject({}),
 });
 
+// ---- healthCheck: /ws/health-check/{session_id} -----------------------------------------
+
+const healthCheckServer = readsTable<'healthCheck'>()({
+  progress: z.looseObject({ node: str, progress: int, status: str, details: obj.optional() }),
+  complete: z.looseObject({ result: obj }),
+  error: z.looseObject({ error: str, node: str.nullish(), technical: str.nullish() }),
+  cancelled: z.looseObject({}),
+});
+
+const healthCheckClient = sendsTable<'healthCheck'>()({
+  cancel: z.looseObject({}),
+});
+
+// ---- testTypes: /ws/test-types/{run_id} --------------------------------------------------
+
+const testTypesServer = readsTable<'testTypes'>()({
+  'test-types:progress': z.looseObject({
+    current_step: str,
+    mode: str,
+    progress: int,
+    status: str,
+    step_label: str,
+  }),
+  'test-types:complete': z.looseObject({
+    mode: str,
+    omitted_operations: z.array(z.unknown()),
+    run_id: str,
+    status: str,
+    created: int.optional(),
+    rationale: str.nullish(),
+    skipped: int.optional(),
+    soft_error_status_path: str.nullish(),
+    suggestions: z.array(z.unknown()).optional(),
+    test_types: z.array(z.unknown()).optional(),
+    total: int.optional(),
+    uses_soft_errors: bool.optional(),
+  }),
+  'test-types:error': z.looseObject({ error: str, mode: str, recoverable: bool }),
+});
+
+// ---- payloadGen: /ws/payload-gen/{run_id} ------------------------------------------------
+
+const payloadGenServer = readsTable<'payloadGen'>()({
+  'payload-gen:progress': z.looseObject({
+    current_step: str,
+    progress: int,
+    status: str,
+    step_label: str,
+  }),
+  'payload-gen:complete': z.looseObject({ run_id: str, status: str }),
+  'payload-gen:error': z.looseObject({ error: str, recoverable: bool }),
+});
+
+// ---- gatlingFeeder: /ws/gatling-feeder/{run_id} ------------------------------------------
+
+const gatlingFeederServer = readsTable<'gatlingFeeder'>()({
+  'gatling-feeder:progress': z.looseObject({
+    progress: int,
+    current_step: str.optional(),
+    step_label: str.optional(),
+  }),
+  'gatling-feeder:complete': z.looseObject({ feeder_id: str, run_id: str.optional() }),
+  'gatling-feeder:error': z.looseObject({ error: str, recoverable: bool.optional() }),
+});
+
 // ---- registries -----------------------------------------------------------------------
 
 const serverSchemas = {
@@ -275,6 +351,10 @@ const serverSchemas = {
   analysis: analysisServer,
   har: harServer,
   describe: describeServer,
+  healthCheck: healthCheckServer,
+  testTypes: testTypesServer,
+  payloadGen: payloadGenServer,
+  gatlingFeeder: gatlingFeederServer,
 } as const;
 
 const clientSchemas = {
@@ -284,6 +364,10 @@ const clientSchemas = {
   analysis: {},
   har: harClient,
   describe: describeClient,
+  healthCheck: healthCheckClient,
+  testTypes: {},
+  payloadGen: {},
+  gatlingFeeder: {},
 } as const;
 
 type SchemaTable = Record<Channel, Record<string, z.ZodType>>;
@@ -301,6 +385,10 @@ const CHANNEL_ENVELOPE: Record<Channel, 'payload' | 'flat'> = {
   analysis: 'payload',
   har: 'payload',
   describe: 'flat',
+  healthCheck: 'flat',
+  testTypes: 'payload',
+  payloadGen: 'payload',
+  gatlingFeeder: 'payload',
 };
 const FLAT_OVERRIDES: Partial<Record<Channel, readonly string[]>> = {
   har: ['split_proposal'],

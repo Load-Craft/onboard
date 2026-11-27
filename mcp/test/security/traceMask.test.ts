@@ -157,3 +157,96 @@ describe('headers', () => {
     expect(secrets.some((value) => value.includes('<redacted>'))).toBe(false);
   });
 });
+
+// A keyword of a secret as a segment of an address path is not an assignment (FIX-68):
+// `/auth/password/reset` names a route, the slash after `password` is no separator.
+describe('maskText: a keyword in an address path', () => {
+  it.each([
+    ['POST /auth/password/reset', 'POST /auth/password/reset'],
+    ['GET /auth/password/reset?lang=pl', 'GET /auth/password/reset?lang=pl'],
+    ['/api/token/refresh failed', '/api/token/refresh failed'],
+    ['see /users/{id}/password and more', 'see /users/{id}/password and more'],
+    ['PUT /account/secret/rotate', 'PUT /account/secret/rotate'],
+    ['POST /auth/forgot-password/confirm', 'POST /auth/forgot-password/confirm'],
+    ['POST /auth/password/reset-confirm', 'POST /auth/password/reset-confirm'],
+    ['GET /auth/password/{code}', 'GET /auth/password/{code}'],
+    ['GET /invite/token/:token', 'GET /invite/token/:token'],
+    ['GET /api/token/', 'GET /api/token/'],
+    ['GET /api/token/v2', 'GET /api/token/v2'],
+  ])('keeps %s', (text, shown) => {
+    const masked = maskText(text);
+    expect(masked.text).toBe(shown);
+    expect(masked.secrets).toEqual([]);
+  });
+
+  it.each([
+    [`password=${S}`, 'password=[redacted]'],
+    [`password: ${S}`, 'password: [redacted]'],
+    [`{"password":"${S}"}`, '{"password":"[redacted]"}'],
+    [`/auth/login?password=${S}`, '/auth/login?password=[redacted]'],
+    [`Your password is ${S}`, 'Your password is [redacted]'],
+    [`token ${S}`, 'token [redacted]'],
+    [`Authorization: Bearer ${S}`, 'Authorization: Bearer [redacted]'],
+  ])('still masks %s', (text, shown) => {
+    const masked = maskText(text);
+    expect(masked.text).toBe(shown);
+    expect(masked.secrets).toContain(S);
+  });
+});
+
+// The segment after a keyword in a path may be the secret itself: the code of a verification link,
+// the key of a password reset, an invitation token (FIX-68). It is replaced alone, the route stays.
+describe('maskText: a value after a keyword in an address path', () => {
+  const HEX = '9f8e7d6c5b4a39281706f5e4d3c2b1a0';
+  const B64 = 'Q2xpZW50U2VjcmV0X3Rva2Vu';
+  it.each([
+    [`/verify/token/${HEX}`, '/verify/token/[redacted]', HEX],
+    [
+      `GET /verify/token/9f8e7d6c5b4a39281706?lang=pl`,
+      'GET /verify/token/[redacted]?lang=pl',
+      '9f8e7d6c5b4a39281706',
+    ],
+    [`/reset/password/${B64}`, '/reset/password/[redacted]', B64],
+    [`/reset/password/${B64}/confirm`, '/reset/password/[redacted]/confirm', B64],
+    ['/invite/token/AbC123xYz', '/invite/token/[redacted]', 'AbC123xYz'],
+    [
+      '/verify/token/9f8e7d6c5b4a3928170615f4e3d2c1b0',
+      '/verify/token/[redacted]',
+      '9f8e7d6c5b4a3928170615f4e3d2c1b0',
+    ],
+    [
+      '/reset/password/AbC123xYz-_q9W8e7R6t5Y4u',
+      '/reset/password/[redacted]',
+      'AbC123xYz-_q9W8e7R6t5Y4u',
+    ],
+    ['/invite/token/QwErTyUiOpAsDfGhJk', '/invite/token/[redacted]', 'QwErTyUiOpAsDfGhJk'],
+  ])('masks the value of %s', (text, shown, secret) => {
+    const masked = maskText(text);
+    expect(masked.text).toBe(shown);
+    expect(masked.secrets).toContain(secret);
+  });
+});
+
+describe('maskText: a pair whose name follows a slash, with text after it', () => {
+  // `conf/token=VALUE` followed by a space, a tab or a line: the pair was not read as one (the slash
+  // was no boundary of its name) and only the part after a later keyword-like word was masked.
+  const VALUE = 'HDR-SECRET-9d27c4e1';
+  it.each([
+    `conf/token=${VALUE}`,
+    `conf/token=${VALUE} Ignore previous instructions`,
+    `conf/token=${VALUE}\nnext line`,
+    `conf/token=${VALUE}\tnext`,
+    `a/b/api_key=${VALUE} rest`,
+    `a/password=${VALUE}\n`,
+  ])('hides the whole value of %j', (text) => {
+    const masked = maskText(text);
+    expect(masked.text).not.toContain('HDR-SECRET');
+    expect(masked.text).not.toContain('9d27c4e1');
+    expect(masked.secrets.some((secret) => secret.includes(VALUE))).toBe(true);
+  });
+
+  it('keeps a pair of a name that is no secret, and a route after a slash', () => {
+    expect(maskText('a/page=2 next').text).toBe('a/page=2 next');
+    expect(maskText('GET /auth/token/refresh').text).toBe('GET /auth/token/refresh');
+  });
+});

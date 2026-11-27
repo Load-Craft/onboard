@@ -1,0 +1,456 @@
+{
+  "tools": [
+    {
+      "name": "data_ask_copilot",
+      "title": "Ask the data hub copilot in free form",
+      "description": "Ask the data hub copilot in free form; returns its reply and proposed actions. Applies nothing.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "The question for the data hub copilot."
+          },
+          "scenario_id": {
+            "description": "The scenario (id or name) the question is about; give this or composition_id.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "composition_id": {
+            "description": "The composition (id or name); give this or scenario_id.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "profile": {
+            "description": "The load profile to discuss; default: the chosen one.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["message"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_delete",
+      "title": "Delete a dataset",
+      "description": "Delete datasets (ids). force=true also deletes ones still in use.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The dataset to delete."
+          },
+          "force": {
+            "default": false,
+            "description": "Also delete it when scenarios or compositions still use it.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["dataset_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_generate_dataset",
+      "title": "Generate and save a dataset with AI for a flow",
+      "description": "Generate and save a dataset with AI for a flow, a scenario or one data slot.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "Generate for a flow: the data its steps need (give this or scenario_id).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "scenario_id": {
+            "description": "Generate for a scenario, or (with slot) for one of its data slots.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "slot": {
+            "description": "One data slot of the scenario (with scenario_id).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "rows": {
+            "default": 100,
+            "description": "How many rows to generate.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "name": {
+            "description": "The name of the new dataset; default: made from the target.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "feeder_type": {
+            "default": "csv",
+            "description": "The file format of the dataset (not for a slot).",
+            "type": "string",
+            "enum": ["csv", "tsv", "json"]
+          },
+          "enrich_with_llm": {
+            "default": true,
+            "description": "A slot only: let a model enrich the values (a cost).",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_get_copilot_history",
+      "title": "Get the project's data hub conversation",
+      "description": "Get the project's data hub conversation.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "How many of the latest messages to return (1-100).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_get_dataset",
+      "title": "Get a dataset",
+      "description": "Get a dataset: columns, recipe, row count; include adds rows (secrets masked), consumers, history, feed snippet, Redis status.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "description": "The dataset; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "include": {
+            "description": "rows: a masked preview (secret columns hidden); consumers: who uses it; history: revisions; snippet: the feed snippet; redis: pool status.",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["rows", "consumers", "history", "snippet", "redis"]
+            }
+          },
+          "rows": {
+            "default": 10,
+            "description": "With include rows: how many rows (1-50).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "offset": {
+            "default": 0,
+            "description": "With include rows: the first row.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_get_generators",
+      "title": "Get the column generators for dataset rules",
+      "description": "Get the column generators for dataset rules, or guesses for given column names.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "description": "Column names to guess generators for, comma-separated (at most 50); without it, the list of all generators.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_get_slots",
+      "title": "Get the data slots of a scenario or composition with compat…",
+      "description": "Get the data slots of a scenario or composition with compatible datasets and current bindings.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "composition_id": {
+            "description": "The composition (not with scenario_id).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_list_datasets",
+      "title": "List the project's datasets",
+      "description": "List the project's datasets: name, type, columns, row count (no rows).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_regenerate_dataset",
+      "title": "Regenerate a dataset's rows from its recipe",
+      "description": "Regenerate a dataset's rows from its recipe: mode=expand adds rows, mode=reroll replaces all.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "description": "The dataset; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["expand", "reroll"],
+            "description": "expand: add new rows up to `rows`, existing rows stay; reroll: replace all rows with fresh ones."
+          },
+          "rows": {
+            "description": "expand: the target row count (required, above the current count); reroll: the new row count (default: the current count).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["mode"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_restore_dataset",
+      "title": "Restore a dataset's previous content",
+      "description": "Restore a dataset's previous content (a second call switches back).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "description": "The dataset; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_set_slot_label",
+      "title": "Set the display label of a scenario's data slot",
+      "description": "Set the display label of a scenario's data slot.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "slot": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "The data slot."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The slot's new label."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["slot", "label"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "data_update_dataset",
+      "title": "Update a dataset's definition or replace its rows from a file",
+      "description": "Update a dataset's definition or replace its rows from a file. Direct edit, only on the user's request; normally use data_ask_copilot.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "description": "The dataset; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "name": {
+            "description": "The new name.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "description": "The new description; an empty text clears it.",
+            "type": "string",
+            "maxLength": 500
+          },
+          "file": {
+            "description": "A CSV file of the project directory (relative path, up to 2 MB) whose rows replace the dataset's; the server reads it.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 260
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

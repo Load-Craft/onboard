@@ -6,6 +6,7 @@ import type { DataDemand } from '../../api/data.js';
 import type { ClampNote, ClampRefusal, EnvironmentCaps } from '../../profiles/caps.js';
 import type { Profile, ProfileType } from '../../profiles/presets.js';
 import { columns, inline, num, VIEW_WIDTH, visibleWidth, wrap } from '../primitives.js';
+import { slotCause } from '../slotCause.js';
 import { slotRef } from '../slotRef.js';
 
 export interface ProfileEntry {
@@ -35,8 +36,8 @@ export interface ProfilesData {
     readonly caps: EnvironmentCaps;
   };
   readonly targetUsers: number;
-  /** `off`: not asked for; `done`: checked per profile; `composition_only`: the target is a scenario. */
-  readonly dataCheck: 'off' | 'done' | 'composition_only';
+  /** `off`: not asked for; `done`: checked per profile (a composition or a scenario). */
+  readonly dataCheck: 'off' | 'done';
   readonly profiles: ProfileEntry[];
 }
 
@@ -46,7 +47,7 @@ const SEP = '  ';
 /** Profiles whose `vusers` is an arrival rate (users per second), not a number of users. */
 const RATE_TYPES: ReadonlySet<ProfileType> = new Set(['constant', 'stress']);
 
-/** The stairs climb by `max(vusers / 5, 1)`: the top is `5 × step` (`config_generator.py:676-683`). */
+/** The stairs climb by `max(vusers / 5, 1)`: the top is `5 × step`. */
 const STRESS_LEVELS = 5;
 
 /** `15 min`, `2 h`, `1 h 30 min`, `45 s`: whole units, largest first. */
@@ -107,7 +108,7 @@ function clampMarkers(entry: ProfileEntry, caps: EnvironmentCaps, t: Translator)
     markers.push(t('profiles.marker.refused', { limit: num(caps.maxVu ?? 0, t.locale) }));
   } else if (entry.clamped && entry.note === 'second_burst_doubles') {
     // Spike rule: the second burst is twice the first, so `max_vu` bounds `vusers` at half of it
-    // (`injection_builder.py`, `SPIKE_PEAK_MULTIPLIER`).
+    // (`SPIKE_PEAK_MULTIPLIER`).
     markers.push(t('profiles.marker.spike', { to, limit: num(caps.maxVu ?? 0, t.locale) }));
   } else if (entry.clamped) {
     markers.push(t('profiles.marker.clamped', { to }));
@@ -123,14 +124,16 @@ function dataMarker(entry: ProfileEntry, t: Translator): string[] {
   if (entry.data.ready) return [t('profiles.data.ready')];
   const short = entry.data.slots
     .filter((slot) => slot.blocking)
-    .map((slot) =>
-      slot.have === null || slot.need === null
-        ? t('profiles.data.slotNone', { label: slotRef(slot.label, slot.slot, t) })
-        : t('profiles.data.slot', {
-            label: slotRef(slot.label, slot.slot, t),
-            have: num(slot.have, t.locale),
-            need: num(slot.need, t.locale),
-          }),
+    .map(
+      (slot) =>
+        slotCause(slot, t) ??
+        (slot.have === null || slot.need === null
+          ? t('profiles.data.slotNone', { label: slotRef(slot.label, slot.slot, t) })
+          : t('profiles.data.slot', {
+              label: slotRef(slot.label, slot.slot, t),
+              have: num(slot.have, t.locale),
+              need: num(slot.need, t.locale),
+            })),
     );
   if (short.length === 0) {
     return [t('profiles.data.refused', { reason: inline(entry.data.refusal ?? '—') })];
@@ -204,16 +207,6 @@ export function renderRunPlan(data: ProfilesData, t: Translator): string {
     ...data.profiles.map((entry) => `${INDENT}${INDENT}${entry.n}. ${profileJson(entry.profile)}`),
   ];
 
-  const footer = [
-    ...profileLines,
-    ...(data.dataCheck === 'composition_only'
-      ? wrap(
-          t('profiles.data.compositionOnly', { name: inline(data.target.name) }),
-          VIEW_WIDTH,
-          INDENT.length,
-        )
-      : []),
-    ...wrap(t('profiles.next'), VIEW_WIDTH, INDENT.length),
-  ];
+  const footer = [...profileLines, ...wrap(t('profiles.next'), VIEW_WIDTH, INDENT.length)];
   return [...header, ...list, ...footer].join('\n');
 }

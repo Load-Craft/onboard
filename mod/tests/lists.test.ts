@@ -90,6 +90,8 @@ type Dollar = Parameters<Parameters<typeof test>[2]>[0];
 interface WorldOptions {
   /** The first read of the flows is refused (the server is not connected); the next ones work. */
   readonly flowsFailOnce?: boolean;
+  /** The read of the runs answers with an error of the server. */
+  readonly runsError?: boolean;
 }
 
 /** The world beneath the mod: the status in its sections, the prompts the mod submits, the reads it makes. */
@@ -120,6 +122,10 @@ function world(on: Kit, options: WorldOptions = {}) {
     if (args['detail'] === 'flows' && options.flowsFailOnce === true && !failed) {
       failed = true;
       return { deny: 'server not connected' };
+    }
+    if (args['detail'] === 'runs' && options.runsError === true) {
+      const text = '[backend_unavailable] CANARY-SECRET-7f3a the backend said something long';
+      return { value: { content: [{ type: 'text', text }], isError: true } };
     }
     const data =
       args['detail'] === 'flows' ? FLOWS : args['result'] !== undefined ? OUTLINE : STATUS;
@@ -285,6 +291,26 @@ test(
     expect(seen.prompts[0]).toContain('compare_to "e-22222222"');
     expect(seen.prompts[0]).toContain('not consent');
     expect(await ui.find({ key: 'runs-compare' })).toBeUndefined();
+    await ui.unmount();
+  },
+);
+
+test(
+  'a read of the runs that failed names the code of the answer, never its text',
+  CONFIGURED,
+  async ($, on) => {
+    world(on, { runsError: true });
+    const clock = mock.clock(on, { now: 1_000 });
+    await ready($, clock);
+    const ui = await open($, clock, 'results');
+
+    expect(
+      await ui.find({
+        type: 'Text',
+        text: /The runs could not be read \(reason: \[backend_unavailable\]\)/,
+      }),
+    ).toBeDefined();
+    expect(await ui.find({ type: 'Text', text: /CANARY/ })).toBeUndefined();
     await ui.unmount();
   },
 );

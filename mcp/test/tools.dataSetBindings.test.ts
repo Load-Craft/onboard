@@ -16,6 +16,7 @@ import {
 } from './fake-backend/worlds/sklep.js';
 import { dataCheck, dataOf, dataRig, writesOf } from './helpers/dataWorlds.js';
 import type { ToolRig } from './helpers/rig.js';
+import { leakedPieces } from './helpers/canary.js';
 
 const { zakupy: ZAKUPY, konto: KONTO } = SKLEP_WORLD_IDS.scenarios;
 const { frazy: FRAZY, zamowienia: ZAMOWIENIA } = SKLEP_WORLD_IDS.feeders;
@@ -114,6 +115,17 @@ describe('data_set_bindings', () => {
       '[dataset_ambiguous]',
     );
     expect(writesOf(r)).toEqual([]);
+  });
+
+  it('masks a credential in the names of the datasets it lists in a refusal (FIX-74)', async () => {
+    const r = await rig();
+    const feeders = r.fake.store.collection<SklepFeeder>(SKLEP_COLLECTIONS.feeders);
+    const secret = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXRhc2V0In0.c2VudGluZWwtZGF0YXNldC1zaWc';
+    feeders.update(FRAZY, { name: `frazy ${secret}` });
+    const unknown = await bind(r, { order_details: 'nie ma' });
+    expect(unknown.text).toContain('[dataset_unknown]');
+    expect(leakedPieces(unknown.text, [secret])).toEqual([]);
+    expect(unknown.text).toContain('frazy');
   });
 
   it('keeps the previous map for the undo', async () => {

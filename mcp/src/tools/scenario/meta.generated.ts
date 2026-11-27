@@ -59,14 +59,28 @@ export const SCENARIO_LIST = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many scenarios to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
-/** `scenario_get`: Get a scenario: status, self-check, data slots; include adds the session-variable contract, drift score, Scala source (literals masked). */
+/** `scenario_get`: Get a scenario: status, self-check, data slots; include adds the variable contract, drift and stored artifact (masked). */
 export const SCENARIO_GET = {
   name: 'scenario_get',
   module: 'scenario',
@@ -104,7 +118,7 @@ export const SCENARIO_GET = {
   },
   route: null,
   description:
-    'Get a scenario: status, self-check, data slots; include adds the session-variable contract, drift score, Scala source (literals masked).',
+    'Get a scenario: status, self-check, data slots; include adds the variable contract, drift and stored artifact (masked).',
   operations: [
     {
       operationId: 'get_scenario_api_v1_projects__project_id__gatling_scenarios__scenario_id__get',
@@ -132,11 +146,30 @@ export const SCENARIO_GET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario; default: the only one in this workspace.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['contract', 'drift', 'artifact'],
+      max_items: 3,
+      from_state: null,
+      doc: 'contract: the session-variable contract; drift: the drift score; artifact: the stored scenario artifact (literals masked).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_save`: Save a scenario's name, tags, active flag or SLO thresholds (no id: create an empty one). */
@@ -202,7 +235,7 @@ export const SCENARIO_SAVE = {
       path: '/api/v1/projects/{project_id}/gatling/scenarios/{scenario_id}',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_scenario_api_v1_projects__project_id__gatling_scenarios__scenario_id__get'],
   channels: [],
   state_reads: ['ids.project_id', 'ids.scenario_ids'],
   state_writes: ['ids.scenario_ids'],
@@ -211,14 +244,60 @@ export const SCENARIO_SAVE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The scenario to change (id or name); without it, a new empty scenario is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The name; required for a new scenario.',
+    },
+    {
+      name: 'tags',
+      type: 'string',
+      max_length: 1000,
+      from_state: null,
+      doc: 'Tags, comma-separated (at most 20); replaces the list, an empty text clears it.',
+    },
+    {
+      name: 'is_active',
+      type: 'boolean',
+      from_state: null,
+      doc: 'Whether the scenario is active.',
+    },
+    {
+      name: 'slo_thresholds',
+      type: 'object',
+      from_state: null,
+      doc: 'SLO thresholds (key: number); {} sets the standard SLO.',
+    },
+    {
+      name: 'slo_from_project',
+      type: 'boolean',
+      from_state: null,
+      doc: "true: drop the scenario's own SLO thresholds; it inherits the project's.",
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
-/** `scenario_delete`: Delete scenarios or compositions (kind + ids). Past runs stay. */
+/** `scenario_delete`: Delete a scenario or a composition. Past runs stay. */
 export const SCENARIO_DELETE = {
   name: 'scenario_delete',
   module: 'scenario',
@@ -285,7 +364,7 @@ export const SCENARIO_DELETE = {
     result: '{count} {kind} deleted',
   },
   route: null,
-  description: 'Delete scenarios or compositions (kind + ids). Past runs stay.',
+  description: 'Delete a scenario or a composition. Past runs stay.',
   operations: [
     {
       operationId:
@@ -309,11 +388,28 @@ export const SCENARIO_DELETE = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The scenario to delete; give this or composition_id.',
+    },
+    {
+      name: 'composition_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The composition to delete; give this or scenario_id.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_generate`: Generate scenarios from flows with a traffic split, join them in one composition, and self-check each (sends requests to the target). */
@@ -481,13 +577,17 @@ export const SCENARIO_GENERATE = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_regenerate`: Regenerate a scenario from its source flow; saved as a new version and self-checked again (sends requests to the target). */
@@ -576,13 +676,17 @@ export const SCENARIO_REGENERATE = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_check_self`: Check scenarios with a one-user self-check on the default environment; returns each request chain. Sends requests to the target. */
@@ -685,13 +789,17 @@ export const SCENARIO_CHECK_SELF = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_check_drift`: Check whether a scenario still matches its reference (HAR or API docs); returns a staleness score and a drift report. */
@@ -777,14 +885,44 @@ export const SCENARIO_CHECK_DRIFT = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario to check (id or name); default: the only one in this workspace.',
+    },
+    {
+      name: 'reference_source',
+      type: 'enum',
+      enum: ['har', 'openapi'],
+      required: true,
+      from_state: null,
+      doc: 'What to compare the scenario with: a recorded HAR session or a documentation version.',
+    },
+    {
+      name: 'reference_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 128,
+      required: true,
+      from_state: null,
+      doc: 'The HAR session id or the documentation version id to compare with.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
-/** `scenario_export`: Export the scenario's Gatling project as a local ZIP and return its path (dataset secrets masked). */
+/** `scenario_export`: Export the scenario's Gatling project as a local ZIP without dataset values; returns its path and what to add to run it. */
 export const SCENARIO_EXPORT = {
   name: 'scenario_export',
   module: 'scenario',
@@ -822,7 +960,7 @@ export const SCENARIO_EXPORT = {
   },
   route: null,
   description:
-    "Export the scenario's Gatling project as a local ZIP and return its path (dataset secrets masked).",
+    "Export the scenario's Gatling project as a local ZIP without dataset values; returns its path and what to add to run it.",
   operations: [
     {
       operationId:
@@ -831,7 +969,7 @@ export const SCENARIO_EXPORT = {
       path: '/api/v1/projects/{project_id}/gatling/scenarios/{scenario_id}/export',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_scenario_api_v1_projects__project_id__gatling_scenarios__scenario_id__get'],
   channels: [],
   state_reads: ['ids.project_id', 'ids.scenario_ids'],
   state_writes: [],
@@ -840,11 +978,23 @@ export const SCENARIO_EXPORT = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario; default: the only one in this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason:
+      'zapisuje ZIP projektu Gatlinga lokalnie pod loadcraft/exports/ (ignorowane przez git); nic w backendzie się nie zmienia',
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_get_versions`: Get a scenario's versions: the list, or one with its code (literals masked). */
@@ -908,11 +1058,30 @@ export const SCENARIO_GET_VERSIONS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario; default: the only one in this workspace.',
+    },
+    {
+      name: 'version',
+      type: 'integer',
+      min: 1,
+      max: 100000,
+      from_state: null,
+      doc: 'One version with its stored artifact (literals masked); without it, the list.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_restore_version`: Restore a scenario version as the newest one; its self-check is cleared. */
@@ -976,11 +1145,33 @@ export const SCENARIO_RESTORE_VERSION = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario: its id or name; default: the only one in this workspace.',
+    },
+    {
+      name: 'version',
+      type: 'integer',
+      min: 1,
+      max: 100000,
+      from_state: null,
+      required: true,
+      doc: 'The version to make current.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_suggest_split`: Suggest how to split traffic between flows (planner LLM), or review the current plan. Generates nothing. */
@@ -1108,8 +1299,12 @@ export const SCENARIO_SUGGEST_SPLIT = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_ask_copilot`: Ask the scenario copilot what to fix, or run its readiness review. Proposes actions, applies none. */
@@ -1203,7 +1398,7 @@ export const SCENARIO_ASK_COPILOT = {
       path: '/api/v1/projects/{project_id}/gatling/scenarios/{scenario_id}/copilot/messages/review',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_scenario_api_v1_projects__project_id__gatling_scenarios__scenario_id__get'],
   channels: [],
   state_reads: ['ids.project_id', 'ids.scenario_ids', 'choices.run.profile'],
   state_writes: [],
@@ -1212,11 +1407,44 @@ export const SCENARIO_ASK_COPILOT = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario (id or name); default: the only one of this workspace.',
+    },
+    {
+      name: 'message',
+      type: 'string',
+      min_length: 1,
+      max_length: 4000,
+      from_state: null,
+      doc: 'The question for the scenario copilot.',
+    },
+    {
+      name: 'review',
+      type: 'boolean',
+      from_state: null,
+      doc: 'true: the standard readiness review instead of a question (not with message).',
+    },
+    {
+      name: 'profile',
+      type: 'object',
+      from_state: 'choices.run.profile',
+      doc: 'The load profile to discuss; default: the chosen one.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_get_copilot_history`: Get a copilot conversation: the traffic-split planner or a scenario's copilot. */
@@ -1280,11 +1508,37 @@ export const SCENARIO_GET_COPILOT_HISTORY = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: null,
+      doc: "A scenario's copilot conversation (not with draft_id).",
+    },
+    {
+      name: 'draft_id',
+      type: 'uuid',
+      from_state: 'ids.split_draft_id',
+      doc: 'The traffic-split planner draft; default: the draft of this workspace.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 20,
+      from_state: null,
+      doc: 'How many of the latest messages to return (1-100).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_list_compositions`: List the project's compositions: name, status, member count. */
@@ -1341,11 +1595,33 @@ export const SCENARIO_LIST_COMPOSITIONS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'status',
+      type: 'string',
+      min_length: 1,
+      max_length: 40,
+      from_state: null,
+      doc: 'List only compositions with this status.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many compositions to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_get_composition`: Get a composition: members, weights, pinned versions, load profile, status, drift. Header values masked. */
@@ -1404,11 +1680,24 @@ export const SCENARIO_GET_COMPOSITION = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_save_composition`: Save a composition (members, weights, load profile; no id: create), validating it. Direct edit, only on request; see scenario_suggest_split. */
@@ -1524,6 +1813,7 @@ export const SCENARIO_SAVE_COMPOSITION = {
   ],
   also_calls: [
     'validate_composition_api_v1_projects__project_id__gatling_compositions__composition_id__validate_post',
+    'get_composition_api_v1_projects__project_id__gatling_compositions__composition_id__get',
   ],
   channels: [],
   state_reads: [
@@ -1539,11 +1829,44 @@ export const SCENARIO_SAVE_COMPOSITION = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The composition to change (id or name); without it, a new one is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The name; required for a new composition.',
+    },
+    {
+      name: 'members',
+      type: 'object',
+      from_state: null,
+      doc: 'Scenario (id or name) -> its share in percent; replaces the member list.',
+    },
+    {
+      name: 'profile',
+      type: 'object',
+      from_state: null,
+      doc: "The composition's load profile (users, ramp, duration), as scenario_get_composition shows it.",
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_check_composition`: Check a composition: contract issues between members and version drift. Changes no user data (stores the verdict). */
@@ -1602,11 +1925,24 @@ export const SCENARIO_CHECK_COMPOSITION = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_compile_composition`: Compile the Gatling project a run would ship, without running it (up to 2 min). */
@@ -1678,7 +2014,9 @@ export const SCENARIO_COMPILE_COMPOSITION = {
       path: '/api/v1/projects/{project_id}/gatling/compositions/{composition_id}/dry-run',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_composition_api_v1_projects__project_id__gatling_compositions__composition_id__get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.composition_id'],
   state_writes: ['steps.scenario.compiled', 'problems'],
@@ -1687,11 +2025,24 @@ export const SCENARIO_COMPILE_COMPOSITION = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_get_composition_code`: Get the Gatling project generated for a composition: the file tree, or one file by path (literals masked). */
@@ -1756,11 +2107,32 @@ export const SCENARIO_GET_COMPOSITION_CODE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+    {
+      name: 'path',
+      type: 'string',
+      min_length: 1,
+      max_length: 300,
+      from_state: null,
+      doc: 'One file of the project by its path in the tree (as listed); without it, the file tree.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_update_pins`: Update every drifted member of a composition to its scenario's current version. */
@@ -1826,11 +2198,24 @@ export const SCENARIO_UPDATE_PINS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `scenario_set_composition_type`: Set a composition's load test type; members are re-linked and data re-sized. */
@@ -1894,14 +2279,49 @@ export const SCENARIO_SET_COMPOSITION_TYPE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+    {
+      name: 'type',
+      type: 'enum',
+      enum: [
+        'load_test',
+        'stress_test',
+        'soak_test',
+        'spike_test',
+        'breakpoint_test',
+        'capacity_test',
+      ],
+      from_state: null,
+      required: true,
+      doc: 'The kind of test the composition runs.',
+    },
+    {
+      name: 'spec',
+      type: 'object',
+      from_state: null,
+      required: true,
+      doc: 'The parameters of that kind (users, durations, ramps, steps…); LoadCraft checks them.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
-/** `scenario_get_templates`: Get built-in scenario templates: the list, one, or its draft composition config for the project (nothing saved). */
+/** `scenario_get_templates`: Get scenario templates; for one, its generic draft (the template's own scenarios and load, not fitted to the project). */
 export const SCENARIO_GET_TEMPLATES = {
   name: 'scenario_get_templates',
   module: 'scenario',
@@ -1939,7 +2359,7 @@ export const SCENARIO_GET_TEMPLATES = {
   },
   route: null,
   description:
-    'Get built-in scenario templates: the list, one, or its draft composition config for the project (nothing saved).',
+    "Get scenario templates; for one, its generic draft (the template's own scenarios and load, not fitted to the project).",
   operations: [
     {
       operationId: 'list_templates_api_v1_templates_get',
@@ -1967,9 +2387,30 @@ export const SCENARIO_GET_TEMPLATES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'template',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One template with its scenarios and data files (id or name); without it, the list.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['draft'],
+      max_items: 1,
+      from_state: null,
+      doc: '"draft": its composition config for this project, nothing saved (with template only).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

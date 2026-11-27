@@ -5,7 +5,7 @@ import * as z from 'zod/v4';
 import { loadConfig } from '../../src/config.js';
 import { createLogger } from '../../src/log.js';
 import { defineTool } from '../../src/registry.js';
-import { assertNoCanary, CANARY } from './canary.js';
+import { assertNoCanary, CANARY, HEADER_CANARY, leakedPieces, SHAPE_CANARY } from './canary.js';
 import { createTestClock } from './clock.js';
 import { connect, CURRENT_REVISION, type Era } from './mcp.js';
 
@@ -186,5 +186,29 @@ describe('assertNoCanary', () => {
   it('throws for a url-encoded canary and a canary inside a buffer', () => {
     expect(() => assertNoCanary(encodeURIComponent(CANARY))).toThrow(/canary/i);
     expect(() => assertNoCanary(Buffer.from(`token=${CANARY}`))).toThrow(/canary/i);
+  });
+
+  it('throws for the tail of a canary a view kept after cutting its head', () => {
+    expect(() => assertNoCanary(`…${HEADER_CANARY.slice(-8)}`)).toThrow(/canary/i);
+  });
+
+  it('throws for a run from the middle of a canary a partial mask left behind', () => {
+    const middle = SHAPE_CANARY.slice(5, 17);
+    expect(SHAPE_CANARY.startsWith(middle) || SHAPE_CANARY.endsWith(middle)).toBe(false);
+    expect(() => assertNoCanary(`[redacted]${middle}[redacted]`)).toThrow(/canary/i);
+  });
+});
+
+describe('leakedPieces', () => {
+  const JWT = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwaWVjZXMifQ.c2lnbmF0dXJlLXBpZWNlcw';
+
+  it('finds no piece in a text that holds none', () => {
+    expect(leakedPieces('flow "checkout" [redacted]', [JWT])).toEqual([]);
+  });
+
+  it('finds the head, the tail and a run from the middle of a secret', () => {
+    expect(leakedPieces(`label ${JWT.slice(0, 8)}…`, [JWT])).not.toEqual([]);
+    expect(leakedPieces(`…${JWT.slice(-8)}`, [JWT])).not.toEqual([]);
+    expect(leakedPieces(`x${JWT.slice(30, 42)}x`, [JWT])).not.toEqual([]);
   });
 });

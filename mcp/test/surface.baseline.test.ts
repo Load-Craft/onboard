@@ -98,8 +98,8 @@ const expected: Surface = {
 };
 
 describe('surface baseline: tools/list of the server', () => {
-  it('exposes exactly the tools of the fixtures: the 37 of today and the written ones of the modules', () => {
-    expect(live.tools.filter((tool) => !MODULE_OF.has(tool.name))).toHaveLength(37);
+  it('exposes exactly the tools of the fixtures: the 36 of today and the written ones of the modules', () => {
+    expect(live.tools.filter((tool) => !MODULE_OF.has(tool.name))).toHaveLength(36);
     expect(
       live.tools.map((tool) => tool.name),
       HOW_TO_UPDATE,

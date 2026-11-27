@@ -16,6 +16,7 @@ import * as nodeFs from 'node:fs';
 import { hostname } from 'node:os';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { ToolError } from '../errors.js';
+import { WRITER_BUILD } from './build.js';
 
 /** The file operations of the lock; tests wrap them to put another process's step between two of ours. */
 export type LockFs = Pick<
@@ -159,7 +160,14 @@ function ownerText(s: Settings): { text: string; token: string } {
   const token = randomBytes(8).toString('hex');
   return {
     token,
-    text: JSON.stringify({ host: hostname(), pid: process.pid, at: s.now(), token }),
+    // the build names the version that holds the lock, for whoever waits on it (DOKTOR-07)
+    text: JSON.stringify({
+      host: hostname(),
+      pid: process.pid,
+      at: s.now(),
+      token,
+      build: WRITER_BUILD,
+    }),
   };
 }
 

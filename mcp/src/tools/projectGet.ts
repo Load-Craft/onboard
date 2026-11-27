@@ -7,7 +7,7 @@ import * as z from 'zod';
 
 import type { ToolContext } from '../context.js';
 import { provenanceOf, unmetSteps, UNSETTLED_STATUSES } from '../contract/setupGate.js';
-import { callOperation } from '../http/operation.js';
+import { callOperation, settleAll } from '../http/operation.js';
 import { defineTool } from '../registry.js';
 import {
   renderProjectGet,
@@ -17,6 +17,7 @@ import {
 } from '../render/views/projectProfile.js';
 import { createResolver } from '../resolve/handles.js';
 import { openUncertain, readProfile, shownProfile } from './project/profile.js';
+import { content } from './moduleCall.js';
 
 const INCLUDE = ['stats', 'setup', 'telemetry'] as const;
 
@@ -97,7 +98,7 @@ export const projectGet = defineTool({
   async run(ctx, args) {
     const project = await createResolver(ctx).project();
     const include = new Set(args.include ?? []);
-    const [stored, stats, gate, telemetry] = await Promise.all([
+    const [stored, stats, gate, telemetry] = await settleAll([
       readProfile(ctx, project.id),
       include.has('stats') ? statsOf(ctx, project.id) : undefined,
       setupOf(ctx, project.id),
@@ -107,7 +108,8 @@ export const projectGet = defineTool({
       .filter((entry) => UNSETTLED_STATUSES.has(entry.status))
       .map((entry) => entry.field);
     const data: ProjectGetData = {
-      project: { id: project.id, name: stored.name },
+      // the name is shown masked, its secrets registered (FIX-76)
+      project: { id: project.id, name: content(ctx, stored.name, 120) },
       profile: shownProfile(stored.stored),
       uncertain: [...new Set([...openUncertain(ctx.state.process()), ...recorded])],
       ...(gate.provenance.length === 0 ? {} : { provenance: gate.provenance }),

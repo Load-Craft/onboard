@@ -80,8 +80,12 @@ export const RUN_PLAN = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_start`: Start a load run of a scenario or composition on a named environment and follow it; returns a handle when the time limit ends first. */
@@ -237,13 +241,17 @@ export const RUN_START = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_start_saved`: Start a saved run now and follow it. */
@@ -348,13 +356,17 @@ export const RUN_START_SAVED = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_list`: List the project's runs, newest first: status, target, environment; include=results adds headline results. */
@@ -417,11 +429,41 @@ export const RUN_LIST = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 20,
+      from_state: null,
+      doc: 'How many runs to return (1-200).',
+    },
+    {
+      name: 'target',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'Only runs of this scenario or composition (name or id).',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['results'],
+      max_items: 1,
+      from_state: null,
+      doc: '"results": the headline numbers of each run.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_get`: Get one run: state, configuration, failure stage; include=diagnostics adds the build output. */
@@ -486,14 +528,33 @@ export const RUN_GET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'run_id',
+      type: 'uuid|run_handle',
+      from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['diagnostics'],
+      max_items: 1,
+      from_state: null,
+      doc: '"diagnostics": why the run stopped or failed, when LoadCraft knows.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
-/** `run_delete`: Delete runs with their results and reports, load profiles, or saved runs (kind + ids). */
+/** `run_delete`: Delete a run, a load profile or a saved run (kind + item_id). Runs in progress are refused. */
 export const RUN_DELETE = {
   name: 'run_delete',
   module: 'run',
@@ -522,8 +583,8 @@ export const RUN_DELETE = {
           source: 'args',
         },
         {
-          label: 'Items',
-          from: 'ids (names resolved by the registry)',
+          label: 'Item',
+          from: 'item_id (name resolved by the registry)',
           source: 'labels',
         },
       ],
@@ -556,7 +617,7 @@ export const RUN_DELETE = {
   },
   route: null,
   description:
-    'Delete runs with their results and reports, load profiles, or saved runs (kind + ids).',
+    'Delete a run, a load profile or a saved run (kind + item_id). Runs in progress are refused.',
   operations: [
     {
       operationId:
@@ -583,7 +644,11 @@ export const RUN_DELETE = {
       path: '/api/v1/projects/{project_id}/gatling/saved-runs/{saved_run_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_execution_api_v1_projects__project_id__gatling_executions__execution_id__get',
+    'get_configuration_api_v1_projects__project_id__gatling_configurations__config_id__get',
+    'get_saved_run_api_v1_projects__project_id__gatling_saved_runs__saved_run_id__get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.run_id'],
   state_writes: ['ids.run_id'],
@@ -592,11 +657,31 @@ export const RUN_DELETE = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: ['run', 'profile', 'saved_run'],
+      required: true,
+      from_state: null,
+      doc: 'What to delete.',
+    },
+    {
+      name: 'item_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The run, load profile or saved run to delete.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_get_profiles`: Get stored load profiles: the list, or one with its injection steps. */
@@ -659,11 +744,24 @@ export const RUN_GET_PROFILES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'profile',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One load profile with its injection steps (name or id); without it, the list.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_save_profile`: Save a stored load profile (users, ramp, duration, default flag; no id: create). */
@@ -737,11 +835,86 @@ export const RUN_SAVE_PROFILE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'profile',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'The load profile to change (name or id); without it, a new one is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'The profile name (needed to create; renames on change).',
+    },
+    {
+      name: 'type',
+      type: 'enum',
+      enum: [
+        'at_once',
+        'ramp',
+        'constant',
+        'stress',
+        'spike',
+        'soak',
+        'ramp_concurrency',
+        'constant_concurrency',
+        'custom',
+      ],
+      from_state: null,
+      doc: 'The load shape (needed to create).',
+    },
+    {
+      name: 'users',
+      type: 'integer',
+      min: 1,
+      max: 1000000,
+      from_state: null,
+      doc: 'Virtual users.',
+    },
+    {
+      name: 'duration_seconds',
+      type: 'integer',
+      min: 1,
+      max: 86400,
+      from_state: null,
+      doc: 'How long the load lasts.',
+    },
+    {
+      name: 'ramp_duration_seconds',
+      type: 'integer',
+      min: 0,
+      max: 86400,
+      from_state: null,
+      doc: 'How long the ramp lasts.',
+    },
+    {
+      name: 'description',
+      type: 'string',
+      max_length: 500,
+      from_state: null,
+      doc: 'A short description.',
+    },
+    {
+      name: 'is_default',
+      type: 'boolean',
+      from_state: null,
+      doc: 'true: make it the default profile of the project.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_get_saved`: Get saved runs with their schedules: the list, or one. */
@@ -804,11 +977,24 @@ export const RUN_GET_SAVED = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'saved_run',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One saved run (name or id); without it, the list.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_save`: Save a run definition for reuse (target, load, environment, data bindings; id: update). */
@@ -921,12 +1107,12 @@ export const RUN_SAVE = {
       },
       {
         path: 'ids.dataset_ids',
-        arg: 'dataset_ids',
+        arg: 'feeder_bindings',
         explicit: true,
       },
       {
         path: 'ids.env_id',
-        arg: 'env',
+        arg: 'environment_id',
         explicit: true,
       },
     ],
@@ -968,7 +1154,7 @@ export const RUN_SAVE = {
       path: '/api/v1/projects/{project_id}/gatling/saved-runs/{saved_run_id}',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_saved_run_api_v1_projects__project_id__gatling_saved_runs__saved_run_id__get'],
   channels: [],
   state_reads: [
     'ids.project_id',
@@ -982,13 +1168,76 @@ export const RUN_SAVE = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'saved_run_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The saved run to change; without it, a new one is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'The name; required for a new saved run.',
+    },
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The scenario a new saved run starts (give this or composition_id; new only).',
+    },
+    {
+      name: 'composition_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The composition a new saved run starts (give this or scenario_id; new only).',
+    },
+    {
+      name: 'environment_id',
+      type: 'uuid',
+      from_state: 'ids.env_id',
+      doc: 'The environment; set or change, never clear.',
+    },
+    {
+      name: 'target_base_url',
+      type: 'string',
+      min_length: 1,
+      max_length: 500,
+      from_state: null,
+      doc: 'The target address; set or change, never clear.',
+    },
+    {
+      name: 'workload',
+      type: 'object',
+      from_state: 'choices.run.profile',
+      doc: 'The load {type, vusers, ramp, hold, thresholds}; replaced as a whole.',
+    },
+    {
+      name: 'feeder_bindings',
+      type: 'object',
+      from_state: null,
+      doc: 'Slot -> dataset id; replaced as a whole.',
+    },
+    {
+      name: 'source_execution_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The run this saved run is made from (new only).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_set_schedule`: Set a saved run's cron schedule (cron=null clears it; paused=true pauses, false resumes). */
@@ -1126,13 +1375,17 @@ export const RUN_SET_SCHEDULE = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `run_get_usage`: Get finished runs over a period and the compute time they used. */
@@ -1194,9 +1447,23 @@ export const RUN_GET_USAGE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'days',
+      type: 'integer',
+      min: 1,
+      max: 365,
+      default: 30,
+      from_state: null,
+      doc: 'How many past days of usage to return (1-365).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

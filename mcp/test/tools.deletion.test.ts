@@ -33,6 +33,7 @@ import { SKLEP_IDS } from './golden/index.js';
 import { settleClock } from './helpers/clock.js';
 import type { Elicitor } from './helpers/mcp.js';
 import { toolRig, type RigCallResult, type ToolRig } from './helpers/rig.js';
+import { leakedPieces } from './helpers/canary.js';
 
 const PROJECT = SKLEP_IDS.project;
 const ZAKUPY = SKLEP_IDS.flowZakupy;
@@ -272,6 +273,23 @@ describe('project_delete: the card names the project and counts what goes with i
     expect(refused.isError).toBe(true);
     expect(refused.text).toMatch(/^\[delete_kind_unsupported\] /u);
     expect(r.fake.calls.slice(before)).toEqual([]);
+  });
+
+  it('masks a credential in the names it lists when a name matches nothing (FIX-74)', async () => {
+    const r = await rig();
+    const secret = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZWxldGUifQ.c2VudGluZWwtZGVsZXRlLXNpZw';
+    r.fake.store
+      .collection(SKLEP_COLLECTIONS.projects)
+      .update(PROJECT, { name: `sklep ${secret}` });
+    r.fake.store.collection(SKLEP_COLLECTIONS.flows).update(ZAKUPY, { name: `zakupy ${secret}` });
+    const project = await call(r, 'project_delete', { kind: 'project', names: ['nie-ma'] });
+    const flow = await call(r, 'flows_delete', { kind: 'flow', names: ['nie-ma'] });
+    for (const result of [project, flow]) {
+      expect(result.text).toMatch(/^\[not_found\] /u);
+      expect(leakedPieces(result.text, [secret])).toEqual([]);
+    }
+    expect(project.text).toContain('sklep');
+    expect(flow.text).toContain('zakupy');
   });
 
   it('names at most five projects per card, so the question lists each one', async () => {

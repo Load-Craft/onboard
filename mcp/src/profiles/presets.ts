@@ -37,7 +37,7 @@ export interface Preset {
 }
 
 // PRODUCT RULE OF THE PLUGIN: it comes from the plugin's session specification, not from LoadCraft
-// code. The run wizard (`frontend/src/features/gatling/pages/runWizardPresets.ts`) offers the same
+// code. The run wizard of the frontend offers the same
 // nine profiles in the same order and under the same names, but only with fixed defaults; it has no
 // formula that turns "N users" into a profile. For 2 000 users this rule gives 2 000 spread over
 // 10 min, 4 new/s for 15 min, 5 steps of 3 min up to 10 new/s, and so on. If the wizard or the

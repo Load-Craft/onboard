@@ -63,6 +63,7 @@ import {
   describeWalk,
   finishWalk,
   recoverWalk,
+  acceptWalkFrame,
   reduceWalk,
   sentWalk,
   walkAdvance,
@@ -73,6 +74,7 @@ import {
   walkSavedSchema,
   type WalkState,
 } from './recordWalk.js';
+import { content } from './moduleCall.js';
 
 /** How long the plan may take to arrive on the channel once the run waits for the approval. */
 export const PLAN_FRAME_TIMEOUT_MS = 15_000;
@@ -164,8 +166,8 @@ function v6Private(address: string): boolean {
 /**
  * Whether the host of `url` is a loopback, private, link-local or local-only name, which the
  * browser of a LoadCraft server elsewhere does not reach. The ranges follow the address checks of
- * the backend (`backend/domain/services/ssrf_guard.py:205-215` at loadcraft 7d383e0ec:
- * `is_loopback`, `is_private`, `is_link_local`) for literal addresses; names are not resolved.
+ * the backend (`is_loopback`, `is_private`,
+ * `is_link_local`) for literal addresses; names are not resolved.
  */
 export function isPrivateAddress(url: string): boolean {
   let host: string;
@@ -517,11 +519,12 @@ async function finishPlan(
     ...saved,
     plan: { proposed: read.paths.map((path) => ({ ...path.raw })), sharedSignIn: shared },
   });
-  return { status: 'done', data: planView(id, read.paths, shared, saved, link.url) };
+  return { status: 'done', data: planView(ctx, id, read.paths, shared, saved, link.url) };
 }
 
 /** The plan as `flows_describe_journeys` shows it: from the proposal read, or from the plan kept. */
 function planView(
+  ctx: ToolContext,
   id: string,
   paths: readonly ProposedPath[],
   shared: boolean,
@@ -530,14 +533,15 @@ function planView(
 ): DescribeFlowsData {
   return {
     plan: planHandle(id),
+    // the generator's names, shown masked; a masked name still picks its path (FIX-76)
     paths: paths.map((path) => ({
-      name: path.name,
+      name: content(ctx, path.name, 120),
       steps: [...path.steps],
       dependsOnPrior: path.dependsOnPrior,
       ownIdentity: path.ownIdentity,
     })),
     // One sign-in runs before every path except one that registers its own account
-    // (`shared_login_is_wanted`, `per_path_drive_coordinator.py:2134-2159` at loadcraft 7d383e0ec).
+    // (`shared_login_is_wanted`).
     sharedSignIn: shared ? paths.filter((path) => !path.ownIdentity).map((path) => path.name) : [],
     single: paths.length === 1,
     started: false,
@@ -562,7 +566,7 @@ async function shownAgain(
   if (!run.awaitingApproval || ENDED.has(run.status)) return undefined;
   const link = ctx.services.links.describeRun(saved.projectId, id).url;
   const paths = saved.plan.proposed.map((raw) => proposedPath(raw));
-  return { status: 'done', data: planView(id, paths, saved.plan.sharedSignIn, saved, link) };
+  return { status: 'done', data: planView(ctx, id, paths, saved.plan.sharedSignIn, saved, link) };
 }
 
 /** The handle and the path names of the plan kept with the run. */
@@ -618,6 +622,7 @@ export const recordRunOperation = defineOperationKind({
     name: RUN_CHANNEL,
     params: (id, saved) => ({ project_id: saved.projectId, run_id: id }),
     enabled: (saved) => saved.walk !== undefined,
+    accept: (ctx, frame) => acceptWalkFrame(ctx, frame),
     reduce: (state, frame) => (state.phase === 'walk' ? reduceWalk(state, frame) : state),
     sent: (state, message) => (state.phase === 'walk' ? sentWalk(state, message) : state),
   },
@@ -702,7 +707,7 @@ export const flowsDescribeJourneys = defineTool({
     const target = await getDescribeTarget(ctx, project.id, environment.id);
     if (target === undefined) {
       throw new ToolError('environment_without_frontend', {
-        params: { environment: inline(environment.name) },
+        params: { environment: content(ctx, environment.name, 120) },
       });
     }
     const url = targetUrl(environment.name, target, ctx);

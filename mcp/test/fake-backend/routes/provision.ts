@@ -30,6 +30,36 @@ import { idleWhile } from '../../helpers/clock.js';
 
 export const FAKE_PROVISION = 'fake_provision';
 
+const HTTP_SETTINGS = 'fake_http_settings';
+
+type GatlingProjectBody = ReturnType<typeof gatlingProjectBody>;
+
+interface StoredHttpSettings {
+  readonly id: string;
+  readonly missing: boolean;
+  readonly fields: Partial<GatlingProjectBody>;
+}
+
+/**
+ * The HTTP settings of a project's Gatling project as a test wants them: fields that replace the
+ * defaults of the world, or none at all (`missing`: the GET and the PUT answer 404 until the setup).
+ */
+export function seedHttpSettings(
+  store: Store,
+  projectId: string,
+  fields: Partial<GatlingProjectBody>,
+  options: { readonly missing?: boolean } = {},
+): void {
+  const settings = store.collection<StoredHttpSettings>(HTTP_SETTINGS);
+  settings.delete(projectId);
+  settings.insert({ id: projectId, missing: options.missing === true, fields: { ...fields } });
+}
+
+/** The settings the fake holds for a project (the stored fields only). */
+export function httpSettingsOf(store: Store, projectId: string): Partial<GatlingProjectBody> {
+  return { ...store.collection<StoredHttpSettings>(HTTP_SETTINGS).get(projectId)?.fields };
+}
+
 /** How the fake answers; every field has a default (see `configOf`). */
 export interface FakeProvisionConfig {
   id: 'config';
@@ -147,24 +177,31 @@ export interface RecordedSlotGeneration {
 }
 
 const SECRET_NAME = /pass(word|wd)?|pwd|secret|token|api_?key|otp|cvv|pin\b/iu;
+const TRUE_SECRET_NAME = /secret|token|api_?key|otp|cvv|pin\b/iu;
 const LOGIN_NAME = /e-?mail|user(name)?|login/iu;
 
 /**
  * Whether the generation may not invent a column of the slot: a secret never, a login identity
  * unless the slot is plain data, any column of a slot that signs in with existing accounts. The
- * fake's short form of `_is_never_fabricated` (loadcraft @ 47a52b419
- * backend/domain/services/gatling/feeders/derived_data_fill.py:87-170).
+ * fake's short form of `_is_never_fabricated` .
  */
 function neverFabricated(column: string, slot: SklepSlot): boolean {
+  // A slot of new identities (`fresh`) invents the e-mail, the login and the password of the account
+  // its flow creates; a token, a key or a card number it never invents.
+  if (slot.identity_kind === 'fresh') return TRUE_SECRET_NAME.test(column);
   if (SECRET_NAME.test(column)) return true;
   if (slot.identity_kind === 'existing') return true;
   return LOGIN_NAME.test(column) && slot.role !== 'data' && slot.identity_kind !== 'fresh';
 }
 
 /** CSV content of `rows` generated rows of the columns; an e-mail column gets addresses. */
-function generatedContent(columns: readonly string[], rows: number): string {
+export function generatedContent(columns: readonly string[], rows: number): string {
   const cell = (column: string, row: number): string =>
-    LOGIN_NAME.test(column) ? `user-${String(row)}@example.com` : `${column}-${String(row)}`;
+    LOGIN_NAME.test(column)
+      ? `user-${String(row)}@example.com`
+      : /pass(word|wd)?/iu.test(column)
+        ? `${DATA_SENTINEL}-${String(row)}`
+        : `${column}-${String(row)}`;
   const lines = Array.from({ length: rows }, (_, row) =>
     columns.map((column) => cell(column, row + 1)).join(','),
   );
@@ -172,7 +209,7 @@ function generatedContent(columns: readonly string[], rows: number): string {
 }
 
 /** A dataset record with the defaults of a dataset someone created; `fields` override them. */
-function newFeeder(id: string, fields: Partial<SklepFeeder>): SklepFeeder {
+export function newFeeder(id: string, fields: Partial<SklepFeeder>): SklepFeeder {
   return {
     id,
     gatling_project_id: SKLEP_WORLD_IDS.gatlingProject,
@@ -235,7 +272,17 @@ function environmentName(store: Store, id: string | null | undefined): string {
 }
 
 /** The project settings of the Gatling project, with the defaults of a project nobody tuned. */
-function gatlingProjectBody(projectId: string, probesEnabled: boolean) {
+export function gatlingProjectBody(
+  projectId: string,
+  probesEnabled: boolean,
+  overrides: Partial<Omit<ReturnType<typeof baseGatlingProject>, 'base_url'>> & {
+    base_url?: string | null;
+  } = {},
+) {
+  return { ...baseGatlingProject(projectId, probesEnabled), ...overrides };
+}
+
+function baseGatlingProject(projectId: string, probesEnabled: boolean) {
   return {
     id: SKLEP_WORLD_IDS.gatlingProject,
     project_id: projectId,
@@ -272,24 +319,88 @@ export function registerProvisionRoutes(fake: Fake): void {
   registered.add(fake);
   registerDataRoutes(fake);
 
+  const settingsOf = (store: Store, projectId: string): StoredHttpSettings =>
+    store.collection<StoredHttpSettings>(HTTP_SETTINGS).get(projectId) ?? {
+      id: projectId,
+      missing: false,
+      fields: {},
+    };
+  const requireSettings = (store: Store, projectId: string): StoredHttpSettings => {
+    store.collection(SKLEP_COLLECTIONS.projects).require(projectId);
+    const found = settingsOf(store, projectId);
+    if (found.missing) throw new FakeHttpError(404, { detail: 'Gatling project not found' });
+    return found;
+  };
+
+  // the backend answers the values of the default headers masked
+  const masked = (body: GatlingProjectBody): GatlingProjectBody => ({
+    ...body,
+    default_headers: Object.fromEntries(
+      Object.keys(body.default_headers).map((name) => [name, '«masked»']),
+    ),
+  });
+
   fake.route('GET', '/api/v1/projects/{project_id}/gatling/project', (req, store) => {
-    store.collection(SKLEP_COLLECTIONS.projects).require(req.params.project_id);
+    const found = requireSettings(store, req.params.project_id);
     return {
       status: 200,
-      body: gatlingProjectBody(req.params.project_id, configOf(store).probes),
+      body: masked({
+        ...gatlingProjectBody(req.params.project_id, configOf(store).probes),
+        ...found.fields,
+      }),
+    };
+  });
+
+  // The first use of the settings: the fields of the body become the settings of the project.
+  fake.route('POST', '/api/v1/projects/{project_id}/gatling/setup', (req, store) => {
+    store.collection(SKLEP_COLLECTIONS.projects).require(req.params.project_id);
+    const settings = store.collection<StoredHttpSettings>(HTTP_SETTINGS);
+    const existing = settingsOf(store, req.params.project_id);
+    if (!existing.missing && settings.get(req.params.project_id) !== undefined) {
+      return {
+        status: 200,
+        body: { id: SKLEP_WORLD_IDS.gatlingProject, message: 'Gatling project already exists' },
+      };
+    }
+    settings.delete(req.params.project_id);
+    settings.insert({
+      id: req.params.project_id,
+      missing: false,
+      fields: { ...(req.body as Partial<GatlingProjectBody>) },
+    });
+    return {
+      status: 200,
+      body: { id: SKLEP_WORLD_IDS.gatlingProject, message: 'Gatling project created' },
     };
   });
 
   // The project settings a user saves in the frontend: a PATCH-like PUT, a field left out stays.
   fake.route('PUT', '/api/v1/projects/{project_id}/gatling/project', (req, store) => {
-    store.collection(SKLEP_COLLECTIONS.projects).require(req.params.project_id);
-    const body = req.body as { probes_enabled?: boolean | null };
+    const found = requireSettings(store, req.params.project_id);
+    const body = req.body as { probes_enabled?: boolean | null } & Record<string, unknown>;
     if (typeof body.probes_enabled === 'boolean' && !configOf(store).ignoreProbesPut) {
       setFakeProvision(store, { probes: body.probes_enabled });
     }
+    // a field left out or null stays; the others replace what the project has
+    const changed = Object.fromEntries(
+      Object.entries(body).filter(
+        ([key, value]) => key !== 'probes_enabled' && value !== null && value !== undefined,
+      ),
+    ) as Partial<GatlingProjectBody>;
+    const settings = store.collection<StoredHttpSettings>(HTTP_SETTINGS);
+    settings.delete(req.params.project_id);
+    settings.insert({
+      id: req.params.project_id,
+      missing: false,
+      fields: { ...found.fields, ...changed },
+    });
     return {
       status: 200,
-      body: gatlingProjectBody(req.params.project_id, configOf(store).probes),
+      body: masked({
+        ...gatlingProjectBody(req.params.project_id, configOf(store).probes),
+        ...found.fields,
+        ...changed,
+      }),
     };
   });
 
@@ -381,7 +492,7 @@ export function registerProvisionRoutes(fake: Fake): void {
     },
   );
 
-  // `generate_slot_feeder` (loadcraft @ 47a52b419 api/routes/gatling.py:5845-6501): rows for the
+  // `generate_slot_feeder` (the backend's route): rows for the
   // columns of one scenario's slot, saved as `<slot> data` with the file `<slot>.csv`; a repeat for
   // the same slot refreshes that dataset. It writes a dataset and sends nothing to the target.
   fake.route(
@@ -405,8 +516,14 @@ export function registerProvisionRoutes(fake: Fake): void {
       }
       const guarded = slot.columns.filter((column) => neverFabricated(column, slot));
       if (guarded.length > 0) {
+        // The backend's refusal names the columns twice: in its sentence and as a list (`columns`)
+        // a client reads without parsing the sentence (`NeverFabricatedHttpError`).
         throw new FakeHttpError(422, {
-          detail: `Slot '${key}' carries column(s) [${guarded.join(', ')}] that must not be fabricated.`,
+          detail: {
+            error: 'never_fabricated_columns',
+            message: `Slot '${key}' carries column(s) [${guarded.join(', ')}] that must not be fabricated.`,
+            columns: guarded,
+          },
         });
       }
       const body = (req.body ?? {}) as { row_count?: number; enrich_with_llm?: boolean };

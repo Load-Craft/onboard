@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { provenanceOf } from '../src/contract/setupGate.js';
+import { clockTime } from '../src/render/views/projectProfile.js';
 import { PROFILE_DEFAULTS } from '../src/tools/project/profile.js';
 import { unsureAfterApply } from '../src/tools/project/setup.js';
 import { processGetStatus } from '../src/tools/processGetStatus.js';
@@ -36,7 +37,7 @@ import { registerTelemetryRoutes } from './fake-backend/routes/telemetry.js';
 import type { Fake, FakeCall } from './fake-backend/server.js';
 import { seedSklep, SKLEP_COLLECTIONS } from './fake-backend/worlds/sklep.js';
 import { SKLEP_IDS } from './golden/index.js';
-import { settleClock } from './helpers/clock.js';
+import { createTestClock, settleClock } from './helpers/clock.js';
 import { analysisHandle, SETUP_TOOLS, type SetupEnvironment } from './helpers/projectSetup.js';
 import { toolRig, type RigCallResult, type ToolRig } from './helpers/rig.js';
 
@@ -155,6 +156,67 @@ async function card(r: ToolRig, fields: Record<string, unknown>): Promise<RigCal
 const tokenOf = (result: RigCallResult): string => (result.outcome?.data as CardView).confirm;
 
 describe('project_set_profile: a consent card first, the write on its repeat', () => {
+  it('the card lives through other calls: reads of other tools, then the yes two minutes later (DOKTOR-11)', async () => {
+    const clock = createTestClock(Date.parse('2026-11-27T20:00:00Z'));
+    const r = await toolRig({
+      tools: TOOLS,
+      world: world('project'),
+      env: { LOADCRAFT_LOCALE: 'pl' },
+      files: BOUND,
+      clock,
+      processServices: true,
+    });
+    setStoredProfile(r, STORED_PROFILE);
+    const fields = { app_architecture: 'spa' };
+    const first = await card(r, fields);
+    // the person reads the card while the model looks around: status, the project, the status again
+    for (const [name, args] of [
+      ['process_get_status', {}],
+      ['project_get', {}],
+      ['process_get_status', { format: 'data' }],
+      ['project_get', {}],
+    ] as const) {
+      await clock.advance(20_000);
+      const read = await r.call(name, args);
+      expect(read.isError, read.text).toBe(false);
+    }
+    await clock.advance(60_000);
+    const done = await r.call('project_set_profile', { fields, confirm: tokenOf(first) });
+    expect(done.isError, done.text).toBe(false);
+    expect(done.text).not.toContain('straciła ważność');
+    expect(storedProfile(r)['app_architecture']).toBe('spa');
+  });
+
+  it('a card past its 30 minutes says when it was issued: a yes after 32 minutes gets a new card (DOKTOR-11)', async () => {
+    const clock = createTestClock(Date.parse('2026-11-27T18:56:42Z'));
+    const r = await toolRig({
+      tools: TOOLS,
+      world: world('project'),
+      env: { LOADCRAFT_LOCALE: 'pl' },
+      files: BOUND,
+      clock,
+    });
+    setStoredProfile(r, STORED_PROFILE);
+    const fields = { app_architecture: 'spa' };
+    const first = await card(r, fields);
+    await clock.advance(32 * 60_000);
+    const again = await r.call('project_set_profile', { fields, confirm: tokenOf(first) });
+    expect(again.isError, again.text).toBe(false);
+    expect(flat(again.text)).toContain(
+      `Nic nie zapisano: karta wydana o ${clockTime('2026-11-27T18:56:42Z')} straciła ważność (karta jest ważna 30 min).`,
+    );
+    expect(storedProfile(r)['app_architecture']).toBe('mobile');
+    const en = await toolRig({ tools: TOOLS, world: world('project'), files: BOUND, clock });
+    setStoredProfile(en, STORED_PROFILE);
+    const issued = new Date(clock.now()).toISOString();
+    const enCard = await card(en, fields);
+    await clock.advance(45 * 60_000);
+    const enAgain = await en.call('project_set_profile', { fields, confirm: tokenOf(enCard) });
+    expect(flat(enAgain.text)).toContain(
+      `Nothing was written: the card issued at ${clockTime(issued)} has expired (a card is valid for 30 min).`,
+    );
+  });
+
   it('the first call is a card with the current and the new values and writes nothing', async () => {
     const r = await boundRig();
     const before = r.fake.calls.length;

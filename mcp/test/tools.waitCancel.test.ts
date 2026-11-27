@@ -113,6 +113,13 @@ const CANCELLABLE: Readonly<Record<OperationKindName, boolean>> = {
   analysis: false,
   // account_provision: the cases are in tools.provisionAccounts.test.ts (the series runs in the process).
   account_provision: true,
+  // drift_check: the cases (stop on the channel, the checks that stay running) are in tools/scenario/checkDrift.test.ts.
+  drift_check: true,
+  // test_types_generation: the channel takes no client frame and the backend has no stop, so the run cannot be stopped.
+  test_types_generation: false,
+  payload_generation: false,
+  // dataset_generation: the backend cannot stop a run, so the kind has no cancel; the wait is in tools/data/generateDataset.test.ts.
+  dataset_generation: false,
 };
 /** Kinds in `OPERATION_KINDS` that no tool defines yet: `process_wait` answers them "unsupported". */
 const NOT_DEFINED_YET: readonly OperationKindName[] = [];
@@ -154,6 +161,8 @@ describe('registry of operation kinds', () => {
       account_provision: 'tools.provisionAccounts.test.ts',
       analysis: 'tools.getDiagnosis.test.ts',
       batch_generation: 'tools.flowsGenerateFromSuggestions.test.ts',
+      dataset_generation: 'tools/data/generateDataset.test.ts',
+      drift_check: 'tools/scenario/checkDrift.test.ts',
       flow_generation: 'tools.flowsGenerateFromEndpoints.test.ts',
       har_generation: 'tools.flowsGenerateFromHar.test.ts',
       har_split: 'tools.flowsGenerateFromHar.test.ts',
@@ -163,6 +172,8 @@ describe('registry of operation kinds', () => {
       self_check: 'tools.selfCheck.test.ts',
       setup_analysis: 'tools.projectAnalyzeSetup.test.ts',
       test_run: 'tools.waitCancel.test.ts',
+      payload_generation: 'tools/functional/generatePayloads.test.ts',
+      test_types_generation: 'tools/functional/suggestTestTypes.test.ts',
     };
     for (const kind of ALL_OPERATION_KINDS) {
       const file = WAIT_TESTS[kind.kind];

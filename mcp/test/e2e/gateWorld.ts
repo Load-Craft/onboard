@@ -144,9 +144,10 @@ const RUN: RunScript = {
 
 /**
  * The slot of plain data the generation of a scenario built from an OpenAPI flow leaves without
- * rows: its contract only (`generate_feeder_data_node.py` writes no content without the flow's
- * DataPack), so the data hub's model, not the generation, would have to fill it. The gate meets it
- * in the shopping scenario: `data_create_dataset` with the slot makes its rows from the slot's columns.
+ * rows: its contract only (the backend's feeder-data generation writes no content without the
+ * flow's DataPack), so the data hub's model, not the generation, would have to fill it. The gate
+ * meets it in the shopping scenario: `data_create_dataset` with the slot makes its rows from the
+ * slot's columns.
  */
 export const CONTENTLESS_SLOT: SklepSlot = {
   slot: 'scenario_auto_data',

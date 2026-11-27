@@ -1,12 +1,16 @@
 // Consent cards of level-2 tools until the general cards of the process state exist: a tool that would
 // write first returns a card and keeps here exactly what the write will do (its frozen arguments); the
 // write happens only on a later call that hands back the card's token, and it takes its arguments from
-// the card, never from that call. One card per tool scope and project: a new card replaces the old one.
+// the card, never from that call. Up to `CARDS_KEPT` cards per tool scope and project: a session that makes
+// a card for one slot and then another for the next slot keeps both, and the oldest goes when a sixth
+// comes (DOKTOR-12: one card per scope let the second card wipe the first before its yes).
 //
-//   issueCard(ctx, scope, projectId, frozen)  → token (the card is saved; valid `CARD_TTL_MINUTES`)
-//   redeemCard(ctx, scope, projectId, token)  → { ok: true, frozen } | { ok: false, reason }
-//   consumeCard(ctx, scope, projectId, token) → redeemCard, and a valid card is gone at once (the write)
-//   discardCard(ctx, scope, projectId)        → the card is gone (after the write, a 409, a new import)
+//   issueCard(ctx, scope, projectId, frozen)          → token (the card is saved; valid `CARD_TTL_MINUTES`)
+//   redeemCard(ctx, scope, projectId, token)          → { ok: true, frozen } | { ok: false, reason }
+//   consumeCard(ctx, scope, projectId, token)         → redeemCard, and a valid card is gone at once (the write)
+//   currentCard(ctx, scope, projectId, frozen?)       → the card of these frozen arguments (else the newest)
+//   discardCard(ctx, scope, projectId, token?)        → that card is gone; without a token every card of the
+//                                                       scope (a new import, a 409)
 //
 // The token is bound to the scope, the project and the frozen arguments, with a random part, so a card
 // issued again (even with the same arguments) has another token, and a used card cannot be used twice:
@@ -30,10 +34,42 @@ const cardSchema = z.object({
   frozen: z.record(z.string(), z.unknown()),
 });
 
+/** How many cards of one scope and project are kept at once; the oldest goes first. */
+export const CARDS_KEPT = 5;
+
+type StoredCard = z.infer<typeof cardSchema>;
+
+/** The cards of the scope, oldest first; a card kept in the shape of one card per scope is read as one. */
+function cardsOf(ctx: CardContext, scope: string, projectId: string): StoredCard[] {
+  const value = ctx.state.get('drafts', cardKey(scope, projectId))?.value;
+  const many = z.object({ cards: z.array(cardSchema) }).safeParse(value);
+  if (many.success) return many.data.cards;
+  const one = cardSchema.safeParse(value);
+  return one.success ? [one.data] : [];
+}
+
+async function keepCards(
+  ctx: CardContext,
+  scope: string,
+  projectId: string,
+  cards: readonly StoredCard[],
+): Promise<void> {
+  if (cards.length === 0) {
+    if (ctx.state.get('drafts', cardKey(scope, projectId)) !== undefined) {
+      await ctx.state.delete('drafts', cardKey(scope, projectId));
+    }
+    return;
+  }
+  await ctx.state.set('drafts', cardKey(scope, projectId), { cards: cards.slice(-CARDS_KEPT) });
+}
+
+const expired = (ctx: CardContext, card: StoredCard): boolean =>
+  ctx.clock.now() - card.issuedAt > CARD_TTL_MINUTES * 60_000;
+
 const cardKey = (scope: string, projectId: string): string => `card:${scope}:${projectId}`;
 
 /** JSON with the keys of every object sorted, so equal arguments give one text. */
-function canonical(value: unknown): string {
+export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   if (typeof value === 'object' && value !== null) {
     const entries = Object.entries(value as Record<string, unknown>)
@@ -44,7 +80,7 @@ function canonical(value: unknown): string {
   return JSON.stringify(value) ?? 'null';
 }
 
-/** Saves the card of `frozen` (replacing the scope's earlier card) and returns its token. */
+/** Saves the card of `frozen` next to the scope's earlier cards (the oldest beyond `CARDS_KEPT` goes). */
 export async function issueCard(
   ctx: CardContext,
   scope: string,
@@ -58,28 +94,61 @@ export async function issueCard(
     )
     .digest('hex')
     .slice(0, TOKEN_LENGTH);
-  await ctx.state.set('drafts', cardKey(scope, projectId), { token, issuedAt, frozen });
+  // the same arguments get one card: an earlier card of them is replaced, the others stay
+  // (an expired card stays until it is pushed out, so its repeat still hears that it expired)
+  const others = cardsOf(ctx, scope, projectId).filter((card) => !sameFrozen(card.frozen, frozen));
+  await keepCards(ctx, scope, projectId, [...others, { token, issuedAt, frozen }]);
   return token;
 }
 
 export type Redeemed =
   | { readonly ok: true; readonly frozen: Readonly<Record<string, unknown>> }
-  | { readonly ok: false; readonly reason: 'missing' | 'expired' | 'token' };
+  | { readonly ok: false; readonly reason: 'missing' | 'token' }
+  /** `issuedAt` (epoch ms): when the card was issued, so a view can say it was not seconds ago (DOKTOR-11). */
+  | { readonly ok: false; readonly reason: 'expired'; readonly issuedAt: number };
 
-/** The frozen arguments of the scope's card when `token` is its token and it has not expired. */
+/** The frozen arguments of the scope's card whose token is `token`, when it has not expired. */
 export function redeemCard(
   ctx: CardContext,
   scope: string,
   projectId: string,
   token: string,
 ): Redeemed {
-  const parsed = cardSchema.safeParse(ctx.state.get('drafts', cardKey(scope, projectId))?.value);
-  if (!parsed.success) return { ok: false, reason: 'missing' };
-  if (ctx.clock.now() - parsed.data.issuedAt > CARD_TTL_MINUTES * 60_000) {
-    return { ok: false, reason: 'expired' };
-  }
-  if (parsed.data.token !== token) return { ok: false, reason: 'token' };
-  return { ok: true, frozen: parsed.data.frozen };
+  const cards = cardsOf(ctx, scope, projectId);
+  if (cards.length === 0) return { ok: false, reason: 'missing' };
+  const card = cards.find((one) => one.token === token);
+  if (card === undefined) return { ok: false, reason: 'token' };
+  if (expired(ctx, card)) return { ok: false, reason: 'expired', issuedAt: card.issuedAt };
+  return { ok: true, frozen: card.frozen };
+}
+
+export type Kept =
+  | {
+      readonly ok: true;
+      readonly token: string;
+      readonly frozen: Readonly<Record<string, unknown>>;
+    }
+  | { readonly ok: false; readonly reason: 'missing' | 'expired' };
+
+/**
+ * The scope's card as it is kept, read without its token: for a caller that finds the card by what
+ * it froze (`sameFrozen`) and takes the person's yes from a channel the model does not write
+ * (`consent/ask.ts`). The token of such a card never leaves the server. With `frozen`, the card of
+ * those arguments; without it, or when none has them, the newest card (the caller sees it differs).
+ */
+export function currentCard(
+  ctx: CardContext,
+  scope: string,
+  projectId: string,
+  frozen?: unknown,
+): Kept {
+  const cards = cardsOf(ctx, scope, projectId);
+  const same =
+    frozen === undefined ? undefined : cards.find((one) => sameFrozen(one.frozen, frozen));
+  const card = same ?? cards.at(-1);
+  if (card === undefined) return { ok: false, reason: 'missing' };
+  if (expired(ctx, card)) return { ok: false, reason: 'expired' };
+  return { ok: true, token: card.token, frozen: card.frozen };
 }
 
 /**
@@ -93,18 +162,21 @@ export async function consumeCard(
   token: string,
 ): Promise<Redeemed> {
   const redeemed = redeemCard(ctx, scope, projectId, token);
-  if (redeemed.ok) await discardCard(ctx, scope, projectId);
+  if (redeemed.ok) await discardCard(ctx, scope, projectId, token);
   return redeemed;
 }
 
-/** Removes the scope's card, if there is one. */
+/** Removes the card with `token`; without a token every card of the scope. */
 export async function discardCard(
   ctx: CardContext,
   scope: string,
   projectId: string,
+  token?: string,
 ): Promise<void> {
-  if (ctx.state.get('drafts', cardKey(scope, projectId)) === undefined) return;
-  await ctx.state.delete('drafts', cardKey(scope, projectId));
+  const cards = cardsOf(ctx, scope, projectId);
+  const kept = token === undefined ? [] : cards.filter((one) => one.token !== token);
+  if (kept.length === cards.length && token !== undefined) return;
+  await keepCards(ctx, scope, projectId, kept);
 }
 
 /** Whether two argument values are the same for a card (key order and `undefined` keys aside). */

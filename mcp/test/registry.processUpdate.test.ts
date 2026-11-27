@@ -294,7 +294,18 @@ describe('ProcessUpdate from a tool: a refused write leaves its cause in the log
         applyUpdate: () => Promise.reject(new Error(`disk full while writing ${CANARY}`)),
       };
     };
-    const b = await bench([stub('flows_get', () => done())], failing);
+    const b = await bench(
+      [
+        stub('flows_get', () =>
+          done({
+            log: {
+              values: { name: 'checkout', version: 1, steps: 3, needs_input: 0, definite: 0 },
+            },
+          }),
+        ),
+      ],
+      failing,
+    );
 
     const result = await b.session.call('flows_get', {});
     expect(result.isError, result.text).toBe(false);

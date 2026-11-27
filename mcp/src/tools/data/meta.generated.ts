@@ -101,8 +101,12 @@ export const DATA_SUGGEST_ACTIONS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_ask_copilot`: Ask the data hub copilot in free form; returns its reply and proposed actions. Applies nothing. */
@@ -133,7 +137,7 @@ export const DATA_ASK_COPILOT = {
       fields: [
         {
           label: 'For',
-          from: 'scenario_ids | composition_id',
+          from: 'scenario_id | composition_id',
           source: 'args',
         },
         {
@@ -164,7 +168,7 @@ export const DATA_ASK_COPILOT = {
       },
       {
         path: 'ids.scenario_ids',
-        arg: 'scenario_ids',
+        arg: 'scenario_id',
         explicit: true,
       },
       {
@@ -194,7 +198,10 @@ export const DATA_ASK_COPILOT = {
       path: '/api/v1/projects/{project_id}/data-hub/messages',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_scenario_api_v1_projects__project_id__gatling_scenarios__scenario_id__get',
+    'get_composition_api_v1_projects__project_id__gatling_compositions__composition_id__get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.scenario_ids', 'ids.composition_id', 'choices.run.profile'],
   state_writes: [],
@@ -203,11 +210,47 @@ export const DATA_ASK_COPILOT = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'message',
+      type: 'string',
+      min_length: 1,
+      max_length: 4000,
+      required: true,
+      from_state: null,
+      doc: 'The question for the data hub copilot.',
+    },
+    {
+      name: 'scenario_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario (id or name) the question is about; give this or composition_id.',
+    },
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition (id or name); give this or scenario_id.',
+    },
+    {
+      name: 'profile',
+      type: 'object',
+      from_state: 'choices.run.profile',
+      doc: 'The load profile to discuss; default: the chosen one.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_get_copilot_history`: Get the project's data hub conversation. */
@@ -264,11 +307,25 @@ export const DATA_GET_COPILOT_HISTORY = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 20,
+      from_state: null,
+      doc: 'How many of the latest messages to return (1-100).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_get_slots`: Get the data slots of a scenario or composition with compatible datasets and current bindings. */
@@ -324,7 +381,10 @@ export const DATA_GET_SLOTS = {
       path: '/api/v1/projects/{project_id}/gatling/compositions/{composition_id}/slots/options',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_scenario_api_v1_projects__project_id__gatling_scenarios__scenario_id__get',
+    'get_composition_api_v1_projects__project_id__gatling_compositions__composition_id__get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.scenario_ids', 'ids.composition_id'],
   state_writes: [],
@@ -333,11 +393,28 @@ export const DATA_GET_SLOTS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario; default: the only one in this workspace.',
+    },
+    {
+      name: 'composition_id',
+      type: 'uuid',
+      from_state: 'ids.composition_id',
+      doc: 'The composition (not with scenario_id).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_set_bindings`: Set the slot-to-dataset bindings of a scenario or composition (whole map replaced; {} clears). */
@@ -411,8 +488,12 @@ export const DATA_SET_BINDINGS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_set_slot_label`: Set the display label of a scenario's data slot. */
@@ -476,11 +557,40 @@ export const DATA_SET_SLOT_LABEL = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'scenario_id',
+      type: 'uuid',
+      from_state: 'ids.scenario_ids',
+      doc: 'The scenario; default: the only one in this workspace.',
+    },
+    {
+      name: 'slot',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      required: true,
+      doc: 'The data slot.',
+    },
+    {
+      name: 'label',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      required: true,
+      doc: "The slot's new label.",
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_check_readiness`: Check whether the datasets cover a run of a scenario or composition under a given load and environment. Creates nothing. */
@@ -558,8 +668,12 @@ export const DATA_CHECK_READINESS = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_list_datasets`: List the project's datasets: name, type, columns, row count (no rows). */
@@ -619,8 +733,12 @@ export const DATA_LIST_DATASETS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_get_dataset`: Get a dataset: columns, recipe, row count; include adds rows (secrets masked), consumers, history, feed snippet, Redis status. */
@@ -708,11 +826,48 @@ export const DATA_GET_DATASET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'dataset_id',
+      type: 'uuid',
+      from_state: 'ids.dataset_ids',
+      doc: 'The dataset; default: the only one in this workspace.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['rows', 'consumers', 'history', 'snippet', 'redis'],
+      max_items: 5,
+      from_state: null,
+      doc: 'rows: a masked preview (secret columns hidden); consumers: who uses it; history: revisions; snippet: the feed snippet; redis: pool status.',
+    },
+    {
+      name: 'rows',
+      type: 'integer',
+      min: 1,
+      max: 50,
+      default: 10,
+      from_state: null,
+      doc: 'With include rows: how many rows (1-50).',
+    },
+    {
+      name: 'offset',
+      type: 'integer',
+      min: 0,
+      max: 100000,
+      default: 0,
+      from_state: null,
+      doc: 'With include rows: the first row.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_create_dataset`: Create a dataset from a local file, from column rules (no AI), or as a copy of another; preview=true returns sample rows and saves nothing. */
@@ -850,8 +1005,12 @@ export const DATA_CREATE_DATASET = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_update_dataset`: Update a dataset's definition or replace its rows from a file. Direct edit, only on the user's request; normally use data_ask_copilot. */
@@ -974,11 +1133,45 @@ export const DATA_UPDATE_DATASET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'dataset_id',
+      type: 'uuid',
+      from_state: 'ids.dataset_ids',
+      doc: 'The dataset; default: the only one in this workspace.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 255,
+      from_state: null,
+      doc: 'The new name.',
+    },
+    {
+      name: 'description',
+      type: 'string',
+      max_length: 500,
+      from_state: null,
+      doc: 'The new description; an empty text clears it.',
+    },
+    {
+      name: 'file',
+      type: 'string',
+      min_length: 1,
+      max_length: 260,
+      from_state: null,
+      doc: "A CSV file of the project directory (relative path, up to 2 MB) whose rows replace the dataset's; the server reads it.",
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_regenerate_dataset`: Regenerate a dataset's rows from its recipe: mode=expand adds rows, mode=reroll replaces all. */
@@ -1082,11 +1275,38 @@ export const DATA_REGENERATE_DATASET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'dataset_id',
+      type: 'uuid',
+      from_state: 'ids.dataset_ids',
+      doc: 'The dataset; default: the only one in this workspace.',
+    },
+    {
+      name: 'mode',
+      type: 'enum',
+      enum: ['expand', 'reroll'],
+      required: true,
+      from_state: null,
+      doc: 'expand: add new rows up to `rows`, existing rows stay; reroll: replace all rows with fresh ones.',
+    },
+    {
+      name: 'rows',
+      type: 'integer',
+      min: 1,
+      max: 100000,
+      from_state: null,
+      doc: 'expand: the target row count (required, above the current count); reroll: the new row count (default: the current count).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_restore_dataset`: Restore a dataset's previous content (a second call switches back). */
@@ -1150,11 +1370,22 @@ export const DATA_RESTORE_DATASET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'dataset_id',
+      type: 'uuid',
+      from_state: 'ids.dataset_ids',
+      doc: 'The dataset; default: the only one in this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_delete`: Delete datasets (ids). force=true also deletes ones still in use. */
@@ -1178,11 +1409,11 @@ export const DATA_DELETE = {
     scope: null,
     cost: null,
     card: {
-      title: 'Delete datasets: {names}',
+      title: 'Delete dataset: {names}',
       fields: [
         {
-          label: 'Items',
-          from: 'ids (names resolved by the registry)',
+          label: 'Item',
+          from: 'dataset_id (name resolved by the registry)',
           source: 'labels',
         },
         {
@@ -1215,7 +1446,7 @@ export const DATA_DELETE = {
     reason: 'permanent',
   },
   log: {
-    args: 'Delete datasets: {names}',
+    args: 'Delete dataset: {names}',
     result: '{count} datasets deleted',
   },
   route: null,
@@ -1227,7 +1458,10 @@ export const DATA_DELETE = {
       path: '/api/v1/projects/{project_id}/gatling/feeders/{feeder_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_feeder_api_v1_projects__project_id__gatling_feeders__feeder_id__get',
+    'get_feeder_used_in_api_v1_projects__project_id__gatling_feeders__feeder_id__used_in_get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.dataset_ids'],
   state_writes: ['ids.dataset_ids', 'steps.data.datasets_ready'],
@@ -1236,11 +1470,30 @@ export const DATA_DELETE = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'dataset_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The dataset to delete.',
+    },
+    {
+      name: 'force',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'Also delete it when scenarios or compositions still use it.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_generate_dataset`: Generate and save a dataset with AI for a flow, a scenario or one data slot. */
@@ -1346,7 +1599,7 @@ export const DATA_GENERATE_DATASET = {
       path: '/api/v1/projects/{project_id}/gatling/scenarios/{scenario_id}/slots/{slot}/generate-feeder',
     },
   ],
-  also_calls: [],
+  also_calls: ['list_feeders_api_v1_projects__project_id__gatling_feeders_get'],
   channels: ['gatlingFeeder'],
   state_reads: ['ids.project_id', 'ids.flow_ids', 'ids.scenario_ids'],
   state_writes: ['ids.dataset_ids', 'operations', 'problems'],
@@ -1355,11 +1608,72 @@ export const DATA_GENERATE_DATASET = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'Generate for a flow: the data its steps need (give this or scenario_id).',
+    },
+    {
+      name: 'scenario_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.scenario_ids',
+      doc: 'Generate for a scenario, or (with slot) for one of its data slots.',
+    },
+    {
+      name: 'slot',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      doc: 'One data slot of the scenario (with scenario_id).',
+    },
+    {
+      name: 'rows',
+      type: 'integer',
+      min: 1,
+      max: 100000,
+      default: 100,
+      from_state: null,
+      doc: 'How many rows to generate.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The name of the new dataset; default: made from the target.',
+    },
+    {
+      name: 'feeder_type',
+      type: 'enum',
+      enum: ['csv', 'tsv', 'json'],
+      default: 'csv',
+      from_state: null,
+      doc: 'The file format of the dataset (not for a slot).',
+    },
+    {
+      name: 'enrich_with_llm',
+      type: 'boolean',
+      default: true,
+      from_state: null,
+      doc: 'A slot only: let a model enrich the values (a cost).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_regenerate_column`: Regenerate one column of a dataset with a generator or AI; preview=true saves nothing. */
@@ -1470,8 +1784,12 @@ export const DATA_REGENERATE_COLUMN = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_get_generators`: Get the column generators for dataset rules, or guesses for given column names. */
@@ -1535,11 +1853,24 @@ export const DATA_GET_GENERATORS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'columns',
+      type: 'string',
+      min_length: 1,
+      max_length: 2000,
+      from_state: null,
+      doc: 'Column names to guess generators for, comma-separated (at most 50); without it, the list of all generators.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_check_dataset`: Check a dataset against the target: sign in with row 1, look up entities (database: test the connection). Sends requests to the target. */
@@ -1680,13 +2011,17 @@ export const DATA_CHECK_DATASET = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `data_create_accounts`: Create test accounts in the target system through its register request and append them to a dataset. Passwords are never returned. */
@@ -1806,11 +2141,15 @@ export const DATA_CREATE_ACCOUNTS = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

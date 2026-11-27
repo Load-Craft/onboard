@@ -1,0 +1,1266 @@
+{
+  "id": "0d0c7034-0003-4000-8000-000000001003",
+  "name": "Registered customer checkout journey",
+  "description": "Generated from flow 0d0c7034-0003-4000-8000-000000001004",
+  "simulation_class_name": "RegisteredCustomerCheckoutJourneySimulation",
+  "source_flow_id": "0d0c7034-0003-4000-8000-000000001004",
+  "source_flow_version": 1,
+  "truncate_after_block_id": null,
+  "flow_overlay_version": 2,
+  "current_version": 3,
+  "artifact_version": 1,
+  "feeder_slots": [
+    {
+      "slot": "users",
+      "label": "User accounts",
+      "columns": ["email", "password", "target_key_storekey"],
+      "strategy": "circular",
+      "column_specs": [
+        {
+          "name": "email",
+          "type": "email"
+        },
+        {
+          "name": "password",
+          "type": "string"
+        },
+        {
+          "name": "target_key_storekey",
+          "type": "string"
+        }
+      ],
+      "identity_kind": "existing",
+      "default_file": "users.csv",
+      "role": "auth",
+      "generated": false,
+      "generated_rows": null
+    },
+    {
+      "slot": "scenario_auto_data",
+      "label": "Address 1 & address 2 & address name & city & company & country code & first name & is default billing & is default shipping & last name & phone & postal code & quantity",
+      "columns": [
+        "address_1",
+        "address_2",
+        "address_name",
+        "city",
+        "company",
+        "country_code",
+        "first_name",
+        "is_default_billing",
+        "is_default_shipping",
+        "last_name",
+        "phone",
+        "postal_code",
+        "quantity"
+      ],
+      "strategy": "circular",
+      "column_specs": [
+        {
+          "name": "address_1",
+          "type": "string",
+          "example": "Examplestrasse 1"
+        },
+        {
+          "name": "address_2",
+          "type": "string",
+          "example": "Apt 2"
+        },
+        {
+          "name": "address_name",
+          "type": "string",
+          "example": "Home"
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "example": "Berlin"
+        },
+        {
+          "name": "company",
+          "type": "string",
+          "example": "Example GmbH"
+        },
+        {
+          "name": "country_code",
+          "type": "string",
+          "example": "de"
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "example": "Jane"
+        },
+        {
+          "name": "is_default_billing",
+          "type": "boolean",
+          "example": "false"
+        },
+        {
+          "name": "is_default_shipping",
+          "type": "boolean",
+          "example": "true"
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "example": "Doe"
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "example": "+491700000000"
+        },
+        {
+          "name": "postal_code",
+          "type": "string",
+          "example": "10115"
+        },
+        {
+          "name": "quantity",
+          "type": "float",
+          "example": "1",
+          "minimum": 0
+        }
+      ],
+      "identity_kind": null,
+      "default_file": "scenario_auto_data.csv",
+      "role": "data",
+      "generated": false,
+      "generated_rows": null
+    }
+  ],
+  "sensitive_headers_missing_registration": [],
+  "auth_credentials_without_consumer": [],
+  "slot_bindings": {
+    "users": "0d0c7034-0003-4000-8000-000000001005",
+    "scenario_auto_data": "0d0c7034-0003-4000-8000-000000001006"
+  },
+  "slot_binding_states": [
+    {
+      "slot": "users",
+      "feeder_id": "0d0c7034-0003-4000-8000-000000001005",
+      "state": "pinned"
+    },
+    {
+      "slot": "scenario_auto_data",
+      "feeder_id": "0d0c7034-0003-4000-8000-000000001006",
+      "state": "pinned"
+    }
+  ],
+  "assertion_thresholds": null,
+  "project_assertion_thresholds": null,
+  "assertion_threshold_view": {
+    "effective_tier": "default",
+    "declared_at": {
+      "scenario": false,
+      "project": false
+    },
+    "thresholds": {
+      "response_time_p95_ms": {
+        "value": 2000,
+        "tier": "default"
+      },
+      "success_rate_pct": {
+        "value": 99,
+        "tier": "default"
+      }
+    },
+    "declared_not_consumed": [],
+    "in_artifact": {
+      "global_slo": [
+        "global.responseTime.percentile(95).lt(2000)",
+        "global.successfulRequests.percent.gte(99)"
+      ],
+      "tier": "default",
+      "matches_effective_tier": true
+    }
+  },
+  "scenario_contract_v2": {
+    "contract_version": 2,
+    "required_inputs": ["email", "target_key_storekey"],
+    "exports": [],
+    "locals": [
+      "address_1",
+      "address_2",
+      "address_city",
+      "address_country",
+      "address_first_name",
+      "address_last_name",
+      "address_name",
+      "address_postal_code",
+      "address_street",
+      "auth_token",
+      "cart_id",
+      "city",
+      "company",
+      "country_code",
+      "customer_email",
+      "customer_id",
+      "first_name",
+      "is_default_billing",
+      "is_default_shipping",
+      "last_name",
+      "loadcraft_thinkRandom",
+      "order_id",
+      "password",
+      "payment_collection_id",
+      "payment_provider_id",
+      "phone",
+      "postal_code",
+      "product_id",
+      "quantity",
+      "region_id",
+      "shipping_option_id",
+      "variant_id"
+    ],
+    "control_vars": [],
+    "session_vars": [
+      "address_1",
+      "address_2",
+      "address_city",
+      "address_country",
+      "address_first_name",
+      "address_last_name",
+      "address_name",
+      "address_postal_code",
+      "address_street",
+      "auth_token",
+      "cart_id",
+      "city",
+      "company",
+      "country_code",
+      "customer_email",
+      "customer_id",
+      "email",
+      "first_name",
+      "is_default_billing",
+      "is_default_shipping",
+      "last_name",
+      "loadcraft_thinkRandom",
+      "order_id",
+      "password",
+      "payment_collection_id",
+      "payment_provider_id",
+      "phone",
+      "postal_code",
+      "product_id",
+      "quantity",
+      "region_id",
+      "shipping_option_id",
+      "target_key_storekey",
+      "variant_id"
+    ],
+    "source_metadata": {
+      "source_kind": "flow",
+      "source_flow_id": "0d0c7034-0003-4000-8000-000000001004",
+      "source_flow_version": 1
+    }
+  },
+  "self_check": {
+    "status": "failed",
+    "scenario_version": 3,
+    "execution_ids": [
+      "0d0c7034-0003-4000-8000-000000001007",
+      "0d0c7034-0003-4000-8000-000000001008",
+      "0d0c7034-0003-4000-8000-000000001009"
+    ],
+    "failure": {
+      "request_name": "transfer_cart_to_customer",
+      "message": "status.find.is(200), found 400",
+      "http_status": null,
+      "goal_url": null
+    },
+    "notes": [],
+    "missing_slots": [],
+    "repairs": [
+      {
+        "round": 1,
+        "failure": {
+          "request_name": "create_cart",
+          "message": "status.find.is(200), found 400",
+          "http_status": null,
+          "goal_url": null
+        },
+        "changes_summary": "Remove the hardcoded `sales_channel_id` and `locale` fields from the `create_cart` request body, as the server returned 400 likely because `sc_01EXAMPLEDEFAULT` is a placeholder that does not exist in the target environment.",
+        "refused_reason": null,
+        "refused_code": null,
+        "refused_message": null,
+        "scenario_version_after": 2,
+        "verdict": "failed",
+        "recording_available": false
+      },
+      {
+        "round": 2,
+        "failure": {
+          "request_name": "transfer_cart_to_customer",
+          "message": "status.find.is(200), found 400",
+          "http_status": null,
+          "goal_url": null
+        },
+        "changes_summary": "Remove the `customer_id` from the `uses` list of `transfer_cart_to_customer` — the step sends no body and the server returned 400, which in shop v2 means the cart transfer endpoint requires no extra payload; the cart is already associated with the authenticated user via the Bearer token, so the fix is to ensure the request body stays empty (it already is) and no extraneous data is injected — but since recording is unavailable and the only actionable difference visible in the flow is that `customer_id` is listed in `uses` yet never actually sent in the body or path, the most likely cause is that the `create_cart` step (step 21) sends the customer's email in the body while the cart is created under an authenticated session, causing a conflict; to fix the failing `transfer_cart_to_customer` (step 23) we remove the `email` field from the `create_cart` body so the cart is created as anonymous and can then be properly transferred to the customer.",
+        "refused_reason": null,
+        "refused_code": null,
+        "refused_message": null,
+        "scenario_version_after": 3,
+        "verdict": "failed",
+        "recording_available": false
+      }
+    ],
+    "max_repair_rounds": null,
+    "runs": [],
+    "started_at": "2026-11-26T16:19:20.723736Z",
+    "finished_at": "2026-11-26T16:20:39.138679Z"
+  },
+  "generator_state": "built_with_older_generator",
+  "session_seconds": null,
+  "session_seconds_kind": "unknown",
+  "pause_source_mix": {
+    "recording": {
+      "count": 0.0,
+      "mean_ms": null
+    },
+    "default_human": {
+      "count": 22.0,
+      "mean_ms": 2000.0
+    },
+    "manual": {
+      "count": 0.0,
+      "mean_ms": null
+    },
+    "machine_wait": {
+      "count": 0.0,
+      "mean_ms": null
+    },
+    "unknown": {
+      "count": 0.0,
+      "mean_ms": null
+    }
+  },
+  "requests_per_session": 23,
+  "is_active": true,
+  "tags": ["generated"],
+  "created_at": "2026-11-26T16:04:10.667816+00:00",
+  "updated_at": "2026-11-26T16:19:20.548903+00:00",
+  "scenario_artifact": {
+    "contract": {
+      "inputs": ["email", "target_key_storekey"],
+      "outputs": [],
+      "session_vars": ["email", "target_key_storekey"]
+    },
+    "scenario_contract_v2": {
+      "contract_version": 2,
+      "required_inputs": ["email", "target_key_storekey"],
+      "exports": [],
+      "locals": [
+        "address_1",
+        "address_2",
+        "address_city",
+        "address_country",
+        "address_first_name",
+        "address_last_name",
+        "address_name",
+        "address_postal_code",
+        "address_street",
+        "auth_token",
+        "cart_id",
+        "city",
+        "company",
+        "country_code",
+        "customer_email",
+        "customer_id",
+        "first_name",
+        "is_default_billing",
+        "is_default_shipping",
+        "last_name",
+        "loadcraft_thinkRandom",
+        "order_id",
+        "password",
+        "payment_collection_id",
+        "payment_provider_id",
+        "phone",
+        "postal_code",
+        "product_id",
+        "quantity",
+        "region_id",
+        "shipping_option_id",
+        "variant_id"
+      ],
+      "control_vars": [],
+      "session_vars": [
+        "address_1",
+        "address_2",
+        "address_city",
+        "address_country",
+        "address_first_name",
+        "address_last_name",
+        "address_name",
+        "address_postal_code",
+        "address_street",
+        "auth_token",
+        "cart_id",
+        "city",
+        "company",
+        "country_code",
+        "customer_email",
+        "customer_id",
+        "email",
+        "first_name",
+        "is_default_billing",
+        "is_default_shipping",
+        "last_name",
+        "loadcraft_thinkRandom",
+        "order_id",
+        "password",
+        "payment_collection_id",
+        "payment_provider_id",
+        "phone",
+        "postal_code",
+        "product_id",
+        "quantity",
+        "region_id",
+        "shipping_option_id",
+        "target_key_storekey",
+        "variant_id"
+      ],
+      "source_metadata": {
+        "source_kind": "flow",
+        "source_flow_id": "0d0c7034-0003-4000-8000-000000001004",
+        "source_flow_version": 1
+      }
+    },
+    "scenario_plan": {
+      "session_variables": {
+        "region_id": "Captured by request check on list_regions",
+        "product_id": "Captured by request check on list_products",
+        "variant_id": "Captured by request check on get_product_detail",
+        "auth_token": "Captured by request check on login_customer",
+        "customer_email": "Captured by request check on get_current_customer",
+        "customer_id": "Captured by request check on get_current_customer",
+        "address_city": "Captured by request check on create_customer_address",
+        "address_country": "Captured by request check on create_customer_address",
+        "address_first_name": "Captured by request check on create_customer_address",
+        "address_last_name": "Captured by request check on create_customer_address",
+        "address_postal_code": "Captured by request check on create_customer_address",
+        "address_street": "Captured by request check on create_customer_address",
+        "cart_id": "Captured by request check on create_cart",
+        "shipping_option_id": "Captured by request check on list_shipping_options",
+        "payment_provider_id": "Captured by request check on list_payment_providers",
+        "payment_collection_id": "Captured by request check on create_payment_collection",
+        "order_id": "Captured by request check on complete_cart"
+      },
+      "request_sequence": [
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "list_regions",
+          "method": "GET",
+          "path": "/store/regions",
+          "action_start": null,
+          "origin": null,
+          "headers": {
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": null,
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [
+            {
+              "name": null,
+              "check_type": "jmesPath",
+              "selector": "regions[] | [].id",
+              "pattern": null,
+              "header_name": null,
+              "extraction_mode": null,
+              "index": null,
+              "random_count": null,
+              "fail_if_less": false,
+              "expected_value": null,
+              "expected_values": [],
+              "expected_count": null,
+              "save_as": "region_id",
+              "validation_operator": null,
+              "optional": false,
+              "tolerance": null,
+              "recorded_fingerprint": null,
+              "default_value": null,
+              "with_default": null,
+              "extract_value_type": "list",
+              "transform_expression": "Random.shuffle(value).head",
+              "log_actual_value_in_error": null,
+              "check_if_el": null,
+              "check_if_condition": null,
+              "check_if_session_var": null,
+              "check_if_operator": null,
+              "check_if_value": null,
+              "compiled_expression": "jmesPath(\"regions[] | [].id\").ofType[Seq[Any]].transform(value => Random.shuffle(value).head).saveAs(\"region_id\")",
+              "condition_inputs": []
+            }
+          ],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": true,
+          "preflight": true,
+          "checks": [
+            "jmesPath(\"regions[] | [].id\").ofType[Seq[Any]].transform(value => Random.shuffle(value).head).saveAs(\"region_id\")",
+            "status.is(200)",
+            "jsonPath(\"$.regions\").ofType[Seq[Any]].notNull",
+            "jsonPath(\"$.count\").ofType[Long]",
+            "jsonPath(\"$.count\").notNull",
+            "jsonPath(\"$.offset\").ofType[Long]",
+            "jsonPath(\"$.offset\").notNull",
+            "jsonPath(\"$.limit\").ofType[Long]",
+            "jsonPath(\"$.limit\").notNull"
+          ],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "regions": [
+                {
+                  "id": "str",
+                  "name": "str",
+                  "currency_code": "str",
+                  "created_at": "str",
+                  "updated_at": "str",
+                  "deleted_at": "str",
+                  "countries": [
+                    {
+                      "iso_2": "str",
+                      "iso_3": "str",
+                      "num_code": "str",
+                      "name": "str",
+                      "display_name": "str",
+                      "region_id": "str"
+                    }
+                  ]
+                }
+              ],
+              "count": "int",
+              "offset": "int",
+              "limit": "int"
+            },
+            "origin": "declared",
+            "required": ["regions", "count", "offset", "limit"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        },
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "get_region_detail",
+          "method": "GET",
+          "path": "/store/regions/{{region_id}}",
+          "action_start": {
+            "class": "api_call",
+            "key": "GET /store/regions/{}"
+          },
+          "origin": null,
+          "headers": {
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": null,
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": false,
+          "preflight": true,
+          "checks": ["status.is(200)", "jsonPath(\"$.region\").ofType[Map[String, Any]].notNull"],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "region": {
+                "id": "str",
+                "name": "str",
+                "currency_code": "str",
+                "created_at": "str",
+                "updated_at": "str",
+                "deleted_at": "str",
+                "countries": [
+                  {
+                    "iso_2": "str",
+                    "iso_3": "str",
+                    "num_code": "str",
+                    "name": "str",
+                    "display_name": "str",
+                    "region_id": "str"
+                  }
+                ]
+              }
+            },
+            "origin": "declared",
+            "required": ["region"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        },
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "list_collections",
+          "method": "GET",
+          "path": "/store/collections",
+          "action_start": {
+            "class": "api_call",
+            "key": "GET /store/collections"
+          },
+          "origin": null,
+          "headers": {
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": null,
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": false,
+          "preflight": true,
+          "checks": [
+            "status.is(200)",
+            "jsonPath(\"$.collections\").ofType[Seq[Any]].notNull",
+            "jsonPath(\"$.count\").ofType[Long]",
+            "jsonPath(\"$.count\").notNull",
+            "jsonPath(\"$.offset\").ofType[Long]",
+            "jsonPath(\"$.offset\").notNull",
+            "jsonPath(\"$.limit\").ofType[Long]",
+            "jsonPath(\"$.limit\").notNull"
+          ],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "collections": [
+                {
+                  "id": "str",
+                  "title": "str",
+                  "handle": "str",
+                  "external_id": "str",
+                  "created_at": "str",
+                  "updated_at": "str"
+                }
+              ],
+              "count": "int",
+              "offset": "int",
+              "limit": "int"
+            },
+            "origin": "declared",
+            "required": ["collections", "count", "offset", "limit"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        },
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "list_categories",
+          "method": "GET",
+          "path": "/store/product-categories",
+          "action_start": {
+            "class": "api_call",
+            "key": "GET /store/product-categories"
+          },
+          "origin": null,
+          "headers": {
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": null,
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": false,
+          "preflight": true,
+          "checks": [
+            "status.is(200)",
+            "jsonPath(\"$.product_categories\").ofType[Seq[Any]].notNull",
+            "jsonPath(\"$.count\").ofType[Long]",
+            "jsonPath(\"$.count\").notNull",
+            "jsonPath(\"$.offset\").ofType[Long]",
+            "jsonPath(\"$.offset\").notNull",
+            "jsonPath(\"$.limit\").ofType[Long]",
+            "jsonPath(\"$.limit\").notNull"
+          ],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "product_categories": [
+                {
+                  "id": "str",
+                  "name": "str",
+                  "description": "str",
+                  "handle": "str",
+                  "rank": "int",
+                  "external_id": "str",
+                  "parent_category_id": "str",
+                  "created_at": "str",
+                  "updated_at": "str",
+                  "parent_category": {
+                    "id": "str",
+                    "name": "str",
+                    "description": "str",
+                    "handle": "str",
+                    "rank": "int",
+                    "external_id": "str",
+                    "parent_category_id": "str",
+                    "created_at": "str",
+                    "updated_at": "str"
+                  },
+                  "category_children": [
+                    {
+                      "id": "str",
+                      "name": "str",
+                      "description": "str",
+                      "handle": "str",
+                      "rank": "int",
+                      "external_id": "str",
+                      "parent_category_id": "str",
+                      "created_at": "str",
+                      "updated_at": "str"
+                    }
+                  ]
+                }
+              ],
+              "count": "int",
+              "offset": "int",
+              "limit": "int"
+            },
+            "origin": "declared",
+            "required": ["product_categories", "count", "offset", "limit"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        }
+      ]
+    },
+    "requests": [
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "list_regions",
+        "method": "GET",
+        "path": "/store/regions",
+        "action_start": null,
+        "origin": null,
+        "headers": {
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": null,
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [
+          {
+            "name": null,
+            "check_type": "jmesPath",
+            "selector": "regions[] | [].id",
+            "pattern": null,
+            "header_name": null,
+            "extraction_mode": null,
+            "index": null,
+            "random_count": null,
+            "fail_if_less": false,
+            "expected_value": null,
+            "expected_values": [],
+            "expected_count": null,
+            "save_as": "region_id",
+            "validation_operator": null,
+            "optional": false,
+            "tolerance": null,
+            "recorded_fingerprint": null,
+            "default_value": null,
+            "with_default": null,
+            "extract_value_type": "list",
+            "transform_expression": "Random.shuffle(value).head",
+            "log_actual_value_in_error": null,
+            "check_if_el": null,
+            "check_if_condition": null,
+            "check_if_session_var": null,
+            "check_if_operator": null,
+            "check_if_value": null,
+            "compiled_expression": "jmesPath(\"regions[] | [].id\").ofType[Seq[Any]].transform(value => Random.shuffle(value).head).saveAs(\"region_id\")",
+            "condition_inputs": []
+          }
+        ],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": true,
+        "preflight": true,
+        "checks": [
+          "jmesPath(\"regions[] | [].id\").ofType[Seq[Any]].transform(value => Random.shuffle(value).head).saveAs(\"region_id\")",
+          "status.is(200)",
+          "jsonPath(\"$.regions\").ofType[Seq[Any]].notNull",
+          "jsonPath(\"$.count\").ofType[Long]",
+          "jsonPath(\"$.count\").notNull",
+          "jsonPath(\"$.offset\").ofType[Long]",
+          "jsonPath(\"$.offset\").notNull",
+          "jsonPath(\"$.limit\").ofType[Long]",
+          "jsonPath(\"$.limit\").notNull"
+        ],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "regions": [
+              {
+                "id": "str",
+                "name": "str",
+                "currency_code": "str",
+                "created_at": "str",
+                "updated_at": "str",
+                "deleted_at": "str",
+                "countries": [
+                  {
+                    "iso_2": "str",
+                    "iso_3": "str",
+                    "num_code": "str",
+                    "name": "str",
+                    "display_name": "str",
+                    "region_id": "str"
+                  }
+                ]
+              }
+            ],
+            "count": "int",
+            "offset": "int",
+            "limit": "int"
+          },
+          "origin": "declared",
+          "required": ["regions", "count", "offset", "limit"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      },
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "get_region_detail",
+        "method": "GET",
+        "path": "/store/regions/{{region_id}}",
+        "action_start": {
+          "class": "api_call",
+          "key": "GET /store/regions/{}"
+        },
+        "origin": null,
+        "headers": {
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": null,
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": false,
+        "preflight": true,
+        "checks": ["status.is(200)", "jsonPath(\"$.region\").ofType[Map[String, Any]].notNull"],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "region": {
+              "id": "str",
+              "name": "str",
+              "currency_code": "str",
+              "created_at": "str",
+              "updated_at": "str",
+              "deleted_at": "str",
+              "countries": [
+                {
+                  "iso_2": "str",
+                  "iso_3": "str",
+                  "num_code": "str",
+                  "name": "str",
+                  "display_name": "str",
+                  "region_id": "str"
+                }
+              ]
+            }
+          },
+          "origin": "declared",
+          "required": ["region"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      },
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "list_collections",
+        "method": "GET",
+        "path": "/store/collections",
+        "action_start": {
+          "class": "api_call",
+          "key": "GET /store/collections"
+        },
+        "origin": null,
+        "headers": {
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": null,
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": false,
+        "preflight": true,
+        "checks": [
+          "status.is(200)",
+          "jsonPath(\"$.collections\").ofType[Seq[Any]].notNull",
+          "jsonPath(\"$.count\").ofType[Long]",
+          "jsonPath(\"$.count\").notNull",
+          "jsonPath(\"$.offset\").ofType[Long]",
+          "jsonPath(\"$.offset\").notNull",
+          "jsonPath(\"$.limit\").ofType[Long]",
+          "jsonPath(\"$.limit\").notNull"
+        ],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "collections": [
+              {
+                "id": "str",
+                "title": "str",
+                "handle": "str",
+                "external_id": "str",
+                "created_at": "str",
+                "updated_at": "str"
+              }
+            ],
+            "count": "int",
+            "offset": "int",
+            "limit": "int"
+          },
+          "origin": "declared",
+          "required": ["collections", "count", "offset", "limit"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      },
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "list_categories",
+        "method": "GET",
+        "path": "/store/product-categories",
+        "action_start": {
+          "class": "api_call",
+          "key": "GET /store/product-categories"
+        },
+        "origin": null,
+        "headers": {
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": null,
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": false,
+        "preflight": true,
+        "checks": [
+          "status.is(200)",
+          "jsonPath(\"$.product_categories\").ofType[Seq[Any]].notNull",
+          "jsonPath(\"$.count\").ofType[Long]",
+          "jsonPath(\"$.count\").notNull",
+          "jsonPath(\"$.offset\").ofType[Long]",
+          "jsonPath(\"$.offset\").notNull",
+          "jsonPath(\"$.limit\").ofType[Long]",
+          "jsonPath(\"$.limit\").notNull"
+        ],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "product_categories": [
+              {
+                "id": "str",
+                "name": "str",
+                "description": "str",
+                "handle": "str",
+                "rank": "int",
+                "external_id": "str",
+                "parent_category_id": "str",
+                "created_at": "str",
+                "updated_at": "str",
+                "parent_category": {
+                  "id": "str",
+                  "name": "str",
+                  "description": "str",
+                  "handle": "str",
+                  "rank": "int",
+                  "external_id": "str",
+                  "parent_category_id": "str",
+                  "created_at": "str",
+                  "updated_at": "str"
+                },
+                "category_children": [
+                  {
+                    "id": "str",
+                    "name": "str",
+                    "description": "str",
+                    "handle": "str",
+                    "rank": "int",
+                    "external_id": "str",
+                    "parent_category_id": "str",
+                    "created_at": "str",
+                    "updated_at": "str"
+                  }
+                ]
+              }
+            ],
+            "count": "int",
+            "offset": "int",
+            "limit": "int"
+          },
+          "origin": "declared",
+          "required": ["product_categories", "count", "offset", "limit"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      }
+    ],
+    "modular_files": {
+      "src/gatling/scala/steps/ListRegionsStep.scala": "package steps\n\nimport io.gatling.core.Predef._\nimport io.gatling.http.Predef._\nimport io.gatling.http.request.builder.HttpRequestBuilder\n\nimport scala.util.Random\n\nobject ListRegionsStep {\n  def apply(): HttpRequestBuilder =\n    util.HttpConfig.stripHeaders(\n      http(\"list_regions\")\n        .get(\"/store/regions\")\n        .check(\n          status.is(200),\n          jmesPath(\"regions[] | [].id\").ofType[Seq[Any]].transform(value => Random.shuffle(value).head).saveAs(\"region_id\"),\n          jsonPath(\"$.regions\").ofType[Seq[Any]].notNull,\n          jsonPath(\"$.count\").ofType[Long],\n          jsonPath(\"$.count\").notNull,\n          jsonPath(\"$.offset\").ofType[Long],\n          jsonPath(\"$.offset\").notNull,\n          jsonPath(\"$.limit\").ofType[Long],\n          jsonPath(\"$.limit\").notNull\n        ),\n      Seq(\"Authorization\")\n    )\n}\n"
+    },
+    "feeders": [
+      {
+        "file": "users.csv",
+        "feeder_type": "csv",
+        "strategy": "circular",
+        "columns": ["email", "password", "target_key_storekey"],
+        "column_specs": [
+          {
+            "name": "email",
+            "type": "email"
+          },
+          {
+            "name": "password",
+            "type": "string"
+          },
+          {
+            "name": "target_key_storekey",
+            "type": "string"
+          }
+        ],
+        "column_fingerprints": {
+          "email": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "password": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "target_key_storekey": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "has_unique_columns": false,
+        "column_types": ["email", "string", "string"],
+        "record_count": null,
+        "content": null,
+        "bundle_evidenced": null,
+        "role": "auth",
+        "identity_kind": "existing",
+        "label": "User accounts",
+        "description": "Accounts used to sign in.",
+        "separator": null,
+        "feed_records_count": null,
+        "jdbc_config": null,
+        "redis_config": null
+      }
+    ]
+  }
+}

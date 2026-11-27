@@ -16,7 +16,7 @@ const profile = (type: ProfileType, vusers: number, ramp?: number, hold?: number
 });
 
 describe('plannedDurationSeconds', () => {
-  // Shapes of `Environment.scala` (config_generator.py:665-698 open, :746-765 closed).
+  // Shapes of `Environment.scala`.
   const table: [string, Profile, number | null][] = [
     ['smoke is one instant pass', profile('smoke', 1), null],
     ['ramp lasts the ramp', profile('ramp', 2000, 600), 600],
@@ -55,7 +55,7 @@ describe('clampProfile', () => {
   };
 
   // type, vusers in, then the vusers out under (no caps, max_vu 100, max_rps 20, both)
-  // Families: injection_builder.py:839-843 (+ the spike halving).
+  // Families (+ the spike halving).
   const table: [ProfileType, number, number, number, number, number][] = [
     ['smoke', 500, 500, 100, 500, 100],
     ['ramp', 2000, 2000, 100, 2000, 100],

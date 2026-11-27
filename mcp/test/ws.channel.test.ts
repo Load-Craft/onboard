@@ -354,6 +354,10 @@ describe('openChannel: address and headers', () => {
     analysis: { run_id: 'r' },
     har: { project_id: 'p', session_id: 's' },
     describe: { project_id: 'p', run_id: 'r' },
+    healthCheck: { session_id: 's' },
+    testTypes: { run_id: 'r' },
+    payloadGen: { run_id: 'r' },
+    gatlingFeeder: { run_id: 'r' },
   };
 
   // The caller names only the channel: what the connection presents follows the frame contract, so

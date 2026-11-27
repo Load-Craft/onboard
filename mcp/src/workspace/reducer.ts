@@ -15,6 +15,7 @@ import type * as z from 'zod';
 import { ToolError } from '../errors.js';
 import { systemClock, type Clock } from '../ops/clock.js';
 import type { SecretScope } from '../secret.js';
+import { WRITER_BUILD } from './build.js';
 import { ensureStateDir, writeFileAtomic } from './stateFile.js';
 import { INVALIDATED_CODE, invalidateChecks, invalidatedBy, triggersOf } from './invalidate.js';
 import { withFileLock, type FileLockOptions } from './lock.js';
@@ -271,27 +272,37 @@ export interface WriteResult {
   written: boolean;
   /** 1, or 2 when another writer committed first and the change ran again on the fresh state. */
   attempts: number;
+  /** Another version of the plugin writes the file too (`ForeignWriter`); absent when none was seen. */
+  foreign?: ForeignWriter;
 }
+
+/**
+ * A writer of another build seen in the file (DOKTOR-07): `other_build`, its stamp names another
+ * build; `unstamped`, the file changed since this process wrote it while the stamp still names this
+ * process, so a writer that does not stamp (a build from before the stamp) wrote it.
+ */
+export type ForeignWriter = 'other_build' | 'unstamped';
 
 export interface StateWriteResult {
   /** The whole state after the write (or as read, when nothing was written). */
   state: State;
   written: boolean;
   attempts: number;
+  foreign?: ForeignWriter;
 }
 
 /**
  * A change of one process. Returning `current` itself means "nothing to write": no file write, no new rev.
  * It runs a second time, on the fresh state, when another writer committed first, so it must only compute.
  */
-export type ProcessChange = (current: Process, now: string) => Process;
+export type ProcessChange = (current: Process, now: string, foreign?: ForeignWriter) => Process;
 
 /**
  * A change of the whole state: several process keys, `bound_project_id`, the cache sections. Returning `state`
  * itself means "nothing to write". A process object left as it was (same reference) keeps its rev; every other
  * process gets the next rev. Like `ProcessChange`, it may run twice.
  */
-export type StateChange = (state: State, now: string) => State;
+export type StateChange = (state: State, now: string, foreign?: ForeignWriter) => State;
 
 /** A detail of a log entry (`logDetails`), saved in the same write as the entry. */
 export type LogDetailEntry = State['logDetails'][string];
@@ -329,6 +340,33 @@ export interface ProcessStore {
 
 type RawState = Record<string, unknown>;
 const KNOWN_FIELDS: ReadonlySet<string> = new Set(Object.keys(State.shape));
+/** The stamp of the last writer: `{build, pid, seq}`; a field older builds keep as one they do not know. */
+const WRITER_FIELD = 'writer';
+
+/** What this process last wrote to each state file, and the number of its stamp. */
+const ownWrites = new Map<string, { text: string; seq: number }>();
+let writeSeq = 0;
+
+interface WriterStamp {
+  build?: unknown;
+  pid?: unknown;
+  seq?: unknown;
+}
+
+/** The other writer the file shows, if any (see `ForeignWriter`). */
+function foreignOf(
+  path: string,
+  read: { raw: RawState; text: string | undefined },
+): ForeignWriter | undefined {
+  const stamp = read.raw[WRITER_FIELD];
+  const writer: WriterStamp = typeof stamp === 'object' && stamp !== null ? stamp : {};
+  if (typeof writer.build === 'string' && writer.build !== WRITER_BUILD) return 'other_build';
+  const mine = ownWrites.get(path);
+  if (mine === undefined || read.text === undefined || read.text === mine.text) return undefined;
+  const stampIsMine =
+    writer.build === WRITER_BUILD && writer.pid === process.pid && writer.seq === mine.seq;
+  return stampIsMine ? 'unstamped' : undefined;
+}
 
 /** Freezes a parsed state (plain objects and arrays) all the way down; returns the same object. */
 function deepFreeze<T>(value: T): T {
@@ -443,12 +481,16 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
   };
 
   // Computes the next state, or undefined when the change wrote nothing.
-  const prepare = (seen: State, change: StateChange): State | undefined => {
+  const prepare = (
+    seen: State,
+    change: StateChange,
+    foreign?: ForeignWriter,
+  ): State | undefined => {
     const nowMs = clock.now();
     const now = new Date(nowMs).toISOString();
     // Frozen: a change that edits the state in place (instead of returning new objects) fails with a
     // TypeError, so nothing escapes the rev and the secret filter below, which look at what changed.
-    const changed = change(deepFreeze(seen), now);
+    const changed = change(deepFreeze(seen), now, foreign);
     if (changed === seen) return undefined;
     const process: Record<string, Process> = {};
     for (const [key, p] of Object.entries(changed.process)) {
@@ -467,10 +509,14 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
     // Known fields come from `next` only (a field the change left out is removed); fields this version does
     // not know stay as the file has them.
     const unknown = Object.fromEntries(
-      Object.entries(raw).filter(([field]) => !KNOWN_FIELDS.has(field)),
+      Object.entries(raw).filter(([field]) => !KNOWN_FIELDS.has(field) && field !== WRITER_FIELD),
     );
-    const out = { ...unknown, ...next, schema: PROCESS_STATE_SCHEMA };
-    writeFileAtomic(statePath, `${JSON.stringify(out, null, 2)}\n`);
+    writeSeq += 1;
+    const writer = { build: WRITER_BUILD, pid: process.pid, seq: writeSeq };
+    const out = { ...unknown, ...next, schema: PROCESS_STATE_SCHEMA, [WRITER_FIELD]: writer };
+    const text = `${JSON.stringify(out, null, 2)}\n`;
+    writeFileAtomic(statePath, text);
+    ownWrites.set(statePath, { text, seq: writeSeq });
   };
 
   // Invalidation of checks and the closing of steps run only in `applyUpdate` (through `reduce`). This write
@@ -486,8 +532,13 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
   const writeState = async (change: StateChange): Promise<StateWriteResult> => {
     // Attempt 1, optimistic: read and compute without the lock.
     const seen = readFile();
-    const first = prepare(seen.state, change);
-    if (first === undefined) return { state: seen.state, written: false, attempts: 1 };
+    const seenForeign = foreignOf(statePath, seen);
+    const first = prepare(seen.state, change, seenForeign);
+    const flagged = (foreign: ForeignWriter | undefined) =>
+      foreign === undefined ? {} : { foreign };
+    if (first === undefined) {
+      return { state: seen.state, written: false, attempts: 1, ...flagged(seenForeign) };
+    }
 
     const dir = ensureStateDir(root, '.cache');
     const ignore = join(dir, '.gitignore');
@@ -499,12 +550,15 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
         const fresh = readFile();
         if (fresh.text === seen.text) {
           commit(fresh.raw, first);
-          return { state: first, written: true, attempts: 1 };
+          return { state: first, written: true, attempts: 1, ...flagged(seenForeign) };
         }
         // Attempt 2: another writer committed after our read. The lock is held, so the fresh state stays
         // fresh for every writer that takes it; a second mismatch means one that does not.
-        const retry = prepare(fresh.state, change);
-        if (retry === undefined) return { state: fresh.state, written: false, attempts: 2 };
+        const foreign = foreignOf(statePath, fresh) ?? seenForeign;
+        const retry = prepare(fresh.state, change, foreign);
+        if (retry === undefined) {
+          return { state: fresh.state, written: false, attempts: 2, ...flagged(foreign) };
+        }
         const latest = readFile();
         if (latest.text !== fresh.text) {
           throw new ToolError('state_conflict', {
@@ -513,7 +567,7 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
           });
         }
         commit(latest.raw, retry);
-        return { state: retry, written: true, attempts: 2 };
+        return { state: retry, written: true, attempts: 2, ...flagged(foreign) };
       },
       options.lock,
     );
@@ -526,9 +580,9 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
     bound?: string,
   ): Promise<WriteResult> => {
     let last: Process | undefined;
-    const result = await writeState((state, now) => {
+    const result = await writeState((state, now, foreign) => {
       const base = state.process[key] ?? emptyProcess(key, now);
-      const next = change(base, now);
+      const next = change(base, now, foreign);
       last = base;
       if (next === base) return state;
       const logDetails =
@@ -544,7 +598,12 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
     });
     const process = result.written ? result.state.process[key] : last;
     if (process === undefined) throw new Error('the change of a process ran no time');
-    return { process, written: result.written, attempts: result.attempts };
+    return {
+      process,
+      written: result.written,
+      attempts: result.attempts,
+      ...(result.foreign === undefined ? {} : { foreign: result.foreign }),
+    };
   };
 
   return {
@@ -556,14 +615,14 @@ export function createProcessStore(root: string, options: ProcessStoreOptions): 
       const then = meta.then;
       return write(
         key,
-        (p, now) => {
+        (p, now, foreign) => {
           const reduced = reduce(p, parsed.data, {
             tool: meta.tool,
             now,
             ...(meta.failed === undefined ? {} : { failed: meta.failed }),
             ...(meta.inert === undefined ? {} : { inert: meta.inert }),
           });
-          return then === undefined ? reduced : then(reduced, now);
+          return then === undefined ? reduced : then(reduced, now, foreign);
         },
         meta.detail,
         meta.bound,

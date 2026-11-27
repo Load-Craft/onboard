@@ -22,6 +22,7 @@ import { createResolver } from '../resolve/handles.js';
 import { flowWarnings } from './scenario/flowWarnings.js';
 import { MAX_SCENARIO_FLOWS } from './scenario/limits.js';
 import { equalShares, sharesFromProposal } from './scenario/propose.js';
+import { settleAll } from '../http/operation.js';
 
 /** The request put to the scenario-builder chat; the flows themselves go in `selected_flow_ids`. */
 const SPLIT_REQUEST =
@@ -56,7 +57,7 @@ export const scenarioSuggestSplit = defineTool({
     await getCompat(ctx);
     const resolver = createResolver(ctx);
     const project = await resolver.project(args.project ?? '');
-    const resolved = await Promise.all(args.flows.map((name) => resolver.flow(project.id, name)));
+    const resolved = await settleAll(args.flows.map((name) => resolver.flow(project.id, name)));
     const flows = resolved.filter(
       (flow, index) => resolved.findIndex((other) => other.id === flow.id) === index,
     );

@@ -28,7 +28,7 @@ import { fillTemplate, logToolOf } from '../src/workspace/logEntry.js';
 import { NEW_KEY } from '../src/workspace/processState.js';
 import { createProcessStore } from '../src/workspace/reducer.js';
 import { startFake, type Fake } from './fake-backend/server.js';
-import { BACKEND_CANARY, CANARY, FILE_CANARY } from './helpers/canary.js';
+import { BACKEND_CANARY, CANARY, FILE_CANARY, leakedPieces } from './helpers/canary.js';
 import { createTestClock } from './helpers/clock.js';
 import { connect, type McpSession } from './helpers/mcp.js';
 
@@ -48,7 +48,6 @@ const ARGS: Readonly<Record<string, Record<string, unknown>>> = {
   scenario_generate: { name: 'checkout', flows: ['checkout'], proportions: { checkout: 100 } },
   flows_describe_journeys: { description: 'browse the shop and buy one item', environment: 'perf' },
   results_analyze_run: { execution: 'run-1' },
-  flows_get: { flow: 'checkout' },
   results_get_report: { execution: 'run-1' },
   results_get_errors: { execution: 'run-1' },
   results_get_traces: { execution: 'run-1' },
@@ -276,8 +275,8 @@ const argsOf = (tool: string): Record<string, unknown> => ARGS[tool] ?? {};
 const failArgsOf = (tool: string): Record<string, unknown> => FAIL_ARGS[tool] ?? argsOf(tool);
 
 describe('log of calls: every tool of the registry', () => {
-  it('finds the catalog entry of each of the 37 tools of today among its ways in the migration map', () => {
-    expect(LEGACY_TOOLS).toHaveLength(37);
+  it('finds the catalog entry of each of the 36 tools of today among its ways in the migration map', () => {
+    expect(LEGACY_TOOLS).toHaveLength(36);
     const map = CURRENT_TO_TOOLS as Readonly<Record<string, readonly string[]>>;
     // A tool renamed 1:1 already carries its catalog name: the map holds it under its old name.
     const renamedTo = (name: string): boolean =>
@@ -324,7 +323,7 @@ describe('log of calls: every tool of the registry', () => {
     expect(logToolOf('helper_probe', {})).toBeUndefined();
   });
 
-  it('leaves 74 entries after a success and a failure of each of the 37 tools; no read entry has undo', async () => {
+  it('leaves 72 entries after a success and a failure of each of the 36 tools; no read entry has undo', async () => {
     const b = await bench();
     for (const tool of LEGACY_TOOLS) {
       b.control.mode = 'done';
@@ -336,8 +335,8 @@ describe('log of calls: every tool of the registry', () => {
     }
     const p = b.process();
     const entries = [...p.log, ...p.reads];
-    expect(entries).toHaveLength(74);
-    expect(p.rev).toBe(74);
+    expect(entries).toHaveLength(72);
+    expect(p.rev).toBe(72);
     for (const tool of LEGACY_TOOLS) {
       const own = entries.filter((e) => e.tool === tool.name);
       expect(own.map((e) => e.status).sort(), tool.name).toEqual(['error', 'ok']);
@@ -418,7 +417,7 @@ describe('log of calls: content of an entry', () => {
 
   it('records the code and the message of a failure', async () => {
     const b = await bench();
-    await b.session.call('flows_get', ARGS.flows_get ?? {});
+    await b.session.call('project_get', ARGS.project_get ?? {});
     const [entry] = b.process().log;
     expect(entry?.status).toBe('error');
     expect(entry?.error_code).toBe('no_project');
@@ -482,7 +481,7 @@ describe('log of calls: content of an entry', () => {
     // a state file this version does not know: the reducer refuses it
     mkdirSync(join(b.workspace, 'loadcraft', '.cache'), { recursive: true });
     writeFileSync(join(b.workspace, 'loadcraft', '.cache', 'state.json'), '{"schema":99}\n');
-    const result = await b.session.call('flows_get', ARGS.flows_get ?? {});
+    const result = await b.session.call('project_get', ARGS.project_get ?? {});
     expect(result.isError).toBe(false);
     expect(result.text.split('\n')[0]).toBe('ok');
     expect(b.lines.some((line) => line.includes('log entry not saved'))).toBe(true);
@@ -529,14 +528,14 @@ describe('log of calls: summary and undo from the result', () => {
   const PROJECT = '00000000-0000-4000-8000-0000000000cc';
   const FLOWS = ['00000000-0000-4000-8000-0000000000d1', '00000000-0000-4000-8000-0000000000d2'];
 
-  it('summarises the arguments as key=value when the template names a slot they do not fill', async () => {
+  it('keeps the sentence of the template when a slot has no value: none in its place, no fields of the call', async () => {
     const b = await bench();
     b.control.mode = 'done';
     await b.session.call('flows_describe_journeys', ARGS.flows_describe_journeys ?? {});
     const [entry] = b.process().log;
-    expect(entry?.args).toContain('environment=perf');
-    expect(entry?.args).toContain('description=browse the shop');
-    expect(entry?.args).not.toContain('?');
+    expect(entry?.args).toBe('Open none in the backend browser and sign in');
+    expect(entry?.args).not.toContain('environment=');
+    expect(entry?.args).not.toContain('browse the shop');
   });
 
   it('a new project can be undone by deleting it; the id comes from the result', async () => {
@@ -605,7 +604,7 @@ describe('log of calls: summary and undo from the result', () => {
     expect(entry?.args).toContain('[redacted]');
     expect(entry?.result).toContain('[redacted]');
     for (const secret of [FILE_CANARY, BACKEND_CANARY]) {
-      expect(b.stateText()).not.toContain(secret);
+      expect(leakedPieces(b.stateText(), [secret])).toEqual([]);
       expect(b.stateText()).not.toContain(secret.slice(0, 10));
     }
   });
@@ -621,7 +620,8 @@ describe('the detail of an entry', () => {
     const detail = entry === undefined ? undefined : b.details()[entry.id];
     expect(detail?.value.request).toContain('shop [redacted]');
     expect(detail?.value.response).toContain('[redacted]');
-    for (const secret of [FILE_CANARY, BACKEND_CANARY]) expect(b.stateText()).not.toContain(secret);
+    for (const secret of [FILE_CANARY, BACKEND_CANARY])
+      expect(leakedPieces(b.stateText(), [secret])).toEqual([]);
   });
 
   it('a read that succeeds has no detail, and the section stays empty', async () => {

@@ -273,3 +273,41 @@ function runAsync(p: Project, args: string[], env: Record<string, string>) {
     });
   });
 }
+
+describe('sync-api: operations the public snapshot leaves out', () => {
+  it('drops dev-login and the schema only it used on import, so the snapshot stays as it was', () => {
+    const p = project();
+    const source = JSON.parse(readFileSync(join(FIXTURES, 'old.json'), 'utf8')) as {
+      paths: Record<string, unknown>;
+      components?: { schemas?: Record<string, unknown> };
+    };
+    source.paths['/api/v1/auth/dev-login'] = {
+      post: {
+        operationId: 'dev_login_api_v1_auth_dev_login_post',
+        requestBody: {
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/DevLoginBody' } },
+          },
+        },
+        responses: { '200': { description: 'Session for any user.' } },
+      },
+    };
+    source.components = {
+      ...source.components,
+      schemas: {
+        ...source.components?.schemas,
+        DevLoginBody: { type: 'object', properties: { user_id: { type: 'string' } } },
+      },
+    };
+    const file = join(p.root, 'with-dev-login.json');
+    writeFileSync(file, JSON.stringify(source));
+    const before = readFileSync(p.spec, 'utf8');
+    const result = run(p, ['--from-file', file]);
+    expect(result.code, result.out).toBe(0);
+    expect(result.out).toMatch(/no changes|bez zmian/i);
+    const after = readFileSync(p.spec, 'utf8');
+    expect(after).toBe(before);
+    expect(after).not.toContain('dev-login');
+    expect(after).not.toContain('DevLoginBody');
+  });
+});

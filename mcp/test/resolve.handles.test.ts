@@ -16,7 +16,7 @@ import { createTranslator } from '../src/render/i18n/index.js';
 import { createResolver, type Resolver } from '../src/resolve/handles.js';
 import { writeBinding } from '../src/workspace/binding.js';
 import { SKLEP_IDS } from './golden/index.js';
-import { assertNoCanary, CANARY } from './helpers/canary.js';
+import { assertNoCanary, CANARY, leakedPieces, SHAPE_CANARY } from './helpers/canary.js';
 import { createTestClock } from './helpers/clock.js';
 import { noopSecretScope } from './helpers/scope.js';
 import { registerFlowRoutes } from './fake-backend/routes/flows.js';
@@ -541,4 +541,67 @@ describe('texts', () => {
     }
     throw new Error('expected the call to fail');
   });
+});
+
+// FIX-74: a name from the backend is a third party's text. A credential in it (a JWT, a key after
+// its name) is masked in every message of the resolver, the not_found list and the ambiguous one.
+const JWT_NAME = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZXNvbHZlciJ9.c2VudGluZWwtcmVzb2x2ZXItc2ln';
+const KEY_NAME = `api_key=${SHAPE_CANARY}`;
+const named = (secret: string): string => `checkout ${secret}`;
+// every piece of a secret counts: a view that cuts or a mask that hides a part leaves one (FIX-79)
+const leaks = (text: string): string[] =>
+  leakedPieces(text, [JWT_NAME, SHAPE_CANARY, 'c2VudGluZWwtcmVzb2x2ZXItc2ln']);
+
+describe.each(KINDS)('$label: a credential in a name from the backend', (kind) => {
+  it.each([JWT_NAME, KEY_NAME])('is masked in not_found and ambiguous (%s)', async (secret) => {
+    const w = await world();
+    clone<{ id: string }>(w, kind.collection, kind.id, { name: named(secret) });
+    clone<{ id: string }>(w, kind.collection, kind.id, { name: named(secret) });
+    const missing = await shown(w, kind.call(w.resolver, PROJECT, 'nie-ma-takiego'));
+    const twins = await shown(w, kind.call(w.resolver, PROJECT, named(secret)));
+    expect(missing.code).toBe('not_found');
+    expect(twins.code).toBe('ambiguous');
+    for (const text of [missing.message, missing.hint, twins.message, twins.hint]) {
+      expect(leaks(text)).toEqual([]);
+    }
+    expect(missing.hint).toContain('checkout');
+  });
+});
+
+describe('project and run target: a credential in a name from the backend', () => {
+  it.each([JWT_NAME, KEY_NAME])(
+    'project not_found and ambiguous are masked (%s)',
+    async (secret) => {
+      const w = await world();
+      clone<ProjectDetail>(w, SKLEP_COLLECTIONS.projects, PROJECT, { name: named(secret) });
+      clone<ProjectDetail>(w, SKLEP_COLLECTIONS.projects, PROJECT, { name: named(secret) });
+      const missing = await shown(w, w.resolver.project('nie-ma'));
+      const twins = await shown(w, w.resolver.project(named(secret)));
+      expect(twins.code).toBe('ambiguous');
+      for (const text of [missing.message, missing.hint, twins.message, twins.hint]) {
+        expect(leaks(text)).toEqual([]);
+      }
+    },
+  );
+
+  it.each([JWT_NAME, KEY_NAME])(
+    'run target not_found and ambiguous are masked (%s)',
+    async (secret) => {
+      const w = await world();
+      const scenarios = SKLEP_COLLECTIONS.scenarios;
+      clone<{ id: string }>(w, scenarios, SKLEP_WORLD_IDS.scenarios.zakupy, {
+        name: named(secret),
+      });
+      clone<{ id: string }>(w, SKLEP_COLLECTIONS.compositions, SKLEP_WORLD_IDS.composition, {
+        name: named(secret),
+      });
+      const missing = await shown(w, w.resolver.runScenarioTarget(PROJECT, 'nie-ma'));
+      const twins = await shown(w, w.resolver.runScenarioTarget(PROJECT, named(secret)));
+      expect(missing.code).toBe('not_found');
+      expect(twins.code).toBe('ambiguous');
+      for (const text of [missing.message, missing.hint, twins.message, twins.hint]) {
+        expect(leaks(text)).toEqual([]);
+      }
+    },
+  );
 });

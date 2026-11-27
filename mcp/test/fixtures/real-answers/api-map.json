@@ -1,0 +1,449 @@
+{
+  "title": "Shop — Store API (shopping path)",
+  "digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "area_rule": "detected",
+  "preview": false,
+  "detected_area_prefixes": [],
+  "saved_area_prefixes": null,
+  "empty_area_prefixes": [],
+  "total_operations": 31,
+  "areas": [
+    {
+      "prefix": "",
+      "name": "",
+      "operations": [
+        "DELETE /store/carts/{id}/line-items/{line_id}",
+        "GET /store/carts/{id}",
+        "GET /store/collections",
+        "GET /store/collections/{id}",
+        "GET /store/custom",
+        "GET /store/customers/me",
+        "GET /store/customers/me/addresses",
+        "GET /store/orders",
+        "GET /store/orders/{id}",
+        "GET /store/payment-providers",
+        "GET /store/product-categories",
+        "GET /store/product-categories/{id}",
+        "GET /store/products",
+        "GET /store/products/{id}",
+        "GET /store/regions",
+        "GET /store/regions/{id}",
+        "GET /store/shipping-options",
+        "POST /auth/customer/credentials",
+        "POST /auth/customer/credentials/register",
+        "POST /store/carts",
+        "POST /store/carts/{id}",
+        "POST /store/carts/{id}/complete",
+        "POST /store/carts/{id}/customer",
+        "POST /store/carts/{id}/line-items",
+        "POST /store/carts/{id}/line-items/{line_id}",
+        "POST /store/carts/{id}/shipping-methods",
+        "POST /store/customers",
+        "POST /store/customers/me/addresses",
+        "POST /store/payment-collections",
+        "POST /store/payment-collections/{id}/payment-sessions",
+        "POST /store/search"
+      ],
+      "token_operations": [
+        "POST /auth/customer/credentials",
+        "POST /auth/customer/credentials/register"
+      ],
+      "parts": ["Auth", "Carts", "Catalog", "Custom", "Customers", "Orders", "Payments", "Regions"],
+      "sign_in_endpoint_id": "0d0c7034-0003-4000-8000-000000001000"
+    }
+  ],
+  "outside_area": [],
+  "outside_area_token_operations": [],
+  "outside_area_sign_in_endpoint_id": null,
+  "parts": [
+    {
+      "key": "Auth",
+      "name": "Auth",
+      "label": "Auth",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/auth",
+      "operations": ["POST /auth/customer/credentials", "POST /auth/customer/credentials/register"]
+    },
+    {
+      "key": "Carts",
+      "name": "Carts",
+      "label": "Carts",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": [
+        "DELETE /store/carts/{id}/line-items/{line_id}",
+        "GET /store/carts/{id}",
+        "GET /store/shipping-options",
+        "POST /store/carts",
+        "POST /store/carts/{id}",
+        "POST /store/carts/{id}/complete",
+        "POST /store/carts/{id}/customer",
+        "POST /store/carts/{id}/line-items",
+        "POST /store/carts/{id}/line-items/{line_id}",
+        "POST /store/carts/{id}/shipping-methods"
+      ]
+    },
+    {
+      "key": "Catalog",
+      "name": "Catalog",
+      "label": "Catalog",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": [
+        "GET /store/collections",
+        "GET /store/collections/{id}",
+        "GET /store/product-categories",
+        "GET /store/product-categories/{id}",
+        "GET /store/products",
+        "GET /store/products/{id}",
+        "POST /store/search"
+      ]
+    },
+    {
+      "key": "Custom",
+      "name": "Custom",
+      "label": "Custom",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": ["GET /store/custom"]
+    },
+    {
+      "key": "Customers",
+      "name": "Customers",
+      "label": "Customers",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": [
+        "GET /store/customers/me",
+        "GET /store/customers/me/addresses",
+        "POST /store/customers",
+        "POST /store/customers/me/addresses"
+      ]
+    },
+    {
+      "key": "Orders",
+      "name": "Orders",
+      "label": "Orders",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": ["GET /store/orders", "GET /store/orders/{id}"]
+    },
+    {
+      "key": "Payments",
+      "name": "Payments",
+      "label": "Payments",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": [
+        "GET /store/payment-providers",
+        "POST /store/payment-collections",
+        "POST /store/payment-collections/{id}/payment-sessions"
+      ]
+    },
+    {
+      "key": "Regions",
+      "name": "Regions",
+      "label": "Regions",
+      "area": "",
+      "partition_source": "tag",
+      "api_prefix": "/store",
+      "operations": ["GET /store/regions", "GET /store/regions/{id}"]
+    }
+  ],
+  "operations": [
+    {
+      "key": "POST /auth/customer/credentials",
+      "method": "POST",
+      "path": "/auth/customer/credentials",
+      "summary": "Log in a customer with email and password",
+      "area": "",
+      "part_key": "Auth",
+      "chars": 4689
+    },
+    {
+      "key": "POST /auth/customer/credentials/register",
+      "method": "POST",
+      "path": "/auth/customer/credentials/register",
+      "summary": "Register a customer email/password auth identity",
+      "area": "",
+      "part_key": "Auth",
+      "chars": 4353
+    },
+    {
+      "key": "POST /store/carts",
+      "method": "POST",
+      "path": "/store/carts",
+      "summary": "Create a cart",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 22581
+    },
+    {
+      "key": "GET /store/carts/{id}",
+      "method": "GET",
+      "path": "/store/carts/{id}",
+      "summary": "Retrieve a cart by id",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 10075
+    },
+    {
+      "key": "POST /store/carts/{id}",
+      "method": "POST",
+      "path": "/store/carts/{id}",
+      "summary": "Update a cart",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 22151
+    },
+    {
+      "key": "POST /store/carts/{id}/complete",
+      "method": "POST",
+      "path": "/store/carts/{id}/complete",
+      "summary": "Complete a cart and place an order",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 15993
+    },
+    {
+      "key": "POST /store/carts/{id}/customer",
+      "method": "POST",
+      "path": "/store/carts/{id}/customer",
+      "summary": "Transfer cart to the logged-in customer",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 11449
+    },
+    {
+      "key": "POST /store/carts/{id}/line-items",
+      "method": "POST",
+      "path": "/store/carts/{id}/line-items",
+      "summary": "Add a line item to a cart",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 13459
+    },
+    {
+      "key": "POST /store/carts/{id}/line-items/{line_id}",
+      "method": "POST",
+      "path": "/store/carts/{id}/line-items/{line_id}",
+      "summary": "Update a line item's quantity or metadata",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 11729
+    },
+    {
+      "key": "DELETE /store/carts/{id}/line-items/{line_id}",
+      "method": "DELETE",
+      "path": "/store/carts/{id}/line-items/{line_id}",
+      "summary": "Remove a line item from a cart",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 9805
+    },
+    {
+      "key": "POST /store/carts/{id}/shipping-methods",
+      "method": "POST",
+      "path": "/store/carts/{id}/shipping-methods",
+      "summary": "Add a shipping method to a cart",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 13946
+    },
+    {
+      "key": "GET /store/collections",
+      "method": "GET",
+      "path": "/store/collections",
+      "summary": "List product collections",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 7062
+    },
+    {
+      "key": "GET /store/collections/{id}",
+      "method": "GET",
+      "path": "/store/collections/{id}",
+      "summary": "Retrieve a product collection",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 4975
+    },
+    {
+      "key": "GET /store/custom",
+      "method": "GET",
+      "path": "/store/custom",
+      "summary": "Repository placeholder store route",
+      "area": "",
+      "part_key": "Custom",
+      "chars": 1589
+    },
+    {
+      "key": "POST /store/customers",
+      "method": "POST",
+      "path": "/store/customers",
+      "summary": "Register a customer (create the customer actor for a registration token)",
+      "area": "",
+      "part_key": "Customers",
+      "chars": 9778
+    },
+    {
+      "key": "GET /store/customers/me",
+      "method": "GET",
+      "path": "/store/customers/me",
+      "summary": "Get the logged-in customer",
+      "area": "",
+      "part_key": "Customers",
+      "chars": 7580
+    },
+    {
+      "key": "GET /store/customers/me/addresses",
+      "method": "GET",
+      "path": "/store/customers/me/addresses",
+      "summary": "List the logged-in customer's addresses",
+      "area": "",
+      "part_key": "Customers",
+      "chars": 7495
+    },
+    {
+      "key": "POST /store/customers/me/addresses",
+      "method": "POST",
+      "path": "/store/customers/me/addresses",
+      "summary": "Add an address to the logged-in customer",
+      "area": "",
+      "part_key": "Customers",
+      "chars": 9053
+    },
+    {
+      "key": "GET /store/orders",
+      "method": "GET",
+      "path": "/store/orders",
+      "summary": "List the logged-in customer's orders",
+      "area": "",
+      "part_key": "Orders",
+      "chars": 9815
+    },
+    {
+      "key": "GET /store/orders/{id}",
+      "method": "GET",
+      "path": "/store/orders/{id}",
+      "summary": "Retrieve an order by id",
+      "area": "",
+      "part_key": "Orders",
+      "chars": 11130
+    },
+    {
+      "key": "POST /store/payment-collections",
+      "method": "POST",
+      "path": "/store/payment-collections",
+      "summary": "Create (or get) the payment collection for a cart",
+      "area": "",
+      "part_key": "Payments",
+      "chars": 8411
+    },
+    {
+      "key": "POST /store/payment-collections/{id}/payment-sessions",
+      "method": "POST",
+      "path": "/store/payment-collections/{id}/payment-sessions",
+      "summary": "Initialize a payment session for a payment collection",
+      "area": "",
+      "part_key": "Payments",
+      "chars": 10094
+    },
+    {
+      "key": "GET /store/payment-providers",
+      "method": "GET",
+      "path": "/store/payment-providers",
+      "summary": "List payment providers of a region",
+      "area": "",
+      "part_key": "Payments",
+      "chars": 3997
+    },
+    {
+      "key": "GET /store/product-categories",
+      "method": "GET",
+      "path": "/store/product-categories",
+      "summary": "List product categories",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 9898
+    },
+    {
+      "key": "GET /store/product-categories/{id}",
+      "method": "GET",
+      "path": "/store/product-categories/{id}",
+      "summary": "Get a product category",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 8043
+    },
+    {
+      "key": "GET /store/products",
+      "method": "GET",
+      "path": "/store/products",
+      "summary": "List products",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 16394
+    },
+    {
+      "key": "GET /store/products/{id}",
+      "method": "GET",
+      "path": "/store/products/{id}",
+      "summary": "Retrieve a product",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 12058
+    },
+    {
+      "key": "GET /store/regions",
+      "method": "GET",
+      "path": "/store/regions",
+      "summary": "List regions",
+      "area": "",
+      "part_key": "Regions",
+      "chars": 8245
+    },
+    {
+      "key": "GET /store/regions/{id}",
+      "method": "GET",
+      "path": "/store/regions/{id}",
+      "summary": "Retrieve a region",
+      "area": "",
+      "part_key": "Regions",
+      "chars": 6261
+    },
+    {
+      "key": "POST /store/search",
+      "method": "POST",
+      "path": "/store/search",
+      "summary": "Search the store's product index",
+      "area": "",
+      "part_key": "Catalog",
+      "chars": 20291
+    },
+    {
+      "key": "GET /store/shipping-options",
+      "method": "GET",
+      "path": "/store/shipping-options",
+      "summary": "List shipping options for a cart",
+      "area": "",
+      "part_key": "Carts",
+      "chars": 7971
+    }
+  ],
+  "budget": {
+    "site": "sub_flow",
+    "subject": "flow generation",
+    "budget_chars": 400000,
+    "fixed_chars": 35740,
+    "whole_api_chars": 356110,
+    "description_counted": true
+  }
+}

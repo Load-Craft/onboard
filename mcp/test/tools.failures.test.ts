@@ -26,7 +26,7 @@ import {
   type SklepErrorGroup,
   type SklepExecutionResult,
 } from './fake-backend/worlds/sklep.js';
-import { BACKEND_CANARY, FILE_CANARY, HEADER_CANARY } from './helpers/canary.js';
+import { BACKEND_CANARY, FILE_CANARY, HEADER_CANARY, leakedPieces } from './helpers/canary.js';
 import { createTestClock } from './helpers/clock.js';
 import { toolRig, type ToolRig } from './helpers/rig.js';
 
@@ -448,7 +448,7 @@ describe('sentinel: a secret of a trace never leaves the call', () => {
       ...state,
     ];
     for (const secret of ALL) {
-      for (const output of outputs) expect(output, secret).not.toContain(secret);
+      for (const output of outputs) expect(leakedPieces(output, [secret]), secret).toEqual([]);
     }
   });
 });
@@ -740,8 +740,8 @@ describe('sentinel: every shape of a secret in a body or an address is masked', 
     const data = await r.call('results_get_traces', { execution: RUN, format: 'data' });
     for (const result of [text, data]) {
       expect(result.isError, result.text).toBe(false);
-      expect(result.text, result.text).not.toContain(secret);
-      expect(JSON.stringify(result.outcome ?? null)).not.toContain(secret);
+      expect(leakedPieces(result.text, [secret]), result.text).toEqual([]);
+      expect(leakedPieces(JSON.stringify(result.outcome ?? null), [secret])).toEqual([]);
     }
   });
 });

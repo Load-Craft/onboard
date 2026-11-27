@@ -411,7 +411,7 @@ describe('data_create_accounts', () => {
     const first = await provision(r, 2000);
     expect(first.isError).toBe(false);
     expect(first.data).toMatchObject({ created: 500, aborted: true, ready: false, batches: 10 });
-    expect(first.text).not.toContain('test może ruszyć');
+    expect(first.text).not.toContain('każdy slot przypięty i wypełniony');
     expect(first.text).toContain('500');
     expect(datasetNamed(r, 'konta').record_count).toBe(500);
     // the series is kept for the repeat in its own section, keyed by the dataset, never in drafts
@@ -427,7 +427,7 @@ describe('data_create_accounts', () => {
     expect(provisionCalls(r) - before).toBe(30);
     expect(second.data).toMatchObject({ created: 1500, earlier: 500, ready: true });
     expect(datasetNamed(r, 'konta').record_count).toBe(2000);
-    expect(second.text).toContain('test może ruszyć');
+    expect(second.text).toContain('każdy slot przypięty i wypełniony');
     // a series that ran to its end is not remembered
     expect(stateFile(r).accountSeries?.[dataset]).toBeUndefined();
     expect(
@@ -449,7 +449,7 @@ describe('data_create_accounts', () => {
     expect(result.isError).toBe(false);
     expect(result.data).toMatchObject({ created: 80, failed: 20, ready: false });
     expect(result.data?.failures).toEqual([{ status: 409, count: 20 }]);
-    expect(result.text).not.toContain('test może ruszyć');
+    expect(result.text).not.toContain('każdy slot przypięty i wypełniony');
     expect(result.text).toContain('20');
     // Failed accounts without an aborted series still say what each status of the target means.
     expect(result.text).toContain('→ odczytaj status: 400 lub 422');
@@ -677,10 +677,14 @@ describe('data_create_accounts', () => {
       expect(writes(r)).toEqual([]);
     });
 
-    it('leaves a slot of accounts alone: a register slot and a legacy slot with no verdict', async () => {
+    it('leaves a slot of accounts alone: a legacy slot with no verdict, and refuses a register slot', async () => {
       const fresh = await rig();
       restamp(fresh, 'accounts', { identity_kind: 'fresh', role: 'auth' });
-      expect((await provision(fresh, 50)).data?.created).toBe(50);
+      // A register slot holds new identities the test makes itself: no account is created for it.
+      const refused = await provision(fresh, 50);
+      expect(refused.isError).toBe(true);
+      expect(refused.text).toContain('[slot_new_identities]');
+      expect(provisionCalls(fresh)).toBe(0);
 
       // A verdict of the backend wins over the role.
       const stamped = await rig();
@@ -984,7 +988,7 @@ describe('data_create_accounts as a long operation', () => {
     expect(provisionCalls(r)).toBe(sent);
     expect(read.text).toContain('450 z 2\u202f000');
     expect(read.text).toContain('data_create_accounts');
-    expect(read.text).not.toContain('test może ruszyć');
+    expect(read.text).not.toContain('każdy slot przypięty i wypełniony');
     await expect(read.text).toMatchFileSnapshot('__snapshots__/provisionAccounts.restart.pl.txt');
     // The entry is settled: a second wait does not read it again, and the row says nobody follows it.
     expect(operationHandles(r)).not.toContain(handle);
@@ -1000,7 +1004,7 @@ describe('data_create_accounts as a long operation', () => {
     expect(rest.isError, rest.text).toBe(false);
     expect(provisionCalls(r) - sent).toBe(Math.ceil((2000 - rows) / 50));
     expect(datasetNamed(r, 'konta').record_count).toBe(2000);
-    expect(rest.text).toContain('test może ruszyć');
+    expect(rest.text).toContain('każdy slot przypięty i wypełniony');
   });
 
   it('a series of a restarted process gives way to a new one without a wait: its row says lost', async () => {

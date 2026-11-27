@@ -6,9 +6,9 @@
 
 The description is not decoration. In the current LoadCraft codebase it feeds three paths, and each dictates part of the content:
 
-1. **Setup readiness gate** (`setup_gate.py`): a non-empty description is one of the setup-completeness criteria. → The file must exist and be substantive.
-2. **Flow generation context** (`project_flow_generation_service.py` → `api_description` in the test-flow generator's LLM graph): the description tells the generator what the application does when it composes flows. → Cover what the application does, for whom, and its main business flows.
-3. **Semantic feeder-data synthesis** (`gatling/feeders/semantic_text_synthesis.py`): the description is injected verbatim into the prompt that generates realistic test data values. → Cover the domain's entities and the **shape of its data** (locales/languages, identifier formats, realistic value examples) — this directly controls how realistic generated feeder data will be.
+1. **Setup readiness gate**: a non-empty description is one of the setup-completeness criteria. → The file must exist and be substantive.
+2. **Flow generation context** (`api_description` in the test-flow generator's LLM graph): the description tells the generator what the application does when it composes flows. → Cover what the application does, for whom, and its main business flows.
+3. **Semantic feeder-data synthesis**: the description is injected verbatim into the prompt that generates realistic test data values. → Cover the domain's entities and the **shape of its data** (locales/languages, identifier formats, realistic value examples) — this directly controls how realistic generated feeder data will be.
 
 ## Required content
 

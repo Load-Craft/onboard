@@ -345,6 +345,24 @@ function argumentsOf(tool, marked = false) {
     : [];
 }
 
+/** The same rule as `asksConditionally` of src/tools/kit/consent.ts: level 1 that asks at level 3 for the calls that meet an escalation. */
+function asksConditionally(tool) {
+  const { consent } = tool;
+  return (
+    consent.level === 1 &&
+    typeof consent.by_argument === 'object' &&
+    consent.by_argument !== null &&
+    consent.by_argument.level === 3 &&
+    Array.isArray(consent.escalate_to_3) &&
+    consent.escalate_to_3.length > 0 &&
+    consent.target_traffic === null &&
+    consent.level3_reason === null &&
+    tool.secret === false &&
+    !tool.class.includes('secret') &&
+    tool.install_allow !== true
+  );
+}
+
 /** The same rule as `asksNothing` of src/tools/moduleTool.ts: level 1, nothing by argument, no escalation. */
 function asksNothing(tool) {
   const { consent } = tool;
@@ -392,6 +410,9 @@ function schemaOf(argument) {
       return 'z.string().min(1).max(64)';
     case 'boolean':
       return 'z.boolean()';
+    case 'object':
+      // a structured value: the module replaces this with the strict schema of what it holds
+      return 'z.record(z.string(), z.unknown())';
     case 'integer':
       return `z.number().int()${bounds(argument, 'min', 'max')}`;
     case 'enum':
@@ -443,6 +464,7 @@ function sampleOf(argument) {
   if (argument.type === 'uuid') return JSON.stringify(UUID_SAMPLE);
   if (argument.type === 'uuid|baseline') return "'baseline'";
   if (argument.type === 'boolean') return 'true';
+  if (argument.type === 'object') return '{}';
   if (argument.type === 'integer')
     return String(typeof argument.min === 'number' ? argument.min : 1);
   if (argument.type === 'enum' && Array.isArray(argument.enum))
@@ -496,7 +518,9 @@ function scaffoldSource(tool, module, contract, marked) {
     ...(asksNothing(tool)
       ? []
       : [
-          `Consent: level ${String(tool.consent.level)}${tool.consent.by_argument === null ? '' : ' (another level by argument)'}${tool.consent.escalate_to_3.length === 0 ? '' : ` (escalates to 3: ${tool.consent.escalate_to_3.join(', ')})`}. This layer draws no consent card, so \`moduleTool\` takes no \`run\` for it: it stays a scaffold, not offered, until the card mechanism exists.`,
+          asksConditionally(tool)
+            ? `Consent: level 1 (another level by argument), escalates to 3: ${tool.consent.escalate_to_3.join(', ')}. It asks only for the calls that meet the escalation: write it with \`card\` (which answers \`{ proceed: true }\` from facts it read from the backend when the call does not meet it), \`cardView\`, \`run\` and \`render\` (docs/consent-card.md); without them it stays a scaffold, not offered.`
+            : `Consent: level ${String(tool.consent.level)}${tool.consent.by_argument === null ? '' : ' (another level by argument)'}${tool.consent.escalate_to_3.length === 0 ? '' : ` (escalates to 3: ${tool.consent.escalate_to_3.join(', ')})`}. This layer draws no consent card, so \`moduleTool\` takes no \`run\` for it: it stays a scaffold, not offered, until the card mechanism exists.`,
         ]),
     ...(card === null || card === undefined
       ? []

@@ -32,6 +32,7 @@ import { defineTool } from '../registry.js';
 import { renderSuggestJourneys, type SuggestionsData } from '../render/views/suggestJourneys.js';
 import { createResolver } from '../resolve/handles.js';
 import type { StateCache } from '../workspace/cache.js';
+import { content } from './moduleCall.js';
 
 /** Uncovered operations the view names. */
 const SHOWN_UNCOVERED = 5;
@@ -135,9 +136,10 @@ async function present(
     if (!(error instanceof ToolError) || error.code !== 'internal_secret_in_state') throw error;
   }
   return {
+    // the generator's names, shown masked; a masked name still picks its proposal (FIX-76)
     suggestions: suggestions.baskets.map((basket) => ({
-      name: basket.name,
-      steps: basket.endpointIds.map(label),
+      name: content(ctx, basket.name, 120),
+      steps: basket.endpointIds.map((id) => content(ctx, label(id), 120)),
       patternType: basket.patternType,
       ...(basket.confidence === undefined ? {} : { confidence: basket.confidence }),
       ...(basket.reasoning === undefined ? {} : { note: basket.reasoning }),

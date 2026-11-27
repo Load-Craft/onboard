@@ -7,6 +7,7 @@
 import { registerDataRoutes, scenarioDetailHooks, unboundStatus } from './data.js';
 import type { Fake, JobStep } from '../server.js';
 import { FakeHttpError } from '../server.js';
+import { requireRun } from './executionOwner.js';
 import {
   SKLEP_COLLECTIONS,
   type SklepEndpointRow,
@@ -15,7 +16,6 @@ import {
   type SklepSelfCheckRepair,
   type SklepSelfCheckRun,
   type SklepSelfCheckStep,
-  type SklepExecution,
   type SklepExecutionResult,
   type SklepScenario,
 } from '../worlds/sklep.js';
@@ -140,7 +140,7 @@ export const selfCheckOutcomes = new WeakMap<
  * A fake that asks for this answers a check that has no pick for a slot of accounts or of plain
  * data without rows with `waiting_for_data`, whatever a test planned. The backend's self-check
  * runs a scenario alone and reads only the scenario's own picks, never the picks of a composition
- * it belongs to (`_run_slot_bindings`, loadcraft @ 47a52b419 api/routes/gatling.py:3296).
+ * it belongs to (`_run_slot_bindings`).
  */
 export const selfCheckReadsOwnPicks = new WeakSet<Fake>();
 
@@ -243,15 +243,11 @@ export function registerSelfCheckRoutes(fake: Fake): SelfCheckFake {
     'GET',
     '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/endpoints',
     (req, store) => {
-      store
-        .collection(SKLEP_COLLECTIONS.projects)
-        .require(req.params.project_id, projectNotFound(req.params.project_id));
-      const execution = store
-        .collection<SklepExecution>(SKLEP_COLLECTIONS.executions)
-        .require(req.params.execution_id, 'Execution not found');
+      // A run under way has no record yet; it is still a run of the project.
+      requireRun(store, req.params.execution_id, req.params.project_id);
       const result = store
         .collection<SklepExecutionResult>(SKLEP_COLLECTIONS.results)
-        .get(execution.id);
+        .get(req.params.execution_id);
       // A run whose samples are gone answers empty lists and says why (`series_source`).
       const rows: SklepEndpointRow[] = result?.endpoints ?? [];
       return {

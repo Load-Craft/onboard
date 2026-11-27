@@ -26,6 +26,7 @@ import type {
   FieldChange,
   SetProfileData,
 } from '../../render/views/projectProfile.js';
+import { content } from '../moduleCall.js';
 
 export type { UncertainField } from '../../render/views/projectProfile.js';
 
@@ -211,7 +212,8 @@ export async function readProfile(
     { path: { project_id: projectId } },
     { signal: ctx.signal, secrets: ctx.secrets },
   );
-  return { name: project.name, stored: project.project_profile ?? null };
+  // the name is shown masked, its secrets registered (FIX-76)
+  return { name: content(ctx, project.name, 120), stored: project.project_profile ?? null };
 }
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -294,6 +296,7 @@ export async function setProfile(
   // A confirm writes what its card froze and uses the card up. No card, an expired or replaced one,
   // other fields than the card's or a profile changed since: a new card, nothing written.
   let renewed: CardRenewal | undefined;
+  let expiredIssuedAt: number | undefined;
   if (confirm !== undefined) {
     const redeemed = await consumeCard(ctx, PROFILE_SCOPE, project.id, confirm.trim());
     const frozen = redeemed.ok ? frozenSchema.safeParse(redeemed.frozen) : undefined;
@@ -304,6 +307,7 @@ export async function setProfile(
       renewed = 'changed';
     } else {
       renewed = redeemed.ok ? 'missing' : redeemed.reason;
+      if (!redeemed.ok && redeemed.reason === 'expired') expiredIssuedAt = redeemed.issuedAt;
     }
   }
 
@@ -334,6 +338,9 @@ export async function setProfile(
       stillUncertain: warning.left,
       confirm: token,
       ...(renewed === undefined ? {} : { renewed }),
+      ...(expiredIssuedAt === undefined
+        ? {}
+        : { expiredIssuedAt: new Date(expiredIssuedAt).toISOString() }),
     },
   };
 }

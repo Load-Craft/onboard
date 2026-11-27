@@ -1,3 +1,4 @@
 konta  2,000 created through POST /auth/register (40 × 50)
        passwords masked
-every slot filled · the test can start
+every slot is bound and filled · whether the rows suffice for a profile,
+  run_plan with a profile checks

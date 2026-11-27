@@ -65,7 +65,7 @@ export const SECRET_PATHS: { readonly [Id in OperationId]?: SecretPaths } = {
   get_project_api_v1_projects__project_id__get: { request: [], response: ['auth_config.*secret', 'default_headers.*secret', 'variables.*secret'] },
   get_test_flow_api_v1_test_flows__flow_id__get: { request: [], response: ['variables.*secret'] },
   list_compositions_api_v1_projects__project_id__gatling_compositions_get: { request: [], response: ['compositions[].global_headers.*secret', 'compositions[].protocol_config.proxy_password'] },
-  list_feeders_api_v1_projects__project_id__gatling_feeders_get: { request: [], response: ['feeders[].content', 'feeders[].jdbc_config.password', 'feeders[].redis_config.password'] },
+  list_feeders_api_v1_projects__project_id__gatling_feeders_get: { request: [], response: ['feeders[].jdbc_config.password', 'feeders[].redis_config.password'] },
   list_flow_results_api_v1_projects__project_id__executions__execution_id__results_get: { request: [], response: ['results[].block_results[].request_headers.*secret', 'results[].block_results[].response_headers.*secret', 'results[].final_variables.*secret'] },
   list_project_environments_api_v1_projects__project_id__environments_get: { request: [], response: ['items[].auth_config.*secret', 'items[].default_headers.*secret', 'items[].variables.*secret'] },
   merge_flows_route_api_v1_projects__project_id__flows_merge_post: { request: [], response: ['flow.variables.*secret'] },

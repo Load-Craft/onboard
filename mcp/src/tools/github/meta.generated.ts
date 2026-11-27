@@ -65,11 +65,33 @@ export const GITHUB_GET_STATUS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['history'],
+      max_items: 1,
+      from_state: null,
+      doc: '"history": the latest syncs.',
+    },
+    {
+      name: 'history_limit',
+      type: 'integer',
+      min: 1,
+      max: 50,
+      default: 10,
+      from_state: null,
+      doc: 'With include history: how many syncs (1-50).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `github_connect`: Connect the project to a GitHub repository with a personal access token read from an env file. */
@@ -176,13 +198,17 @@ export const GITHUB_CONNECT = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `github_plan_push`: Plan a push: the diff a composition's push would produce; writes nothing. */
@@ -239,11 +265,31 @@ export const GITHUB_PLAN_PUSH = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+    {
+      name: 'diffs',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: a short diff per file (up to 10 files, 40 lines each); without it, the file list.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `github_push`: Push a composition's generated Gatling project to the linked repository. */
@@ -344,20 +390,49 @@ export const GITHUB_PUSH = {
       path: '/api/v1/projects/{project_id}/github/push',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_diff_preview_api_v1_projects__project_id__github_diff_preview_get'],
   channels: [],
   state_reads: ['ids.project_id', 'ids.composition_id', 'steps.github.connected'],
   state_writes: ['steps.github.pushed'],
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'composition_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.composition_id',
+      doc: 'The composition: its id or name; default: the one of this workspace.',
+    },
+    {
+      name: 'message',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      required: true,
+      from_state: null,
+      doc: 'The commit message.',
+    },
+    {
+      name: 'create_pr',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: open a pull request instead of committing to the branch.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `github_get_changes`: Get repository changes since the last sync: the file list only. Moves the sync marker: a second call returns nothing. */
@@ -415,11 +490,26 @@ export const GITHUB_GET_CHANGES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many changed files to list (1-200); the count is always the whole number.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason:
+      'pull przesuwa znacznik synchronizacji w backendzie: drugie wywołanie zwraca pustą listę',
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `github_disconnect`: Disconnect the project from its GitHub repository. */
@@ -509,9 +599,13 @@ export const GITHUB_DISCONNECT = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

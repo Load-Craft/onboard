@@ -11,6 +11,7 @@ import {
   PROVISION_BATCH,
   createAccountsDataset,
   getProbeConsent,
+  identityOf,
   isPlainDataSlot,
   provisionAccounts,
   registerCandidates,
@@ -242,6 +243,16 @@ export async function prepareSeries(
     });
   }
   const specs = users.flatMap((scenario) => scenario.slots.filter((c) => c.slot === args.slot));
+  // A slot of new identities is filled with rows the test invents, not with accounts registered
+  // beforehand: a registration made now would use the identities up, and the flow's own sign-up
+  // would then meet "already exists". Refused before consent and before anything is sent.
+  const identity = identityOf(specs);
+  if (identity === 'mixed') {
+    throw new ToolError('slot_mixed_identities', { params: { slot: args.slot } });
+  }
+  if (identity === 'fresh') {
+    throw new ToolError('slot_new_identities', { params: { slot: args.slot } });
+  }
   if (specs.some(isPlainDataSlot)) throw notAccounts(ctx, args.slot, slots);
   const before = planOf(request, slots, await askHub(ctx, request, slots));
 

@@ -251,7 +251,7 @@ describe('buildOutline: the "zakupy" flows of the mock-up', () => {
   });
 
   it('a recorded pause is within the 10 s the backend caps captured think time at', () => {
-    // backend/domain/services/flow_generation/think_time.py:32 (THINK_TIME_MAX_MS).
+    // The backend's `THINK_TIME_MAX_MS`.
     const outline = buildOutline(fixture('zakupy-run4-har'));
     const recorded = outline.steps.filter((item) => item.pause?.source === 'recording');
     expect(recorded).toHaveLength(3);

@@ -329,7 +329,7 @@ describe('flows_generate_from_suggestions from proposals', () => {
   });
 
   describe('a journey the backend refused as over budget', () => {
-    // The text of the frame as the backend writes it (prompt_budget.py:271); the numbers are the ones
+    // The text of the frame as the backend's prompt budget writes it; the numbers are the ones
     // of a live run. It stays out of the result; only the cause it names is shown.
     const REFUSAL =
       'The request is too large for the model (prompt_over_budget): the input of flow generation is 3,473,868 characters and the most it may be is 400,000 (llm.prompt_budget_chars.sub_flow in config.yaml). Nothing was sent to the model.';

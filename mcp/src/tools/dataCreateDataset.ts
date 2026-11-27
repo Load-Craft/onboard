@@ -290,7 +290,7 @@ async function fromSlot(
   if (!gate.write) {
     return card(gate, {
       name: plan.name,
-      source: { kind: 'slot' },
+      source: plan.fresh ? { kind: 'slot', fresh: true } : { kind: 'slot' },
       slot: { slot: args.slot, target: target.name },
       rows: plan.rows ?? RULE_ROWS_DEFAULT,
       revision: plan.slots.datasets.some((dataset) => dataset.name === plan.name),
@@ -328,6 +328,8 @@ export const dataCreateDataset = defineTool<typeof input, Data>({
     idempotentHint: false,
     openWorldHint: true,
   },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   async run(ctx, args) {
     const source = sourceOf(args);
     const { scenario, slot, file, rules } = args;

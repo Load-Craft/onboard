@@ -65,6 +65,8 @@ export const dataSuggestActions = defineTool<typeof input, Data>({
     idempotentHint: false,
     openWorldHint: true,
   },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   async run(ctx, args) {
     const { projectId, target, environment } = await resolveTarget(ctx, args);
     const request = {

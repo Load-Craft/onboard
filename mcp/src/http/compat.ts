@@ -2,10 +2,14 @@
 // API surface and the optional features it has; the plugin refuses an older backend with one
 // sentence instead of letting the first call end in a bare 404.
 
+import type { Client } from 'openapi-fetch';
+
 import { ToolError } from '../errors.js';
 import { LoadcraftApiError } from './apiError.js';
-import type { HttpClient } from './client.js';
-import type { components } from './generated/api.js';
+import type { components, paths } from './generated/api.js';
+
+/** The client of `client.ts`, named here so that the client can call the check without a cycle. */
+type HttpClient = Client<paths>;
 
 export type Meta = components['schemas']['MetaResponse'];
 
@@ -67,6 +71,14 @@ export async function getMeta(http: HttpClient): Promise<Meta> {
     );
   }
   return meta;
+}
+
+/**
+ * Drops the remembered answer of `http`: after a lost connection the backend may have been
+ * replaced by another version, so the next check asks again.
+ */
+export function forgetMeta(http: HttpClient): void {
+  answers.delete(http);
 }
 
 /** Whether the backend lists `name` among its capabilities. */

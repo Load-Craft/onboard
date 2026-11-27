@@ -2,9 +2,8 @@
 // and tells the user what a limit will do to each profile.
 //
 // The rule is the backend's own, copied so both sides agree: `clamp_workload` and
-// `_applicable_vuser_ceilings`, `backend/domain/services/gatling/codegen/injection_builder.py:860-913`
-// (commit 6f9a42e45), with the spike rule of `SPIKE_PEAK_MULTIPLIER` in the same file (commit
-// 7e141e1c6): a spike bursts to twice its `vusers`, so `max_vu` bounds `vusers` at `max_vu // 2`,
+// `_applicable_vuser_ceilings` of the backend's injection builder, with the spike rule of
+// `SPIKE_PEAK_MULTIPLIER` in the same file: a spike bursts to twice its `vusers`, so `max_vu` bounds `vusers` at `max_vu // 2`,
 // and a limit of one user fits no spike.
 
 import type { Profile, ProfileType } from './presets.js';
@@ -31,10 +30,10 @@ export interface ClampResult {
   readonly refusal?: ClampRefusal;
 }
 
-/** Spike bursts `vusers`, then `vusers * 2` (`config_generator.py:689-697`). */
+/** Spike bursts `vusers`, then `vusers * 2`. */
 const SPIKE_PEAK_MULTIPLIER = 2;
 
-/** Stress steps `incrementUsersPerSec(max(vusers / 5, 1))` five times (`config_generator.py:676-683`). */
+/** Stress steps `incrementUsersPerSec(max(vusers / 5, 1))` five times. */
 const STRESS_LEVELS = 5;
 
 const VU_CAPPED: ReadonlySet<ProfileType> = new Set([
@@ -48,7 +47,7 @@ const VU_CAPPED: ReadonlySet<ProfileType> = new Set([
 const RPS_CAPPED: ReadonlySet<ProfileType> = new Set(['constant', 'stress']);
 const BOTH_CAPPED: ReadonlySet<ProfileType> = new Set(['ramp_hold']);
 
-/** The limits that bound `vusers` of this type (`injection_builder.py:860-877`). */
+/** The limits that bound `vusers` of this type. */
 function ceilings(type: ProfileType, caps: EnvironmentCaps): number[] {
   const found: number[] = [];
   if (type === 'spike' && caps.maxVu !== undefined) {
@@ -64,7 +63,7 @@ function ceilings(type: ProfileType, caps: EnvironmentCaps): number[] {
 
 /**
  * Lowers `vusers` to the smallest limit that applies to the profile's type; `ramp` and `hold` are
- * never touched (`injection_builder.py:880-913`). A spike under a limit of one user is refused,
+ * never touched. A spike under a limit of one user is refused,
  * as the backend refuses it before the run, not clamped to nobody.
  */
 export function clampProfile(profile: Profile, caps: EnvironmentCaps): ClampResult {

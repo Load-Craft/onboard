@@ -208,7 +208,7 @@ const Call = z.strictObject({
   tool: Short(64),
   title: Short(160),                                     // z szablonu karty narzędzia
   fields: z.array(Field).max(12).default([]),            // tabela pól: etykieta i wartość z argumentów
-  // DOKŁADNE argumenty EFEKTYWNE, zamrożone przy zapisie karty (P2-1): `ids` z procesu i środowisko po precedencji
+  // DOKŁADNE argumenty EFEKTYWNE, zamrożone przy zapisie karty: `ids` z procesu i środowisko po precedencji
   // (freezeArgs) są już w args; process_answer wykonuje args bez ponownego czytania `choices` i `ids`, więc
   // process_set_choices między kartą a wykonaniem niczego nie zmienia. Sekretów nie ma (tylko wskazania plików).
   args: z.record(z.string(), z.unknown()),
@@ -217,7 +217,7 @@ const Call = z.strictObject({
   // wykonaniu tamtego wywołania. Każda inna wartość jest zamrożona.
   deferred: z.array(z.strictObject({ arg: Short(64), from_call: z.number().int().min(1).max(8) })).default([]),
   args_hash: Short(64),                                  // hash argumentów (nie obiektów, na które wskazują)
-  snapshot: Short(64).optional(),                        // hash obiektów z `resolve` karty (P1-3); brak = karta bez resolve
+  snapshot: Short(64).optional(),                        // hash obiektów z `resolve` karty; brak = karta bez resolve
   effect: z.enum(['write', 'costly', 'destructive']),
   cost: Short(160).optional(),
   reversible: Reversible,
@@ -290,9 +290,10 @@ const Pending = PendingBase.superRefine((c, ctx) => {
 // Zapisuje je centralnie warstwa rejestracji, nie narzędzie. Pełne żądanie i odpowiedź (po masce) leżą
 // w sekcji cache `logDetails` pod kluczem id, z terminem ważności.
 // Wpis dostaje: zapis, koszt, błąd, decyzję (także z moda: process_set_decision, kliknięcie „Stop”).
-// Wpisu NIE dostaje: udane wywołanie z format=data (błąd takiego wywołania idzie do `log`) ani żaden odczyt z origin
+// Wpisu NIE dostaje: udany ODCZYT z format=data (zapis, koszt i usunięcie z format=data dostają wpis z cofnięciem;
+// błąd takiego wywołania idzie do `log`) ani żaden odczyt z origin
 // 'panel' (odpytywanie panelu): nie zapisują stanu i nie zmieniają rev. Udany odczyt z rozmowy trafia do pierścienia `reads` (LIMITS.reads) i do licznika
-// `reads_total`, więc nie wypiera z `log` zapisów, o które użytkownikowi chodzi (P1-2).
+// `reads_total`, więc nie wypiera z `log` zapisów, o które użytkownikowi chodzi.
 const LogEntry = z.strictObject({
   id: Short(16),                                         // l-xxxxxxxx
   at: Iso,
@@ -787,13 +788,13 @@ export function pruneProcess<T extends Prunable>(p: T, nowMs: number): T {
   return { ...p, pending, operations, problems, log: p.log.slice(-LIMITS.log), reads: p.reads.slice(-LIMITS.reads) };
 }
 
-// Zapis jednego wywołania w stanie (rejestr). Odczyt z format=data albo z origin 'panel' zwraca ten sam obiekt:
-// bez wpisu, bez zapisu pliku (P1-2). recordCall NIE zmienia rev: właścicielem rev jest magazyn, który podbija go
+// Zapis jednego wywołania w stanie (rejestr). Udany odczyt z format=data albo odczyt z origin 'panel' zwraca ten sam obiekt:
+// bez wpisu, bez zapisu pliku. recordCall NIE zmienia rev: właścicielem rev jest magazyn, który podbija go
 // przy każdym zapisie pliku (zapis z nieaktualnym rev jest odrzucany i ponawiany), więc wywołujący nie podbija go
 // drugi raz ani nie przywraca. Udany odczyt z rozmowy zmienia tylko reads/reads_total.
 export function recordCall(p: Process, call: { entry: z.input<typeof LogEntry>; format?: string | undefined }, nowIso: string): Process {
   const e = LogEntry.parse(call.entry);
-  if ((call.format === 'data' && e.status === 'ok') || (e.origin === 'panel' && e.effect === 'read')) return p;
+  if ((call.format === 'data' && e.status === 'ok' && e.effect === 'read') || (e.origin === 'panel' && e.effect === 'read')) return p;
   const next = { ...p, updated_at: nowIso };
   if (e.effect === 'read' && e.status === 'ok') {
     next.reads = [...p.reads, e];
@@ -820,7 +821,7 @@ export function canOpenProjectCard(s: State): 'ok' | Extract<SchemaErrorCode, 'n
   return hit ? 'new_project_pending' : 'ok';
 }
 
-// Precedencja środowisk (P2-5, P2-1): wynik zamraża rejestr w args przy zapisie karty. `kind` to wiersz tabeli:
+// Precedencja środowisk: wynik zamraża rejestr w args przy zapisie karty. `kind` to wiersz tabeli:
 // 'run' (argument env, choices.run.env_id, ids.env_id), 'functional' (argument env, choices.functional.env_id,
 // ids.env_id), 'probe' (argument env, ids.env_id), 'self_check' (zawsze ids.env_id: brak argumentu env).
 export function effectiveEnv(kind: 'run' | 'functional' | 'probe' | 'self_check', args: { env?: string | undefined }, p: Process): string {
@@ -832,7 +833,7 @@ export function effectiveEnv(kind: 'run' | 'functional' | 'probe' | 'self_check'
   if (!hit) throw new SchemaError('env_missing');
   return hit;
 }
-// Zamrażanie WSZYSTKIEGO, co narzędzie czyta ze stanu (P2-1): `freeze` to lista z katalogu (`consent.freeze`):
+// Zamrażanie WSZYSTKIEGO, co narzędzie czyta ze stanu: `freeze` to lista z katalogu (`consent.freeze`):
 // ścieżka w stanie -> nazwa argumentu. Argument podany przez model wygrywa (poza `explicit: false`, np. self-check
 // bierze zawsze środowisko domyślne), potem choices.*, potem ids.* (kolejność listy). Wynik wchodzi do `calls[].args`;
 // process_answer go nie przelicza, więc późniejsze process_set_choices niczego nie zmienia.
@@ -859,7 +860,7 @@ export function freezeArgs(freeze: Freeze, args: Record<string, unknown>, p: Pro
   return out;
 }
 
-// Czy wywołanie jest objęte zgodą karty (P2-3). Zgoda obowiązuje, gdy decision=yes, status karty to granted, done
+// Czy wywołanie jest objęte zgodą karty. Zgoda obowiązuje, gdy decision=yes, status karty to granted, done
 // albo failed (karta po process_answer dalej niesie zgodę) i expires_at jest w przyszłości. Objęte jest tylko:
 // (a) następny krok z covers.tools, i to dopiero po `done` wywołania, które go zadeklarowało (`followUps`: deklarujący
 // -> następne kroki z katalogu), albo (b) ponowienie TEGO SAMEGO narzędzia z tym samym args_hash, wyłącznie po failed.

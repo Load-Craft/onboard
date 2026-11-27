@@ -405,7 +405,9 @@ describe('what gets a detail', () => {
     [{ effect: 'read', status: 'ok', origin: 'model' }, undefined, false],
     [{ effect: 'write', status: 'ok', origin: 'panel' }, undefined, true],
     [{ effect: 'read', status: 'ok', origin: 'panel' }, undefined, false],
-    [{ effect: 'write', status: 'ok', origin: 'model' }, 'data', false],
+    // a write with format=data keeps its entry, its undo and its detail (DOKTOR-09)
+    [{ effect: 'write', status: 'ok', origin: 'model' }, 'data', true],
+    [{ effect: 'read', status: 'ok', origin: 'model' }, 'data', false],
     [{ effect: 'write', status: 'error', origin: 'model' }, 'data', true],
   ] as const)('%j with format %s → %s', (entryShape, format, expected) => {
     expect(storesDetail(entryShape, format)).toBe(expected);

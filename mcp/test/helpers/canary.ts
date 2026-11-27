@@ -48,9 +48,34 @@ function base64Fragments(value: string): string[] {
  */
 export const CANARY_PREFIX_LENGTH = 8;
 
+/** Characters of a sentinel any run of which counts as a leak, wherever it stands (FIX-79). */
+export const CANARY_PIECE_LENGTH = 12;
+
+/**
+ * The pieces of a sentinel that count as a leak: the whole, its head and its tail, and every run of
+ * `CANARY_PIECE_LENGTH` characters. A view that cuts a long line keeps the head, one that keeps the
+ * end of a line keeps the tail, and a mask that hides only a part (`HDR-SECRET[redacted]`) leaves
+ * a run in between.
+ */
+export function canaryPieces(value: string): string[] {
+  const pieces = new Set([
+    value,
+    value.slice(0, CANARY_PREFIX_LENGTH),
+    value.slice(-CANARY_PREFIX_LENGTH),
+  ]);
+  for (let at = 0; at + CANARY_PIECE_LENGTH <= value.length; at += 1) {
+    pieces.add(value.slice(at, at + CANARY_PIECE_LENGTH));
+  }
+  return [...pieces];
+}
+
+/** The pieces of `secrets` that `text` holds; empty when none leaked. */
+export function leakedPieces(text: string, secrets: readonly string[]): string[] {
+  return secrets.flatMap(canaryPieces).filter((piece) => text.includes(piece));
+}
+
 const NEEDLES: readonly string[] = ALL_CANARIES.flatMap((value) => [
-  value,
-  value.slice(0, CANARY_PREFIX_LENGTH),
+  ...canaryPieces(value),
   encodeURIComponent(value),
   Buffer.from(value).toString('hex'),
   ...base64Fragments(value),

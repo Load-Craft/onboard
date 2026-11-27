@@ -1,4 +1,4 @@
-// Setup routes of the fake backend (`project_setup.py`, `project_setup_analyze*.py`): the status of
+// Setup routes of the fake backend (setup status, analysis, apply, auto-provision): the status of
 // the setup gate, the analysis run (started by a multipart request, followed by polling, kept only
 // in memory), applying a profile and auto-provisioning validators and test types.
 //
@@ -124,7 +124,7 @@ export interface SetupPlan {
 
 const DEFAULT_PLAN: SetupPlan = { suggestions: SETUP_SUGGESTIONS, durationMs: 9000 };
 
-/** Nodes of the analysis graph with the progress the backend reports (`graph.py:71-93`). */
+/** Nodes of the analysis graph with the progress the backend reports. */
 const STEPS: readonly (readonly [node: string, progress: number, label: string])[] = [
   ['input_to_messages', 5, 'Preparing project setup input...'],
   ['parse_uploaded_evidence', 18, 'Parsing uploaded evidence...'],
@@ -234,7 +234,7 @@ function category(count: number, needsReview: number, target: number) {
   };
 }
 
-/** `GET …/setup/status` (`project_setup.py:110-122`) computed from the records and the row. */
+/** `GET …/setup/status` computed from the records and the row. */
 function setupStatus(store: Store, projectId: string): SetupStatusResponse {
   const project = requireProject(store, projectId);
   const row = rowOf(store, projectId);
@@ -378,7 +378,7 @@ function filesOf(req: FakeRequest, field: string): FakeFile[] {
   return req.files.filter((file) => file.field === field);
 }
 
-/** `metadata` of the form: a JSON object (`project_setup_analyze_for_project.py`). */
+/** `metadata` of the form: a JSON object. */
 function metadataOf(req: FakeRequest): Record<string, unknown> {
   const body = req.body as Record<string, unknown> | undefined;
   const raw = body?.['metadata'];
@@ -575,7 +575,7 @@ function runBody(id: string, run: Run, state: RunState, plan: SetupPlan): Projec
 
 // ---- provisioning -------------------------------------------------------------------------
 
-/** `auto_provision_service.py:29-61`: five validators, three test types; one validator is sure. */
+/** Auto-provisioning of the backend: five validators, three test types; one validator is sure. */
 const PROVISIONED_VALIDATORS: readonly [string, string, boolean][] = [
   ['status_code', 'Status code', false],
   ['schema_validation', 'Schema validation', true],
@@ -600,7 +600,7 @@ export function registerSetupRoutes(fake: Fake): void {
     body: setupStatus(store, req.params.project_id),
   }));
 
-  // `project_setup_analyze_for_project.py:184`.
+  // Analysis of the project's own flows, as the backend's route does.
   fake.route(
     'POST',
     '/api/v1/projects/{project_id}/setup/analyze',
@@ -624,7 +624,7 @@ export function registerSetupRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_setup_analyze.py:151`: 404 for a run the process does not know (also after a restart).
+  // The backend answers 404 for a run the process does not know (also after a restart).
   fake.route(
     'GET',
     '/api/v1/project-setup/runs/{run_id}',
@@ -641,7 +641,7 @@ export function registerSetupRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_setup.py:325`: the profile sent is the whole model, a missing field takes its default.
+  // The profile sent is the whole model, a missing field takes its default.
   fake.route(
     'POST',
     '/api/v1/projects/{project_id}/setup/apply',
@@ -676,7 +676,7 @@ export function registerSetupRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_setup.py:379`: a category that has rows is skipped unless `force`.
+  // A category that has rows is skipped unless `force`.
   fake.route(
     'POST',
     '/api/v1/projects/{project_id}/setup/auto-provision',

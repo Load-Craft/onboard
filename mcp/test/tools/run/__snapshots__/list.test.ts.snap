@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`run_list > answers in Polish with every key of the view 1`] = `
+"5 przebiegów, od najnowszego:
+  e-3f9a12c4  2026-11-22 10:30  zakończony  perf
+    412 300 req · 2 480 KO · SLA NIE dotrzymane · p95 1 120 ms · 688,5 req/s
+  e-47d9a0c3  2026-11-22 10:21  zakończony  perf
+    2 req · 0 KO
+  e-0b5e8d2a  2026-11-22 10:20  zakończony  perf
+    4 req · 0 KO
+  e-c7702e5a  2026-11-22 10:12  zakończony  perf
+    2 req · 0 KO
+  e-8c2d4f17  2026-11-21 09:00  zakończony  perf
+    412 300 req · 2 480 KO · SLA NIE dotrzymane"
+`;
+
+exports[`run_list > lists the runs newest first with their state and figures, in one request 1`] = `
+"5 runs, newest first:
+  e-3f9a12c4  2026-11-22 10:30  completed  perf
+    412,300 req · 2,480 KO · SLA NOT met
+  e-47d9a0c3  2026-11-22 10:21  completed  perf
+    2 req · 0 KO
+  e-0b5e8d2a  2026-11-22 10:20  completed  perf
+    4 req · 0 KO
+  e-c7702e5a  2026-11-22 10:12  completed  perf
+    2 req · 0 KO
+  e-8c2d4f17  2026-11-21 09:00  completed  perf
+    412,300 req · 2,480 KO · SLA NOT met"
+`;

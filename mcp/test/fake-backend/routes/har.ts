@@ -1,20 +1,19 @@
-// HAR import routes of the fake backend (`har_import.py:842` upload, `:989` analyze, `:1032`
-// generate, `:1051` cancel) and the answers of the HAR channel to `har:generate`, `split_resume`
-// and `har:cancel` (`har_ws.py:573-680`). The upload
-// parses the recording it receives with a miniature of the backend parser, so what a test puts in
-// the file decides what the tool sees: static assets are filtered, `/analytics` requests are noise,
-// a bearer header is an auth pattern, a response value that a later request sends back is a
-// correlation. A test that needs exact numbers passes `fixed` answers instead; the file is still
-// received (its size and name are recorded) but its content is not read.
+// HAR import routes of the fake backend (upload, analyze, generate, cancel) and the answers of the
+// HAR channel to `har:generate`, `split_resume` and `har:cancel`. The upload parses the recording
+// it receives with a miniature of the backend parser, so what a test puts in the file decides what
+// the tool sees: static assets are filtered, `/analytics` requests are noise, a bearer header is an
+// auth pattern, a response value that a later request sends back is a correlation. A test that
+// needs exact numbers passes `fixed` answers instead; the file is still received (its size and name
+// are recorded) but its content is not read.
 //
 // The session store is the `har_sessions` collection; a session is bound to its project as in
-// the backend (`har_session_store.py`), and an unknown or foreign one is a 404.
+// the backend, and an unknown or foreign one is a 404.
 //
 // Generation: REST always gives one flow; the channel proposes a split when the world names two
 // journeys or more, waits for `split_resume` and saves one flow per path it got back, and a
 // recording with one journey ends at once with one flow, as `generate_har_flow_response` does
-// (`har_import.py:679-760`). A recording without response bodies is refused with the backend's
-// text (`flow_postprocessor.py:244-258`) before anything is generated.
+//. A recording without response bodies is refused with the backend's
+// text before anything is generated.
 
 import type { components } from '../../../src/http/generated/api.js';
 import type { Clock } from '../../../src/ops/clock.js';
@@ -32,7 +31,7 @@ export const HAR_SESSIONS = 'har_sessions';
 const FLOWS = 'flows';
 const CREATED = '2026-11-22T09:00:00Z';
 
-/** The refusal of a recording without response bodies (`flow_postprocessor.py:249-258`). */
+/** The refusal of a recording without response bodies. */
 export const SANITIZED_REFUSAL =
   "100% of the kept requests declare a response body (content.size > 0) that is not in the file, and no response in this recording carries a body at all. That is the shape of a HAR exported from the browser without 'Allow generating HAR with sensitive data' (response bodies and Cookie/Authorization headers are stripped): a flow generated from it cannot correlate the session token, so every request would fail with 401. Re-export the recording from Chrome DevTools with 'Allow generating HAR with sensitive data' enabled and upload it again.";
 

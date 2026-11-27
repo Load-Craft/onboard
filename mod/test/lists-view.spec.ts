@@ -298,6 +298,36 @@ describe('the steps of a flow', () => {
   });
 });
 
+describe('the reason of a failed read', () => {
+  it.each([
+    ['busy', 'reason: the panel reads were busy', 'powód: odczyty panelu zajęte'],
+    ['exception', 'reason: exception', 'powód: wyjątek'],
+    ['missing', 'reason: no recentRuns in the data', 'powód: brak recentRuns w danych'],
+    ['bad_answer', 'reason: the answer held no data', 'powód: odpowiedź bez danych'],
+    ['code:backend_unavailable', 'reason: [backend_unavailable]', 'powód: [backend_unavailable]'],
+  ])('%s', (why, en, pl) => {
+    const failed = withFailed(base(), 'runs', undefined, why);
+    expect(text(results(failed))).toContain(`The runs could not be read (${en}).`);
+    expect(text(results(failed, 'pl'))).toContain(`Nie udało się wczytać przebiegów (${pl}).`);
+  });
+
+  it('names the field each list reads, for the flows and the steps too', () => {
+    expect(text(project(withFailed(base(), 'flows', undefined, 'missing')))).toContain(
+      'The flows could not be read (reason: no section in the data).',
+    );
+  });
+
+  it('a code that is not a plain code is not drawn', () => {
+    const failed = withFailed(base(), 'runs', undefined, 'code:<b>x</b> CANARY');
+    expect(text(results(failed))).not.toContain('CANARY');
+    expect(text(results(failed))).toContain('reason: [error]');
+  });
+
+  it('without a reason the sentence stays as it was', () => {
+    expect(text(results(withFailed(base(), 'runs')))).toContain('The runs could not be read.');
+  });
+});
+
 describe('the runs list', () => {
   it('says it is loading, that it failed with a retry, that there are none', () => {
     expect(text(results(base()))).toContain('Loading the runs…');

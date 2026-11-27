@@ -61,9 +61,9 @@ export const deletionEn = {
   'error.delete_busy.hint':
     'Follow it with process_wait or stop it with process_cancel, then ask for the deletion again.',
   'error.consent_missing.message':
-    'Nothing was deleted: the user did not say yes in the dialog Claude Code showed for this deletion (declined, closed, or no dialog could be shown).',
+    'Nothing was done: the user did not say yes in the dialog the client showed for this call (declined, closed, or no dialog could be shown).',
   'error.consent_missing.hint':
-    'Do not repeat the call on your own; ask the user what they want. Where no dialog can be shown (claude -p) the user deletes in the LoadCraft app: {link}',
+    'Do not repeat the call on your own; ask the user what they want. Where no dialog can be shown (claude -p) the user does it in the LoadCraft app: {link}',
   'error.run_not_finished.message':
     'Nothing was deleted: a browser walk of this project is still working (walking, walking a path again, or closing its review).',
   'error.run_not_finished.hint': 'Ask for the deletion again once that walk is done.',
@@ -155,9 +155,9 @@ export const deletionPl = {
   'error.delete_busy.hint':
     'Poczekaj na koniec przez process_wait albo zatrzymaj przez process_cancel, potem poproś o usunięcie jeszcze raz.',
   'error.consent_missing.message':
-    'Nic nie usunięto: użytkownik nie powiedział „tak” w oknie, które Claude Code pokazał dla tego usunięcia (odmówił, zamknął je albo okna nie dało się pokazać).',
+    'Nic nie zrobiono: użytkownik nie powiedział „tak” w oknie, które klient pokazał dla tego wywołania (odmówił, zamknął je albo okna nie dało się pokazać).',
   'error.consent_missing.hint':
-    'Nie powtarzaj wywołania sam; zapytaj użytkownika, czego chce. Gdzie okna nie da się pokazać (claude -p), użytkownik usuwa w aplikacji LoadCraft: {link}',
+    'Nie powtarzaj wywołania sam; zapytaj użytkownika, czego chce. Gdzie okna nie da się pokazać (claude -p), użytkownik robi to w aplikacji LoadCraft: {link}',
   'error.run_not_finished.message':
     'Nic nie usunięto: przebieg w przeglądarce w tym projekcie jeszcze pracuje (przechodzi ścieżkę, przechodzi ją ponownie albo zamyka przegląd).',
   'error.run_not_finished.hint': 'Poproś o usunięcie jeszcze raz, gdy ten przebieg się skończy.',

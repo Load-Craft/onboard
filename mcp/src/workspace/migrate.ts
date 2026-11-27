@@ -47,6 +47,10 @@ export const OPERATION_MODULE = {
   test_run: 'run',
   analysis: 'results',
   account_provision: 'data',
+  drift_check: 'scenario',
+  test_types_generation: 'functional',
+  payload_generation: 'functional',
+  dataset_generation: 'data',
 } as const satisfies Record<string, (typeof MODULES)[number]>;
 
 const entrySchema = z.object({ savedAt: z.number(), value: z.unknown() });

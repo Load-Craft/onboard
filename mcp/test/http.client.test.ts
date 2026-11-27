@@ -842,3 +842,65 @@ describe('createHttp: secrets', () => {
     }
   });
 });
+
+describe('createHttp: the compatibility check of the tools (checkCompat)', () => {
+  const META = { version: '1.0.0', api_revision: 1, capabilities: ['meta'], public_base_url: null };
+
+  function checked(): HttpClient {
+    const config = loadConfig(
+      { LOADCRAFT_API_URL: `${backend.origin}/api/v1`, LOADCRAFT_API_TOKEN: CANARY },
+      '/tmp',
+    );
+    return createHttp(config, createLogger({ level: 'error' }), { clock, checkCompat: true });
+  }
+
+  const asked = (path: string): number =>
+    backend.requests.filter((request) => request.url.startsWith(path)).length;
+
+  it('asks /meta once before the first request, and again after a lost connection', async () => {
+    let drop = false;
+    backend.handle((req, res) => {
+      if (req.url === '/api/v1/meta') return json(res, 200, META);
+      if (drop) {
+        drop = false;
+        res.socket?.destroy();
+        return;
+      }
+      json(res, 201, { id: 'p1' });
+    });
+    const http = checked();
+
+    await http.POST('/api/v1/projects', { body: project });
+    await http.POST('/api/v1/projects', { body: project });
+    expect(asked('/api/v1/meta')).toBe(1);
+
+    drop = true;
+    const lost = await apiError(http.POST('/api/v1/projects', { body: project }));
+    expect(lost.code).toBe('network_error');
+    await http.POST('/api/v1/projects', { body: project });
+    expect(asked('/api/v1/meta')).toBe(2);
+    expect(backend.requests.map((request) => request.url)).toEqual([
+      '/api/v1/meta',
+      '/api/v1/projects',
+      '/api/v1/projects',
+      '/api/v1/projects',
+      '/api/v1/meta',
+      '/api/v1/projects',
+    ]);
+  });
+
+  it('a backend without /meta: backend_too_old and the request is never sent', async () => {
+    backend.handle((_req, res) => json(res, 404, { detail: 'Not Found' }));
+    const error = await rejection(checked().POST('/api/v1/projects', { body: project }));
+
+    expect(error).toBeInstanceOf(ToolError);
+    expect((error as ToolError).code).toBe('backend_too_old');
+    expect(backend.requests.map((request) => request.url)).toEqual(['/api/v1/meta']);
+  });
+
+  it('a client without the check sends the request as it is', async () => {
+    backend.handle((_req, res) => json(res, 201, { id: 'p1' }));
+    await client().POST('/api/v1/projects', { body: project });
+    expect(backend.requests.map((request) => request.url)).toEqual(['/api/v1/projects']);
+  });
+});

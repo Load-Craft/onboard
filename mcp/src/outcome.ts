@@ -58,6 +58,12 @@ export interface DoneOutcome<D> {
    * the tool does not invalidate what depends on its writes.
    */
   inert?: true;
+  /**
+   * The call went through a consent card (`tools/kit/consent.ts`): `asked` when it only made the
+   * card and waits for the person (the log entry is `queued`), `given` when it ran after their yes
+   * in the client's dialog (the entry names the channel).
+   */
+  consent?: 'asked' | 'given';
 }
 
 /** Not finished: drawn by the registry with one shared view; `wait(operation)` continues. */

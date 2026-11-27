@@ -5,7 +5,11 @@
 // the data check and on a protected environment; a start of a composition with thresholds, of a
 // scenario, with the default profile, left running, refused for consent, confirmed, refused for
 // short data, joining a run of the same load and refused for another. The new tools must send
-// the same requests in the same order with the same bodies, reads included.
+// the same requests in the same order with the same bodies, reads included. Since FIX-72 the client
+// the tools share asks `/meta` once, before the first request of a path: a plan now asks it too
+// (the old profiles tool never checked the backend) and a second start no longer asks it again.
+// Since DOKTOR-02 a plan with the data check of a scenario sends the scenario's data check once per
+// profile; the old profiles tool checked compositions only.
 
 import { readFileSync } from 'node:fs';
 

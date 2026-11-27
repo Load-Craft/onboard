@@ -14,6 +14,7 @@ import {
 } from '@modelcontextprotocol/server';
 import * as z from 'zod';
 
+import { LOG_META } from './catalog.generated.js';
 import type { Config } from './config.js';
 import { declaresForm, QuestionForUser, questionResult } from './consent/ask.js';
 import type { ProgressReporter, Services, ToolContext, Translator } from './context.js';
@@ -29,12 +30,29 @@ import type { Logger } from './log.js';
 import { createStateCache } from './workspace/cache.js';
 import type { SecretScope } from './secret.js';
 import { migrateState } from './workspace/migrate.js';
-import { buildLogEntry, declaresFromPanel, logToolOf, type CallEnd } from './workspace/logEntry.js';
+import {
+  buildLogEntry,
+  declaresFromPanel,
+  logToolOf,
+  logValueCollisions,
+  templateValues,
+  unfilledSlots,
+  type CallEnd,
+  type LogEntryInput,
+} from './workspace/logEntry.js';
 import { detailOf, storesDetail } from './workspace/logDetails.js';
-import { NEW_KEY, recordCall } from './workspace/processState.js';
+import { NEW_KEY, recordCall, type Process } from './workspace/processState.js';
 import { adoptBinding, processKey } from './workspace/processKey.js';
-import type { ProcessStore, ProcessStoreOptions, ProcessUpdateInput } from './workspace/reducer.js';
+import type {
+  ForeignWriter,
+  ProcessStore,
+  ProcessStoreOptions,
+  ProcessUpdateInput,
+} from './workspace/reducer.js';
 import { CallSecretScope } from './workspace/secrets.js';
+import { runsUnderTests } from './underTests.js';
+import { UNFILLED_RESULT_SLOTS } from './workspace/logSlotDebt.js';
+import { withShownNames } from './tools/shownNames.js';
 
 export interface ToolAnnotationHints {
   readOnlyHint?: boolean;
@@ -50,6 +68,12 @@ export interface ToolSpec<I extends z.ZodType, D> {
   input: I;
   annotations: ToolAnnotationHints;
   meta?: Record<string, unknown>;
+  /**
+   * The names and texts of a third party in the finished data (`name`, `label`, `dataset`, …) pass
+   * `content()` before anything sees them (`tools/shownNames.ts`, FIX-76): for a tool that copies
+   * names from LoadCraft's answers into its data without masking them itself.
+   */
+  maskNames?: true;
   run(ctx: ToolContext, args: z.infer<I>): Promise<ToolOutcome<D>>;
   /**
    * Text of finished data. `args` are those of the call, for a view chosen by the input (`process_wait`
@@ -81,7 +105,9 @@ export function defineTool<I extends z.ZodType, D>(spec: ToolSpec<I, D>): Tool {
       const input = args as z.infer<I>;
       // The view wraps, cuts and joins what it is given, and a secret reshaped that way no longer
       // looks like itself: every registered value leaves the data before the view sees it.
-      const outcome = ctx.secrets.scrubDeep(await spec.run(ctx, input));
+      const ran = await spec.run(ctx, input);
+      const shown = spec.maskNames === true ? withShownNames(ctx, ran) : ran;
+      const outcome = ctx.secrets.scrubDeep(shown, { keys: 'keep' });
       const text =
         outcome.status === 'done'
           ? spec.render(outcome.data, ctx.t, input)
@@ -122,7 +148,12 @@ function endOf(outcome: ToolOutcome<unknown>): CallEnd {
   const link = outcome.links?.[0]?.url;
   const linked = link === undefined ? {} : { link };
   return outcome.status === 'done'
-    ? { kind: 'done', data: outcome.data, ...linked }
+    ? {
+        kind: 'done',
+        data: outcome.data,
+        ...linked,
+        ...(outcome.consent === undefined ? {} : { consent: outcome.consent }),
+      }
     : { kind: 'running', data: outcome.data, handle: outcome.operation, ...linked };
 }
 
@@ -132,13 +163,18 @@ function endOf(outcome: ToolOutcome<unknown>): CallEnd {
  */
 function shownFailure(error: unknown, ctx: ToolContext): { code: string; message: string } {
   try {
-    const shown = toToolError(ctx.secrets.scrubDeep(error), ctx.t);
+    const shown = toToolError(ctx.secrets.scrubDeep(error), ctx.t, {
+      withhold: ctx.secrets.incomplete,
+    });
     return { code: shown.code, message: shown.message };
   } catch {
     const code = error instanceof ToolError ? error.code : 'internal_error';
     return { code, message: code };
   }
 }
+
+/** Longest list of refused fields of the state a result names. */
+const MAX_REFUSED_FIELDS = 300;
 
 /** Longest cause of a failed write the server log keeps. */
 const MAX_WRITE_CAUSE = 500;
@@ -168,6 +204,41 @@ function writeFailure(
  * failed write is only logged, and an update the schema refuses is logged and dropped, the entry
  * saved without it.
  */
+/** Codes of a write that another process held up or spoiled: tried once more after `LOG_RETRY_MS`. */
+const RETRIED_WRITES: ReadonlySet<string> = new Set(['state_locked', 'state_conflict']);
+const LOG_RETRY_MS = 150;
+const pause = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+/**
+ * The entries this process wrote, per workspace and process key (the newest `OWN_ENTRIES_KEPT`): when a writer of
+ * another build is seen in the file, an entry of ours it dropped is put back in the same write.
+ */
+const OWN_ENTRIES_KEPT = 20;
+type OwnEntry = {
+  readonly entry: LogEntryInput & { readonly id: string };
+  readonly format: string | undefined;
+};
+const ownEntries = new Map<string, OwnEntry[]>();
+
+function rememberEntry(key: string, own: OwnEntry): void {
+  const list = [...(ownEntries.get(key) ?? []), own];
+  ownEntries.set(key, list.slice(-OWN_ENTRIES_KEPT));
+}
+
+/** The process with every remembered entry of ours that is missing from it put back. */
+function withOwnEntries(p: Process, key: string, now: string, current: string): Process {
+  const present = new Set([...p.log, ...p.reads].map((entry) => entry.id));
+  let next = p;
+  for (const own of ownEntries.get(key) ?? []) {
+    if (own.entry.id === current || present.has(own.entry.id)) continue;
+    next = recordCall(next, { entry: own.entry, format: own.format }, now);
+  }
+  return next;
+}
+
 export function withLog(tool: Tool, journal: JournalFactory): Tool {
   if (logToolOf(tool.name, {}) === undefined) return tool;
   const fromPanel = declaresFromPanel(tool.input);
@@ -175,16 +246,58 @@ export function withLog(tool: Tool, journal: JournalFactory): Tool {
     ...tool,
     async invoke(ctx, args) {
       const startedAt = ctx.clock.now();
+      // What the write of the entry met: the code of an entry not saved, or another build that writes
+      // the same file; undefined when the entry was saved and nothing else was seen (DOKTOR-07).
       const record = async (
         end: CallEnd,
         update: ProcessUpdateInput | undefined,
         inert = false,
-      ): Promise<void> => {
+      ): Promise<{ lost?: string; refused?: string; foreign?: ForeignWriter } | undefined> => {
         // a split tool of today: the way the call took (its arguments, then its result) decides
         // the catalog entry, so it is chosen after the call
         const data = end.kind === 'done' || end.kind === 'running' ? end.data : undefined;
         const catalogTool = logToolOf(tool.name, args, data);
-        if (catalogTool === undefined) return;
+        if (catalogTool === undefined) return undefined;
+        // `log.values` win in the entry; one that fills a slot of the result other than the data of the
+        // same name is a mistake of the tool, made loud under the tests only
+        if (runsUnderTests()) {
+          // the way of the undo a tool names must be one of the ways of its catalog entry
+          const named = update?.log?.undo_args?.['undo_tool'];
+          if (
+            named !== undefined &&
+            !LOG_META[catalogTool].undo.some((way) => way.tool === named)
+          ) {
+            throw new TypeError(
+              `${tool.name}: undo_tool ${JSON.stringify(named)} is none of the undo ways of its catalog entry`,
+            );
+          }
+          // a call that only made a consent card has no result yet: its entry says it waits
+          const asked = end.kind === 'done' && end.consent === 'asked';
+          const clashes = asked
+            ? []
+            : logValueCollisions(LOG_META[catalogTool].log.result, update?.log?.values, data);
+          if (clashes.length > 0) {
+            throw new TypeError(
+              `${tool.name}: log.values ${clashes.join(', ')} fill a slot of the result other than the data of the same name`,
+            );
+          }
+          // A slot of the result no value fills prints `none` in the entry; a tool whose data may
+          // lack a slot gives its value in `log.values`, so the entry says what the call did.
+          const unfilled =
+            end.kind === 'done' && !asked
+              ? unfilledSlots(
+                  LOG_META[catalogTool].log.result,
+                  templateValues(update?.log?.values, data, args),
+                )
+              : [];
+          const owed = new Set(UNFILLED_RESULT_SLOTS[catalogTool] ?? []);
+          const unowed = unfilled.filter((slot) => !owed.has(slot));
+          if (unowed.length > 0) {
+            throw new TypeError(
+              `${tool.name}: the result of its log entry leaves ${unowed.join(', ')} without a value; give it in log.values`,
+            );
+          }
+        }
         try {
           const draft = buildLogEntry({
             tool: tool.name,
@@ -229,7 +342,13 @@ export function withLog(tool: Tool, journal: JournalFactory): Tool {
               // the binding is recorded in the same write as the entry
               ...(key === NEW_KEY ? {} : { bound: key }),
               // `rev` is the store's: it raises it once per write that changes the process
-              then: (p, now) => recordCall(p, { entry: built, format }, now),
+              then: (p, now, foreign) => {
+                const recorded = recordCall(p, { entry: built, format }, now);
+                // a writer of another build may have dropped entries of ours: they go back (DOKTOR-07)
+                return foreign === undefined
+                  ? recorded
+                  : withOwnEntries(recorded, `${ctx.config.stateRoot}\0${key}`, now, built.id);
+              },
               // the detail lands in the same write as its entry, so the log never points at a missing detail
               ...(keepsDetail
                 ? {
@@ -242,16 +361,42 @@ export function withLog(tool: Tool, journal: JournalFactory): Tool {
             });
           // the operations the call ended (also a failed or cancelled call) end in the same write
           const ended = ctx.state.endedOperations();
+          let foreign: ForeignWriter | undefined;
+          const save = async (): Promise<void> => {
+            try {
+              foreign = (await write(mergeUpdates(update, ended) ?? {})).foreign;
+            } catch (error) {
+              const refused = error instanceof ToolError && error.code === 'state_update_invalid';
+              if (update === undefined || !refused) throw error;
+              ctx.log.warn('state update of the call not saved', writeFailure(error, ctx.secrets));
+              foreign = (await write(ended ?? {})).foreign;
+            }
+          };
           try {
-            await write(mergeUpdates(update, ended) ?? {});
+            await save();
           } catch (error) {
-            const refused = error instanceof ToolError && error.code === 'state_update_invalid';
-            if (update === undefined || !refused) throw error;
-            ctx.log.warn('state update of the call not saved', writeFailure(error, ctx.secrets));
-            await write(ended ?? {});
+            // another process held the lock past its wait, or wrote outside it: one more try
+            if (!(error instanceof ToolError) || !RETRIED_WRITES.has(error.code)) throw error;
+            ctx.log.warn('log entry not saved, trying once more', writeFailure(error, ctx.secrets));
+            await pause(LOG_RETRY_MS);
+            await save();
           }
+          rememberEntry(`${ctx.config.stateRoot}\0${key}`, { entry: built, format });
+          if (foreign !== undefined) {
+            ctx.log.warn('another build of the plugin writes the state file', { foreign });
+            return { foreign };
+          }
+          return undefined;
         } catch (error) {
           ctx.log.warn('log entry not saved', writeFailure(error, ctx.secrets));
+          // the fields the schema of the state refused, so the next look at the result finds them (DOKTOR-12)
+          const fields = error instanceof ToolError ? error.params?.['fields'] : undefined;
+          return {
+            lost: error instanceof ToolError ? error.code : 'internal_error',
+            ...(typeof fields === 'string' && fields !== ''
+              ? { refused: ctx.secrets.scrub(fields).slice(0, MAX_REFUSED_FIELDS) }
+              : {}),
+          };
         }
       };
       let result: Awaited<ReturnType<Tool['invoke']>>;
@@ -269,12 +414,24 @@ export function withLog(tool: Tool, journal: JournalFactory): Tool {
         throw error;
       }
       const { outcome } = result;
-      await record(
+      const lost = await record(
         endOf(outcome),
         outcome.update,
         outcome.status === 'done' && outcome.inert === true,
       );
-      return result;
+      // the call succeeded; that its entry is missing from the log, or that another build writes the
+      // same file, is said, never kept quiet
+      const notes = [
+        ...(lost?.lost === undefined
+          ? []
+          : [
+              lost.refused === undefined
+                ? ctx.t('log.entryNotSaved', { code: lost.lost })
+                : ctx.t('log.entryNotSaved.refused', { code: lost.lost, fields: lost.refused }),
+            ]),
+        ...(lost?.foreign === undefined ? [] : [ctx.t('log.foreignWriter')]),
+      ];
+      return notes.length === 0 ? result : { ...result, text: [result.text, ...notes].join('\n') };
     },
   };
 }
@@ -495,15 +652,41 @@ async function handleCall(
       log.info('tool error', { code: error.code });
       logBackendText(log, error);
       // Scrubbed before it is translated: the translation quotes the backend's text cut to a limit.
-      return toolFailure(scope, toToolError(scope.scrubDeep(error), ctx.t));
+      return toolFailure(
+        scope,
+        toToolError(scope.scrubDeep(error), ctx.t, { withhold: scope.incomplete }),
+      );
     }
     const event = randomUUID().slice(0, 8);
-    log.error('tool failed', { event, err: error });
+    log.error('tool failed', { event, tool: tool.name, ...failureOf(error) });
     return internalFailure(tool.name, event);
   } finally {
     ctx.progress.stop();
     await live.end(ended);
   }
+}
+
+/** Stack frames kept in the entry of an internal error: where it failed, not what it held. */
+const FAILURE_FRAMES = 12;
+
+/** The message of an internal error in the log is cut to this. */
+const FAILURE_MESSAGE_LIMIT = 300;
+
+/**
+ * What the server log keeps of an internal error (DOKTOR-03 S1a): the event the model is told, the
+ * kind of the exception, its message cut (the logger masks every value the call registered as a
+ * secret), and where it was thrown, so the entry says what broke. Nothing else the exception carries
+ * (its fields, a cause holding an answer) is written.
+ */
+export function failureOf(error: unknown): Record<string, string | string[]> {
+  if (!(error instanceof Error)) return { error: typeof error };
+  const frames = (error.stack ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('at '))
+    .slice(0, FAILURE_FRAMES);
+  const message = error.message.slice(0, FAILURE_MESSAGE_LIMIT);
+  return { error: error.name, message, frames };
 }
 
 export function registerTools(server: McpServer, tools: readonly Tool[], deps: RegistryDeps): void {

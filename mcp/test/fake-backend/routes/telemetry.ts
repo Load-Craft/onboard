@@ -1,4 +1,4 @@
-// Telemetry-source routes of the fake backend (`project_telemetry_source.py`): read, replace,
+// Telemetry-source routes of the fake backend: read, replace,
 // remove and the connection test, over the `telemetry_sources` collection of the sklep world (one
 // record per project, keyed by the project id). The connection test answers with the tools the
 // test configured for the fake, like the real one lists the tools of the customer's log server.

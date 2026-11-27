@@ -39,8 +39,11 @@ export function registerLookupRoutes(fake: Fake): void {
   fake.route('GET', '/api/v1/projects', (req, store) => {
     const limit = limitOf(req.query['limit'], LIST_DEFAULT_LIMIT);
     const offset = Number(req.query['offset'] ?? 0);
+    const active = req.query['is_active'];
     const all = newestFirst(
-      store.collection<ProjectDetail>(SKLEP_COLLECTIONS.projects).list(),
+      store
+        .collection<ProjectDetail>(SKLEP_COLLECTIONS.projects)
+        .list((project) => active === undefined || String(project.is_active) === active),
       (project) => project.updated_at,
     );
     const projects = all.slice(offset, offset + limit).map((project) => ({
@@ -115,8 +118,11 @@ export function registerLookupRoutes(fake: Fake): void {
   fake.route('GET', '/api/v1/projects/{project_id}/gatling/compositions', (req, store) => {
     requireProject(store, req.params.project_id);
     const limit = limitOf(req.query['limit'], LIST_DEFAULT_LIMIT);
+    const wanted = req.query['status'];
     const compositions = newestFirst(
-      store.collection<SklepComposition>(SKLEP_COLLECTIONS.compositions).list(),
+      store
+        .collection<SklepComposition>(SKLEP_COLLECTIONS.compositions)
+        .list((composition) => wanted === undefined || composition.status === wanted),
       (composition) => composition.updated_at,
     ).slice(0, limit);
     return { status: 200, body: { compositions, total: compositions.length } };

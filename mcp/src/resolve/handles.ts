@@ -18,7 +18,7 @@ import {
 import type { ToolContext } from '../context.js';
 import { ToolError } from '../errors.js';
 import { settleAll } from '../http/operation.js';
-import { inline } from '../render/primitives.js';
+import { content } from '../tools/moduleCall.js';
 import { readProjectBinding } from '../workspace/binding.js';
 
 export interface Handle {
@@ -74,10 +74,21 @@ export function createResolver(ctx: ResolverContext): Resolver {
     return pending;
   }
 
-  function listed(names: readonly string[]): string {
+  /**
+   * A name from the backend, or what the model typed, as an error shows it: a third party's text,
+   * masked by shape with its secrets registered and made one line (FIX-74: a credential in a name
+   * reached the model through not_found and ambiguous).
+   */
+  const shownName = (name: string): string => content(ctx, name, NAME_LIMIT);
+
+  /**
+   * The first names, masked; `masked` names were shown already (a candidate of `ambiguous`: its name masked,
+   * then its id): a second mask would take the id after a masked secret for part of it (DOKTOR-09).
+   */
+  function listed(names: readonly string[], masked = false): string {
     const shown = names
       .slice(0, LISTED)
-      .map((name) => inline(name))
+      .map((name) => (masked ? name : shownName(name)))
       .join(', ');
     const more = names.length - LISTED;
     return more > 0 ? t('resolve.more', { names: shown, count: more }) : shown;
@@ -85,7 +96,7 @@ export function createResolver(ctx: ResolverContext): Resolver {
 
   function notFound(kind: Kind, raw: string, names: readonly string[]): ToolError {
     const subject = t(`resolve.kind.${kind}`);
-    const input = inline(raw, NAME_LIMIT);
+    const input = shownName(raw);
     const sentence =
       names.length === 0
         ? t('resolve.notFound.empty', { kind: subject, name: input })
@@ -96,15 +107,20 @@ export function createResolver(ctx: ResolverContext): Resolver {
     });
   }
 
+  /** `candidates` are shown already: `describe` masks the name of each, an execution is its own short handle. */
   function ambiguous(kind: Kind, raw: string, candidates: readonly string[]): ToolError {
-    const input = inline(raw, NAME_LIMIT);
+    const input = shownName(raw);
     return new ToolError('ambiguous', {
       message: `More than one ${kind} matches "${input}".`,
-      params: { kind: t(`resolve.kind.${kind}`), name: input, candidates: listed(candidates) },
+      params: {
+        kind: t(`resolve.kind.${kind}`),
+        name: input,
+        candidates: listed(candidates, true),
+      },
     });
   }
 
-  const describe = (item: Handle): string => `"${inline(item.name, NAME_LIMIT)}" (${item.id})`;
+  const describe = (item: Handle): string => `"${shownName(item.name)}" (${item.id})`;
 
   /** The one item with this name (or id); zero or several is an error with the names. */
   function pick(kind: Kind, input: string, items: readonly Handle[]): Handle {

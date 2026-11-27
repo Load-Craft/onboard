@@ -8,16 +8,19 @@
 
 import type { OpOutput } from '../../http/operation.js';
 import { renderListNotes, type NoteItem, type NotesData } from '../../render/project/listNotes.js';
-import { callBackend, content, type CallContext } from '../moduleCall.js';
-import { projectIdOf } from '../moduleState.js';
+import {
+  callBackend,
+  LIMITS,
+  projectIdOf,
+  thirdParty,
+  type CallContext,
+} from '../kit/transitional.js';
 import { moduleTool } from '../moduleTool.js';
 import { PROJECT_LIST_NOTES } from './meta.generated.js';
 
 /** The notes the data carries; the count says how many the project has. */
 const NOTES_SHOWN = 50;
 /** The longest note text kept, and the longest page path or step words. */
-const TEXT_LIMIT = 300;
-const AT_LIMIT = 120;
 
 /** GET /projects/{project_id}/agent-guidance (REST API v1) */
 export function listAgentGuidance(
@@ -37,9 +40,10 @@ function noteOf(ctx: CallContext, entry: Entry): NoteItem {
   const at = scope === 'plan_step' ? entry.scope?.plan_step : entry.scope?.url_path;
   return {
     id: entry.id ?? null,
-    text: content(ctx, entry.text, TEXT_LIMIT),
+    text: thirdParty(ctx, entry.text, LIMITS.sentence),
     scope,
-    at: at === null || at === undefined || at.trim() === '' ? null : content(ctx, at, AT_LIMIT),
+    at:
+      at === null || at === undefined || at.trim() === '' ? null : thirdParty(ctx, at, LIMITS.name),
     learned_from_run: entry.learned_from_run ?? null,
   };
 }

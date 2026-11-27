@@ -1,10 +1,11 @@
-// The comparison of two runs of the fake backend (`GET …/gatling/executions/compare`,
-// `api/routes/gatling_results.py:236-349`), derived from the executions and results of the sklep
+// The comparison of two runs of the fake backend (`GET …/gatling/executions/compare`),
+// derived from the executions and results of the sklep
 // world: the twelve metrics as `{a, b, delta}`, the load compared from the run manifests, and the
 // overall answer as a conjunction over the facts that are known (null when nothing differs and
-// something could not be read). Registration is idempotent per fake.
+// something could not be read). A test may pin the answer for one pair (`seedComparison`).
+// Registration is idempotent per fake.
 
-import type { Fake } from '../server.js';
+import type { Fake, Store, SuccessBody } from '../server.js';
 import { FakeHttpError } from '../server.js';
 import {
   SKLEP_COLLECTIONS,
@@ -13,6 +14,34 @@ import {
 } from '../worlds/sklep.js';
 
 const registered = new WeakSet<Fake>();
+
+/** The answer of `GET …/gatling/executions/compare`. */
+export type ComparisonAnswer = SuccessBody<
+  '/api/v1/projects/{project_id}/gatling/executions/compare',
+  'GET'
+>;
+
+/** A comparison seeded for a pair: its answer, or an error in its place. */
+export type SeededComparison =
+  ComparisonAnswer | { readonly error: { readonly status: number; readonly detail: unknown } };
+
+const SEEDED_COMPARISONS = 'gatling_execution_comparisons';
+
+interface StoredComparison {
+  readonly id: string;
+  readonly answer: SeededComparison;
+}
+
+/**
+ * The answer for the pair (`a`, `b`) in that order, read before the comparison is derived from the
+ * world; a pair with nothing seeded is compared as before.
+ */
+export function seedComparison(store: Store, a: string, b: string, answer: SeededComparison): void {
+  const records = store.collection<StoredComparison>(SEEDED_COMPARISONS);
+  const id = `${a}|${b}`;
+  records.delete(id);
+  records.insert({ id, answer });
+}
 
 const METRICS = [
   'total_requests',
@@ -61,6 +90,15 @@ export function registerCompareRoute(fake: Fake): void {
     const executions = store.collection<SklepExecution>(SKLEP_COLLECTIONS.executions);
     const results = store.collection<SklepExecutionResult>(SKLEP_COLLECTIONS.results);
     const ids = [req.query.a, req.query.b].map((id) => id ?? '');
+    const pinned = store
+      .collection<StoredComparison>(SEEDED_COMPARISONS)
+      .get(`${ids[0] ?? ''}|${ids[1] ?? ''}`)?.answer;
+    if (pinned !== undefined) {
+      if ('error' in pinned) {
+        throw new FakeHttpError(pinned.error.status, { detail: pinned.error.detail });
+      }
+      return { status: 200, body: pinned };
+    }
     const [a, b] = ids.map((id) => {
       const execution = executions.get(id);
       if (execution === undefined) {

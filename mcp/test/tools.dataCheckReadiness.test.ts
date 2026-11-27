@@ -112,7 +112,9 @@ describe('data_check_readiness', () => {
     expect(data.ready).toBe(true);
     expect(data.slots.every((slot) => slot.state === 'bound')).toBe(true);
     expect(data.fixes).toEqual([]);
-    expect(text.split('\n').at(-1)).toBe('każdy slot wypełniony · test może ruszyć');
+    expect(text.split('\n').slice(-2).join('\n')).toBe(
+      'każdy slot przypięty i wypełniony · czy wierszy starczy na profil, sprawdza\n  run_plan z profilem',
+    );
     expect(calls(r)).not.toContain('POST /api/v1/projects/:p/data-hub/auto-plan');
   });
 

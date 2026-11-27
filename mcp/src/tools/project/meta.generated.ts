@@ -64,11 +64,39 @@ export const PROJECT_LIST = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'query',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'Search projects, flows, scenarios and runs by this text; without it, the list of projects.',
+    },
+    {
+      name: 'is_active',
+      type: 'boolean',
+      from_state: null,
+      doc: 'Only active (true) or inactive (false) projects (the list, not the search).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 50,
+      from_state: null,
+      doc: 'How many projects or search hits to return (1-100).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get`: Get a project's profile; include adds statistics, setup readiness, log server. */
@@ -143,8 +171,12 @@ export const PROJECT_GET = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_create`: Create a project, or adopt the one with the same name, and bind this workspace to it. */
@@ -228,8 +260,12 @@ export const PROJECT_CREATE = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_update`: Update a project's name or description. */
@@ -283,7 +319,7 @@ export const PROJECT_UPDATE = {
       path: '/api/v1/projects/{project_id}',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_project_api_v1_projects__project_id__get'],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: [],
@@ -292,11 +328,31 @@ export const PROJECT_UPDATE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 255,
+      from_state: null,
+      doc: "The project's new name; a name another project uses is refused.",
+    },
+    {
+      name: 'description',
+      type: 'string',
+      max_length: 8000,
+      from_state: null,
+      doc: "The project's new description; an empty text clears it.",
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_set_profile`: Set fields of the project profile (architecture, auth, protocol, flags); other fields are kept. Changes how flows are generated. */
@@ -395,9 +451,13 @@ export const PROJECT_SET_PROFILE = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt:
     'Karta zgody poziomu 2 działa wzorcem confirm z tokenem, bo ogólnych kart pending i process_answer jeszcze nie ma; po ich wdrożeniu narzędzie przechodzi na kartę z katalogu.',
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_delete`: Delete projects, environments, members, agent notes or own API tokens (kind + ids). Permanent. */
@@ -515,8 +575,12 @@ export const PROJECT_DELETE = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get_envs`: Get the project's environments: the list, or one (effective=true resolves inherited values). Header and variable values are masked. */
@@ -590,11 +654,29 @@ export const PROJECT_GET_ENVS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'env',
+      type: 'uuid|default',
+      from_state: null,
+      doc: 'One environment: its id, or "default" for the default one; without it, the list.',
+    },
+    {
+      name: 'effective',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: values inherited from the default environment are resolved (with env only).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_save_env`: Save an environment (address, limits, protection, fixed headers read from an env file; no id: create) and optionally make it the default. */
@@ -753,8 +835,12 @@ export const PROJECT_SAVE_ENV = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_check_env`: Check an environment: probe its address; conformance with the docs only once they exist. Sends requests to the target. */
@@ -863,13 +949,17 @@ export const PROJECT_CHECK_ENV = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get_docs`: Get the project's active API docs (OpenAPI or AsyncAPI), the stored versions, or one version by id. */
@@ -952,11 +1042,37 @@ export const PROJECT_GET_DOCS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: ['openapi', 'asyncapi'],
+      default: 'openapi',
+      from_state: null,
+      doc: 'Which documentation: openapi (default) or asyncapi.',
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'One stored version by its id; without it, the active documentation.',
+    },
+    {
+      name: 'versions',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: the list of stored versions instead (not with docs_id).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get_endpoints`: Get the endpoints of the API docs: the list, or one with its schema and validator bindings. */
@@ -1026,11 +1142,62 @@ export const PROJECT_GET_ENDPOINTS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: 'ids.docs_id',
+      doc: 'The documentation version; default: the one of this workspace (see project_get_docs).',
+    },
+    {
+      name: 'endpoint',
+      type: 'string',
+      min_length: 1,
+      max_length: 300,
+      from_state: null,
+      doc: 'One endpoint: its id, operationId or "METHOD /path" (POST /checkout); without it, the list.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['bindings'],
+      max_items: 1,
+      from_state: null,
+      doc: '"bindings": expected statuses, response schemas in short and suggested assertions (with endpoint only).',
+    },
+    {
+      name: 'method',
+      type: 'enum',
+      enum: ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'],
+      from_state: null,
+      doc: 'List only endpoints of this method.',
+    },
+    {
+      name: 'query',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      doc: 'List only endpoints whose path, summary or operationId contains this text (any case).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many endpoints of the list to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_import_docs`: Import an OpenAPI document from a file as the active version; replaces the docs of an existing project. */
@@ -1163,8 +1330,12 @@ export const PROJECT_IMPORT_DOCS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_set_active_docs`: Set a stored docs version as the active one. */
@@ -1234,11 +1405,31 @@ export const PROJECT_SET_ACTIVE_DOCS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: ['openapi', 'asyncapi'],
+      default: 'openapi',
+      from_state: null,
+      doc: 'Which documentation: openapi (default) or asyncapi.',
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: null,
+      required: true,
+      doc: 'The stored version to make active (project_get_docs versions=true lists them).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_analyze_setup`: Analyze the project setup with the LLM: imports the docs, then proposes profile fields with confidence. */
@@ -1329,8 +1520,12 @@ export const PROJECT_ANALYZE_SETUP = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_apply_setup`: Apply the reviewed profile, seed default validators and test types, then check conformance of the default environment. */
@@ -1419,8 +1614,12 @@ export const PROJECT_APPLY_SETUP = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get_apimap`: Get the API map: areas and operation kinds of the project's API. */
@@ -1480,8 +1679,12 @@ export const PROJECT_GET_APIMAP = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_set_apimap`: Set the URL prefixes that define the project's API areas. */
@@ -1545,11 +1748,31 @@ export const PROJECT_SET_APIMAP = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'prefixes',
+      type: 'string',
+      min_length: 1,
+      max_length: 8000,
+      from_state: null,
+      doc: 'Path prefixes of the areas, comma-separated (at most 64); not with detected.',
+    },
+    {
+      name: 'detected',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: go back to the areas LoadCraft detects (not with prefixes).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_connect_telemetry`: Connect a log server: test it, list its tools and save it as the project's telemetry source. */
@@ -1669,8 +1892,12 @@ export const PROJECT_CONNECT_TELEMETRY = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_disconnect_telemetry`: Disconnect the project's log server. */
@@ -1751,7 +1978,7 @@ export const PROJECT_DISCONNECT_TELEMETRY = {
       path: '/api/v1/projects/{project_id}/telemetry-source',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_telemetry_source_api_v1_projects__project_id__telemetry_source_get'],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: ['steps.project.telemetry'],
@@ -1760,11 +1987,15 @@ export const PROJECT_DISCONNECT_TELEMETRY = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_list_notes`: List the notes the agent learned about the project. */
@@ -1824,8 +2055,12 @@ export const PROJECT_LIST_NOTES = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_update_note`: Update the text or scope of a project note. */
@@ -1889,11 +2124,48 @@ export const PROJECT_UPDATE_NOTE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'note_id',
+      type: 'string',
+      min_length: 32,
+      max_length: 32,
+      from_state: null,
+      required: true,
+      doc: 'The note id (32 hex characters) from project_list_notes.',
+    },
+    {
+      name: 'text',
+      type: 'string',
+      min_length: 1,
+      max_length: 500,
+      from_state: null,
+      doc: "The note's new text.",
+    },
+    {
+      name: 'scope',
+      type: 'enum',
+      enum: ['url_path', 'plan_step'],
+      from_state: null,
+      doc: 'Where the note applies: a page path or a plan step (a step can only become a page).',
+    },
+    {
+      name: 'at',
+      type: 'string',
+      min_length: 1,
+      max_length: 500,
+      from_state: null,
+      doc: 'The page path (url_path) or words of the step (plan_step); with scope.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_list_team`: List project members; me=true returns your own role and permissions. */
@@ -1955,11 +2227,23 @@ export const PROJECT_LIST_TEAM = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'me',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: your own role and permissions instead of the list.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_save_member`: Save a project member: add one, or change a member's role. */
@@ -1986,11 +2270,11 @@ export const PROJECT_SAVE_MEMBER = {
     },
     cost: null,
     card: {
-      title: 'Give {email} the role {role}',
+      title: 'Give {user_id} the role {role}',
       fields: [
         {
           label: 'Member',
-          from: 'email',
+          from: 'user_id',
           source: 'args',
         },
         {
@@ -2029,8 +2313,8 @@ export const PROJECT_SAVE_MEMBER = {
     reason: null,
   },
   log: {
-    args: 'Give {email} the role {role}',
-    result: '{email}: {role}',
+    args: 'Give {user_id} the role {role}',
+    result: '{user_id}: {role}',
   },
   route: null,
   description: "Save a project member: add one, or change a member's role.",
@@ -2046,7 +2330,7 @@ export const PROJECT_SAVE_MEMBER = {
       path: '/api/v1/projects/{project_id}/team/{user_id}',
     },
   ],
-  also_calls: [],
+  also_calls: ['list_team_members_api_v1_projects__project_id__team_get'],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: [],
@@ -2055,11 +2339,31 @@ export const PROJECT_SAVE_MEMBER = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'user_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The person to add or whose role changes (their user id, as project_list_team shows).',
+    },
+    {
+      name: 'role',
+      type: 'enum',
+      enum: ['owner', 'editor', 'viewer'],
+      required: true,
+      from_state: null,
+      doc: 'The role the person gets.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get_activity`: Get recent activity and the runs in progress across all projects. */
@@ -2121,11 +2425,25 @@ export const PROJECT_GET_ACTIVITY = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 50,
+      default: 20,
+      from_state: null,
+      doc: 'How many recent events to return (1-50).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_get_http_settings`: Get the project's HTTP settings for generated tests: base URL, protocol options, default headers (values masked). */
@@ -2186,8 +2504,12 @@ export const PROJECT_GET_HTTP_SETTINGS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `project_set_http_settings`: Set the project's HTTP settings for generated tests (created on first use). */
@@ -2289,7 +2611,7 @@ export const PROJECT_SET_HTTP_SETTINGS = {
       path: '/api/v1/projects/{project_id}/gatling/setup',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_gatling_project_api_v1_projects__project_id__gatling_project_get'],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: [],
@@ -2298,9 +2620,36 @@ export const PROJECT_SET_HTTP_SETTINGS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'base_url',
+      type: 'string',
+      min_length: 1,
+      max_length: 2000,
+      from_state: null,
+      doc: 'The base URL of the tested application.',
+    },
+    {
+      name: 'protocol',
+      type: 'object',
+      from_state: null,
+      doc: 'Protocol options to change (no proxy credentials); the rest stays.',
+    },
+    {
+      name: 'headers_env_file',
+      type: 'string',
+      min_length: 1,
+      max_length: 260,
+      from_state: null,
+      doc: 'An env file of the project directory whose KEY=VALUE lines become the default headers.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

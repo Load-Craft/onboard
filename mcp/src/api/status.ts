@@ -20,7 +20,7 @@ export interface Compat {
   readonly apiRevision: number;
 }
 
-// Steps of the setup gate, in the backend's order (`setup_gate.py:33-40`).
+// Steps of the setup gate, in the backend's order.
 export { SETUP_STEPS, type SetupStep } from '../contract/setupGate.js';
 
 export interface SetupState {
@@ -99,7 +99,7 @@ export async function getCompat(api: ApiContext): Promise<Compat> {
 
 /**
  * The gate's verdict (`setup_complete`) and the unmet steps, judged as the gate judges them
- * (`setup_gate.py:64-106`): an empty category or a missing timestamp is unmet, `needs_review` is not.
+ * (the setup gate): an empty category or a missing timestamp is unmet, `needs_review` is not.
  */
 export async function getSetupState(api: ApiContext, projectId: string): Promise<SetupState> {
   return (await getSetupFacts(api, projectId)).setup;

@@ -1,11 +1,7 @@
 {
   "_source": {
-    "note": "Second copy of a rule owned by the LoadCraft frontend. Derived from the branches and tests of resultsVerdict.ts; when that file changes, this table and src/report/verdict.ts must be re-checked.",
+    "note": "Second copy of a rule owned by the LoadCraft frontend. Derived from the branches and tests of the verdict of its results page; when that rule changes, this table and src/report/verdict.ts must be re-checked.",
     "repo": "loadcraft",
-    "commit": "d93e08d808fa600074a8118c719d1cbd3e2d5865",
-    "file": "frontend/src/features/gatling/pages/resultsVerdict.ts",
-    "fileLastChangedAt": "ef95d17bfb079f71abcd8b4d38bc55c10223103f",
-    "tests": "frontend/src/features/gatling/pages/resultsVerdict.test.ts",
     "mapping": "ok -> sla_passed (sla_verdict.status passed) or sla_not_judged (no verdict or refused); sla_fail and sla_and_invariants_fail -> sla_failed (invariants named in reasons); run_fail -> run_failed; sla_not_judged and the invariants_not_evaluated warning are the only additions to the frontend vocabulary"
   },
   "cases": [

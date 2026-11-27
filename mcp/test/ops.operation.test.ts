@@ -316,6 +316,10 @@ describe('operation handles', () => {
       'test_run',
       'analysis',
       'account_provision',
+      'drift_check',
+      'test_types_generation',
+      'payload_generation',
+      'dataset_generation',
     ]);
     const handle = encodeHandle('test_run', '0b5c-77aa');
     expect(handle).toBe('test_run:0b5c-77aa');

@@ -4,31 +4,26 @@
  * endpoint, so the plugin walks the graph itself.
  *
  * This is a copy of rules owned by LoadCraft. Source of truth:
- *   loadcraft @ d93e08d808fa600074a8118c719d1cbd3e2d5865
- *   frontend/src/features/flow-builder/adapters/flowOutlineViewModel.ts (last changed in 479f86e9d)
- *     - spine, validator bridging, containment, merge point, branch chains: :352-382, :573-847,
- *       :1737-1766; branch labels: :1295-1321; flattening and numbering: :849-913;
- *       request/pause/transform/loop drafts: :915-1072, :1488-1496; refs of bound validators: :2047-2053
- *   frontend/src/lib/pauseSourceWords.ts:12, :59 (pause source states)
- *   frontend/src/features/flow-builder/adapters/projectFlowNodeData.ts:5, :633-641 (flat + config)
- *   backend/domain/services/flow_copilot/block_vars.py:23 (reference pattern), :113-186 (produced
- *     variables), block_order.py:72-95 (bridging over bound validators only),
- *     flow_digest.py:79 (250-node budget), :376-384 (bound validator produces for its request)
- *   backend/domain/models/test_blocks.py:140-157 (action_start), :190 (query_params),
- *     :313 (expected_statuses), :725-753 (pause delays and source), :962 (bound_to_request_id)
+ *   - the frontend's outline screen: spine, validator bridging, containment, merge point, branch
+ *     chains and labels, flattening and numbering, request/pause/transform/loop drafts, refs of
+ *     bound validators; pause source states; flat + config node data
+ *   - the backend's flow copilot: reference pattern, produced variables, bridging over bound
+ *     validators only, the 250-node budget, a bound validator producing for its request
+ *   - the backend's test blocks: `action_start`, `query_params`, `expected_statuses`, pause delays
+ *     and source, `bound_to_request_id`
  * `test/flow.outline.test.ts` pins every rule in tables. When those sources change, re-check both.
  *
  * Deliberate differences from the sources, each stated by the plugin's task:
  *   - a block with `enabled: false` is not a step, nor is anything inside it; the walk still passes
  *     through it, and what it would produce is not produced (the screen shows it greyed out);
- *   - `feederVars` are references no EARLIER step produced (flow_digest.py:450 counts a producer
- *     anywhere in the flow), so a value read before it is produced is test data, not a variable;
- *   - only validators bound to a request are folded (block_order.py:61-66, project_flows.py:142-165);
+ *   - `feederVars` are references no EARLIER step produced (the backend's flow digest counts a
+ *     producer anywhere in the flow), so a value read before it is produced is test data, not a variable;
+ *   - only validators bound to a request are folded (as the backend's block order does);
  *     an unbound validator stays a step, as in the backend's `step_count` (the screen hides it);
  *   - a step of a conditional branch carries its branch label in `name` (`[TRUE] …`).
  */
 
-/** Steps above this are cut and `truncated` is set (flow_digest.py:79). */
+/** Steps above this are cut and `truncated` is set (the backend's flow digest budget). */
 export const MAX_OUTLINE_STEPS = 250;
 
 export type PauseSource = 'recording' | 'default_human' | 'manual' | 'machine_wait';
@@ -119,14 +114,14 @@ const RESERVED_KEYS = new Set([
   'config',
 ]);
 
-/** `#{name}` (Gatling EL) and `{{name}}` (HAR bodies and headers) — block_vars.py:23. */
+/** `#{name}` (Gatling EL) and `{{name}}` (HAR bodies and headers). */
 const VAR_REF = /(?:#\{|\{\{)([a-zA-Z_][a-zA-Z0-9_]*)\}\}?/g;
 
 const PAUSE_SOURCES: readonly string[] = ['recording', 'default_human', 'manual', 'machine_wait'];
 const ACTION_CLASSES: readonly string[] = ['page', 'form_submit', 'in_page', 'api_call'];
 const CONTAINER_TYPES = new Set(['group', 'retry', 'loop']);
 
-/** Single-name "save as" fields across block types (block_vars.py:28-36). */
+/** Single-name "save as" fields across block types. */
 const SINGLE_VAR_FIELDS = [
   'save_response_as',
   'save_result_as',
@@ -186,7 +181,7 @@ function collectRefs(value: unknown, out: string[]): void {
   }
 }
 
-/** Session variables a block produces (block_vars.py:113-186, flowOutlineViewModel.ts:915-1072). */
+/** Session variables a block produces. */
 function producedBy(data: Data): string[] {
   const out: string[] = [];
   const add = (name: unknown): void => {
@@ -264,7 +259,7 @@ interface Graph {
 
 /**
  * Execution edges without `binding` ones, bridged over bound validators: `a -> v -> b` becomes
- * `a -> b` (flowOutlineViewModel.ts:1737-1766, block_order.py:72-95).
+ * `a -> b`, as the backend's block order does.
  */
 function executionEdges(
   edges: Record<string, unknown>[],
@@ -352,7 +347,7 @@ function walkBranch(start: string, merge: string | undefined, graph: Pick<Graph,
   return ids;
 }
 
-/** Branch starts with their labels (flowOutlineViewModel.ts:1295-1321, block_order.py:145-169). */
+/** Branch starts with their labels. */
 function branchesOf(data: Data): { start: string; label: string }[] {
   const switchType = text(data['switch_type']) || 'if_else';
   const cases = Array.isArray(data['switch_cases']) ? data['switch_cases'].filter(isRecord) : [];
@@ -622,6 +617,21 @@ function stepOf(
     };
   }
   return step;
+}
+
+/** The block each step of the outline is, by its number: what a change of the graph (`flow/dropSteps.ts`) addresses. */
+export function outlineBlocks(
+  flow: OutlineSource,
+): ReadonlyMap<string, { readonly id: string; readonly type: string; readonly depth: number }> {
+  const { graph } = buildGraph(flow);
+  const drafts: Draft[] = [];
+  flatten(rootSequence(flow, graph), 0, '', new Map(), graph, new Set(), drafts);
+  return new Map(
+    drafts.map((draft) => [
+      draft.num,
+      { id: draft.block.id, type: draft.block.type, depth: draft.depth },
+    ]),
+  );
 }
 
 /** The outline of a flow, as the Outline screen numbers it. Pure: same flow, same outline. */

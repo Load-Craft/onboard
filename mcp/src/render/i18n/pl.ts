@@ -9,6 +9,7 @@ import { panePl } from './pane.js';
 import { cardPl } from './card.js';
 import { profilePl } from './profile.js';
 import { deletionPl } from './deletion.js';
+import { consentPl } from './consent.js';
 import { failuresPl } from './failures.js';
 
 export const pl: Dictionary = {
@@ -20,6 +21,7 @@ export const pl: Dictionary = {
   ...cardPl,
   ...profilePl,
   ...deletionPl,
+  ...consentPl,
   ...failuresPl,
 
   'demo.notice': 'tryb demonstracyjny — dane przykładowe',
@@ -74,6 +76,32 @@ export const pl: Dictionary = {
     'Potrzebny jest argument {name}: nie podano go, a stan procesu go nie zawiera.',
   'error.missing_argument.hint':
     'Podaj {name} albo uruchom process_get_status, żeby zobaczyć, co zawiera stan, i wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.scenario_id':
+    'Podaj scenario_id: scenario_list pokazuje scenariusze projektu z ich id (dla planera podziału ruchu podaj draft_id), potem wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.docs_id':
+    'Podaj docs_id: project_get_docs z versions=true wypisze id zapisanych dokumentacji (sam project_get_docs poda aktywną), potem wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.composition_id':
+    'Podaj composition_id, id albo nazwę: scenario_list_compositions wypisuje kompozycje projektu (scenario_generate tworzy ją, gdy projekt żadnej nie ma), potem wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.environment_id':
+    'Podaj environment_id, środowisko zapisanego przebiegu: project_get_envs je wypisuje. Zapisany przebieg dostaje środowisko, które mu podano, nigdy takie, które wybrała ta przestrzeń, potem wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.workload':
+    'Podaj workload, obciążenie zapisanego przebiegu jako {type, vusers, ramp, hold}: run_plan podaje gotowe profile. Zastępuje zapisane obciążenie w całości, potem wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.profile':
+    'Podaj profile, profil obciążenia do użycia (type, vusers, ramp, hold): run_get_profiles wypisuje zapisane profile; ta przestrzeń żadnego jeszcze nie wybrała, potem wywołaj narzędzie ponownie.',
+  'error.missing_argument.hint.snapshot_id':
+    'Podaj snapshot_id: traffic_list_snapshots wypisuje migawki ruchu produkcyjnego projektu z ich id (pusta lista oznacza, że żadna nie została jeszcze wysłana), potem wywołaj narzędzie jeszcze raz.',
+  'error.missing_argument.hint.run_id':
+    'Podaj run_id: run_list wypisuje przebiegi projektu od najnowszego z ich uchwytami (e-xxxxxxxx), potem wywołaj narzędzie jeszcze raz.',
+  'error.missing_argument.hint.compare_to':
+    'Podaj compare_to: uchwyt albo UUID przebiegu z run_list, albo „baseline” dla przypiętego odniesienia; potem wywołaj narzędzie jeszcze raz.',
+  'error.missing_argument.hint.flow_id':
+    'Podaj flow_id: flows_list wypisuje flowy projektu z ich id, potem wywołaj narzędzie jeszcze raz.',
+  'error.missing_argument.hint.dataset_id':
+    'Podaj dataset_id: data_list_datasets wypisuje zbiory danych projektu z ich id, potem wywołaj narzędzie jeszcze raz.',
+  'error.missing_argument.hint.walk_id':
+    'Podaj walk_id: żadne narzędzie nie wypisuje przejść. Id drukuje wywołanie, które nagrało przejście (flows_record_journeys), a stan procesu pamięta ostatnie; ta przestrzeń nie ma żadnego, więc zapytaj użytkownika, o które przejście chodzi.',
+  'error.missing_argument.hint.draft_id':
+    'Podaj draft_id: id szkicu podziału ruchu, który zwrócił scenario_suggest_split. Żadne narzędzie nie wypisuje szkiców, a ta przestrzeń nie ma żadnego: najpierw zaproponuj podział.',
   'resolve.kind.project': 'projekt',
   'resolve.kind.environment': 'środowisko',
   'resolve.kind.flow': 'flow',
@@ -203,6 +231,22 @@ export const pl: Dictionary = {
   },
   'data.title.none': 'plan danych · brak slotów',
   'data.label.more': '+{count} więcej',
+  'data.cause': '{label}: {counts}{message}{kind}',
+  'data.cause.have': '{have} wierszy w zbiorze · ',
+  'data.cause.both': '{have} wierszy w zbiorze, potrzebne {need} · ',
+  'data.cause.fresh':
+    ' · {identity}: nowy zbiór (data_create_dataset ze scenario i slot) liczy zużyte wartości od zera',
+  'data.cause.spent': '{have} wierszy w zbiorze, wolnych {free}{by} · ',
+  'data.cause.spentNeed': '{have} wierszy w zbiorze, wolnych {free}{by}, potrzebne {need} · ',
+  'data.cause.by': ' (zużyte przez {runs})',
+  'data.cause.byEarlier': ' (zużyte przez wcześniejsze przebiegi)',
+  'data.cause.rereads':
+    'strategia „{strategy}” czyta plik od początku przy każdym przebiegu, więc ten przebieg wydałby najpierw już zużyte wartości',
+  'data.cause.backend': 'backend: „{message}”',
+  'data.cause.identity': ' · {identity}',
+  'data.cause.regenerate':
+    ' · wygeneruj na nowo zbiór „{dataset}” (id {id}): data_create_dataset ze scenario i slot robi nowe wiersze, albo wczytaj plik CSV z niezużytymi wartościami przez file i slot',
+  'data.identity.fresh': 'nowe tożsamości do rejestracji (każda użyta raz)',
   'data.exclusive': 'wyłączne',
   'data.state.bound': 'przypięty',
   'data.state.auto': 'auto',
@@ -217,6 +261,10 @@ export const pl: Dictionary = {
   'data.fix.data_missing': '{label}: brak danych, wypełni je wywołanie z propozycji',
   'data.fix.data_generate':
     '{label}: brak danych, data_create_dataset zrobi wiersze z kolumn slotu',
+  'data.fix.data_generate.fresh':
+    '{label}: brak danych, data_create_dataset zrobi nowe tożsamości z kolumn slotu; po każdym biegu, który dotarł do celu, zrób je od nowa, użyte są już zarejestrowane',
+  'data.fix.slot_mixed':
+    '{label}: jeden slot obsługuje logowanie i rejestrację: rozdziel go, osobny slot dla rejestracji',
   'data.fix.data_from_file':
     '{label}: brak danych, a żadne narzędzie nie ma jak ich zrobić ({reason}){hub} · podaj plik CSV z kolumnami {columns} przez data_create_dataset z file i slot',
   'data.fix.data_from_file.hub': ' · hub danych: {reply}',
@@ -234,7 +282,8 @@ export const pl: Dictionary = {
     many: '{count} poprawek przed testem: {fixes}',
     other: '{count} poprawki przed testem: {fixes}',
   },
-  'data.ready': 'każdy slot wypełniony · test może ruszyć',
+  'data.ready':
+    'każdy slot przypięty i wypełniony · czy wierszy starczy na profil, sprawdza run_plan z profilem',
   'data.ready.noSlots': 'scenariusz nie potrzebuje danych testowych · test może ruszyć',
   'data.provision.progress': '{done} / {total} kont',
   'data.provision.created': {
@@ -319,6 +368,10 @@ export const pl: Dictionary = {
   'data.card.slot': 'Dla slotu: {slot} w {target}',
   'data.card.rows': 'Wierszy: {rows}',
   'data.card.revision': 'Zbiór istnieje: plik będzie jego nową rewizją.',
+  'data.card.regenerate':
+    'Zbiór istnieje: jego wiersze powstaną od nowa, z nowymi wartościami (nowy rachunek zużycia).',
+  'data.card.cost.fresh':
+    'Koszt: LoadCraft może użyć swojego modelu i dziennego budżetu projektu na zbiory danych; nic nie idzie do celu · nowe tożsamości do rejestracji, każda użyta raz: po biegu, który dotarł do celu, zrób je od nowa',
   'data.card.next':
     '→ zapytaj użytkownika; dopiero po jego zgodzie wywołaj {tool} ponownie z tymi samymi argumentami i confirm: "{confirm}"',
   'data.card.cost.slot':
@@ -349,6 +402,14 @@ export const pl: Dictionary = {
   'error.slot_unknown.message': 'Scenariusz nie ma slotu danych „{slot}”. Sloty: {available}.',
   'error.slot_unknown.hint':
     'Wywołaj data_check_readiness ze scenariuszem, aby zobaczyć sloty, i wybierz jeden.',
+  'error.slot_new_identities.message':
+    'Slot „{slot}” trzyma nowe tożsamości do rejestracji (każda użyta raz), więc nie zakłada się dla niego kont z góry.',
+  'error.slot_new_identities.hint':
+    'Wypełnij go przez data_create_dataset ze scenariuszem i slotem: LoadCraft zrobi nowe wiersze, a po każdym biegu, który dotarł do celu, robi się je od nowa. Nic nie zostało wysłane do celu.',
+  'error.slot_mixed_identities.message':
+    'Slot „{slot}” obsługuje logowanie w jednym scenariuszu i rejestrację w innym, więc żaden jeden zbiór do niego nie pasuje.',
+  'error.slot_mixed_identities.hint':
+    'Rozdziel slot: osobny dla rejestracji, żeby logowanie miało prawdziwe konta, a rejestracja nowe tożsamości. Nic nie zostało wysłane do celu.',
   'error.slot_not_accounts.message':
     'Slot „{slot}” nie jest slotem kont: trzyma zwykłe dane, więc nie da się dla niego założyć kont.',
   'error.slot_not_accounts.hint': '{next} Nic nie zostało wysłane do celu.',
@@ -414,6 +475,10 @@ export const pl: Dictionary = {
   'error.slot_data_unavailable.hint':
     'Podaj plik CSV z kolumnami {columns} przez data_create_dataset z file i slot (konta: data_create_accounts po zgodzie użytkownika). Nic nie zostało wysłane.',
   'error.slot_data_unavailable.reason.accounts': 'trzyma konta',
+  'error.never_fabricated_columns.message':
+    'LoadCraft nigdy nie zmyśla wartości {columns} slotu {slot}: muszą być prawdziwe (login, sekret, wartość wskazująca coś, co istnieje w systemie docelowym).',
+  'error.never_fabricated_columns.hint':
+    'Podaj plik CSV z prawdziwymi wartościami kolumn {all} przez data_create_dataset z file, scenario i slot; narzędzia danych nie zaproponują już generowania dla tego slotu.',
   'error.slot_data_refused.message': 'LoadCraft odmówił zrobienia wierszy slotu {slot}: {detail}',
   'error.slot_data_refused.hint':
     'Podaj plik CSV z kolumnami {columns} przez data_create_dataset z file i slot; narzędzia danych nie zaproponują już generowania dla tego slotu.',
@@ -502,7 +567,7 @@ export const pl: Dictionary = {
   'error.timeout.hint': 'Ponów raz; jeśli się powtórzy, uruchom /loadcraft:doctor.',
   'error.network_error.message': 'Nie można połączyć się z LoadCraft przez sieć.',
   'error.network_error.hint':
-    'Sprawdź, czy adres LoadCraft w opcjach wtyczki jest poprawny i serwer działa, potem uruchom /loadcraft:doctor.',
+    'Spróbuj ponownie za chwilę; jeśli się powtarza, uruchom /loadcraft:doctor.',
   'error.unexpected_redirect.message':
     'LoadCraft odpowiedział na {request} przekierowaniem (HTTP {status}) na {host}. Wtyczka nie idzie za przekierowaniami, więc żądania tam nie powtórzono.',
   'error.unexpected_redirect.hint':
@@ -521,6 +586,175 @@ export const pl: Dictionary = {
   'error.backend_too_old.reason.noMeta': 'serwer nie podaje swojej wersji',
   'error.backend_too_old.hint':
     'Poproś użytkownika o aktualizację serwera LoadCraft albo zainstaluj starszą wersję wtyczki.{advice}',
+  'error.invalid_arguments.message': 'Argumenty się wykluczają: {reason}.',
+  'error.invalid_arguments.hint': 'Zmień argumenty i wywołaj ponownie; nic nie zostało wysłane.',
+  'error.invalid_arguments.rule.generate_one_target': 'podaj flow_id albo scenario_id, nie oba',
+  'error.invalid_arguments.rule.generate_slot_needs_scenario':
+    'slot to slot scenariusza: podaj z nim scenario_id, nie flow_id',
+  'error.invalid_arguments.rule.generate_slot_name':
+    'zbiór slotu nazywa LoadCraft od slotu: pomiń name',
+  'error.invalid_arguments.rule.update_without_fields': 'podaj nową nazwę, nowy opis albo oba',
+  'error.invalid_arguments.rule.apimap_one_of':
+    'podaj prefixes (ścieżki oddzielone przecinkami) albo detected: true, nie oba i nie żadne',
+  'error.invalid_arguments.rule.apimap_prefix_limits':
+    'najwyżej 64 prefiksy, każdy najwyżej 512 znaków i żaden pusty',
+  'error.invalid_arguments.rule.note_nothing_to_change': 'podaj nowy tekst, nowy zakres albo oba',
+  'error.invalid_arguments.rule.note_at_without_scope':
+    'at wskazuje stronę albo krok zakresu, podaj z nim scope',
+  'error.invalid_arguments.rule.choices_empty':
+    'podaj co najmniej jedno pole choices, na przykład flows.method',
+  'error.invalid_arguments.rule.choices_secret':
+    '{path} wygląda na sekret; wybory są zapisywane w stanie obszaru roboczego, wskaż plik zamiast tego',
+  'error.invalid_arguments.rule.flows_merge_count':
+    'flow_ids musi zawierać od 2 do 20 flowów rozdzielonych przecinkami',
+  'error.invalid_arguments.rule.flows_duplicate_count':
+    'flow_ids musi zawierać od 1 do 20 flowów rozdzielonych przecinkami',
+  'error.invalid_arguments.rule.flows_duplicate_docs_one':
+    'docs_id kopiuje jeden flow: podaj dokładnie jeden flow w flow_ids',
+  'error.invalid_arguments.rule.flows_duplicate_name_needs_docs':
+    'name dotyczy kopii na wersję dokumentacji: podaj z nim docs_id',
+  'error.invalid_arguments.rule.walk_note_remember_new':
+    'remember dotyczy nowej notatki: nie podawaj go z note_id',
+  'error.invalid_arguments.rule.composition_save_at_least_one':
+    'podaj nazwę, członków albo profil do zmiany',
+  'error.invalid_arguments.rule.composition_save_create_needs_members':
+    'nowa kompozycja potrzebuje członków: scenariusz -> udział w procentach',
+  'error.invalid_arguments.rule.composition_save_duplicate_member':
+    'members wymienia ten sam scenariusz dwa razy (po id i po nazwie albo dwa razy po nazwie)',
+  'error.invalid_arguments.rule.composition_save_variants':
+    'kompozycja ma kilku członków tego samego scenariusza (warianty): members nie rozstrzyga którego; zmień ich w aplikacji',
+  'error.invalid_arguments.rule.copilot_ask_one_of':
+    'podaj dokładnie jedno z: message i review: true',
+  'error.invalid_arguments.rule.composition_spec_type':
+    'rodzaj testu podaje się w type: usuń type ze spec',
+  'error.invalid_arguments.rule.functional_template_new_needs':
+    'nowy szablon wymaga name oraz w fields api_description i flow_definition',
+  'error.invalid_arguments.rule.functional_template_nothing':
+    'podaj name albo co najmniej jedno pole do zmiany',
+  'error.invalid_arguments.rule.functional_template_docs_new_only':
+    'docs_id dotyczy nowego szablonu: nie podawaj go z template_id',
+  'error.invalid_arguments.rule.functional_flow_new_needs': 'nowy flow wymaga name',
+  'error.invalid_arguments.rule.functional_flow_new_only':
+    'is_active dotyczy zmiany: pomiń go w nowym flowie',
+  'error.invalid_arguments.rule.functional_flow_change_only':
+    'docs_id dotyczy nowego flowa: nie podawaj go z flow_id',
+  'error.invalid_arguments.rule.functional_flow_snapshot_alone':
+    'snapshot wersji przyjmuje tylko flow_id, version i reason',
+  'error.invalid_arguments.rule.functional_flow_reason_needs_version':
+    'reason należy do snapshotu wersji: podaj z nim version',
+  'error.invalid_arguments.rule.functional_flow_nothing':
+    'podaj name albo co najmniej jedno pole do zmiany',
+  'error.invalid_arguments.rule.effective_without_env':
+    'effective wymaga env (id środowiska albo „default”)',
+  'error.invalid_arguments.rule.versions_with_docs_id':
+    'versions wypisuje zapisane wersje, nie podawaj z nim docs_id',
+  'error.invalid_arguments.rule.include_without_endpoint':
+    'include dotyczy jednego endpointu, podaj z nim endpoint',
+  'error.invalid_arguments.rule.save_profile_create_needs_name_and_type':
+    'nowy profil wymaga nazwy i typu',
+  'error.invalid_arguments.rule.save_profile_without_fields':
+    'podaj co najmniej jedno pole do zmiany',
+  'error.invalid_arguments.rule.versions_without_flow':
+    'versions wypisuje historię jednego flowu, podaj z nim flow',
+  'error.invalid_arguments.rule.templates_too_many_tags': 'listę może zawężać co najwyżej 10 tagów',
+  'error.invalid_arguments.rule.runs_one_without_run':
+    'widok one czyta jeden przebieg, podaj z nim run_id',
+  'error.invalid_arguments.rule.runs_by_template_without_template':
+    'by_template wypisuje przebiegi jednego szablonu, podaj z nim template',
+  'error.invalid_arguments.rule.results_one_without_result':
+    'widok one czyta jeden wynik flowu, podaj z nim result_id',
+  'error.invalid_arguments.rule.compare_same_functional_run':
+    'przebieg porównany sam ze sobą nic nie pokaże, podaj dwa różne przebiegi',
+  'error.invalid_arguments.rule.analytics_without_validator':
+    'accuracy, trend i threshold_suggestion dotyczą jednego walidatora, podaj z nimi validator',
+  'error.invalid_arguments.rule.catalog_assertion_types_active':
+    'is_active nie zawęża typów asercji, pomiń go',
+  'error.invalid_arguments.rule.list_active_with_query':
+    'is_active zawęża listę projektów, nie wyszukiwanie: pomiń jedno z nich',
+  'error.invalid_arguments.rule.filter_with_endpoint':
+    'method i query filtrują listę, nie podawaj ich z endpoint',
+  'log.foreignWriter':
+    'Inna wersja wtyczki LoadCraft zapisuje ten sam plik stanu (wcześniej otwarta sesja wciąż działa): zamknij starą sesję albo zrób reconnect wtyczki; wpisy tej sesji, które usunęła, zostały przywrócone.',
+  'log.entryNotSaved':
+    'Wywołanie się udało, ale jego wpis w dzienniku obszaru roboczego nie został zapisany ({code}).',
+  'log.entryNotSaved.refused':
+    'Wywołanie się udało, ale jego wpis w dzienniku obszaru roboczego nie został zapisany ({code}; schemat stanu odrzucił: {fields}).',
+  'error.invalid_arguments.rule.get_templates_only_with': 'include działa tylko razem z template',
+  'error.invalid_arguments.rule.catalog_field_not_of_kind':
+    'pole w fields nie należy do tego rodzaju (typ testu: category, display_name, description, expected_outcome, input_generation_prompt, input_schema, example_inputs, is_active; walidator: category, display_name, description, validator_type, activation, group, scope, requires_profile_flags, ai_prompt_template, parameters, is_active; typ asercji: category, display_name, description, prompt_template, parameters, is_active)',
+  'error.invalid_arguments.rule.catalog_new_needs':
+    'nowy wpis wymaga name i wymaganych pól swojego rodzaju (typ testu: category, display_name, input_generation_prompt; walidator: activation, category, display_name, group, scope, validator_type; typ asercji: category, display_name)',
+  'error.invalid_arguments.rule.catalog_name_new_only':
+    'name dotyczy nowego wpisu; nazwy istniejącego nie można zmienić',
+  'error.invalid_arguments.rule.catalog_nothing': 'podaj w fields co najmniej jedno pole do zmiany',
+  'error.invalid_arguments.rule.test_types_one_mode':
+    'podaj source z items (dodanie) albo test_type_id z fields (zmiana jednego), nie oba i nie żadne',
+  'error.invalid_arguments.rule.test_types_field_unknown':
+    'pole tu nie pasuje (dodanie: category, display_name, description, input_prompt, example_inputs, expected_outcome, default_count, priority, poll_completion_values, poll_timeout_ms; propozycje: to samo bez dwóch pól poll; zmiana przyjmuje też name i is_enabled)',
+  'error.invalid_arguments.rule.test_types_items_count': 'items przyjmuje od 1 do 50 wpisów',
+  'error.invalid_arguments.rule.test_types_catalog_ids':
+    'przy source catalog każdy klucz items to id typu testu z katalogu, a jego wartość to {}',
+  'error.invalid_arguments.rule.test_types_suggestion_needs':
+    'przyjęta propozycja wymaga category, display_name, description i input_prompt',
+  'error.invalid_arguments.rule.test_types_nothing':
+    'podaj w fields co najmniej jedno pole do zmiany',
+  'error.invalid_arguments.rule.validators_one_mode':
+    'podaj source z items (dodanie) albo validator_id z fields (zmiana jednego), nie oba i nie żadne',
+  'error.invalid_arguments.rule.validators_field_unknown':
+    'pole tu nie pasuje (dodanie: display_name, description, ai_prompt, parameters, validator_type, default_params, scope, template, priority; propozycje: display_name, description, template, default_params, rationale, scope, priority; zmiana: name, display_name, description, ai_prompt, parameters, validator_type, default_params, priority, is_enabled, needs_review)',
+  'error.invalid_arguments.rule.validators_items_count': 'items przyjmuje od 1 do 50 wpisów',
+  'error.invalid_arguments.rule.validators_catalog_ids':
+    'przy source catalog każdy klucz items to id walidatora z katalogu, a jego wartość to {}',
+  'error.invalid_arguments.rule.validators_proposal_needs':
+    'przyjęta propozycja wymaga display_name, description i template',
+  'error.invalid_arguments.rule.validators_nothing':
+    'podaj w fields co najmniej jedno pole do zmiany',
+  'error.invalid_arguments.rule.suggest_docs_not_active':
+    'docs_id nie jest aktywną dokumentacją projektu; propozycje czytają aktywną dokumentację (project_get_docs je wylicza)',
+  'error.invalid_arguments.rule.payloads_items_count':
+    'flow_ids i test_types przyjmują od 1 do 50 wpisów',
+  'error.invalid_arguments.rule.payloads_ids': 'każdy klucz flow_ids i test_types jest id (UUID)',
+  'error.invalid_arguments.rule.data_copilot_one_of':
+    'podaj scenario_id albo composition_id, nie oba',
+  'error.invalid_arguments.rule.poll_terminals_success_needed':
+    'podaj co najmniej jeden status powodzenia w success_terminals',
+  'error.invalid_arguments.rule.poll_terminals_too_many':
+    'podaj najwyżej 20 statusów w success_terminals i w failure_terminals',
+  'error.invalid_arguments.rule.copilot_apply_nothing':
+    'podaj co najmniej jedno id zmiany w accept albo w reject',
+  'error.invalid_arguments.rule.copilot_apply_too_many':
+    'podaj najwyżej 50 id zmian w accept i w reject',
+  'error.invalid_arguments.rule.copilot_apply_overlap':
+    'to samo id zmiany nie może być naraz w accept i w reject',
+  'error.invalid_arguments.rule.delete_at_least_one': 'podaj scenario_id albo composition_id',
+  'error.invalid_arguments.rule.delete_one_of': 'podaj scenario_id albo composition_id, nie oba',
+  'error.invalid_arguments.rule.regenerate_expand_needs_rows':
+    'mode=expand wymaga rows, liczby wierszy, do której rozszerzyć',
+  'error.invalid_arguments.rule.regenerate_expand_above_current':
+    'dla mode=expand rows musi być większe niż obecna liczba wierszy zbioru',
+  'error.invalid_arguments.rule.update_dataset_at_least_one':
+    'podaj co najmniej jeden z: name, description, file',
+  'error.invalid_arguments.rule.http_settings_at_least_one':
+    'podaj co najmniej jedno z: base_url, protocol, headers_env_file',
+  'error.invalid_arguments.rule.http_settings_base_url':
+    'base_url to adres http albo https bez nazwy użytkownika i hasła',
+  'error.invalid_arguments.rule.http_settings_headers_empty':
+    'headers_env_file nie ma żadnej linii KEY=VALUE z wartością',
+  'error.invalid_arguments.rule.http_settings_headers_count':
+    'headers_env_file ma więcej niż 20 nagłówków',
+  'error.invalid_arguments.rule.http_settings_header_name':
+    'nazwa nagłówka w headers_env_file to litery, cyfry i myślniki, i nie host, content-length, transfer-encoding, connection ani authorization',
+  'error.invalid_arguments.rule.http_settings_header_value':
+    'wartość nagłówka w headers_env_file nie ma znaków sterujących i ma najwyżej 8192 znaki',
+  'error.invalid_arguments.rule.run_save_name_required': 'nowy zapisany przebieg wymaga nazwy',
+  'error.invalid_arguments.rule.run_save_target_one_of':
+    'nowy zapisany przebieg wymaga dokładnie jednego z: scenario_id, composition_id',
+  'error.invalid_arguments.rule.run_save_target_fixed':
+    'scenario_id, composition_id i source_execution_id są dla nowego zapisanego przebiegu; zapisany przebieg zachowuje swój cel',
+  'error.invalid_arguments.rule.run_save_at_least_one':
+    'podaj co najmniej jedno z: name, environment_id, target_base_url, workload, feeder_bindings',
+  'error.invalid_arguments.rule.run_save_production_only':
+    'obciążenie typu production wymaga planu production oraz ramp i hold równych 0; inny typ go nie przyjmuje',
   'error.invalid.message': 'LoadCraft odrzucił dane jako niepoprawne. Backend napisał: „{detail}”',
   'error.invalid.hint':
     'Popraw dane wskazane w komunikacie i powtórz wywołanie; jeśli brakuje danych (np. za mało wierszy), najpierw je przygotuj.',
@@ -1230,8 +1464,6 @@ export const pl: Dictionary = {
   'profiles.data.slot': '{label}: {have} z {need} wierszy',
   'profiles.data.refused': 'dane ✕ {reason}',
   'profiles.data.slotNone': '{label}: brak zbioru',
-  'profiles.data.compositionOnly':
-    'Sprawdzenie danych obejmuje tylko kompozycje; „{name}” jest scenariuszem.',
   'profiles.json.title': 'Argument „profile” dla run_start, pod numerem z listy:',
   'profiles.next': 'dalej: run_start z wybranym profilem, jego linia powyżej jako „profile”.',
   // ---- flows_generate_* -------------------------------------------------------------------
@@ -1806,4 +2038,15 @@ export const pl: Dictionary = {
   'error.record_stop_refused.message': 'LoadCraft nie zatrzymał przejścia ({code}).',
   'error.record_stop_refused.hint':
     'Użytkownik steruje teraz przeglądarką w aplikacji: niech tam zatrzyma przejście albo najpierw odda przeglądarkę ({link}).',
+  'error.report_not_archived.message':
+    'LoadCraft nie przechowuje raportu Gatlinga przebiegu {run}.',
+  'error.report_not_archived.hint':
+    'Raport archiwizuje się, gdy przebieg się kończy; przebieg, który się nie uruchomił, go nie ma.',
+  'error.not_a_production_run.message': 'Przebieg {run} nie odtwarzał ruchu produkcyjnego.',
+  'error.not_a_production_run.hint': 'results_get_report opisze każdy przebieg.',
+  'error.no_baseline.message':
+    'Dla scenariusza i obciążenia przebiegu {run} nie przypięto linii bazowej.',
+  'error.no_baseline.hint': 'Podaj zamiast tego compare_to z uchwytem przebiegu.',
+  'error.report_exists.message': 'Raport przebiegu {run} został już wyeksportowany: {path}.',
+  'error.report_exists.hint': 'Podaj overwrite: true tylko wtedy, gdy użytkownik chce go zastąpić.',
 };

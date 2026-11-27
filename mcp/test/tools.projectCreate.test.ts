@@ -21,6 +21,7 @@ import { seedSklep, SKLEP_COLLECTIONS } from './fake-backend/worlds/sklep.js';
 import { SKLEP_IDS } from './golden/index.js';
 import { settleClock } from './helpers/clock.js';
 import { CANARY, toolRig, type RigCallResult, type ToolRig } from './helpers/rig.js';
+import { leakedPieces } from './helpers/canary.js';
 
 interface CreateView {
   readonly project: { readonly id: string; readonly name: string; readonly reused: boolean };
@@ -166,6 +167,24 @@ describe('project_create', () => {
     expect(data.project).toEqual({ id: SKLEP_IDS.project, name: 'sklep', reused: true });
     expect(data.environment).toBeUndefined();
     expect(binding(r)).toMatchObject({ project: { id: SKLEP_IDS.project, name: 'sklep' } });
+  });
+
+  it('two projects of the same name are ambiguous, with the names masked (FIX-74)', async () => {
+    const r = await rig('project');
+    const secret = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjcmVhdGUifQ.c2VudGluZWwtY3JlYXRlLXNpZw';
+    const name = `sklep ${secret}`;
+    const projects = r.fake.store.collection<{ id: string; name: string }>(
+      SKLEP_COLLECTIONS.projects,
+    );
+    projects.update(SKLEP_IDS.project, { name });
+    projects.insert({
+      ...structuredClone(projects.require(SKLEP_IDS.project)),
+      id: r.fake.store.newId(),
+    });
+    const result = await call(r, { ...SKLEP_ARGS, name });
+    expect(result.text).toMatch(/^\[ambiguous\] /u);
+    expect(leakedPieces(result.text, [secret])).toEqual([]);
+    expect(writes(r.fake.calls)).toEqual([]);
   });
 
   it('does not reuse a project whose name only contains the name or differs in case', async () => {

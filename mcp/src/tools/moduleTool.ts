@@ -10,9 +10,11 @@
 //   data as one JSON block;
 // - a tool without `run` and `render` is registered but not implemented: a call answers
 //   `not_implemented`, and the server does not offer it to the client (`_generated/modules.ts`);
-// - fail-closed: `run` is taken, by type and at run time, only for a tool of level 1 that never asks
-//   (no level by argument, no escalation). This layer draws no consent card, so a tool that would
-//   need one stays a scaffold, never offered, until the card mechanism gives it a way to ask.
+// - fail-closed: `run` alone is taken, by type and at run time, only for a tool of level 1 that never
+//   asks (no level by argument, no escalation). A tool that asks is written on the consent card
+//   (`card`, `cardView`, `run`, `render`; `kit/consent.ts`, docs/consent-card.md): its `run` is
+//   reached only through the card and the person's yes. A tool that asks and has no card, or one the
+//   card does not cover (a secret, traffic to the target, a level by argument), stays a scaffold.
 
 import * as z from 'zod';
 
@@ -23,7 +25,19 @@ import { ToolError } from '../errors.js';
 import type { OperationId } from '../http/generated/operations.js';
 import type { ToolOutcome } from '../outcome.js';
 import { formatInput, renderDataBlock } from '../render/dataBlock.js';
+import { isConsentCard, renderConsentCard } from '../render/consentCard.js';
 import { defineTool, type Tool, type ToolAnnotationHints } from '../registry.js';
+import {
+  asksConditionally,
+  asksOnACard,
+  runOnACard,
+  type Card,
+  type CardView,
+  type ConsentCardData,
+  type Proceed,
+  type Unchanged,
+  type Volatile,
+} from './kit/consent.js';
 
 /** An argument the catalog names for a tool: its name, its type and the state field it defaults to. */
 export interface CatalogArgument {
@@ -187,6 +201,37 @@ export type QuietMeta = ToolMeta & {
   };
 };
 
+/**
+ * The type of a catalog entry a tool on the consent card may have (`asksOnACard`): level 2 or 3,
+ * fixed (not by argument), no secret, no traffic to the target, no reason but a deletion, a schedule or an external service.
+ */
+export type ConsentMeta = ToolMeta & {
+  readonly secret: false;
+  readonly install_allow: false | null;
+  readonly consent: {
+    readonly level: 2 | 3;
+    readonly by_argument: null;
+    readonly target_traffic: null;
+    readonly level3_reason: null | 'delete' | 'schedule' | 'external';
+  };
+};
+
+/**
+ * The type of a catalog entry of a tool of level 1 that asks only when a call meets an escalation
+ * (`asksConditionally`): another level by argument (3), no secret, no traffic to the target.
+ */
+export type ConditionalMeta = ToolMeta & {
+  readonly secret: false;
+  readonly install_allow: false | null;
+  readonly consent: {
+    readonly level: 1;
+    readonly by_argument: { readonly level: 3 };
+    readonly escalate_to_3: readonly [string, ...string[]];
+    readonly target_traffic: null;
+    readonly level3_reason: null;
+  };
+};
+
 /** The `_meta` of a tool for `tools/list`; undefined when it has none. */
 export function toolMetaOf(meta: ToolMeta): Record<string, unknown> | undefined {
   return requiresUserInteraction(meta) ? { 'anthropic/requiresUserInteraction': true } : undefined;
@@ -230,12 +275,40 @@ export interface ModuleToolSpec<S extends Shape, D> extends ScaffoldSpec<S> {
   render(data: D, t: Translator, args: ModuleArgs<S>): string;
 }
 
+/**
+ * A tool that asks, written on the consent card (docs/consent-card.md): `card` reads what the call
+ * would do, `cardView` words it, `run` does it after the person's yes to exactly that card.
+ */
+export interface ConsentToolSpec<S extends Shape, C, D> extends ScaffoldSpec<S> {
+  /** Reads only (a write is refused). Throws to refuse before any question. */
+  card(ctx: ToolContext, args: ModuleArgs<S>): Promise<Card<C> | Unchanged<D>>;
+  /** The card in words: what will happen, on what, the cost when the tool has one, the undo. */
+  cardView(facts: C, t: Translator, volatile: Volatile): CardView;
+  run(ctx: ToolContext, args: ModuleArgs<S>, facts: C): Promise<ToolOutcome<D>>;
+  render(data: D, t: Translator, args: ModuleArgs<S>): string;
+}
+
+/**
+ * A tool of level 1 that asks only for the calls that meet an escalation of its entry: `card` reads
+ * the backend and answers `{ proceed: true }` when the call does not meet it (the tool then runs at
+ * once, `run` gets `null` facts and checks again what it must), else the card of the escalation. That
+ * answer may come from the facts it read, never from an argument the model left out.
+ */
+export interface ConditionalToolSpec<S extends Shape, C, D> extends ScaffoldSpec<S> {
+  card(ctx: ToolContext, args: ModuleArgs<S>): Promise<Card<C> | Unchanged<D> | Proceed>;
+  cardView(facts: C, t: Translator, volatile: Volatile): CardView;
+  run(ctx: ToolContext, args: ModuleArgs<S>, facts: C | null): Promise<ToolOutcome<D>>;
+  render(data: D, t: Translator, args: ModuleArgs<S>): string;
+}
+
 /** A tool of a module, with its catalog entry and whether the module wrote it. */
 export interface ModuleTool extends Tool {
   readonly module: ModuleName;
   readonly catalog: ToolMeta;
   /** False for a scaffold: registered, answering `not_implemented`, not offered to the client. */
   readonly implemented: boolean;
+  /** True for a tool written on the consent card: its `run` is reached only after the person's yes. */
+  readonly onCard: boolean;
 }
 
 /** `format: "data"`: the caller reads the data, not the view (a generic `args` cannot name the key). */
@@ -252,15 +325,34 @@ export function moduleTool<S extends Shape, D>(
   meta: QuietMeta,
   spec: ModuleToolSpec<S, D>,
 ): ModuleTool;
+/** A tool that asks, written on the consent card: `card`, `cardView`, `run` and `render`. */
+export function moduleTool<S extends Shape, C, D>(
+  meta: ConsentMeta,
+  spec: ConsentToolSpec<S, C, D>,
+): ModuleTool;
+/** A tool of level 1 that asks only for the calls that meet its escalation: see `ConditionalToolSpec`. */
+export function moduleTool<S extends Shape, C, D>(
+  meta: ConditionalMeta,
+  spec: ConditionalToolSpec<S, C, D>,
+): ModuleTool;
 /** Any tool as a scaffold: registered, answering `not_implemented`, not offered. */
 export function moduleTool<S extends Shape>(meta: ToolMeta, spec: ScaffoldOnly<S>): ModuleTool;
-export function moduleTool<S extends Shape, D>(
+export function moduleTool<S extends Shape, C, D>(
   meta: ToolMeta,
-  spec: ScaffoldSpec<S> | ModuleToolSpec<S, D>,
+  spec:
+    | ScaffoldSpec<S>
+    | ModuleToolSpec<S, D>
+    | ConsentToolSpec<S, C, D>
+    | ConditionalToolSpec<S, C, D>,
 ): ModuleTool {
   const input: InputOf<S> = z.strictObject({ ...spec.input, format: formatInput });
-  // the type keeps `run` from a tool that asks; a cast round it still leaves the tool a scaffold
-  const written = 'run' in spec && asksNothing(meta) ? spec : undefined;
+  // The types keep `run` from a tool that asks and `card` from a tool the card does not cover; a
+  // cast round them still leaves the tool a scaffold. A tool that asks runs only through its card.
+  const carded =
+    'run' in spec && 'card' in spec && (asksOnACard(meta) || asksConditionally(meta))
+      ? spec
+      : undefined;
+  const quiet = 'run' in spec && !('card' in spec) && asksNothing(meta) ? spec : undefined;
   const extra = toolMetaOf(meta);
   const tool = defineTool({
     name: meta.name,
@@ -269,14 +361,28 @@ export function moduleTool<S extends Shape, D>(
     input,
     annotations: annotationsOf(meta),
     ...(extra === undefined ? {} : { meta: extra }),
-    run: (ctx, args: ModuleArgs<S>) =>
-      written === undefined ? notImplemented() : written.run(ctx, args),
-    render: (data: D, t, args: ModuleArgs<S>) =>
-      asksForData(args) || written === undefined
-        ? renderDataBlock(data)
-        : written.render(data, t, args),
+    run: (ctx, args: ModuleArgs<S>): Promise<ToolOutcome<D | ConsentCardData<C>>> =>
+      carded !== undefined
+        ? runOnACard(meta, carded, ctx, args)
+        : quiet !== undefined
+          ? quiet.run(ctx, args)
+          : notImplemented(),
+    render: (data: D | ConsentCardData<C>, t, args: ModuleArgs<S>) => {
+      const written = carded ?? quiet;
+      if (asksForData(args) || written === undefined) return renderDataBlock(data);
+      if (carded !== undefined && isConsentCard(data)) {
+        return renderConsentCard(data, carded.cardView(data.card, t, data.volatile ?? {}), t);
+      }
+      return written.render(data as D, t, args);
+    },
   });
-  return { ...tool, module: meta.module, catalog: meta, implemented: written !== undefined };
+  return {
+    ...tool,
+    module: meta.module,
+    catalog: meta,
+    implemented: carded !== undefined || quiet !== undefined,
+    onCard: carded !== undefined,
+  };
 }
 
 /** The tools the server offers to the client: the written ones; a scaffold stays registered only. */

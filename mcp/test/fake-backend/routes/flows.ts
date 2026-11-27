@@ -3,9 +3,8 @@
 // carry `spec_status` the way the backend computes it for these two routes only: `unpinned` without a
 // pin, `current` when pinned to the project's active docs version (or the project has none),
 // `outdated` otherwise. `withoutSpecStatus` makes them answer as an older backend does (null). Answers and 404 texts
-// follow loadcraft @ d93e08d80 `backend/api/routes/project_flows.py` (list :321-349, detail
-// :352-367, version :858-901, summary :168-187, step count :142-165) and the tag filter of
-// `project_flow_repository.py:501-519`.
+// follow the backend's routes for flows (list, detail, version, summary, step count) and its tag
+// filter.
 
 import type { components } from '../../../src/http/generated/api.js';
 import { FakeHttpError, type Fake, type Store } from '../server.js';
@@ -172,6 +171,24 @@ export function registerFlowRoutes(fake: Fake): void {
       status: 200,
       body: { ...flow, spec_status: statusOf(store, flow), needs_input: needsOf(flow) },
     };
+  });
+
+  // The versions of a flow, newest first, as summaries (`flow_versions` holds the details a test seeds).
+  fake.route('GET', '/api/v1/projects/{project_id}/flows/{flow_id}/versions', (req, store) => {
+    const { project_id: projectId, flow_id: flowId } = req.params;
+    requireFlow(store, projectId, flowId);
+    const versions = store
+      .collection<FlowVersionDetail>(FLOW_COLLECTIONS.versions)
+      .list((item) => item.flow_id === flowId)
+      .sort((a, b) => b.version - a.version)
+      .map((item) => ({
+        id: item.id,
+        version: item.version,
+        change_reason: item.change_reason,
+        created_at: item.created_at,
+        created_by: item.created_by,
+      }));
+    return { status: 200, body: { versions, total: versions.length } };
   });
 
   fake.route(

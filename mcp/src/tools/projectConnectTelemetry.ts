@@ -2,6 +2,7 @@
 // diagnosis. The server is probed from the LoadCraft side first (nothing is stored when it does not
 // answer), then saved with the tools the backend will call.
 
+import type { ToolContext } from '../context.js';
 import * as z from 'zod';
 
 import { getCompat } from '../api/status.js';
@@ -20,6 +21,7 @@ import {
   type TelemetryToolView,
 } from '../render/views/setTelemetrySource.js';
 import { createResolver } from '../resolve/handles.js';
+import { content } from './moduleCall.js';
 
 /** Longest backend sentence quoted back to the model. */
 const DETAIL_LIMIT = 200;
@@ -74,6 +76,7 @@ function checkUrl(raw: string): void {
 
 /** The tools of the view: what the server offers, then enabled names it does not offer. */
 function toolViews(
+  ctx: ToolContext,
   offered: readonly TelemetryToolInfo[],
   enabled: readonly string[],
 ): TelemetryToolView[] {
@@ -82,7 +85,8 @@ function toolViews(
   const fromServer = offered.map((tool): TelemetryToolView => {
     const isOn = on.has(tool.name);
     return {
-      name: tool.name,
+      // the telemetry server's names are a third party's text, shown masked (FIX-76)
+      name: content(ctx, tool.name, 120),
       eligible: tool.eligible,
       enabled: isOn,
       ...(tool.eligible ? {} : { reason: 'extra_input' as const }),
@@ -91,7 +95,7 @@ function toolViews(
   const missing = enabled
     .filter((name) => !known.has(name))
     .map((name): TelemetryToolView => ({
-      name,
+      name: content(ctx, name, 120),
       eligible: false,
       enabled: true,
       reason: 'not_offered',
@@ -140,7 +144,7 @@ export const projectConnectTelemetry = defineTool({
     const data: TelemetryData = {
       label: args.label,
       connected: true,
-      tools: toolViews(offered, enabled),
+      tools: toolViews(ctx, offered, enabled),
       window: 'whole_run_±120s',
     };
     return { status: 'done', data };

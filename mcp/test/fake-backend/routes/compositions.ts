@@ -1,10 +1,9 @@
-// Composition writes of the fake backend: `POST …/gatling/compositions` and `PUT …/{id}`. The
-// reads (list, detail) belong to `routes/lookup.ts` and `routes/data.ts`. Rules and texts follow
-// loadcraft @ d93e08d80 `api/routes/gatling_compositions.py`: a unique name (409, `:539-543`), at
-// least one member (400, `:6569-6573`), members of this project (400 `Scenario not found`,
-// `:2054-2058`), a fraction per member that is not summed at write time (K.2 of the contract
-// notes), and a PUT whose `scenarios` list replaces the members — a member left out is removed,
-// fields left out of a kept member keep their values (`:1880-1898`). Registration is idempotent.
+// Composition writes of the fake backend: `POST …/gatling/compositions` and `PUT …/{id}`. The reads
+// (list, detail) belong to `routes/lookup.ts` and `routes/data.ts`. Rules and texts follow the
+// backend: a unique name (409), at least one member (400), members of this project (400 `Scenario
+// not found`), a fraction per member that is not summed at write time (K.2 of the contract notes),
+// and a PUT whose `scenarios` list replaces the members — a member left out is removed, fields left
+// out of a kept member keep their values. Registration is idempotent.
 
 import { FakeHttpError, type Fake, type Store } from '../server.js';
 import { createIdSource, createStore } from '../store.js';
@@ -29,6 +28,7 @@ interface CompositionBody {
   name?: string | null;
   description?: string | null;
   scenarios?: LinkBody[] | null;
+  injection_config?: Record<string, unknown> | null;
 }
 
 const registered = new WeakSet<Fake>();
@@ -127,6 +127,24 @@ function linksOf(
   });
 }
 
+/**
+ * The part of the stored verdict that depends on the members: their count and shares, and whether
+ * the enabled shares add up to one (the check a save runs).
+ */
+function verdictOf(
+  links: readonly SklepCompositionLink[],
+): Partial<SklepComposition['validation']> {
+  const total = links.reduce((sum, link) => sum + link.proportion, 0);
+  const sums = Math.abs(total - 1) < 0.0001;
+  return {
+    scenario_count: links.length,
+    total_proportion: total,
+    is_valid: sums,
+    authoring_valid: sums,
+    errors: sums ? [] : [`The shares add up to ${String(Math.round(total * 100))}%, not 100%`],
+  };
+}
+
 /** The members and the counts of the verdict that depend on them (timestamps stay the template's). */
 function withValidation(
   composition: SklepComposition,
@@ -137,8 +155,7 @@ function withValidation(
     scenarios: links,
     validation: {
       ...composition.validation,
-      scenario_count: links.length,
-      total_proportion: links.reduce((sum, link) => sum + link.proportion, 0),
+      ...verdictOf(links),
     },
   };
 }
@@ -162,14 +179,20 @@ export function registerCompositionRoutes(fake: Fake): void {
     const compositions = store.collection<SklepComposition>(SKLEP_COLLECTIONS.compositions);
     const id = compositions.get(composition.id) === undefined ? composition.id : store.newId();
     const created = withValidation(
-      { ...composition, id, name, description: body.description ?? '' },
+      {
+        ...composition,
+        id,
+        name,
+        description: body.description ?? '',
+        injection_config: body.injection_config ?? composition.injection_config,
+      },
       links,
     );
     compositions.insert(created);
     return { status: 201, body: { ...created } };
   });
 
-  // The composition's own pins (loadcraft @ 47a52b419 api/routes/gatling_compositions.py:7007): the
+  // The composition's own pins (as the backend keeps them): the
   // whole map is replaced; a slot no member declares and a dataset not in the project are refused.
   fake.route(
     'PUT',
@@ -222,6 +245,7 @@ export function registerCompositionRoutes(fake: Fake): void {
           ...saved,
           name: body.name ?? saved.name,
           description: body.description ?? saved.description,
+          injection_config: body.injection_config ?? saved.injection_config,
         },
         links,
       );

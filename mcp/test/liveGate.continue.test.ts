@@ -71,10 +71,14 @@ describe('the phrase of the plugin that asks for the same call again', () => {
     // A new text of this kind must be sorted here: finishing an operation (the gate repeats the
     // call), or asking the user first and then trying again after a failure or a consent (the gate
     // does not repeat it: a consent card is read by `consentOf`, a failure hint is not read at all).
+    // `consent.card.next` is the card of the module tools: the person confirms in a dialog of the
+    // client, there is no token, so `consentOf` does not read it; no scenario of the gate calls such a
+    // tool yet, and one that does needs its own reading of the card (not a repeated call).
     expect(asking).toEqual(
       [
         'build.har.advice.retry',
         'buildScenario.generationDone',
+        'consent.card.next',
         'data.card.next',
         'error.har_session_expired.hint',
         'error.har_split_interrupted.hint',

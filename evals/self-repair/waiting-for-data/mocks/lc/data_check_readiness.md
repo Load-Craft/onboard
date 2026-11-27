@@ -12,7 +12,7 @@ The recorded answers are the two blocks below. Choose one by the order of the ca
 Your reply is the tool result itself, read by a program. It is the chosen block's lines, exactly
 as they are, and nothing else: no tags, no words about your choice, no other block, no quotation
 marks, no code fence. The `plan` reply starts with `plan danych · 1 slot` and ends with `1. data_create_dataset scenario: "checkout", slot: "search_phrases"`; the `ready`
-reply starts with `plan danych · 1 slot` and ends with `każdy slot wypełniony · test może ruszyć`.
+reply starts with `plan danych · 1 slot` and ends with `run_plan z profilem`.
 
 <plan>
 plan danych · 1 slot
@@ -28,5 +28,6 @@ wywołanie, które go wypełni:
 plan danych · 1 slot
 Search terms (slot: search_phrases)  przypięty   q · Samples a model wrote ·
                                                  zakupy
-każdy slot wypełniony · test może ruszyć
+każdy slot przypięty i wypełniony · czy wierszy starczy na profil, sprawdza
+  run_plan z profilem
 </ready>

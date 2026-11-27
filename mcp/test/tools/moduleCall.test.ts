@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { HttpClient } from '../../src/http/client.js';
 import { createLogger } from '../../src/log.js';
-import { body, callBackend, content } from '../../src/tools/moduleCall.js';
+import { body, callBackend, callBackendFor, content } from '../../src/tools/moduleCall.js';
 import { CallSecretScope } from '../../src/workspace/secrets.js';
 import { CANARY } from '../helpers/canary.js';
 
@@ -41,6 +41,42 @@ describe('callBackend', () => {
     expect(seen).toEqual(['GET /api/v1/projects/{project_id}/agent-guidance']);
     expect(data).toEqual(answer);
     expect(secrets.scrub('the token tok-1234567890abcdef')).not.toContain('tok-1234567890abcdef');
+  });
+});
+
+describe('callBackendFor', () => {
+  const ctxOf = (http: HttpClient) => ({
+    services: { http, links: {} as never },
+    signal: new AbortController().signal,
+    secrets: scope(),
+  });
+  const input = { path: { project_id: '5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61' } };
+
+  it('gives the client the time limit of the call; callBackend leaves the default', async () => {
+    const limits: unknown[] = [];
+    const http = {
+      request(_method: string, _path: string, init: Record<string, unknown>) {
+        limits.push(init['timeoutMs']);
+        return Promise.resolve({ data: [], response: new Response(null, { status: 200 }) });
+      },
+    } as unknown as HttpClient;
+    await callBackendFor(ctxOf(http), 150_000, NOTES, input);
+    await callBackend(ctxOf(http), NOTES, input);
+    expect(limits).toEqual([150_000, undefined]);
+  });
+
+  it('refuses a limit of no time or of more than three minutes', () => {
+    const http = answering([]);
+    for (const limit of [0, -1, Number.NaN, 180_001, 3_600_000]) {
+      expect(() => callBackendFor(ctxOf(http), limit, NOTES, input)).toThrow(RangeError);
+    }
+  });
+
+  it('registers the secrets of the answer like callBackend', async () => {
+    const secrets = scope();
+    const http = answering([{ text: 'note', meta: { api_token: 'tok-1234567890abcdef' } }]);
+    await callBackendFor({ ...ctxOf(http), secrets }, 150_000, NOTES, input);
+    expect(secrets.scrub('tok-1234567890abcdef')).not.toContain('tok-1234567890abcdef');
   });
 });
 

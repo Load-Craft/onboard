@@ -165,7 +165,7 @@ export interface Fake {
   readonly calls: readonly FakeCall[];
   readonly faults: Faults;
   /**
-   * A task of one of the six WebSocket channels, behaving as the real channel does (see ws.ts);
+   * A task of one of the ten WebSocket channels, behaving as the real channel does (see ws.ts);
    * the same name and parameters give the same task. Needs a clock with `sleep`.
    */
   channel<C extends Channel>(name: C, params: ChannelParams<C>): ChannelStub<C>;

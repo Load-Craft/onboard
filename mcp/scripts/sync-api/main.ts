@@ -26,6 +26,7 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 
 import { standardNullable, type AsyncApiDocument } from '../gen-clients/model.ts';
+import { withoutExcludedOperations } from './excluded.ts';
 import { carryChannelMetadata, diffAsyncApi, surfaceOf, type AsyncChange } from './asyncDiff.ts';
 import { diffSpecs, type OperationChange, type Spec } from './diff.ts';
 import { findPluginRoutes, toolsReaching, type PluginRoute } from './routes.ts';
@@ -493,12 +494,14 @@ export async function sync(
     };
     try {
       if (options.source !== undefined) {
-        fetched =
+        const imported =
           options.source === 'url'
             ? await fetchSpec(options.target, token)
             : options.source === 'backend'
               ? fromBackend(resolve(options.target), scratch)
               : fromFile(options.target);
+        // The public snapshot never holds the excluded operations (`excluded.ts`).
+        fetched = { ...imported, spec: withoutExcludedOperations(imported.spec) };
       }
     } catch (error) {
       failure('rest', error);

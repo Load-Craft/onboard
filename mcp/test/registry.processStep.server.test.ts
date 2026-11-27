@@ -146,6 +146,7 @@ const BLOCKER = {
 let next: ProcessUpdateInput | undefined;
 const FLOWS_GET = stub('flows_get', () => ({
   checks: { flows: { questions_answered: { ok: true } } },
+  log: { values: { name: 'checkout', version: 1, steps: 3, needs_input: 0, definite: 0 } },
 }));
 const PROJECT_SAVE_ENV = stub('project_save_env', () => undefined);
 const PROJECT_CHECK_ENV = stub('project_check_env', () => next);

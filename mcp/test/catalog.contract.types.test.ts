@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, expectTypeOf, it } from 'vitest';
+import { EXCLUDED_OPERATIONS } from '../scripts/sync-api/excluded.js';
 import { CATALOG_CHANNEL_IDS, CATALOG_OPERATION_IDS } from '../src/catalog.generated.js';
 import type { operations } from '../src/http/generated/api.js';
 import { OPERATIONS, type OperationId } from '../src/http/generated/operations.js';
@@ -22,6 +23,8 @@ interface Catalog {
   excluded: { operations: Array<{ operationId: string }>; channels: Array<{ channel: string }> };
 }
 const catalog = JSON.parse(readFileSync(join(root, 'catalog', 'katalog.json'), 'utf8')) as Catalog;
+/** Operations the public snapshot leaves out: no client type, so no generated id either. */
+const leftOut = new Set(EXCLUDED_OPERATIONS.map((entry) => entry.operationId));
 
 describe('catalog.contract.types: the catalog and the generated clients name the same things', () => {
   it('the catalog operation ids are exactly the keys of operations, the channel ids exactly ChannelId (types)', () => {
@@ -46,7 +49,7 @@ describe('catalog.contract.types: the catalog and the generated clients name the
         m.tools.flatMap((t) => (t.operations ?? []).map((o) => o.operationId)),
       ),
       ...catalog.excluded.operations.map((o) => o.operationId),
-    ];
+    ].filter((id) => !leftOut.has(id));
     const channelIds = [
       ...catalog.modules.flatMap((m) => m.tools.flatMap((t) => t.channels ?? [])),
       ...catalog.excluded.channels.map((c) => c.channel),

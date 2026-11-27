@@ -4,9 +4,11 @@
 // The backend refuses to delete a project while a browser walk of it is still working (409
 // `run_not_finished`, nothing deleted); `refuseProjectDeletion` makes the fake answer so.
 
+import { functionalRunPage } from './functional.js';
 import type { components } from '../../../src/http/generated/api.js';
 import { FakeHttpError, type Fake, type Store } from '../server.js';
 import { FLOW_COLLECTIONS } from './flows.js';
+import { asyncapiSpecList } from './project.js';
 
 type ProjectDetail = components['schemas']['ProjectDetail'];
 type FlowDetail = components['schemas']['FlowDetail'];
@@ -100,11 +102,11 @@ export function registerDeletionRoutes(fake: Fake): void {
 
   fake.route('GET', '/api/v1/projects/{project_id}/asyncapi-specs', (req, store) => {
     requireProject(store, req.params.project_id);
-    return { status: 200, body: { specs: [], total: 0, current_spec_id: null } };
+    return { status: 200, body: asyncapiSpecList(store, req.params.project_id) };
   });
 
   fake.route('GET', '/api/v1/projects/{project_id}/executions', (req, store) => {
     requireProject(store, req.params.project_id);
-    return { status: 200, body: { executions: [], total: 0 } };
+    return { status: 200, body: functionalRunPage(store, req.query) as never };
   });
 }

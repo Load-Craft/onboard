@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`functional_get_validators > answers in Polish with every key of the view 1`] = `
+"walidator „JSON schema”
+nazwa      json_schema
+typ        assertion
+kategoria  structure
+stan       włączony
+priorytet  3
+powstał z  własny"
+`;
+
+exports[`functional_get_validators > answers in Polish with every key of the view 2`] = `
+"walidatory katalogu pasujące do projektu: 2 z 3
+http:
+  status_code  pasuje: every endpoint has a status
+  cookie_flags  nie pasuje: the project does not use cookies
+content:
+  body_contains  pasuje: responses have bodies"
+`;
+
+exports[`functional_get_validators > answers in Polish with every key of the view 3`] = `
+"przebieg obciążenia domyślnie egzekwuje walidatory na poziomie „warn”:
+  status_code: fail
+  response_time: warn"
+`;
+
+exports[`functional_get_validators > lists the validators by priority, in one request, and logs the count 1`] = `
+"5 validators:
+  1  status_code     http         assertion  enabled  custom
+  2  response_time   performance  assertion  enabled  custom
+  3  json_schema     structure    assertion  enabled  custom
+  4  body_contains   content      assertion  enabled  custom
+  5  header_present  http         assertion  enabled  custom"
+`;
+
+exports[`functional_get_validators > shows one validator by name (from the list) and by id (one read) 1`] = `
+"validator "JSON schema"
+name       json_schema
+type       assertion
+category   structure
+state      enabled
+priority   3
+made from  custom"
+`;

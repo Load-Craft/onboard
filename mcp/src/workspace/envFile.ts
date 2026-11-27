@@ -2,6 +2,7 @@
 // only the file path and key names; the password becomes a `Secret` and the file content is never
 // returned, logged or quoted in an error.
 
+import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
 import { ToolError } from '../errors.js';
 import { decodeUtf8, openChecked, readLimited, type FileLimit } from './fileRead.js';
@@ -225,4 +226,26 @@ export async function readEveryEnvValue(root: string, relPath: string): Promise<
   const values = [...parsed.values()].filter((value) => value !== '');
   parsed.clear();
   return values;
+}
+
+/**
+ * Every non-empty assignment of an env file inside `root`, each value added to `scope` (masked from
+ * then on), with the size and the sha256 of the text: what a card shows of the file (never a value).
+ */
+export async function readEnvEntries(
+  root: string,
+  relPath: string,
+  scope: SecretScope,
+): Promise<{ entries: Map<string, Secret>; shown: string; size: number; sha256: string }> {
+  const { text, shown } = await readEnvText(root, relPath);
+  const parsed = parseEnv(text);
+  const entries = new Map<string, Secret>();
+  for (const [key, value] of parsed) if (value !== '') entries.set(key, scope.add(value));
+  parsed.clear();
+  return {
+    entries,
+    shown,
+    size: Buffer.byteLength(text, 'utf8'),
+    sha256: createHash('sha256').update(text).digest('hex'),
+  };
 }

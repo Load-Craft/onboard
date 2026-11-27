@@ -693,12 +693,19 @@ describe.concurrent('npm run gate -- --fake --scenario describe', () => {
 });
 
 /** A copy of the built server with one rule of the plugin switched off. */
-async function brokenServer(from: string, to: string): Promise<string> {
-  const source = await readFile(join(ROOT, 'dist', 'server.mjs'), 'utf8');
-  expect(source.split(from).length - 1, `the built server holds ${from} once`).toBe(1);
+async function brokenServer(
+  from: string,
+  to: string,
+  more: readonly (readonly [string, string])[] = [],
+): Promise<string> {
+  let source = await readFile(join(ROOT, 'dist', 'server.mjs'), 'utf8');
+  for (const [one, other] of [[from, to] as const, ...more]) {
+    expect(source.split(one).length - 1, `the built server holds ${one} once`).toBe(1);
+    source = source.replace(one, other);
+  }
   const dir = await scratch();
   const file = join(dir, 'server.mjs');
-  await writeFile(file, source.replace(from, to));
+  await writeFile(file, source);
   return file;
 }
 
@@ -723,7 +730,12 @@ describe.concurrent(
     }, 300_000);
 
     it('a password in a request for help fails the gate instead of ending it as "needs a human"', async () => {
-      const server = await brokenServer('secrets: accountSecret,', '');
+      // the frame of the help request is masked when it arrives (FIX-77): the broken build drops that
+      // mask too, so the password reaches the answer and the gate has something to catch
+      const server = await brokenServer('secrets: accountSecret,', '', [
+        ['reason: shownText(ctx, frame.data.reason)', 'reason: frame.data.reason'],
+        ['agent_says: shownText(ctx, frame.data.agent_says)', 'agent_says: frame.data.agent_says'],
+      ]);
       const { run, report } = await describeRun([
         '--fake-fault',
         'describe-help',

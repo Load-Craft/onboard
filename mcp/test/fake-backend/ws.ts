@@ -1,4 +1,4 @@
-// WebSocket side of the fake backend: the six channels of contracts/ws-frames.json on the port of
+// WebSocket side of the fake backend: the ten channels of contracts/ws-frames.json on the port of
 // the HTTP fake, with the behaviour of the real channels (no history on connect, a refine job
 // cancelled after 45 s without a watcher, a HAR split abandoned when the socket goes, handshake
 // requirements) driven by the test clock. Every frame the fake sends is checked against the frame
@@ -260,6 +260,10 @@ const TERMINAL_TYPES: Record<Channel, ReadonlySet<string>> = {
   analysis: new Set(['gatling-analysis:complete', 'gatling-analysis:error']),
   har: new Set(['har:complete', 'har:error', 'har:cancelled']),
   describe: new Set(['complete', 'error', 'cancelled', 'interrupted']),
+  healthCheck: new Set(['complete', 'error', 'cancelled']),
+  testTypes: new Set(['test-types:complete', 'test-types:error']),
+  payloadGen: new Set(['payload-gen:complete', 'payload-gen:error']),
+  gatlingFeeder: new Set(['gatling-feeder:complete', 'gatling-feeder:error']),
 };
 
 function taskKey(name: Channel, params: Readonly<Record<string, string>>): string {
@@ -423,6 +427,14 @@ export function createWsLayer(options: WsLayerOptions): WsLayer {
         broadcast(task, frame);
         if (terminal) finish(task);
         return;
+      case 'healthCheck':
+      case 'testTypes':
+      case 'payloadGen':
+      case 'gatlingFeeder':
+        // Nothing is stored: a socket that connects after a frame was sent never sees it.
+        broadcast(task, frame);
+        if (terminal) finish(task);
+        return;
       case 'describe':
         if (frame.type === 'drive_snapshot') {
           // Only a socket that connects later is told the drive state.
@@ -507,6 +519,10 @@ export function createWsLayer(options: WsLayerOptions): WsLayer {
         return;
       case 'analysis':
       case 'har':
+      case 'healthCheck':
+      case 'testTypes':
+      case 'payloadGen':
+      case 'gatlingFeeder':
         return;
     }
   };
@@ -530,6 +546,8 @@ export function createWsLayer(options: WsLayerOptions): WsLayer {
     task.received.push(message);
     const type = isRecord(message) ? message['type'] : undefined;
     if (type === 'split_resume') delete task.proposal;
+    // The session is marked cancelled and answered with `cancelled`; a check already running is not stopped.
+    if (task.name === 'healthCheck' && type === 'cancel') emit(task, { type: 'cancelled' });
     for (const listener of task.listeners) listener(message);
   };
 
@@ -543,7 +561,15 @@ export function createWsLayer(options: WsLayerOptions): WsLayer {
     const key = taskKey(name, params);
     let task = tasks.get(key);
     if (task === undefined) {
-      if (name === 'scenario' || name === 'analysis' || name === 'har') {
+      if (
+        name === 'scenario' ||
+        name === 'analysis' ||
+        name === 'har' ||
+        name === 'healthCheck' ||
+        name === 'testTypes' ||
+        name === 'payloadGen' ||
+        name === 'gatlingFeeder'
+      ) {
         task = createTask(name, params);
       } else {
         if (name === 'refine') {

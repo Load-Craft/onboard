@@ -18,6 +18,7 @@ import { createProcessStore, type ProcessUpdateInput } from '../workspace/reduce
 import { bindProject } from '../workspace/rebind.js';
 import { checkDocuments, descriptionInputs, projectDescription } from './project/documents.js';
 import { address, strictFields } from './project/environments.js';
+import { content } from './moduleCall.js';
 
 /** Said when the call carries a field the tool does not know. */
 const INPUT_HINT =
@@ -57,6 +58,8 @@ type Input = z.infer<typeof input>;
 
 /** Longest name of an object the process keeps for display. */
 const MAX_LABEL = 120;
+/** A project name as the result, the binding and the label show it (the backend takes up to 200). */
+const PROJECT_NAME_LIMIT = 200;
 
 interface ProjectOutcome extends Named {
   readonly reused: boolean;
@@ -69,8 +72,10 @@ function sameName(ctx: ToolContext, projects: readonly Named[], name: string): N
     throw new ToolError('ambiguous', {
       params: {
         kind: ctx.t('resolve.kind.project'),
-        name,
-        candidates: matches.map((project) => `"${project.name}" (${project.id})`).join(', '),
+        name: content(ctx, name, 120),
+        candidates: matches
+          .map((project) => `"${content(ctx, project.name, 120)}" (${project.id})`)
+          .join(', '),
       },
     });
   }
@@ -157,7 +162,9 @@ export const projectCreate = defineTool({
     const description = await projectDescription(args, await checkDocuments(ctx, args));
     await getCompat(ctx);
 
-    const project = await ensureProject(ctx, args, description, first);
+    const ensured = await ensureProject(ctx, args, description, first);
+    // the name is shown, bound and labelled masked, its secrets registered (FIX-76)
+    const project = { ...ensured, name: content(ctx, ensured.name, PROJECT_NAME_LIMIT) };
     // Bound first: a call cut short later still finds its project next time.
     writeBinding(ctx.config.stateRoot, {
       url: ctx.config.appUrl,

@@ -4,6 +4,7 @@
 // detail, environment list) are `registerLookupRoutes` (`routes/lookup.ts`); a test of
 // the project setup registers both groups. Registration is idempotent per fake.
 
+import { seededSearchHits } from './project.js';
 import { isIP } from 'node:net';
 
 import type { components } from '../../../src/http/generated/api.js';
@@ -23,7 +24,7 @@ const WRITTEN_AT = '2026-11-22T10:00:00Z';
 const LATENCY_MS = { base_url: 42, frontend_url: 58 } as const;
 const MASK = '«masked»';
 const SEARCH_DEFAULT_LIMIT = 20;
-/** `q: str = Query(min_length=1, max_length=100)`, `limit` 1–50 (`dashboard.py:426-430`). */
+/** `q: str = Query(min_length=1, max_length=100)`, `limit` 1–50. */
 const SEARCH_QUERY_MAX = 100;
 
 const registered = new WeakSet<Fake>();
@@ -65,7 +66,7 @@ function requireProject(store: Store, id: string): ProjectDetail {
   return projects(store).require(id, `Project not found: ${id}`);
 }
 
-/** The environment of this project (`project_environments.py:846-870`: 404, then 400). */
+/** The environment of this project (the backend answers 404, then 400). */
 function requireEnvironment(store: Store, projectId: string, id: string): EnvironmentResponse {
   requireProject(store, projectId);
   const found = environments(store).require(id, `Environment not found: ${id}`);
@@ -75,14 +76,14 @@ function requireEnvironment(store: Store, projectId: string, id: string): Enviro
   return found;
 }
 
-/** A masked value sent back is refused before any write (`api/masking.py:46-88`). */
+/** A masked value sent back is refused before any write. */
 function refuseMask(body: unknown): void {
   if (JSON.stringify(body ?? null).includes(MASK)) {
     throw new FakeHttpError(422, { detail: 'A masked value cannot be saved; send the real value' });
   }
 }
 
-/** Only one default per project: setting one clears the rest (`project_environment_repository.py:47-49`). */
+/** Only one default per project: setting one clears the rest. */
 function makeDefault(store: Store, projectId: string, id: string): void {
   const collection = environments(store);
   for (const item of collection.list((e) => e.project_id === projectId)) {
@@ -125,7 +126,7 @@ function environmentRecord(
 }
 
 /**
- * What `validate_target_url` refuses (`domain/utils/ssrf.py:95-175`): the name `localhost` and IP
+ * What `validate_target_url` refuses: the name `localhost` and IP
  * literals that are loopback, private, unspecified or link-local. Host names are not resolved.
  */
 function privateTarget(host: string): boolean {
@@ -149,7 +150,7 @@ function privateTarget(host: string): boolean {
 }
 
 /**
- * One probe (`project_environments.py:1178-1323`). A private target is `blocked`; a host under the
+ * One probe. A private target is `blocked`; a host under the
  * reserved `.invalid` domain never resolves, so it is `unreachable`; anything else answers 200.
  */
 function probe(kind: 'base_url' | 'frontend_url', target: string): ConnectionProbeResult {
@@ -173,7 +174,7 @@ export function registerProjectRoutes(fake: Fake): void {
   if (registered.has(fake)) return;
   registered.add(fake);
 
-  // `dashboard.py:426-500`: case-insensitive substring of name or description, newest first.
+  // Search as the backend does it: case-insensitive substring of name or description, newest first.
   fake.route(
     'GET',
     '/api/v1/search',
@@ -186,6 +187,18 @@ export function registerProjectRoutes(fake: Fake): void {
         });
       }
       const q = raw.trim().toLowerCase();
+      // hits a test seeded (pages, flows, scenarios, runs besides projects): matched on title and subtitle
+      const seeded = seededSearchHits(store);
+      if (seeded !== undefined) {
+        const results = seeded
+          .filter(
+            (hit) =>
+              hit.title.toLowerCase().includes(q) || (hit.subtitle ?? '').toLowerCase().includes(q),
+          )
+          .slice(0, limit)
+          .map((hit) => ({ ...hit }));
+        return { status: 200, body: { results, total: results.length } };
+      }
       const results = projects(store)
         .list(
           (project) =>
@@ -206,7 +219,8 @@ export function registerProjectRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `projects.py:290-402`: refusals first, then the project, its first environment and the owner.
+  // As the backend's route for creating a project does: refusals first, then the project, its first
+  // environment and the owner.
   fake.route(
     'POST',
     '/api/v1/projects',
@@ -259,6 +273,14 @@ export function registerProjectRoutes(fake: Fake): void {
       const found = requireProject(store, id);
       const body = req.body as components['schemas']['UpdateProjectRequest'];
       refuseMask(body);
+      if (body.name && body.name !== found.name) {
+        const taken = projects(store).list((item) => item.name === body.name);
+        if (taken.length > 0) {
+          throw new FakeHttpError(400, {
+            detail: `Project with name "${body.name}" already exists`,
+          });
+        }
+      }
       const profile = body.project_profile;
       const updated = projects(store).update(found.id, {
         ...(body.name == null ? {} : { name: body.name }),
@@ -279,7 +301,7 @@ export function registerProjectRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_environments.py:772-823`.
+  // Creating an environment, as the backend's route does.
   fake.route(
     'POST',
     '/api/v1/projects/{project_id}/environments',
@@ -317,7 +339,7 @@ export function registerProjectRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_environments.py:1017-1090`: only the fields the request carries change; the fake
+  // Update as the backend does it: only the fields the request carries change; the fake
   // models the two this client sends, the protection flag and the workload caps.
   fake.route(
     'PUT',
@@ -339,7 +361,7 @@ export function registerProjectRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_environments.py:1094-1121`.
+  // The environment's default flag, as the backend's route does.
   fake.route(
     'POST',
     '/api/v1/projects/{project_id}/environments/{environment_id}/set-default',
@@ -359,7 +381,7 @@ export function registerProjectRoutes(fake: Fake): void {
     { auth: 'none' },
   );
 
-  // `project_environments.py:1330-1396`: the API address, then the frontend when set.
+  // Probe as the backend does it: the API address, then the frontend when set.
   fake.route(
     'POST',
     '/api/v1/projects/{project_id}/environments/{environment_id}/test-connection',

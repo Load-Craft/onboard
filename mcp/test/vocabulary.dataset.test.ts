@@ -11,6 +11,19 @@ import { ALL_TOOLS } from '../src/tools/index.js';
 
 const FEEDER = /feeder/iu;
 
+/** Argument names are client code the model must type (`feeder_bindings`); a text may name them. */
+const ARGUMENT_NAMES = [
+  ...new Set(
+    ALL_TOOLS.flatMap((tool) =>
+      Object.keys((z.toJSONSchema(tool.input) as { properties?: object }).properties ?? {}),
+    ).filter((name) => FEEDER.test(name)),
+  ),
+];
+
+function withoutArgumentNames(text: string): string {
+  return ARGUMENT_NAMES.reduce((rest, name) => rest.split(name).join(''), text);
+}
+
 /** Every text of a value: strings, the forms of a plural, nested descriptions. */
 function texts(value: unknown, path: string, out: [string, string][] = []): [string, string][] {
   if (typeof value === 'string') out.push([path, value]);
@@ -39,8 +52,14 @@ describe('the word feeder stays in the client code', () => {
       ...texts(pl, 'pl'),
       ...texts(paneEn, 'paneEn'),
       ...texts(panePl, 'panePl'),
-    ].filter(([, text]) => FEEDER.test(text));
+    ].filter(([, text]) => FEEDER.test(withoutArgumentNames(text)));
     expect(said).toEqual([]);
+  });
+
+  it('lets a text name an argument, but not use the word beside it (guards the exemption)', () => {
+    expect(ARGUMENT_NAMES).toContain('feeder_bindings');
+    expect(FEEDER.test(withoutArgumentNames('pass feeder_bindings'))).toBe(false);
+    expect(FEEDER.test(withoutArgumentNames('pass feeder_bindings to the feeder'))).toBe(true);
   });
 
   it('finds the word where it is (guards the guard)', () => {

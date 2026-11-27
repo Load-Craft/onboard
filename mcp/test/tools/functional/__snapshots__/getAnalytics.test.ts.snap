@@ -1,0 +1,83 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`functional_get_analytics > accuracy, trend and threshold name the validator by name (list first) or by id (one request) 1`] = `
+"validator "status_code" (assertion)
+executions        200
+pass rate         90.0% (180 / 20)
+retry rate        0.05
+average duration  12 ms
+common failure reasons:
+  - status 504
+suggested actions:
+  - Check the gateway timeout"
+`;
+
+exports[`functional_get_analytics > accuracy, trend and threshold name the validator by name (list first) or by id (one request) 2`] = `
+"trend of "status_code" over 7 days: declining
+  2026-11-25  95.0%  30 executions
+  2026-11-26  88.0%  28 executions"
+`;
+
+exports[`functional_get_analytics > accuracy, trend and threshold name the validator by name (list first) or by id (one request) 3`] = `
+"suggested threshold 0.82 (now 0.70)
+Most passes sit above 0.82
+  more_failures: 4.00"
+`;
+
+exports[`functional_get_analytics > answers in Polish with every key of the view 1`] = `
+"jakość walidatorów w ostatnich 30 dniach
+walidatory              5
+wykonania               440
+odsetek zaliczeń        91,0%
+niestabilne walidatory  1
+walidatory AI           0
+liczby pochodzą z: stored results
+pominięto: load runs
+1 niestabilny walidator:
+  response_time  niestabilność 0,62 w 140 przebiegach: Raise the limit or retry once
+    - passes at night, fails at noon
+1 wzorzec porażek:
+  status_code: 504  31 porażek, 7,0% przebiegów, korelacja 0,80
+    - Expected status 201, got 504"
+`;
+
+exports[`functional_get_analytics > answers in Polish with every key of the view 2`] = `
+"walidator „status_code” (assertion)
+wykonania         200
+odsetek zaliczeń  90,0% (180 / 20)
+odsetek ponowień  0,05
+średni czas       12 ms
+najczęstsze przyczyny porażek:
+  - status 504
+proponowane działania:
+  - Check the gateway timeout"
+`;
+
+exports[`functional_get_analytics > answers in Polish with every key of the view 3`] = `
+"trend „status_code” w 30 dniach: declining
+  2026-11-25  95,0%  30 wykonań
+  2026-11-26  88,0%  28 wykonań"
+`;
+
+exports[`functional_get_analytics > answers in Polish with every key of the view 4`] = `
+"proponowany próg 0,82 (teraz 0,70)
+Most passes sit above 0.82
+  more_failures: 4,00"
+`;
+
+exports[`functional_get_analytics > the dashboard gives the figures, where they come from and the top flaky validators and patterns 1`] = `
+"validator quality over the last 30 days
+validators        5
+executions        440
+pass rate         91.0%
+flaky validators  1
+AI validators     0
+figures from: stored results
+left out: load runs
+1 flaky validator:
+  response_time  flakiness 0.62 over 140 runs: Raise the limit or retry once
+    - passes at night, fails at noon
+1 failure pattern:
+  status_code: 504  31 failures, 7.0% of runs, correlation 0.80
+    - Expected status 201, got 504"
+`;

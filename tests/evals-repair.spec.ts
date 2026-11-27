@@ -278,7 +278,7 @@ describe('WaitingForDataGradersTestCase', () => {
     expect(data).toContain('the first call: the block `plan`');
     expect(data).toContain('brak danych,\n  data_create_dataset zrobi wiersze z kolumn slotu');
     expect(data).toContain('1. data_create_dataset scenario: "checkout", slot: "search_phrases"');
-    expect(data).toContain('każdy slot wypełniony · test może ruszyć');
+    expect(data).toContain('każdy slot przypięty i wypełniony');
     // The slot is plain data: the plan never offers accounts, so data_create_accounts is no way out.
     expect(data).not.toContain('data_create_accounts');
     const dataset = mock(caseName, 'data_create_dataset');

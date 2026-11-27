@@ -1,13 +1,13 @@
 // Reads behind `results_get_report`: the facts of one run (`GET …/gatling/executions/{id}`, the document
 // the verdict is made of), its stored result with the p95 time series (`…/result`) and the request
 // rows (`…/endpoints`). The backend sends the facts and leaves the sentence to the reader
-// (`gatling.py:12507-12512`); nothing here words anything. A run with no stored result, or one the
+// (in the execution document); nothing here words anything. A run with no stored result, or one the
 // metrics store cannot answer for, is a fact about the data, not a failure of the call.
 
 import * as z from 'zod';
 
 import { ToolError } from '../errors.js';
-import { LoadcraftApiError } from '../http/apiError.js';
+import { isRunNotFound, LoadcraftApiError } from '../http/apiError.js';
 import { PROFILE_TYPES, type Profile } from '../profiles/presets.js';
 import type { SeriesPoint } from '../report/breach.js';
 import type { ExecutionStatus, InvariantSummaryFact, VerdictInput } from '../report/verdict.js';
@@ -27,7 +27,7 @@ const ENDPOINTS_PATH = `${EXECUTION_PATH}/endpoints` as const;
 // ---- the run ----------------------------------------------------------------------------
 
 /**
- * One assertion of the exact SLA verdict (`domain/services/sla/evaluation.py:204-222`), cut to
+ * One assertion of the exact SLA verdict (`SlaAssertion`), cut to
  * what the report shows: what was measured, over which requests, against which bound.
  */
 export interface SlaAssertion {
@@ -304,7 +304,7 @@ export interface RunResult {
   readonly peakActiveUsers: number | null;
 }
 
-/** Seconds between two points of `time_series_data` (`prometheus_query.py:1402-1560`). */
+/** Seconds between two points of `time_series_data`. */
 export const RESULT_BUCKET_S = 5;
 
 const resultSchema = reads<ResponseOf<typeof RESULT_PATH, 'get'>>()(
@@ -332,11 +332,14 @@ function seriesState(source: string): SeriesState {
   return 'unreachable';
 }
 
-/** 502 and 503 mean the metrics store did not answer; 404, that the run left no result. */
+/**
+ * 502 and 503 mean the metrics store did not answer; 404, that the run left no result, unless it
+ * is the 404 of a run the project does not have (`isRunNotFound`), which stays an error.
+ */
 const metricsStoreDown = (error: unknown): boolean =>
   error instanceof LoadcraftApiError && (error.status === 502 || error.status === 503);
-const noDocument = (error: unknown): boolean =>
-  error instanceof LoadcraftApiError && error.status === 404;
+const noDocument = (error: unknown, executionId: string): boolean =>
+  error instanceof LoadcraftApiError && error.status === 404 && !isRunNotFound(error, executionId);
 
 const NOTHING: Percentiles = { p50: null, p95: null, p99: null };
 
@@ -358,7 +361,7 @@ export async function getRunResult(
       }),
     );
   } catch (error) {
-    if (noDocument(error)) return null;
+    if (noDocument(error, executionId)) return null;
     if (metricsStoreDown(error)) {
       return {
         requestsPerSecond: null,
@@ -436,7 +439,7 @@ export async function getRunRequests(
       }),
     );
   } catch (error) {
-    if (noDocument(error)) return { rows: [], seriesState: 'absent_unmeasured' };
+    if (noDocument(error, executionId)) return { rows: [], seriesState: 'absent_unmeasured' };
     if (metricsStoreDown(error)) return { rows: [], seriesState: 'unreachable' };
     throw error;
   }

@@ -4,6 +4,7 @@
 // set (addresses and a looser protection are never changed, only reported). Safe to repeat: an
 // environment is never created twice, and a duplicated one cannot be repaired through the API.
 
+import type { ToolContext } from '../context.js';
 import * as z from 'zod';
 
 import { getCompat } from '../api/status.js';
@@ -26,6 +27,7 @@ import {
   type EnvironmentState,
   type PlannedEnvironment,
 } from './project/environments.js';
+import { content } from './moduleCall.js';
 
 /** Said when the call carries a field the tool does not know. */
 const INPUT_HINT =
@@ -54,13 +56,15 @@ const input = strictFields(INPUT_HINT, {
 const MAX_LABEL = 120;
 
 function savedEnvironment(
+  ctx: ToolContext,
   state: EnvironmentState,
   headers: PlannedEnvironment['headerRefs'],
 ): SavedEnvironment {
   const { record } = state;
   const hasCaps = record.caps.maxVu !== undefined || record.caps.maxRps !== undefined;
   return {
-    name: record.name,
+    // the name is shown masked, its secrets registered (FIX-76)
+    name: content(ctx, record.name, 120),
     default: record.isDefault,
     protected: record.protected,
     created: state.created,
@@ -72,12 +76,15 @@ function savedEnvironment(
 }
 
 /** What the call changes in the process: the default environment, the names, and the check. */
-function savedUpdate(states: readonly EnvironmentState[]): ProcessUpdateInput {
+function savedUpdate(ctx: ToolContext, states: readonly EnvironmentState[]): ProcessUpdateInput {
   const fallback = states.find((state) => state.record.isDefault);
   return {
     ...(fallback === undefined ? {} : { ids: { env_id: fallback.record.id } }),
     labels: Object.fromEntries(
-      states.map((state) => [state.record.id, { name: state.record.name.slice(0, MAX_LABEL) }]),
+      states.map((state) => [
+        state.record.id,
+        { name: content(ctx, state.record.name, MAX_LABEL) },
+      ]),
     ),
     checks: { project: { env_saved: { ok: states.length > 0 } } },
   };
@@ -115,13 +122,13 @@ export const projectSaveEnv = defineTool({
     const states = await ensureEnvironments(ctx, project.id, planned);
     const data: SaveEnvData = {
       environments: states.map((state, index) =>
-        savedEnvironment(state, planned[index]?.headerRefs ?? []),
+        savedEnvironment(ctx, state, planned[index]?.headerRefs ?? []),
       ),
     };
     // headers set here may supply a key the generator asked for: the warning about it is closed
     const headersSet = planned.some((environment) => environment.headerRefs.length > 0);
     const cleared = headersSet ? needsInputCleared(ctx.state.process()) : undefined;
-    const saved = savedUpdate(states);
+    const saved = savedUpdate(ctx, states);
     return { status: 'done', data, update: mergeUpdates(saved, cleared) ?? saved };
   },
   render: renderSaveEnv,

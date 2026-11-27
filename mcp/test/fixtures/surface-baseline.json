@@ -489,29 +489,6 @@
       }
     },
     {
-      "name": "flows_get",
-      "title": "Flow outline",
-      "description": "Show one flow as a numbered outline: requests with the variables they use and create, pauses with their length and source, expected statuses, plus the flow version and the questions the generator left open. Read-only.",
-      "annotations": {
-        "readOnlyHint": true
-      },
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "flow": {
-            "type": "string",
-            "description": "Name of the flow, or its UUID."
-          },
-          "project": {
-            "description": "Project name or UUID; default: the project this repository is bound to.",
-            "type": "string"
-          }
-        },
-        "required": ["flow"],
-        "$schema": "https://json-schema.org/draft/2020-12/schema"
-      }
-    },
-    {
       "name": "flows_import_har",
       "title": "Import a HAR recording",
       "description": "Step 03: send a browser recording (.har, up to 100 MB) to LoadCraft and show what it found: requests kept and filtered as noise, the login, the action groups in the recording and the values passed between requests. The same file sent again is not uploaded twice. The recording may hold the user's session data: the result shows counts and names only. Takes up to a few minutes.",
@@ -1553,7 +1530,7 @@
           },
           "include_data": {
             "default": false,
-            "description": "Also check, for every profile, whether the composition has enough data for it (nine data checks; slower, off by default).",
+            "description": "Also check, for every profile, whether the composition or scenario has enough data for it (nine data checks; slower, off by default).",
             "type": "boolean"
           }
         },

@@ -74,19 +74,25 @@ export const RESULTS_GET_REPORT = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
     {
       name: 'compare_to',
-      type: 'uuid|baseline',
+      type: 'uuid|run_handle|baseline',
       from_state: 'choices.run.compare_to',
+      doc: 'The run to compare with (handle or UUID), or "baseline"; default: the choice of this workspace.',
     },
   ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_get_request`: Get one request's metrics and latency percentiles in a run. */
@@ -153,19 +159,35 @@ export const RESULTS_GET_REQUEST = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
     {
       name: 'request',
       type: 'string',
       from_state: null,
+      required: true,
+      max_length: 300,
+      doc: 'The request as the run names it (POST /checkout), as results_get_report lists it.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['series'],
+      max_items: 1,
+      from_state: null,
+      doc: '"series": the request over time, at the step of the run; without it, totals only.',
     },
   ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_get_errors`: Get the error groups of a run, or one group by hash. */
@@ -232,14 +254,19 @@ export const RESULTS_GET_ERRORS = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
   ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_get_traces`: Get request traces of a run (all or failed only), or one trace by id. Headers and bodies masked. */
@@ -313,8 +340,9 @@ export const RESULTS_GET_TRACES = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
   ],
   shows_content: {
@@ -322,8 +350,12 @@ export const RESULTS_GET_TRACES = {
     unrecognized: 'hidden_entirely',
   },
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_get_logs`: Get Gatling log lines of a run (masked, truncated). */
@@ -384,14 +416,35 @@ export const RESULTS_GET_LOGS = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
+    },
+    {
+      name: 'level',
+      type: 'enum',
+      enum: ['error', 'warn', 'info', 'debug'],
+      from_state: null,
+      doc: 'Only lines of this level: error, warn, info or debug.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many lines to return (1-200).',
     },
   ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_export_report`: Export the archived Gatling HTML report to a local folder and return its path. */
@@ -458,14 +511,27 @@ export const RESULTS_EXPORT_REPORT = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
+    },
+    {
+      name: 'overwrite',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: replace a report of this run exported earlier; without it an existing folder is refused.',
     },
   ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason:
+      'zapisuje pliki raportu lokalnie pod loadcraft/reports/<uchwyt>/ (ignorowane przez git); nic w backendzie się nie zmienia, więc klasa i poziom 1 zostają',
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_check_production`: Check a production-replay run: achieved load against the plan, and the think-time verdict. */
@@ -533,14 +599,19 @@ export const RESULTS_CHECK_PRODUCTION = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
   ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_compare_runs`: Compare two runs metric by metric; compare_to=baseline uses the pinned baseline. */
@@ -595,7 +666,7 @@ export const RESULTS_COMPARE_RUNS = {
       path: '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/baseline',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_execution_api_v1_projects__project_id__gatling_executions__execution_id__get'],
   channels: [],
   state_reads: ['ids.project_id', 'ids.run_id', 'choices.run.compare_to'],
   state_writes: [],
@@ -607,19 +678,33 @@ export const RESULTS_COMPARE_RUNS = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['errors'],
+      max_items: 1,
+      from_state: null,
+      doc: '"errors": the console errors only in one run and in both.',
     },
     {
       name: 'compare_to',
-      type: 'uuid|baseline',
+      type: 'uuid|run_handle|baseline',
       from_state: 'choices.run.compare_to',
+      doc: 'The run to compare with (handle or UUID), or "baseline" for the pinned baseline of this run; default: the choice of this workspace.',
     },
   ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_set_baseline`: Set a run as the baseline for its scenario and environment pair. */
@@ -686,14 +771,19 @@ export const RESULTS_SET_BASELINE = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
   ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `results_analyze_run`: Analyze why a run went as it did: returns the stored AI analysis, or starts one and waits. */
@@ -789,12 +879,17 @@ export const RESULTS_ANALYZE_RUN = {
   arguments: [
     {
       name: 'run_id',
-      type: 'uuid',
+      type: 'uuid|run_handle',
       from_state: 'ids.run_id',
+      doc: 'The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.',
     },
   ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

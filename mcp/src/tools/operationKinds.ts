@@ -14,18 +14,26 @@ import { testRunOperation } from './run/wait.js';
 import { selfCheckOperation } from './scenarioCheckSelf.js';
 import { accountProvisionOperation } from './dataCreateAccounts/operation.js';
 import { refineOperation } from './flowsSuggestJourneys.js';
+import { payloadsOperation } from './functional/generatePayloads.js';
+import { testTypesOperation } from './functional/testTypesRun.js';
+import { datasetGenerationOperation } from './data/generateDataset.js';
+import { driftCheckOperation } from './scenario/checkDrift.js';
 
 export const ALL_OPERATION_KINDS: readonly AnyOperationKind[] = [
   accountProvisionOperation,
   analysisKind,
   batchGenerationOperation,
+  datasetGenerationOperation,
+  driftCheckOperation,
   flowGenerationOperation,
   harGenerationOperation,
   harSplitOperation,
+  payloadsOperation,
   recordRunOperation,
   refineOperation,
   scenarioGenerationOperation,
   selfCheckOperation,
   setupAnalysisOperation,
   testRunOperation,
+  testTypesOperation,
 ];

@@ -13,6 +13,7 @@ import {
   markedOldDocs,
   MAX_MARKED_FLOWS,
   MAX_MARKED_RUNS,
+  READ_FIELD,
   RUN_LIST,
   STEP_LIST,
   comparePair,
@@ -72,6 +73,33 @@ const row = (children: readonly ListsNode[], columnGap = 2): ListsBox => ({
   props: { flexDirection: 'row', columnGap },
   children,
 });
+
+const PLAIN_CODE = /^[a-z][a-z0-9_]{0,63}$/u;
+
+/**
+ * The sentence of a failed read with its reason in one word or a code (`Loaded.why`): never any text
+ * of the answer. Without a reason, the sentence alone.
+ */
+function failedText(
+  t: Translator,
+  key: string,
+  what: keyof typeof READ_FIELD,
+  why: string | undefined,
+): TreeText {
+  const sentence = t(key);
+  if (why === undefined) return text(sentence, { color: 'error' });
+  const code = why.startsWith('code:') ? why.slice(5) : undefined;
+  const reason =
+    code !== undefined
+      ? `[${PLAIN_CODE.test(code) ? code : 'error'}]`
+      : why === 'missing'
+        ? t('pane.read.missing', { field: READ_FIELD[what] })
+        : t(
+            `pane.read.${why === 'busy' || why === 'exception' || why === 'bad_answer' ? why : 'exception'}`,
+          );
+  const full = t('pane.read.failed', { sentence: sentence.replace(/\.$/u, ''), reason });
+  return text(full, { color: 'error' });
+}
 
 function retry(key: string, list: string, t: Translator): ListButton {
   return {
@@ -174,7 +202,10 @@ function stepsNodes(panel: PanelData, flow: string, t: Translator, hotkeys: bool
     panel.outline?.flow === flow ? panel.outline : undefined;
   if (outline === undefined) return [text(t('pane.steps.loading'), dim)];
   if (outline.failed === true) {
-    return [text(t('pane.steps.failed'), { color: 'error' }), retry('steps-retry', STEP_LIST, t)];
+    return [
+      failedText(t, 'pane.steps.failed', 'outline', outline.why),
+      retry('steps-retry', STEP_LIST, t),
+    ];
   }
   if (outline.steps.length === 0) return [text(t('pane.steps.none'), dim)];
   const spec: ListSpec = {
@@ -221,7 +252,7 @@ export function flowsBlock(panel: PanelData, t: Translator, hotkeys: boolean): L
     return [
       blank,
       title,
-      text(t('pane.flows.failed'), { color: 'error' }),
+      failedText(t, 'pane.flows.failed', 'flows', flows.why),
       retry('flows-retry', FLOW_LIST, t),
     ];
   }
@@ -329,7 +360,7 @@ export function runsBlock(panel: PanelData, t: Translator, hotkeys: boolean): Li
   if (runs.failed === true && runs.items.length === 0) {
     return [
       title,
-      text(t('pane.runs.failed'), { color: 'error' }),
+      failedText(t, 'pane.runs.failed', 'runs', runs.why),
       retry('runs-retry', RUN_LIST, t),
       blank,
     ];

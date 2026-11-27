@@ -33,7 +33,7 @@ import { ToolError } from '../errors.js';
 import { OLD_DOCS_CODE, oldDocsUpdate, outdatedFlows, specStatusOf } from '../flow/oldDocs.js';
 import { LoadcraftApiError } from '../http/apiError.js';
 import { requireCapability } from '../http/compat.js';
-import { callOperation, type OpOutput } from '../http/operation.js';
+import { callOperation, type OpOutput, settleAll } from '../http/operation.js';
 import type { DoneOutcome } from '../outcome.js';
 import { defineTool } from '../registry.js';
 import {
@@ -47,6 +47,7 @@ import {
 } from '../render/views/migrateDocs.js';
 import { createResolver, type Resolver } from '../resolve/handles.js';
 import type { ProcessUpdateInput } from '../workspace/reducer.js';
+import { content } from './moduleCall.js';
 
 const TOOL = 'flows_migrate_docs';
 const CAPABILITY = 'flows_spec_migration';
@@ -202,7 +203,7 @@ async function namedFlows(
   names: readonly string[],
   rows: readonly FlowRow[],
 ): Promise<{ id: string; name: string; version: number | null }[]> {
-  const picked = await Promise.all(
+  const picked = await settleAll(
     names.map(async (wanted) => {
       const hits = rows.filter((row) => same(row.id, wanted) || same(row.name, wanted));
       const [only] = hits;
@@ -480,7 +481,7 @@ export const flowsMigrateDocs = defineTool({
     await requireCapability(ctx.services.http, CAPABILITY, ctx.t('migrateDocs.capabilityAdvice'));
     const resolver = createResolver(ctx);
     const project = await resolver.project(args.project);
-    const [docs, listed] = await Promise.all([
+    const [docs, listed] = await settleAll([
       listDocs(ctx, project.id),
       listFlowPage(ctx, project.id),
     ]);
@@ -528,12 +529,12 @@ export const flowsMigrateDocs = defineTool({
         : shown !== undefined
           ? Object.keys(shown.versions).map((id) => ({
               id,
-              name: names.get(id) ?? id,
+              name: content(ctx, names.get(id) ?? id, 120),
               version: shown.versions[id] ?? null,
             }))
           : onOtherDocs(rows, target, current).map((row) => ({
               id: row.id,
-              name: row.name,
+              name: content(ctx, row.name, 120),
               version: row.current_version,
             }));
 
@@ -584,7 +585,8 @@ export const flowsMigrateDocs = defineTool({
     // no preview, as the list has them now), the target, the values and allow_unmatched.
     const frozen: Frozen = {
       flow_ids: flowIds,
-      names: Object.fromEntries(chosen.map((flow) => [flow.id, flow.name])),
+      // shown and frozen in the card: masked, deterministically (FIX-76)
+      names: Object.fromEntries(chosen.map((flow) => [flow.id, content(ctx, flow.name, 120)])),
       target_spec_id: target,
       adopt_values: args.adopt_values ?? 'none',
       adopt_value_ids: [...new Set(args.adopt_value_ids ?? [])].sort(),
@@ -600,7 +602,7 @@ export const flowsMigrateDocs = defineTool({
     const data: MigrateDocsData = {
       kind: 'card',
       n: chosen.length,
-      flows: chosen.map((flow) => flow.name),
+      flows: chosen.map((flow) => content(ctx, flow.name, 120)),
       target: targetView,
       current: current === null ? null : versionOf(docs, current),
       adopt: adoptChoice(args),

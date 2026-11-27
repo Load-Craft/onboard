@@ -1,8 +1,8 @@
-// Run starts of the fake backend: `POST …/gatling/compositions/{id}/execute` and
-// `POST …/gatling/executions`. The fake starts exactly the load it is sent, without looking at the
-// limits of the environment, so a test reads from `startedRuns` the load the plugin asked for. The workload is checked as `WorkloadBody` checks it (`extra='forbid'`,
-// `api/routes/gatling.py:974-1082`); unknown keys at the top level are ignored, as the backend
-// ignores them. Registration is idempotent per fake.
+// Run starts of the fake backend: `POST …/gatling/compositions/{id}/execute` and `POST
+// …/gatling/executions`. The fake starts exactly the load it is sent, without looking at the limits
+// of the environment, so a test reads from `startedRuns` the load the plugin asked for. The
+// workload is checked as `WorkloadBody` checks it (`extra='forbid'`); unknown keys at the top level
+// are ignored, as the backend ignores them. Registration is idempotent per fake.
 
 import type { Clock } from '../../../src/ops/clock.js';
 import type { Fake } from '../server.js';

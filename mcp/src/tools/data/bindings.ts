@@ -12,18 +12,20 @@ import type { ToolContext } from '../../context.js';
 import { ToolError } from '../../errors.js';
 import type { BoundSlot } from '../../render/views/data.js';
 import type { RunTarget } from '../../resolve/handles.js';
+import { content } from '../moduleCall.js';
 import { readTarget, type TargetRead } from './readPlan.js';
 import { datasetRef, ownPicks } from './steps.js';
 
 /** How many names an error lists. */
 const LISTED = 10;
+const NAME_LIMIT = 120;
 
 const sameMap = (a: Readonly<Record<string, string>>, b: Readonly<Record<string, string>>) =>
   Object.keys(a).length === Object.keys(b).length &&
   Object.entries(a).every(([key, value]) => b[key] === value);
 
 /** The dataset a call names: its id, or a name no other dataset of the project has. */
-function datasetOf(datasets: readonly Dataset[], wanted: string): Dataset {
+function datasetOf(ctx: ToolContext, datasets: readonly Dataset[], wanted: string): Dataset {
   const name = wanted.trim();
   const byId = datasets.find((item) => item.id === name);
   if (byId !== undefined) return byId;
@@ -31,10 +33,11 @@ function datasetOf(datasets: readonly Dataset[], wanted: string): Dataset {
   if (byName.length === 1 && byName[0] !== undefined) return byName[0];
   throw new ToolError(byName.length > 1 ? 'dataset_ambiguous' : 'dataset_unknown', {
     params: {
-      dataset: name,
+      // what the model typed and the names from the backend are shown masked (FIX-74)
+      dataset: content(ctx, name, NAME_LIMIT),
       available: datasets
         .slice(0, LISTED)
-        .map((item) => item.name)
+        .map((item) => content(ctx, item.name, NAME_LIMIT))
         .join(', '),
     },
   });
@@ -64,7 +67,7 @@ export async function setBindings(
     if (!slotKeys.includes(slot)) {
       throw new ToolError('slot_unknown', { params: { slot, available: slotKeys.join(', ') } });
     }
-    const dataset = datasetOf(read.datasets, name);
+    const dataset = datasetOf(ctx, read.datasets, name);
     next[slot] = dataset.id;
     picked.set(slot, dataset);
   }

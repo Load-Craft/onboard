@@ -52,6 +52,8 @@ import {
 import { ALL_TOOLS, LEGACY_TOOLS } from '../../src/tools/index.js';
 import {
   asksNothing,
+  cardCovers,
+  catalogEntries,
   catalogEntry,
   expectCatalogEntry,
   expectedAnnotations,
@@ -200,11 +202,26 @@ describe('module tools: registered, implemented or not', () => {
 });
 
 describe('module tools: fail-closed on consent', () => {
-  it('no tool of a module the server offers would need a consent card', () => {
+  it('a tool of a module the server offers asks nothing, or is written on the consent card', () => {
     for (const tool of EXPOSED_MODULE_TOOLS) {
       const found = catalogEntry(tool.name);
-      expect(found !== undefined && asksNothing(found.entry), `${tool.name} asks`).toBe(true);
+      expect(found, tool.name).toBeDefined();
+      if (found === undefined) continue;
+      if (asksNothing(found.entry)) {
+        expect(tool.onCard, `${tool.name} asks nothing: it takes no card`).toBe(false);
+        continue;
+      }
+      // its `run` is reached only through the card and the person's yes (tools/kit/consent.ts)
+      expect(tool.onCard, `${tool.name} asks: it must be written on the consent card`).toBe(true);
+      expect(cardCovers(found.entry), `${tool.name} is outside what the card covers`).toBe(true);
     }
+  });
+
+  it('no tool that asks is pre-allowed at install, in the whole catalog', () => {
+    const preAllowed = catalogEntries()
+      .filter((entry) => !asksNothing(entry) && entry.install_allow === true)
+      .map((entry) => entry.name);
+    expect(preAllowed).toEqual([]);
   });
 
   it('a tool that asks stays a scaffold, even when a cast gives it run', async () => {
@@ -214,7 +231,7 @@ describe('module tools: fail-closed on consent', () => {
       run: () => Promise.resolve({ status: 'done' as const, data: { written: true } }),
       render: () => 'written',
     };
-    // @ts-expect-error a tool of level 2 takes no run: this layer has no consent card for it yet
+    // @ts-expect-error a tool of level 2 takes no run without a card (tools/kit/consent.ts)
     const typed = moduleTool(PROJECT_CREATE, spec);
     const cast = moduleTool(PROJECT_CREATE as unknown as QuietMeta, spec);
     for (const tool of [typed, cast]) {

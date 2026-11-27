@@ -24,8 +24,9 @@ import { createResolver } from '../resolve/handles.js';
 import { MIN_SECRET_LENGTH } from '../security/mask.js';
 import { isSecretField, secretFieldValues } from '../security/secretFields.js';
 import { openAllowed, readBytesAllowed, type AllowedFile } from '../workspace/uploads.js';
+import { content } from './moduleCall.js';
 
-/** The backend keeps a HAR session for 2 h (`har_session_store.py:31`); the plugin trusts 110 min. */
+/** The backend keeps a HAR session for 2 h; the plugin trusts 110 min. */
 const SESSION_TTL_MS = 110 * 60_000;
 /** A gateway failure after at least this long comes from a proxy with the default 60 s limit. */
 const PROXY_LIMIT_MS = 55_000;
@@ -35,7 +36,7 @@ const TICK_MS = 1000;
 const LISTED = 10;
 /**
  * A correlation is accepted automatically above this confidence
- * (`har_models.py:376` `confidence_level`, `CorrelationPreview.tsx:20`, backend `d93e08d80`).
+ * (`confidence_level`, as the frontend's correlation preview reads it).
  */
 const ACCEPTED_ABOVE = 0.8;
 
@@ -178,7 +179,7 @@ function warningsOf(
     code === 'sanitized_har_export' ? SANITIZED : code,
   );
   // Generation is refused when bodies were declared but absent and no response carries one
-  // (`flow_postprocessor.py:244` `sanitized_export_refusal`, backend `d93e08d80`).
+  // (`sanitized_export_refusal`).
   if (analysis.strippedResponseBodyRatio > 0 && analysis.responseBodyRatio === 0) {
     codes.push(SANITIZED);
   }
@@ -388,7 +389,12 @@ export async function importRecording(
   );
   const environment = await getDefaultEnvironment(ctx, projectId);
   // A name the backend made from the recording can hold one of its credentials: masked, not refused.
-  const data = ctx.secrets.scrubDeep(describe(upload, analysis, size, environment));
+  const described = describe(upload, analysis, size, environment);
+  // the generator's names of the paths are shown masked, their secrets registered (FIX-76)
+  const data = ctx.secrets.scrubDeep({
+    ...described,
+    paths: described.paths.map((name) => content(ctx, name, 120)),
+  });
   await ctx.state.set('harSessions', key, { sessionId: upload.sessionId, data });
   return { projectId, sessionId: upload.sessionId, name, reused: false, data, key, secrets };
 }

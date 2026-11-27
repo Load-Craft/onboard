@@ -141,6 +141,8 @@ export interface RunRow {
 export interface Loaded<T> {
   readonly stamp: string;
   readonly failed?: true;
+  /** Why the read failed (`readFailure` in pane/lists.ts): a kind, or `code:<code>` of an error answer. */
+  readonly why?: string;
   readonly items: readonly T[];
   /** Entries the status did not list (it lists the first 20). */
   readonly more: number;
@@ -168,6 +170,8 @@ export interface StepFact {
 export interface OutlineFacts {
   readonly flow: string;
   readonly failed?: true;
+  /** Why the read failed, as `Loaded.why`. */
+  readonly why?: string;
   readonly steps: readonly StepFact[];
   /** Every step the flow has, listed or not. */
   readonly total: number;

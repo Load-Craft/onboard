@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`functional_get_catalog > answers in Polish with every key of the view 1`] = `
+"2 pozycje katalogu bazowych typów testów:
+  negative_testing  negative    aktywny     wbudowany
+  edge_cases        edge        nieaktywny  wbudowany
+kategorie: negative, edge"
+`;
+
+exports[`functional_get_catalog > answers in Polish with every key of the view 2`] = `
+"bazowych walidatorów: „Status code”
+nazwa      status_code
+kategoria  http
+stan       aktywny, wbudowany
+rodzaj     assertion
+opis       The status equals the expected one
+parametry  expected"
+`;
+
+exports[`functional_get_catalog > lists a catalog with its categories, in one request without a project 1`] = `
+"2 entries of the base test types:
+  negative_testing  negative    active    built in
+  edge_cases        edge        inactive  built in
+categories: negative, edge"
+`;
+
+exports[`functional_get_catalog > reads one entry by id; for assertion types also by name; the prompt itself is never read 1`] = `
+"assertion types: "Equals"
+name         equals
+category     comparison
+state        active, built in
+description  Equal values
+parameters   expected, path"
+`;
+
+exports[`functional_get_catalog > the validators list carries the kind of each validator; assertion types are cut by limit 1`] = `
+"1 entry of the base validators:
+  status_code  http  assertion  active  built in
+categories: http"
+`;

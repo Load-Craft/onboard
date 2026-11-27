@@ -1,6 +1,18 @@
 {
   "tools": [
     {
+      "name": "data_ask_copilot",
+      "title": "Ask the data hub copilot in free form",
+      "params": [
+        "composition_id",
+        "format",
+        "message",
+        "profile",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
       "name": "data_check_readiness",
       "title": "Check the test data of a scenario",
       "params": [
@@ -41,12 +53,116 @@
       "fields": []
     },
     {
+      "name": "data_delete",
+      "title": "Delete a dataset",
+      "params": [
+        "dataset_id",
+        "force",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_generate_dataset",
+      "title": "Generate and save a dataset with AI for a flow",
+      "params": [
+        "enrich_with_llm",
+        "feeder_type",
+        "flow_id",
+        "format",
+        "name",
+        "rows",
+        "scenario_id",
+        "slot"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_get_copilot_history",
+      "title": "Get the project's data hub conversation",
+      "params": [
+        "format",
+        "limit"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_get_dataset",
+      "title": "Get a dataset",
+      "params": [
+        "dataset_id",
+        "format",
+        "include",
+        "offset",
+        "rows"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_get_generators",
+      "title": "Get the column generators for dataset rules",
+      "params": [
+        "columns",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_get_slots",
+      "title": "Get the data slots of a scenario or composition with compat…",
+      "params": [
+        "composition_id",
+        "format",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_list_datasets",
+      "title": "List the project's datasets",
+      "params": [
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_regenerate_dataset",
+      "title": "Regenerate a dataset's rows from its recipe",
+      "params": [
+        "dataset_id",
+        "format",
+        "mode",
+        "rows"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_restore_dataset",
+      "title": "Restore a dataset's previous content",
+      "params": [
+        "dataset_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
       "name": "data_set_bindings",
       "title": "Set the datasets of the data slots",
       "params": [
         "bindings",
         "project",
         "scenario"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_set_slot_label",
+      "title": "Set the display label of a scenario's data slot",
+      "params": [
+        "format",
+        "label",
+        "scenario_id",
+        "slot"
       ],
       "fields": []
     },
@@ -58,6 +174,40 @@
         "environment",
         "project",
         "scenario"
+      ],
+      "fields": []
+    },
+    {
+      "name": "data_update_dataset",
+      "title": "Update a dataset's definition or replace its rows from a file",
+      "params": [
+        "dataset_id",
+        "description",
+        "file",
+        "format",
+        "name"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_apply_copilot_changes",
+      "title": "Apply the accepted copilot changes to a flow as one new ver…",
+      "params": [
+        "accept",
+        "flow_id",
+        "format",
+        "message_id",
+        "reject"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_ask_copilot",
+      "title": "Ask the flow copilot for changes to a flow",
+      "params": [
+        "flow_id",
+        "format",
+        "message"
       ],
       "fields": []
     },
@@ -89,6 +239,30 @@
         "from_env",
         "password_key"
       ]
+    },
+    {
+      "name": "flows_duplicate",
+      "title": "Duplicate flows, or copy one flow onto another docs version",
+      "params": [
+        "docs_id",
+        "flow_ids",
+        "format",
+        "name"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_export_walk_image",
+      "title": "Export a walk image to a local file",
+      "params": [
+        "attempt",
+        "format",
+        "overwrite",
+        "path_index",
+        "still_id",
+        "walk_id"
+      ],
+      "fields": []
     },
     {
       "name": "flows_generate_from_endpoints",
@@ -127,10 +301,43 @@
     },
     {
       "name": "flows_get",
-      "title": "Flow outline",
+      "title": "Get one flow as a numbered outline with variables",
       "params": [
-        "flow",
-        "project"
+        "flow_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_get_copilot_history",
+      "title": "Get a flow's copilot conversation",
+      "params": [
+        "flow_id",
+        "format",
+        "limit",
+        "suggestions"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_get_versions",
+      "title": "Get a flow's stored versions",
+      "params": [
+        "flow_id",
+        "format",
+        "limit",
+        "version"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_get_walks",
+      "title": "Get description runs",
+      "params": [
+        "format",
+        "include",
+        "limit",
+        "walk_id"
       ],
       "fields": []
     },
@@ -140,6 +347,26 @@
       "params": [
         "file",
         "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_list",
+      "title": "List the project's flows",
+      "params": [
+        "format",
+        "limit",
+        "query"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_merge",
+      "title": "Merge several flows into one new flow",
+      "params": [
+        "flow_ids",
+        "format",
+        "name"
       ],
       "fields": []
     },
@@ -169,6 +396,67 @@
       "fields": []
     },
     {
+      "name": "flows_regenerate",
+      "title": "Regenerate a flow from its recorded sources",
+      "params": [
+        "description",
+        "flow_id",
+        "format",
+        "skip_validators"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_restore_version",
+      "title": "Restore an older flow version as the newest one",
+      "params": [
+        "flow_id",
+        "format",
+        "reason",
+        "version"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_save",
+      "title": "Save a flow from blocks",
+      "params": [
+        "description",
+        "drop_steps",
+        "flow_id",
+        "format",
+        "graph",
+        "name",
+        "reason"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_save_walk_note",
+      "title": "Save a note at a step of a walk",
+      "params": [
+        "format",
+        "note_id",
+        "remember",
+        "step",
+        "text",
+        "walk_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "flows_set_poll_terminals",
+      "title": "Set the success and failure terminal statuses that answer a…",
+      "params": [
+        "failure_terminals",
+        "field",
+        "flow_id",
+        "format",
+        "success_terminals"
+      ],
+      "fields": []
+    },
+    {
       "name": "flows_suggest_journeys",
       "title": "Suggest user journeys",
       "params": [
@@ -176,6 +464,351 @@
         "max_wait_s",
         "project",
         "refine"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_compare_runs",
+      "title": "Compare two functional runs block by block",
+      "params": [
+        "format",
+        "other",
+        "run_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_delete",
+      "title": "Delete a functional item",
+      "params": [
+        "format",
+        "item_id",
+        "kind"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_generate_payloads",
+      "title": "Generate request payloads for flows and test types",
+      "params": [
+        "file",
+        "flow_ids",
+        "format",
+        "test_types"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_generate_test_types",
+      "title": "Generate the missing base test types",
+      "params": [
+        "format",
+        "include_categories"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_analytics",
+      "title": "Get validator quality over N days",
+      "params": [
+        "days",
+        "format",
+        "threshold_pct",
+        "validator",
+        "view"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_catalog",
+      "title": "Get the global catalog of base test types",
+      "params": [
+        "category",
+        "entry_id",
+        "format",
+        "is_active",
+        "kind",
+        "limit"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_flows",
+      "title": "Get functional test flows",
+      "params": [
+        "docs_id",
+        "flow",
+        "format",
+        "limit",
+        "view"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_results",
+      "title": "Get the results of a functional run",
+      "params": [
+        "format",
+        "limit",
+        "log_type",
+        "result_id",
+        "run_id",
+        "view"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_runs",
+      "title": "Get functional runs",
+      "params": [
+        "format",
+        "limit",
+        "offset",
+        "run_id",
+        "status",
+        "template",
+        "type",
+        "view"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_templates",
+      "title": "Get functional test templates",
+      "params": [
+        "docs_id",
+        "format",
+        "limit",
+        "tags",
+        "template"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_test_types",
+      "title": "Get the project's test types",
+      "params": [
+        "format",
+        "is_enabled",
+        "test_type",
+        "view"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_get_validators",
+      "title": "Get the project's validators",
+      "params": [
+        "format",
+        "is_enabled",
+        "validator",
+        "view"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_restore_flow",
+      "title": "Restore a functional flow to a saved version",
+      "params": [
+        "flow_id",
+        "format",
+        "version"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_save_catalog",
+      "title": "Save a custom catalog entry",
+      "params": [
+        "entry_id",
+        "fields",
+        "format",
+        "kind",
+        "name"
+      ],
+      "fields": [
+        "activation",
+        "ai_prompt_template",
+        "category",
+        "description",
+        "display_name",
+        "example_inputs",
+        "expected_outcome",
+        "group",
+        "input_generation_prompt",
+        "input_schema",
+        "is_active",
+        "parameters",
+        "prompt_template",
+        "requires_profile_flags",
+        "scope",
+        "validator_type"
+      ]
+    },
+    {
+      "name": "functional_save_flow",
+      "title": "Save a functional test flow",
+      "params": [
+        "docs_id",
+        "fields",
+        "flow_id",
+        "format",
+        "name",
+        "reason",
+        "version"
+      ],
+      "fields": [
+        "blocks",
+        "description",
+        "edges",
+        "entry_block_id",
+        "is_active",
+        "retry_count",
+        "retry_delay_ms",
+        "tags",
+        "timeout_ms",
+        "variables"
+      ]
+    },
+    {
+      "name": "functional_save_template",
+      "title": "Save a functional test template",
+      "params": [
+        "docs_id",
+        "fields",
+        "format",
+        "name",
+        "template_id"
+      ],
+      "fields": [
+        "api_description",
+        "assertions",
+        "description",
+        "enabled",
+        "endpoint_ids",
+        "flow_definition",
+        "is_active",
+        "parameters",
+        "tags",
+        "type_id",
+        "type_name"
+      ]
+    },
+    {
+      "name": "functional_save_test_types",
+      "title": "Save test types in the project",
+      "params": [
+        "fields",
+        "format",
+        "items",
+        "source",
+        "test_type_id"
+      ],
+      "fields": [
+        "category",
+        "default_count",
+        "description",
+        "display_name",
+        "example_inputs",
+        "expected_outcome",
+        "input_prompt",
+        "is_enabled",
+        "name",
+        "poll_completion_values",
+        "poll_timeout_ms",
+        "priority"
+      ]
+    },
+    {
+      "name": "functional_save_validators",
+      "title": "Save validators in the project",
+      "params": [
+        "fields",
+        "format",
+        "items",
+        "source",
+        "validator_id"
+      ],
+      "fields": [
+        "ai_prompt",
+        "default_params",
+        "description",
+        "display_name",
+        "is_enabled",
+        "name",
+        "needs_review",
+        "parameters",
+        "priority",
+        "rationale",
+        "scope",
+        "template",
+        "validator_type"
+      ]
+    },
+    {
+      "name": "functional_suggest_test_types",
+      "title": "Suggest custom test types from the project's API docs",
+      "params": [
+        "docs_id",
+        "focus_areas",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "functional_suggest_validators",
+      "title": "Suggest validators from the API docs and recorded runs",
+      "params": [
+        "docs_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "github_disconnect",
+      "title": "Disconnect the project from its GitHub repository",
+      "params": [
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "github_get_changes",
+      "title": "Get repository changes since the last sync",
+      "params": [
+        "format",
+        "limit"
+      ],
+      "fields": []
+    },
+    {
+      "name": "github_get_status",
+      "title": "Get the project's GitHub link status",
+      "params": [
+        "format",
+        "history_limit",
+        "include"
+      ],
+      "fields": []
+    },
+    {
+      "name": "github_plan_push",
+      "title": "Plan a push",
+      "params": [
+        "composition_id",
+        "diffs",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "github_push",
+      "title": "Push a composition's generated Gatling project to the repository",
+      "params": [
+        "composition_id",
+        "create_pr",
+        "format",
+        "message"
       ],
       "fields": []
     },
@@ -210,6 +843,42 @@
         "profile",
         "ramp",
         "scenario",
+        "type",
+        "vusers"
+      ]
+    },
+    {
+      "name": "process_set_choices",
+      "title": "Set user decisions",
+      "params": [
+        "choices",
+        "format"
+      ],
+      "fields": [
+        "account_ref",
+        "compare_to",
+        "composition_name",
+        "data",
+        "data_mix",
+        "env_id",
+        "flow_ids",
+        "flows",
+        "functional",
+        "har_split",
+        "hold",
+        "id",
+        "journeys",
+        "kind",
+        "method",
+        "needs_accounts",
+        "profile",
+        "ramp",
+        "run",
+        "scenario",
+        "split",
+        "target",
+        "test_type_ids",
+        "traffic_snapshot_id",
         "type",
         "vusers"
       ]
@@ -287,10 +956,78 @@
       "fields": []
     },
     {
+      "name": "project_disconnect_telemetry",
+      "title": "Disconnect the project's log server",
+      "params": [
+        "format"
+      ],
+      "fields": []
+    },
+    {
       "name": "project_get",
       "title": "Get the profile of a LoadCraft project",
       "params": [
         "include"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get_activity",
+      "title": "Get recent activity and the runs in progress across all pro…",
+      "params": [
+        "format",
+        "limit"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get_apimap",
+      "title": "Get the API map",
+      "params": [
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get_docs",
+      "title": "Get the project's active API docs",
+      "params": [
+        "docs_id",
+        "format",
+        "kind",
+        "versions"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get_endpoints",
+      "title": "Get the endpoints of the API docs",
+      "params": [
+        "docs_id",
+        "endpoint",
+        "format",
+        "include",
+        "limit",
+        "method",
+        "query"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get_envs",
+      "title": "Get the project's environments",
+      "params": [
+        "effective",
+        "env",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_get_http_settings",
+      "title": "Get the project's HTTP settings for generated tests",
+      "params": [
+        "format"
       ],
       "fields": []
     },
@@ -305,10 +1042,30 @@
       "fields": []
     },
     {
+      "name": "project_list",
+      "title": "List projects",
+      "params": [
+        "format",
+        "is_active",
+        "limit",
+        "query"
+      ],
+      "fields": []
+    },
+    {
       "name": "project_list_notes",
       "title": "List the notes the agent learned about the project",
       "params": [
         "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_list_team",
+      "title": "List project members",
+      "params": [
+        "format",
+        "me"
       ],
       "fields": []
     },
@@ -327,6 +1084,62 @@
         "headers",
         "limit",
         "name"
+      ]
+    },
+    {
+      "name": "project_save_member",
+      "title": "Save a project member",
+      "params": [
+        "format",
+        "role",
+        "user_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_set_active_docs",
+      "title": "Set a stored docs version as the active one",
+      "params": [
+        "docs_id",
+        "format",
+        "kind"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_set_apimap",
+      "title": "Set the URL prefixes that define the project's API areas",
+      "params": [
+        "detected",
+        "format",
+        "prefixes"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_set_http_settings",
+      "title": "Set the project's HTTP settings for generated tests",
+      "params": [
+        "base_url",
+        "format",
+        "headers_env_file",
+        "protocol"
+      ],
+      "fields": [
+        "async_name_resolution",
+        "connection_timeout_ms",
+        "disable_auto_referer",
+        "disable_caching",
+        "disable_warm_up",
+        "http2_enabled",
+        "http2_prior_knowledge",
+        "infer_html_resources",
+        "max_connections_per_host",
+        "per_user_name_resolution",
+        "request_timeout_ms",
+        "share_connections",
+        "silent_resources",
+        "user_agent_header"
       ]
     },
     {
@@ -358,6 +1171,28 @@
       ]
     },
     {
+      "name": "project_update",
+      "title": "Update a project's name or description",
+      "params": [
+        "description",
+        "format",
+        "name"
+      ],
+      "fields": []
+    },
+    {
+      "name": "project_update_note",
+      "title": "Update the text or scope of a project note",
+      "params": [
+        "at",
+        "format",
+        "note_id",
+        "scope",
+        "text"
+      ],
+      "fields": []
+    },
+    {
       "name": "results_analyze_run",
       "title": "Diagnose a test run",
       "params": [
@@ -365,6 +1200,36 @@
         "force",
         "max_wait_s",
         "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_check_production",
+      "title": "Check a production-replay run",
+      "params": [
+        "format",
+        "run_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_compare_runs",
+      "title": "Compare two runs",
+      "params": [
+        "compare_to",
+        "format",
+        "include",
+        "run_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_export_report",
+      "title": "Export the Gatling report of a run",
+      "params": [
+        "format",
+        "overwrite",
+        "run_id"
       ],
       "fields": []
     },
@@ -380,12 +1245,34 @@
       "fields": []
     },
     {
+      "name": "results_get_logs",
+      "title": "Get the log lines of a run",
+      "params": [
+        "format",
+        "level",
+        "limit",
+        "run_id"
+      ],
+      "fields": []
+    },
+    {
       "name": "results_get_report",
       "title": "Report on a test run",
       "params": [
         "compare_to",
         "execution",
         "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "results_get_request",
+      "title": "Get one request of a run",
+      "params": [
+        "format",
+        "include",
+        "request",
+        "run_id"
       ],
       "fields": []
     },
@@ -404,6 +1291,73 @@
       "fields": []
     },
     {
+      "name": "results_set_baseline",
+      "title": "Set a run as the baseline for its scenario and environment pair",
+      "params": [
+        "format",
+        "run_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_delete",
+      "title": "Delete a run, a load profile or a saved run",
+      "params": [
+        "format",
+        "item_id",
+        "kind"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_get",
+      "title": "Get one run",
+      "params": [
+        "format",
+        "include",
+        "run_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_get_profiles",
+      "title": "Get stored load profiles",
+      "params": [
+        "format",
+        "profile"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_get_saved",
+      "title": "Get saved runs with their schedules",
+      "params": [
+        "format",
+        "saved_run"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_get_usage",
+      "title": "Get finished runs over a period and the compute time they used",
+      "params": [
+        "days",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_list",
+      "title": "List the project's runs, newest first",
+      "params": [
+        "format",
+        "include",
+        "limit",
+        "target"
+      ],
+      "fields": []
+    },
+    {
       "name": "run_plan",
       "title": "Load profiles",
       "params": [
@@ -411,6 +1365,46 @@
         "include_data",
         "scenario",
         "target_users"
+      ],
+      "fields": []
+    },
+    {
+      "name": "run_save",
+      "title": "Save a run definition for reuse",
+      "params": [
+        "composition_id",
+        "environment_id",
+        "feeder_bindings",
+        "format",
+        "name",
+        "saved_run_id",
+        "scenario_id",
+        "source_execution_id",
+        "target_base_url",
+        "workload"
+      ],
+      "fields": [
+        "hold",
+        "production",
+        "ramp",
+        "thresholds",
+        "type",
+        "vusers"
+      ]
+    },
+    {
+      "name": "run_save_profile",
+      "title": "Save a stored load profile",
+      "params": [
+        "description",
+        "duration_seconds",
+        "format",
+        "is_default",
+        "name",
+        "profile",
+        "ramp_duration_seconds",
+        "type",
+        "users"
       ],
       "fields": []
     },
@@ -436,11 +1430,71 @@
       ]
     },
     {
+      "name": "scenario_ask_copilot",
+      "title": "Ask the scenario copilot what to fix",
+      "params": [
+        "format",
+        "message",
+        "profile",
+        "review",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_check_composition",
+      "title": "Check a composition",
+      "params": [
+        "composition_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_check_drift",
+      "title": "Check whether a scenario still matches its reference",
+      "params": [
+        "format",
+        "reference_id",
+        "reference_source",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
       "name": "scenario_check_self",
       "title": "Check scenarios again",
       "params": [
         "project",
         "scenarios"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_compile_composition",
+      "title": "Compile the Gatling project a run would ship",
+      "params": [
+        "composition_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_delete",
+      "title": "Delete a scenario or a composition",
+      "params": [
+        "composition_id",
+        "format",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_export",
+      "title": "Export the scenario's Gatling project",
+      "params": [
+        "format",
+        "scenario_id"
       ],
       "fields": []
     },
@@ -458,12 +1512,185 @@
       "fields": []
     },
     {
+      "name": "scenario_get",
+      "title": "Get a scenario",
+      "params": [
+        "format",
+        "include",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_get_composition",
+      "title": "Get a composition",
+      "params": [
+        "composition_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_get_composition_code",
+      "title": "Get the Gatling project generated for a composition",
+      "params": [
+        "composition_id",
+        "format",
+        "path"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_get_copilot_history",
+      "title": "Get a copilot conversation",
+      "params": [
+        "draft_id",
+        "format",
+        "limit",
+        "scenario_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_get_templates",
+      "title": "Get built-in scenario templates",
+      "params": [
+        "format",
+        "include",
+        "template"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_get_versions",
+      "title": "Get a scenario's versions",
+      "params": [
+        "format",
+        "scenario_id",
+        "version"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_list",
+      "title": "List the project's scenarios",
+      "params": [
+        "format",
+        "limit"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_list_compositions",
+      "title": "List the project's compositions",
+      "params": [
+        "format",
+        "limit",
+        "status"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_restore_version",
+      "title": "Restore a scenario version as the newest one",
+      "params": [
+        "format",
+        "scenario_id",
+        "version"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_save",
+      "title": "Save a scenario's name, tags, active flag or SLO thresholds",
+      "params": [
+        "format",
+        "is_active",
+        "name",
+        "scenario_id",
+        "slo_from_project",
+        "slo_thresholds",
+        "tags"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_save_composition",
+      "title": "Save a composition",
+      "params": [
+        "composition_id",
+        "format",
+        "members",
+        "name",
+        "profile"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_set_composition_type",
+      "title": "Set a composition's load test type",
+      "params": [
+        "composition_id",
+        "format",
+        "spec",
+        "type"
+      ],
+      "fields": []
+    },
+    {
       "name": "scenario_suggest_split",
       "title": "Suggest the traffic split",
       "params": [
         "flows",
         "name",
         "project"
+      ],
+      "fields": []
+    },
+    {
+      "name": "scenario_update_pins",
+      "title": "Update every drifted member of a composition to its scenario’s current version",
+      "params": [
+        "composition_id",
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "traffic_delete",
+      "title": "Delete traffic snapshots or revoke push tokens",
+      "params": [
+        "format",
+        "item_id",
+        "kind"
+      ],
+      "fields": []
+    },
+    {
+      "name": "traffic_get_push_setup",
+      "title": "Get the setup for pushing traffic from production",
+      "params": [
+        "format"
+      ],
+      "fields": []
+    },
+    {
+      "name": "traffic_get_snapshot",
+      "title": "Get one snapshot",
+      "params": [
+        "format",
+        "series",
+        "snapshot_id"
+      ],
+      "fields": []
+    },
+    {
+      "name": "traffic_list_snapshots",
+      "title": "List traffic snapshots",
+      "params": [
+        "format",
+        "include",
+        "limit"
       ],
       "fields": []
     }

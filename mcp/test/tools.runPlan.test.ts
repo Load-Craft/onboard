@@ -301,16 +301,25 @@ describe('run_plan', () => {
       expect(data.profiles.find((entry) => entry.type === 'spike')?.data).toBeUndefined();
     });
 
-    it('says the check covers compositions only when the target is a scenario', async () => {
+    it('checks the data of a scenario too, with its environment, per profile (DOKTOR-02)', async () => {
       const r = await rig();
       const { text, data } = await list(r, {
         scenario: 'zakupy',
         environment: 'perf',
         include_data: true,
       });
-      expect(data.dataCheck).toBe('composition_only');
+      expect(data.dataCheck).toBe('done');
+      const bodies = r.fake.calls
+        .filter((call) => call.path.endsWith('/gatling/executions/preflight'))
+        .map((call) => call.body as { scenario_id: string; environment_id: string });
+      expect(bodies.length).toBeGreaterThan(0);
+      expect(new Set(bodies.map((body) => body.scenario_id))).toEqual(
+        new Set([SKLEP_WORLD_IDS.scenarios.zakupy]),
+      );
+      expect(bodies.every((body) => body.environment_id.length > 0)).toBe(true);
       expect(preflightBodies(r)).toEqual([]);
-      expect(text).toContain('The data check covers compositions only; "zakupy" is a scenario.');
+      expect(data.profiles.find((entry) => entry.type === 'smoke')?.data).toBeDefined();
+      expect(text).not.toContain('compositions only');
     });
   });
 

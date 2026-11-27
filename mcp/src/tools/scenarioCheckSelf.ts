@@ -41,6 +41,7 @@ import {
   writeSelfCheckView,
   type SelfCheckStateView,
 } from './selfCheckStateView.js';
+import { settleAll } from '../http/operation.js';
 
 const MAX_SCENARIOS = 20;
 /** The state of a check is read this often; a check takes seconds to minutes. */
@@ -118,7 +119,7 @@ async function attemptsOf(
   // read; a check stored before runs has only the failure of the check and of each round.
   const runs =
     state.runs.length > 0 ? state.runs.map((run) => run.executionId) : state.executionIds;
-  return Promise.all(
+  return settleAll(
     runs.map(async (run, index): Promise<CheckAttemptView> => {
       const failure =
         index < state.repairs.length ? (state.repairs[index]?.failure ?? null) : state.failure;
@@ -278,7 +279,7 @@ function observeChecks(ctx: OperationContext, key: string, state: ChecksState): 
 
 /** The state of every check of the operation, one read of each scenario. */
 async function readChecks(ctx: OperationContext, start: Saved): Promise<ChecksState> {
-  const read = await Promise.all(
+  const read = await settleAll(
     start.scenarios.map((scenario) => readSelfCheck(ctx, start.project.id, scenario.id)),
   );
   return {
@@ -375,7 +376,7 @@ export const selfCheckOperation = defineOperationKind<ChecksState, SelfCheckData
     };
     const resolver = createResolver(ctx);
     const short = (id: string): string => resolver.shortExecution(id);
-    const scenarios = await Promise.all(
+    const scenarios = await settleAll(
       state.scenarios.map((scenario) => viewOf(scenario, readRun, readFailed, short)),
     );
     // The client beside the chat draws the same check from the state file; one view per call.

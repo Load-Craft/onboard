@@ -1,18 +1,17 @@
-// Flows from a description, walked by the agent browser, in the fake backend
-// (`api/routes/scenario_from_description.py`: `generate` :624, `runs/{run_id}` :1596, `cancel`
-// :1167, `timeline` :2737). The POST answers with a run id after the checks that come before the
-// run (Pydantic limits of `GenerateRequest` :197-213, the setup gate :651, the agent-browser slots
-// :578-586). The run goes on the test clock: it plans, then either pauses for the approval of a
-// split (two paths or more) and sends `split_proposal` on its channel, or drives a single path at
-// once. The channel task is created with the run, so its handshake knows the run (`fake.channel`).
+// Flows from a description, walked by the agent browser, in the fake backend (`generate`,
+// `runs/{run_id}`, the cancel route, `timeline`). The POST answers with a run id after the checks that come
+// before the run (Pydantic limits of `GenerateRequest`, the setup gate, the agent-browser slots).
+// The run goes on the test clock: it plans, then either pauses for the approval of a split (two
+// paths or more) and sends `split_proposal` on its channel, or drives a single path at once. The
+// channel task is created with the run, so its handshake knows the run (`fake.channel`).
 //
-// The walk: `split_resume` on the channel (`handle_split_resume` :891-959) starts it, or a refusal
+// The walk: `split_resume` on the channel (`handle_split_resume`) starts it, or a refusal
 // answers it (`split_resume_refused` when every agent browser is busy, `message_denied` for a
 // principal without the editor role, an `error` frame when the run is not waiting for it). The
 // paths are walked one after another: agent steps, the build of the flow, `path_done` or
-// `path_failed`; `drive_snapshot` is what a socket connecting later is told (`ws:53-117`). The
+// `path_failed`; `drive_snapshot` is what a socket connecting later is told. The
 // agent may ask for help (`help_requested`) and get the browser back (`control_returned`), both
-// also in the timeline. A `stop` message ends the walk gently (`stop_run` :962-987: the path in
+// also in the timeline. A `stop` message ends the walk gently (`stop_run`: the path in
 // progress stops, built paths are saved); `POST …/cancel` ends it at once. Flows are saved when
 // the run completes, as LoadCraft saves them once, at the end.
 
@@ -30,6 +29,7 @@ import {
 } from '../server.js';
 import { createIdSource, createStore } from '../store.js';
 import { SKLEP_COLLECTIONS, SKLEP_WORLD_IDS, seedSklep } from '../worlds/sklep.js';
+import { isPlantedWalk, notesOfWalk } from './flowWrites.js';
 
 type GenerateRequest = components['schemas']['GenerateRequest'];
 type RunDetailsResponse = components['schemas']['RunDetailsResponse'];
@@ -37,7 +37,7 @@ type SessionPath = components['schemas']['SessionPath'];
 type FlowDetail = components['schemas']['FlowDetail'];
 type TimelineResponse = components['schemas']['TimelineResponse'];
 
-/** One proposed path as the planner writes it (`split_plan.py:90-143`). */
+/** One proposed path as the planner writes it. */
 export interface ProposedPath {
   readonly name: string;
   readonly steps: readonly string[];
@@ -138,7 +138,7 @@ export interface DescribeHandles {
   readonly approvals: readonly (readonly Record<string, unknown>[])[];
 }
 
-/** Agent browsers of one backend instance (`NL_AGENT_BROWSERS_MAX`, `config/settings.py:212-234`). */
+/** Agent browsers of one backend instance (`NL_AGENT_BROWSERS_MAX`). */
 const BROWSER_LIMIT = 2;
 const RUNNING_AT_MS = 1000;
 const DEFAULT_PLAN_AT_MS = 8000;
@@ -167,7 +167,7 @@ interface RunRecord {
 const SETUP_MS = 2000;
 const STEP_MS = 1500;
 const BUILD_MS = 2000;
-/** How long the agent waits for the user (`HUMAN_WAIT_S`, `live_drives.py:142`). */
+/** How long the agent waits for the user (`HUMAN_WAIT_S`). */
 const HELP_WAIT_MS = 600_000;
 /** From the last path, or from an accepted stop, to the end of the run. */
 const END_MS = 1000;
@@ -549,7 +549,7 @@ function checkBody(body: GenerateRequest): void {
   }
   const credentials = body.auth_credentials;
   if (credentials != null) {
-    // `domain/models/playwright_script.py:12-28`: both values must be non-empty strings.
+    // Both values must be non-empty strings.
     if (typeof credentials.username !== 'string' || credentials.username === '') {
       throw validation(['auth_credentials', 'username'], 'value_error', 'must not be empty');
     }
@@ -691,7 +691,7 @@ export function registerDescribeRoutes(fake: Fake, world: DescribeWorld = {}): D
             frame: {
               type: 'split_proposal',
               proposed_paths: paths.map((path) => ({ ...path, steps: [...path.steps] })),
-              // `scenario_from_description_ws.py:363-375` with `shared_login_is_wanted`.
+              // As the backend decides it with `shared_login_is_wanted`.
               shared_sign_in:
                 world.sharedSignIn ??
                 (credentials && !paths.every((path) => path.creates_own_identity === true)),
@@ -723,13 +723,21 @@ export function registerDescribeRoutes(fake: Fake, world: DescribeWorld = {}): D
   fake.route(
     'GET',
     '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/timeline',
-    (req, _store, jobs) => {
+    (req, store, jobs) => {
       const id = req.params.run_id;
       const record = records.get(id);
       if (jobs.find(id) === undefined || record === undefined) {
+        // a walk a test planted for the notes of the flows module has a timeline of its notes only
+        if (isPlantedWalk(store, id)) {
+          return { status: 200, body: { run_id: id, events: [], notes: notesOfWalk(store, id) } };
+        }
         throw new FakeHttpError(404, { detail: `Scenario run not found: ${id}` });
       }
-      const body: TimelineResponse = { run_id: id, events: timeline(record), notes: [] };
+      const body: TimelineResponse = {
+        run_id: id,
+        events: timeline(record),
+        notes: notesOfWalk(store, id),
+      };
       return { status: 200, body };
     },
   );

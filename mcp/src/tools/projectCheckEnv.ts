@@ -18,6 +18,7 @@ import { createResolver } from '../resolve/handles.js';
 import type { ProcessUpdateInput } from '../workspace/reducer.js';
 import { inBatches, PROBES_AT_ONCE } from './project/environments.js';
 import { checkConformance, conformanceNote } from './project/setup.js';
+import { content } from './moduleCall.js';
 
 const input = z.strictObject({
   environment: z
@@ -95,7 +96,8 @@ export const projectCheckEnv = defineTool({
       if (check === undefined) throw new Error(`no connection test for ${record.name}`);
       const hasCaps = record.caps.maxVu !== undefined || record.caps.maxRps !== undefined;
       return {
-        name: record.name,
+        // the name is shown masked, its secrets registered (FIX-76)
+        name: content(ctx, record.name, 120),
         default: record.isDefault,
         protected: record.protected,
         ...(hasCaps ? { caps: record.caps } : {}),

@@ -803,13 +803,12 @@ describe('sklep world', () => {
 });
 
 /**
- * Key sets of the Gatling documents, copied from the backend (`loadcraft` @ `mcp/integracja`,
- * `backend/`). The snapshot leaves these responses untyped, so nothing else keeps the world in
- * the shape of the real answers: when a builder gains or loses a key, change the list AND the
- * world together.
+ * Key sets of the Gatling documents, copied from the backend (the backend's own response builders).
+ * The snapshot leaves these responses untyped, so nothing else keeps the world in the shape of the
+ * real answers: when a builder gains or loses a key, change the list AND the world together.
  */
 const BACKEND_KEYS = {
-  // api/routes/gatling.py:12490-12557 (list_executions), :13297-13340 (get_execution; adds `logs`)
+  // `list_executions`, `get_execution` (adds `logs`)
   execution: [
     'id',
     'scenario_id',
@@ -839,7 +838,7 @@ const BACKEND_KEYS = {
     'run_manifest',
     'logs',
   ],
-  // api/routes/gatling.py:12412-12439 (_run_manifest_payload)
+  // `_run_manifest_payload`
   runManifest: [
     'workload',
     'proportions',
@@ -849,7 +848,7 @@ const BACKEND_KEYS = {
     'members',
     'feeders',
   ],
-  // domain/services/gatling/run_manifest.py:497-510 (FeederManifestEntry.to_json)
+  // `FeederManifestEntry.to_json`
   feederManifestEntry: [
     'slot',
     'source_kind',
@@ -862,9 +861,9 @@ const BACKEND_KEYS = {
     'demand_values',
     'binding_source',
   ],
-  // domain/services/gatling/run_manifest.py:~200-215 (RunManifestMember.to_json)
+  // `RunManifestMember.to_json`
   manifestMember: ['scenario_id', 'variant_label', 'scenario_version', 'artifact_digest_at_run'],
-  // domain/services/gatling/sla_verdict.py:89-115 (SlaVerdictV1.to_json)
+  // `SlaVerdictV1.to_json`
   slaVerdict: [
     'format_version',
     'source',
@@ -880,7 +879,7 @@ const BACKEND_KEYS = {
     'gatling_disagrees',
     'warnings',
   ],
-  // domain/services/sla/evaluation.py:204-222 (AssertionOutcome.to_json)
+  // `AssertionOutcome.to_json`
   assertion: [
     'subject',
     'metric',
@@ -898,7 +897,7 @@ const BACKEND_KEYS = {
     'threshold_label',
     'message',
   ],
-  // api/routes/gatling.py:4147-4198 (_scenario_detail_payload)
+  // `_scenario_detail_payload`
   scenario: [
     'id',
     'name',
@@ -931,7 +930,7 @@ const BACKEND_KEYS = {
     'created_at',
     'updated_at',
   ],
-  // domain/services/gatling/pipeline/models.py:1843-1871 (SelfCheckState, model_dump)
+  // `SelfCheckState`, model_dump
   selfCheck: [
     'status',
     'scenario_version',
@@ -945,7 +944,7 @@ const BACKEND_KEYS = {
     'started_at',
     'finished_at',
   ],
-  // api/routes/gatling.py:2200-2262 (_derive_feeder_slots) + :4080-4087 (_detail_feeder_slots)
+  // `_derive_feeder_slots` + `_detail_feeder_slots`
   slot: [
     'slot',
     'label',
@@ -958,9 +957,9 @@ const BACKEND_KEYS = {
     'generated',
     'generated_rows',
   ],
-  // domain/models/session_budget.py:83-92 (PauseSourceMix)
+  // `PauseSourceMix`
   pauseSources: ['recording', 'default_human', 'manual', 'machine_wait', 'unknown'],
-  // api/routes/gatling_compositions.py:745-792 (_format_composition)
+  // `_format_composition`
   composition: [
     'id',
     'name',
@@ -985,7 +984,7 @@ const BACKEND_KEYS = {
     'validation',
     'scenarios',
   ],
-  // api/routes/gatling_compositions.py:812-871 (link of _format_composition)
+  // link of `_format_composition`
   compositionLink: [
     'link_id',
     'scenario_id',
@@ -1011,7 +1010,7 @@ const BACKEND_KEYS = {
     'pinned_version',
     'current_version',
   ],
-  // api/routes/gatling_compositions.py:6403-6414 + :6504-6519 (validation block)
+  // validation block
   compositionValidation: [
     'is_valid',
     'authoring_valid',
@@ -1029,7 +1028,7 @@ const BACKEND_KEYS = {
     'drifted_members',
     'missing_bound_feeders',
   ],
-  // api/routes/gatling.py:2050-2098 (_serialize_feeder_model, list shape: no `recipe`)
+  // `_serialize_feeder_model`, list shape: no `recipe`
   feeder: [
     'id',
     'gatling_project_id',
@@ -1062,8 +1061,8 @@ const BACKEND_KEYS = {
     'created_at',
     'updated_at',
   ],
-  // api/routes/gatling_results.py:741-751 over executor.py:1127-1150 (result_row_aggregate_fields,
-  // result_row_latency_fields) and prometheus_query.py:2295-2318 + :331-343 (get_full_results);
+  // the result row (`result_row_aggregate_fields`, `result_row_latency_fields`) over
+  // `get_full_results`;
   // `id` is the record key (the execution id), not a key of the document
   result: [
     'aggregates_source',
@@ -1101,7 +1100,7 @@ const BACKEND_KEYS = {
     'error_traces',
     'time_series_data',
   ],
-  // prometheus_query.py:2407-2420 (_query_per_request)
+  // `_query_per_request`
   perRequest: [
     'request_name',
     'total_requests',
@@ -1112,7 +1111,7 @@ const BACKEND_KEYS = {
     'p95_histogram',
     'p99_histogram',
   ],
-  // prometheus_query.py:994-1035 (get_endpoints_summary)
+  // `get_endpoints_summary`
   endpointRow: [
     'name',
     'group',
@@ -1134,7 +1133,7 @@ const BACKEND_KEYS = {
     'error_rate',
     'http_status_counts',
   ],
-  // prometheus_query.py:800-842 (get_errors: error group from Prometheus)
+  // `get_errors`: error group from Prometheus
   errorGroup: [
     'error_hash',
     'message',
@@ -1148,7 +1147,7 @@ const BACKEND_KEYS = {
     'last_seen',
     'percentage',
   ],
-  // prometheus_query.py:1521-1550 (get_global_time_series)
+  // `get_global_time_series`
   timePoint: [
     'elapsed_seconds',
     'requests_per_second',
@@ -1160,7 +1159,7 @@ const BACKEND_KEYS = {
     'p99_histogram',
     'max_response_time',
   ],
-  // api/routes/gatling.py:13207-13237 (GET …/analysis)
+  // GET …/analysis
   analysis: [
     'id',
     'execution_id',
@@ -1175,7 +1174,7 @@ const BACKEND_KEYS = {
     'initiated_by',
     'generated_at',
   ],
-  // domain/services/telemetry/mcp_evidence.py:723-728 (collect_external_evidence)
+  // `collect_external_evidence`
   externalEvidence: ['source', 'window', 'calls', 'skipped', 'error'],
 } as const;
 

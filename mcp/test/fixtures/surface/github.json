@@ -1,0 +1,165 @@
+{
+  "tools": [
+    {
+      "name": "github_disconnect",
+      "title": "Disconnect the project from its GitHub repository",
+      "description": "Disconnect the project from its GitHub repository.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "github_get_changes",
+      "title": "Get repository changes since the last sync",
+      "description": "Get repository changes since the last sync: the file list only. Moves the sync marker: a second call returns nothing.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "default": 50,
+            "description": "How many changed files to list (1-200); the count is always the whole number.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "github_get_status",
+      "title": "Get the project's GitHub link status",
+      "description": "Get the project's GitHub link status; include=history adds recent pushes and pulls.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include": {
+            "description": "\"history\": the latest syncs.",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["history"]
+            }
+          },
+          "history_limit": {
+            "default": 10,
+            "description": "With include history: how many syncs (1-50).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "github_plan_push",
+      "title": "Plan a push",
+      "description": "Plan a push: the diff a composition's push would produce; writes nothing.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "diffs": {
+            "default": false,
+            "description": "true: a short diff per file (up to 10 files, 40 lines each); without it, the file list.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "github_push",
+      "title": "Push a composition's generated Gatling project to the repository",
+      "description": "Push a composition's generated Gatling project to the linked repository.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The commit message."
+          },
+          "create_pr": {
+            "default": false,
+            "description": "true: open a pull request instead of committing to the branch.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["message"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

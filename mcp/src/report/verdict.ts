@@ -3,8 +3,7 @@
  *
  * This is a second copy of a rule owned by the LoadCraft frontend, which is the only place the
  * backend's facts are combined today. Source of truth:
- *   loadcraft @ d93e08d808fa600074a8118c719d1cbd3e2d5865
- *   frontend/src/features/gatling/pages/resultsVerdict.ts (last changed in ef95d17bfb07)
+ * the verdict of its results page.
  * `test/fixtures/verdict-cases.json` is derived from the same branches and tests. When the frontend
  * rule changes, this file and that table have to be re-checked together.
  *

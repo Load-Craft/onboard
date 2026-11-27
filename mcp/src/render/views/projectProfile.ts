@@ -4,6 +4,7 @@
 // the result of `project_set_profile`, and the block of unsure fields the result of
 // `project_analyze_setup` shows before anything is applied.
 
+import { CARD_TTL_MINUTES } from '../../consent/confirmCard.js';
 import type { Translator } from '../../context.js';
 import type { SetupStep } from '../../contract/setupGate.js';
 import { inline, VIEW_WIDTH, wrap } from '../primitives.js';
@@ -41,6 +42,12 @@ export interface FieldChange {
 /** Why a confirm got a new card instead of the write: no card, expired, another token, other fields or profile. */
 export type CardRenewal = 'missing' | 'expired' | 'token' | 'changed';
 
+/** The hour and minute of an ISO time on the clock of this machine (`18:56`). */
+export function clockTime(iso: string): string {
+  const at = new Date(iso);
+  return `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`;
+}
+
 /** The consent card of `project_set_profile`: nothing was written. */
 export interface ProfileCardData {
   readonly needsConfirmation: true;
@@ -55,6 +62,8 @@ export interface ProfileCardData {
   readonly confirm: string;
   /** The call had a token, but it did not write: this card replaces the earlier one. */
   readonly renewed?: CardRenewal;
+  /** With `renewed: "expired"`: when the earlier card was issued (ISO time). */
+  readonly expiredIssuedAt?: string;
 }
 
 /** The write of `project_set_profile`, or a call that had nothing to change. */
@@ -277,7 +286,16 @@ export function renderSetProfile(data: SetProfileData, t: Translator): string {
     return [
       ...(data.renewed === undefined
         ? []
-        : wrap(t(`projectProfile.card.renewed.${data.renewed}`), VIEW_WIDTH, 2)),
+        : wrap(
+            data.renewed === 'expired' && data.expiredIssuedAt !== undefined
+              ? t('projectProfile.card.renewed.expired_at', {
+                  time: clockTime(data.expiredIssuedAt),
+                  minutes: CARD_TTL_MINUTES,
+                })
+              : t(`projectProfile.card.renewed.${data.renewed}`),
+            VIEW_WIDTH,
+            2,
+          )),
       ...wrap(
         t.plural('projectProfile.card.title', data.changes.length, {
           name,

@@ -10,8 +10,13 @@ import type { ResponseOf } from '../../../src/contract/reads.js';
 import type { components } from '../../../src/http/generated/api.js';
 import type { Fake } from '../server.js';
 import { FakeHttpError } from '../server.js';
-import { SKLEP_COLLECTIONS, type SklepExecutionResult } from '../worlds/sklep.js';
+import {
+  SKLEP_COLLECTIONS,
+  type SklepExecution,
+  type SklepExecutionResult,
+} from '../worlds/sklep.js';
 import { registerErrorGroupsRoute } from './analysis.js';
+import { requireRun } from './executionOwner.js';
 
 /** One request of a run as the load generator records it on its span. */
 export interface FakeTraceInput {
@@ -53,13 +58,22 @@ function tracesOf(fake: Fake): Map<string, StoredTrace[]> {
   return known;
 }
 
-/** The requests of a run; one with a status of 400 or more, or with an error text, failed. */
+/**
+ * The requests of a run; one with a status of 400 or more, or with an error text, failed. A run the
+ * trace store holds is a run of the project (the trace routes answer only those), so a run that is
+ * not an execution of the world yet becomes one, a copy of the world's first run.
+ */
 export function seedTraces(
   fake: Fake,
   executionId: string,
   items: readonly FakeTraceInput[],
 ): void {
   registerTraceRoutes(fake);
+  const executions = fake.store.collection<SklepExecution>(SKLEP_COLLECTIONS.executions);
+  const [template] = executions.list();
+  if (executions.get(executionId) === undefined && template !== undefined) {
+    executions.insert({ ...template, id: executionId });
+  }
   const runs = tracesOf(fake);
   runs.set(executionId, [
     ...(runs.get(executionId) ?? []),
@@ -134,7 +148,8 @@ export function registerTraceRoutes(fake: Fake): void {
   fake.route(
     'GET',
     '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/traces',
-    (req) => {
+    (req, store) => {
+      requireRun(store, req.params.execution_id, req.params.project_id);
       const limit = Number(req.query['limit'] ?? '100');
       const wanted = req.query['request_name'];
       const listed = (runs.get(req.params.execution_id) ?? [])
@@ -155,7 +170,8 @@ export function registerTraceRoutes(fake: Fake): void {
   fake.route(
     'GET',
     '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/error-traces',
-    (req) => {
+    (req, store) => {
+      requireRun(store, req.params.execution_id, req.params.project_id);
       const limit = Number(req.query['limit'] ?? '50');
       const listed = (runs.get(req.params.execution_id) ?? []).filter((trace) => trace.failed);
       return { status: 200, body: listed.slice(0, limit).map(summary) };
@@ -165,8 +181,9 @@ export function registerTraceRoutes(fake: Fake): void {
   fake.route(
     'GET',
     '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/traces/{trace_id}',
-    (req) => {
-      // The backend reads the trace store by the trace id alone; the run in the path is not used.
+    (req, store) => {
+      // The run in the path only has to be the project's; the trace is read by its id alone.
+      requireRun(store, req.params.execution_id, req.params.project_id);
       for (const run of runs.values()) {
         const found = run.find((trace) => trace.traceId === req.params.trace_id);
         if (found !== undefined) return { status: 200, body: detail(found) };

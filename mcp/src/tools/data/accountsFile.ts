@@ -41,7 +41,7 @@ const sameColumns = (a: readonly string[], b: readonly string[]): boolean =>
   a.length === b.length && a.every((column) => b.includes(column));
 
 /** The separator of the header line: a comma, else a semicolon or a tab when the header has one. */
-function separatorOf(text: string): string {
+export function separatorOf(text: string): string {
   const end = text.search(/[\r\n]/u);
   const header = end === -1 ? text : text.slice(0, end);
   if (header.includes(',')) return ',';

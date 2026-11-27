@@ -16,8 +16,10 @@ import type { Profile } from '../profiles/presets.js';
 import { LoadcraftApiError } from '../http/apiError.js';
 import { reads, type ResponseOf } from '../contract/reads.js';
 import { callOperation } from '../http/operation.js';
+import { content } from '../tools/moduleCall.js';
 import { must, type ApiContext, type SecretApiContext } from './context.js';
 import { csvRows } from '../security/datasetCells.js';
+import { spentPoolOf, type SpentPool } from '../contract/spentPool.js';
 
 export { csvRows };
 
@@ -68,26 +70,15 @@ const datasetList = reads<ResponseOf<'/api/v1/projects/{project_id}/gatling/feed
         columns: z.array(z.string()).catch([]),
         record_count: nullable(z.number()),
         consumption: nullable(z.string()),
-        separator: nullable(z.string()),
-        column_semantics: z.record(z.string(), z.string()).nullish().catch(null),
         recipe_summary: z
           .array(z.object({ column_name: z.string(), generator: z.string() }))
           .catch([]),
         auto_linked_scenario_id: nullable(z.string()),
-        content: z.unknown().optional(),
-        audit_metadata: z.unknown().optional(),
       }),
     ),
   }),
 );
 
-type RawDataset = z.infer<typeof datasetList>['feeders'][number];
-
-/**
- * Column semantics the backend marks as material that must not be shown: `credential` is the
- * contract's value; the other two guard against a value the contract may add.
- */
-const SECRET_SEMANTICS: ReadonlySet<string> = new Set(['credential', 'secret', 'card']);
 /** Names of columns that hold secret material (the one pattern; the masker and `apply` both use it). */
 export const SECRET_NAME = /pass(word|wd)?|pwd|has[lł]o|secret|token|cvv|cvc|pin\b/iu;
 /** Types, semantics and generators the backend gives a column that holds secret material. */
@@ -96,46 +87,11 @@ const SECRET_KIND = /pass|pwd|secret|token|card|cvv|cvc|pin\b|credential/iu;
 /** A column is secret by its name or by the type, meaning or generator the slot or plan gives it. */
 export const isSecretColumn = (name: string, kind?: string | null): boolean =>
   SECRET_NAME.test(name) || (kind != null && SECRET_KIND.test(kind));
-/** Values registered per dataset; the content itself is dropped, so this only bounds the masker. */
-const SECRETS_PER_DATASET = 1000;
-
-function secretColumns(feeder: RawDataset): Set<string> {
-  const semantics = feeder.column_semantics ?? {};
-  return new Set(
-    feeder.columns.filter(
-      (column) => SECRET_SEMANTICS.has(semantics[column] ?? '') || isSecretColumn(column),
-    ),
-  );
-}
-
-/** Cells of the secret columns of a CSV-like content (the values only get masked). */
-function secretsInContent(feeder: RawDataset, secret: ReadonlySet<string>): string[] {
-  if (typeof feeder.content !== 'string' || secret.size === 0) return [];
-  const [header, ...rows] = csvRows(feeder.content, feeder.separator ?? ',');
-  if (header === undefined) return [];
-  const wanted = header.flatMap((name, index) => (secret.has(name.trim()) ? [index] : []));
-  return rows.flatMap((row) => wanted.map((index) => (row[index] ?? '').trim()));
-}
-
-function secretsInPreview(feeder: RawDataset, secret: ReadonlySet<string>): string[] {
-  const metadata = feeder.audit_metadata;
-  if (typeof metadata !== 'object' || metadata === null) return [];
-  const rows: unknown = (metadata as Record<string, unknown>)['sample_rows_preview'];
-  if (!Array.isArray(rows)) return [];
-  return rows.flatMap((row: unknown) =>
-    typeof row !== 'object' || row === null
-      ? []
-      : Object.entries(row).flatMap(([column, value]) =>
-          secret.has(column) && (typeof value === 'string' || typeof value === 'number')
-            ? [String(value)]
-            : [],
-        ),
-  );
-}
 
 /**
- * Every dataset of the project, narrowed to what the plan shows. Content and preview rows are
- * dropped here; each value of a secret column is registered in the call's secrets first.
+ * Every dataset of the project, narrowed to what the plan shows. The list carries no cells (no
+ * content and no preview rows): a dataset's cells come only with a read of that dataset, whose
+ * answer registers them (`credentialCells` in `callOperation`).
  */
 export async function listDatasets(api: DataApiContext, projectId: string): Promise<Dataset[]> {
   const data = await callOperation(
@@ -146,24 +102,18 @@ export async function listDatasets(api: DataApiContext, projectId: string): Prom
     },
     { signal: api.signal, secrets: api.secrets },
   );
-  return datasetList.parse(data).feeders.map((feeder) => {
-    const secret = secretColumns(feeder);
-    const values = [...secretsInContent(feeder, secret), ...secretsInPreview(feeder, secret)];
-    const unique = [...new Set(values.filter((value) => value !== ''))];
-    for (const value of unique.slice(0, SECRETS_PER_DATASET)) api.secrets.add(value);
-    return {
-      id: feeder.id,
-      name: feeder.name,
-      columns: feeder.columns,
-      rows: feeder.record_count,
-      exclusive: feeder.consumption === 'exclusive',
-      generators: feeder.recipe_summary.map((entry) => ({
-        column: entry.column_name,
-        generator: entry.generator,
-      })),
-      autoLinkedScenarioId: feeder.auto_linked_scenario_id,
-    };
-  });
+  return datasetList.parse(data).feeders.map((feeder) => ({
+    id: feeder.id,
+    name: feeder.name,
+    columns: feeder.columns,
+    rows: feeder.record_count,
+    exclusive: feeder.consumption === 'exclusive',
+    generators: feeder.recipe_summary.map((entry) => ({
+      column: entry.column_name,
+      generator: entry.generator,
+    })),
+    autoLinkedScenarioId: feeder.auto_linked_scenario_id,
+  }));
 }
 
 // ---- slots of a scenario and of a composition ------------------------------------------------
@@ -196,12 +146,37 @@ export interface SlotSpec {
  * register verdict (`identity_kind` null) and the resolver's role `data`. A slot with a verdict
  * is an account slot; a legacy artifact that carries neither stamp is an honest unknown, not a
  * data slot, and is not refused. Names of columns never decide it.
- * Rule copied from the backend: backend/api/routes/gatling.py:2168 (`_derive_feeder_slots`, the
- * stamps `identity_kind` and `role`) and backend/domain/services/gatling/feeders/semantics.py:141
- * (`derive_identity_kind`: a `data` slot is always None, an `auth` slot never is), loadcraft @ 47a52b419.
+ * Rule copied from the backend: `_derive_feeder_slots` (the stamps `identity_kind` and `role`) and
+ * `derive_identity_kind` (a `data` slot is always None, an `auth` slot never is).
  */
 export const isPlainDataSlot = (spec: Pick<SlotSpec, 'identityKind' | 'role'>): boolean =>
   spec.identityKind === null && spec.role === 'data';
+
+/**
+ * Whether the backend itself judged the slot to hold NEW identities: the flow creates the account
+ * (a sign-up), so the test invents each value, uses it once, and real accounts would collide with the
+ * target's own (`identity_kind` `fresh`). The backend can make such rows (`generateSlotData`); the
+ * slot's name never decides it.
+ */
+export const isFreshIdentitySlot = (spec: Pick<SlotSpec, 'identityKind'>): boolean =>
+  spec.identityKind === 'fresh';
+
+/** What the backend's verdicts say a slot holds, over every member that declares it. */
+export type SlotIdentity = 'fresh' | 'existing' | 'mixed' | 'none';
+
+/**
+ * The one reading of `identity_kind` across the specs of one slot key: `fresh` (every verdict is new
+ * identities), `existing` (every verdict is real accounts), `mixed` (one member signs in and another
+ * signs up with the same key: no single dataset serves both) or `none` (no verdict: plain data or a
+ * legacy artifact). Every tool that treats a slot as new identities asks this, not the spec of one member.
+ */
+export function identityOf(specs: readonly Pick<SlotSpec, 'identityKind'>[]): SlotIdentity {
+  const kinds = new Set(specs.map((spec) => spec.identityKind).filter((kind) => kind !== null));
+  if (kinds.has('fresh') && kinds.has('existing')) return 'mixed';
+  if (kinds.has('fresh')) return 'fresh';
+  if (kinds.has('existing')) return 'existing';
+  return 'none';
+}
 
 export interface ScenarioSlots {
   readonly id: string;
@@ -423,6 +398,48 @@ export interface SlotDemand {
   readonly have: number | null;
   /** Rows the profile needs; null when the slot does not consume rows one by one. */
   readonly need: number | null;
+  /**
+   * The backend's own sentence for the slot, its cause (a pool a run already drew from, no pool at
+   * all): text of a third party, already masked and on one line (`content()`) when read; null when it has none.
+   */
+  readonly message?: string | null;
+  /** The backend's verdict on the kind of identities the slot holds; null when it gave none. */
+  readonly identityKind?: 'existing' | 'fresh' | null;
+  /** The dataset the backend says to make again (its fix `regenerate_dataset`); null when none. */
+  readonly regenerate?: SpentDataset | null;
+  /** What earlier runs took from the slot's pool, read from the backend's sentence; null when it says nothing of it. */
+  readonly spent?: SpentPool | null;
+}
+
+/**
+ * A dataset whose values earlier runs spent while the run reads it from the start: the backend's
+ * fix `regenerate_dataset`. New values start a new count.
+ */
+export interface SpentDataset {
+  readonly datasetId: string;
+  /** Its name, masked and on one line (`content()`); null when the fix names none. */
+  readonly dataset: string | null;
+}
+
+/** An id the plugin may repeat as an argument; anything else in its place is dropped. */
+const DATASET_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
+const DATASET_NAME_LIMIT = 120;
+
+/**
+ * The fix of a verdict the plugin shows: `regenerate_dataset` with an id. Every other kind, one a
+ * later backend adds among them, and a fix that is not an object with string fields are left out,
+ * so an unknown fix never changes the view.
+ */
+function regenerateOf(api: SecretApiContext, fixes: unknown): SpentDataset | null {
+  if (!Array.isArray(fixes)) return null;
+  for (const fix of fixes as unknown[]) {
+    if (typeof fix !== 'object' || fix === null) continue;
+    const { kind, dataset_id: id, dataset_name: name } = fix as Record<string, unknown>;
+    if (kind !== 'regenerate_dataset' || typeof id !== 'string' || !DATASET_ID.test(id)) continue;
+    const dataset = typeof name === 'string' ? content(api, name, DATASET_NAME_LIMIT) : '';
+    return { datasetId: id, dataset: dataset === '' ? null : dataset };
+  }
+  return null;
 }
 
 /** What the data check says about one load profile. */
@@ -439,7 +456,7 @@ export interface DataDemand {
  * A refusal for data is an answer (`ready: false`), not an error.
  */
 export async function preflightCompositionFor(
-  api: ApiContext,
+  api: SecretApiContext,
   projectId: string,
   compositionId: string,
   profile: Profile,
@@ -461,20 +478,38 @@ export async function preflightCompositionFor(
       },
     ),
   );
+  // The check carries no kind of identities and no fixes; the verdicts of the same answer do.
+  const verdicts = new Map(
+    (data.verdicts ?? []).map((verdict) => [verdict.slot, verdict] as const),
+  );
   return {
     ready: data.ready,
-    refusal: data.refused?.message ?? null,
+    refusal:
+      data.refused === null || data.refused === undefined
+        ? null
+        : sentence(api, data.refused.message),
     slots: (data.checks ?? []).map((check) => ({
       slot: check.slot,
-      label: check.label ?? check.slot,
+      // the names are shown in the views of the run (run_plan, run_start, the dry run): masked (FIX-78)
+      label: shownName(api, check.label ?? check.slot),
       status: check.status,
       blocking: check.status !== 'ok' && check.status !== 'auto',
-      dataset: check.feeder_name ?? null,
+      dataset: check.feeder_name == null ? null : shownName(api, check.feeder_name),
       have: check.rows ?? null,
       need: check.recommended_row_count ?? null,
+      message: check.message == null ? null : sentence(api, check.message),
+      identityKind: verdicts.get(check.slot)?.identity_kind ?? null,
+      regenerate: regenerateOf(api, verdicts.get(check.slot)?.fixes),
+      spent: spentPoolOf(check.message),
     })),
   };
 }
+
+/** A name of a slot or a dataset as a view of the run shows it: masked, its secrets registered. */
+const shownName = (api: SecretApiContext, name: string): string => content(api, name, 120);
+
+/** The backend's sentence about a slot or a refusal: masked by shape, its secrets registered, one line. */
+const sentence = (api: SecretApiContext, text: string): string => content(api, text, 520);
 
 /** Verdict statuses of a slot that let a run start. */
 const READY_VERDICTS: readonly string[] = ['bound', 'auto'];
@@ -484,7 +519,7 @@ const READY_VERDICTS: readonly string[] = ['bound', 'auto'];
  * built or started. A refusal for data is an answer (`ready: false`), not an error.
  */
 export async function preflightScenarioFor(
-  api: ApiContext,
+  api: SecretApiContext,
   projectId: string,
   scenarioId: string,
   profile: Profile,
@@ -508,15 +543,21 @@ export async function preflightScenarioFor(
   );
   return {
     ready: data.ready,
-    refusal: data.run_environment_refusal ?? null,
+    refusal:
+      data.run_environment_refusal == null ? null : sentence(api, data.run_environment_refusal),
     slots: (data.verdicts ?? []).map((verdict) => ({
       slot: verdict.slot,
-      label: verdict.label ?? verdict.slot,
+      // the names are shown in the views of the run (run_plan, run_start, the dry run): masked (FIX-78)
+      label: shownName(api, verdict.label ?? verdict.slot),
       status: verdict.status,
       blocking: verdict.blocking === true || !READY_VERDICTS.includes(verdict.status),
-      dataset: verdict.dataset_name ?? null,
+      dataset: verdict.dataset_name == null ? null : shownName(api, verdict.dataset_name),
       have: verdict.have_rows ?? null,
       need: verdict.required_rows ?? null,
+      message: sentence(api, verdict.message),
+      identityKind: verdict.identity_kind ?? null,
+      regenerate: regenerateOf(api, verdict.fixes),
+      spent: spentPoolOf(verdict.message),
     })),
   };
 }

@@ -134,7 +134,7 @@ pilnuje obu stron. Podstawa: decyzja koordynatora z 2026-11-22 (makieta i karty 
 ### R11. Etykiety slotów danych pochodzą z backendu, nie z makiety
 
 Makieta nazywa sloty po polsku (`frazy wyszukiwania`, `zamówienia`, `konta`). Etykietę slotu
-wystawia backend (`derive_slot_label`, `backend/domain/services/gatling/feeders/semantics.py:368`)
+wystawia backend (`derive_slot_label`)
 i jest ona angielska: slot z rolą `auth` to `User accounts`, kolumna `q` daje `Search terms`,
 kolumny `quantity` i `cardNumber` dają `Quantity & cardnumber`. Widok pokazuje etykietę z backendu
 (użytkownik może ją zmienić w Test Data Hub), więc wzorce ją trzymają:
@@ -193,13 +193,13 @@ w terminalu i w markdownie. Zgoda koordynatora (FIX-02); `LINK_LINE` w `golden.t
 Dotyczy wzorców `run1/04`, `run2/03`, `run3/04`, `run4/04` (konspekt „zakupy”).
 
 Makieta opisuje pauzę czynnością osoby: `założona · wpisuje frazę`. Backend tej czynności nie zapisuje:
-opis pauzy to stałe zdanie po angielsku (`flow_generation/service.py:592`, `:1768`), a pauzy z nagrania
-w ogóle nie mają opisu (`think_time.py:99`). Zna za to klasę akcji następnego żądania
+opis pauzy to stałe zdanie po angielsku, a pauzy z nagrania
+w ogóle nie mają opisu. Zna za to klasę akcji następnego żądania
 (`config.action_start.class`). Wzorzec pokazuje ją słowem: `strona`, `akcja w stronie`, `formularz`
 (`założona · formularz`). Klasa `api_call` nie jest akcją osoby i nie ma słowa. Fixtury `zakupy-*` i
 świat „sklep” dostały opisy pauz takie jak w backendzie — atrapa nie może dawać tego, czego backend nie daje.
 
-Pauzy z nagrania HAR backend przycina do 10 s (`THINK_TIME_MAX_MS`, `think_time.py:32`), więc
+Pauzy z nagrania HAR backend przycina do 10 s (`THINK_TIME_MAX_MS`), więc
 `run4/04` ma `10 s` tam, gdzie makieta miała `16,8 s` i `31,5 s`. Pauzy z założenia (`3–8 s`,
 `20–45 s`) tego limitu nie dotyczą — są w modelu pauzy do 60 s.
 
@@ -375,8 +375,7 @@ Wymaga zgody koordynatora (zlecenie TOOL-23).
 `plan r-2481a3f0 · 3 ścieżki · logowanie wspólne dla wszystkich` (`run3/03-flows_describe_journeys`).
 
 Powód: LoadCraft loguje się kontem testowym RAZ, przed wszystkimi ścieżkami, a pomija to logowanie tylko
-dla ścieżki, która sama zakłada konto (`creates_own_identity` propozycji; reguła `shared_login_is_wanted`,
-`backend/domain/services/browser/per_path_drive_coordinator.py:2134-2159` w loadcraft 7d383e0ec). Ramka
+dla ścieżki, która sama zakłada konto (`creates_own_identity` propozycji; reguła `shared_login_is_wanted` koordynatora przejazdów). Ramka
 `split_proposal` niesie tylko `shared_sign_in: bool`, więc lista ścieżek ze wspólnym logowaniem to ścieżki
 bez `creates_own_identity`. „przeglądanie” nie zakłada konta, więc w produkcie też jedzie po wspólnym
 logowaniu; makieta, która je pomija, opisuje coś, czego produkt nie robi. Gdy wspólne logowanie obejmuje

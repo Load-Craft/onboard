@@ -40,7 +40,7 @@ export interface SetupSnapshot {
 
 /**
  * `GET …/setup/status`. The gate's unmet steps are judged as the gate judges them
- * (`setup_gate.py:64-106`): an empty category or a missing time stamp is unmet, `needs_review` is not.
+ * (the setup gate): an empty category or a missing time stamp is unmet, `needs_review` is not.
  */
 export async function getSetupSnapshot(api: ApiContext, projectId: string): Promise<SetupSnapshot> {
   const data = await must(
@@ -317,7 +317,7 @@ export async function startAnalysis(
 
 type Profile = components['schemas']['ProjectProfile'];
 
-// Choices of the profile (`ProjectProfile`, `domain/models/project_profile.py:181-223`).
+// Choices of the profile (`ProjectProfile`).
 const API_PROTOCOLS = ['rest', 'graphql', 'grpc_web', 'soap', 'mixed'] as const;
 // `unknown`: the sources do not say how the client is built; it never stands for a known value.
 const ARCHITECTURES = ['spa', 'mpa', 'ssr', 'mobile', 'mixed', 'unknown'] as const;

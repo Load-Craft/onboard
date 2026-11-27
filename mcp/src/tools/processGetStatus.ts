@@ -51,8 +51,13 @@ import { storedDiagnosis } from './resultsAnalyzeRun.js';
 import { capOutline, flowData, type GetFlowData } from './flowsGet.js';
 import { openUncertain } from './project/profile.js';
 import { reportOf } from './resultsGetReport.js';
+import { content } from './moduleCall.js';
+
 import type { DiagnosisData } from '../render/views/getDiagnosis.js';
 import type { ReportData } from '../render/views/getReport.js';
+
+/** A name from the backend, as the status shows it. */
+const STATUS_NAME_LIMIT = 120;
 
 const RESULT_KINDS = ['report', 'diagnosis', 'flow'] as const;
 /** Names of flows on an older docs version the data of the status carries; the rest is a count. */
@@ -315,29 +320,33 @@ async function nextStep(
   return { step: 'run_start', hint: 'all_done' };
 }
 
-function section(detail: Detail, facts: ProjectFacts): StatusSection | undefined {
-  const flowName = new Map(facts.flows.map((flow) => [flow.id, flow.name]));
+function section(
+  detail: Detail,
+  facts: ProjectFacts,
+  shown: (name: string) => string,
+): StatusSection | undefined {
+  const flowName = new Map(facts.flows.map((flow) => [flow.id, shown(flow.name)]));
   switch (detail) {
     case 'flows':
       return {
         kind: 'flows',
         items: facts.flows
           .slice(0, DETAIL_ITEMS)
-          .map((flow) => ({ name: flow.name, steps: flow.step_count })),
+          .map((flow) => ({ name: shown(flow.name), steps: flow.step_count })),
         more: Math.max(0, facts.flows.length - DETAIL_ITEMS),
       };
     case 'scenarios':
       return {
         kind: 'scenarios',
         items: facts.scenarios.slice(0, DETAIL_ITEMS).map((scenario) => ({
-          name: scenario.name,
+          name: shown(scenario.name),
           flow:
             scenario.sourceFlowId === null ? null : (flowName.get(scenario.sourceFlowId) ?? null),
           version: scenario.version,
           selfCheck: scenario.selfCheck,
         })),
         more: Math.max(0, facts.scenarios.length - DETAIL_ITEMS),
-        compositions: facts.compositions.slice(0, DETAIL_ITEMS).map((item) => item.name),
+        compositions: facts.compositions.slice(0, DETAIL_ITEMS).map((item) => shown(item.name)),
         moreCompositions: Math.max(0, facts.compositions.length - DETAIL_ITEMS),
       };
     case 'data': {
@@ -346,7 +355,7 @@ function section(detail: Detail, facts: ProjectFacts): StatusSection | undefined
         kind: 'data',
         items: withSlots
           .slice(0, DETAIL_ITEMS)
-          .map((scenario) => ({ scenario: scenario.name, slots: scenario.slots })),
+          .map((scenario) => ({ scenario: shown(scenario.name), slots: scenario.slots })),
         more: Math.max(0, withSlots.length - DETAIL_ITEMS),
       };
     }
@@ -433,6 +442,9 @@ export const processGetStatus = defineTool({
         listRecentRuns(ctx, id),
       ]);
     const { setup } = setupFacts;
+    // names from the backend are shown masked, their secrets registered (FIX-76); the facts keep
+    // the raw names for matching
+    const shown = (name: string): string => content(ctx, name, STATUS_NAME_LIMIT);
     const environments = environmentFacts.states;
     const { flows } = listed;
     const old = await flowsOnOldDocs(ctx, id, listed);
@@ -443,19 +455,22 @@ export const processGetStatus = defineTool({
     const definite = needs.reduce((sum, item) => sum + item.definite, 0);
     const facts: ProjectFacts = { setup, flows, scenarios, compositions, runs };
     const targets = new Map<string, string>([
-      ...scenarios.map((scenario): [string, string] => [scenario.id, scenario.name]),
-      ...compositions.map((composition): [string, string] => [composition.id, composition.name]),
+      ...scenarios.map((scenario): [string, string] => [scenario.id, shown(scenario.name)]),
+      ...compositions.map((composition): [string, string] => [
+        composition.id,
+        shown(composition.name),
+      ]),
     ]);
     const shownRuns = args.detail === 'runs' ? DETAIL_ITEMS : SUMMARY_RUNS;
-    const detailSection = section(args.detail, facts);
+    const detailSection = section(args.detail, facts, shown);
     // the warning of the analysis lives in the process of the bound project
     const bound = readProjectBinding(ctx)?.project.id === id;
     const uncertain = bound ? openUncertain(ctx.state.process()) : [];
     const data: StatusData = {
       ...base,
-      project: { id, name: project.name },
+      project: { id, name: shown(project.name) },
       setup,
-      environments,
+      environments: environments.map((state) => ({ ...state, name: shown(state.name) })),
       path: {
         docs: setupFacts.evidence.docs,
         recording: setupFacts.evidence.recording,
@@ -481,7 +496,7 @@ export const processGetStatus = defineTool({
         ? {}
         : {
             oldDocs: {
-              flows: old.flows.slice(0, OLD_DOCS_NAMES).map((flow) => flow.name),
+              flows: old.flows.slice(0, OLD_DOCS_NAMES).map((flow) => shown(flow.name)),
               more: Math.max(0, old.flows.length - OLD_DOCS_NAMES),
             },
           }),
@@ -489,7 +504,7 @@ export const processGetStatus = defineTool({
         ? {}
         : {
             needsInput: {
-              flows: needing.slice(0, OLD_DOCS_NAMES).map((flow) => flow.name),
+              flows: needing.slice(0, OLD_DOCS_NAMES).map((flow) => shown(flow.name)),
               more: Math.max(0, needing.length - OLD_DOCS_NAMES),
               definite,
             },

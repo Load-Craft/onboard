@@ -54,6 +54,7 @@ import {
 import type { Resolver } from '../../resolve/handles.js';
 import { selfCheckOperation } from '../scenarioCheckSelf.js';
 import { roundToHundred } from './propose.js';
+import { content } from '../moduleCall.js';
 
 export interface FlowRef {
   readonly id: string;
@@ -722,9 +723,13 @@ async function awaitSelfChecks(
 ) {
   const spec = selfCheckOperation.spec;
   const start = {
-    project: { id: project.id, name: project.name },
+    // names are shown masked in the self-check view, their secrets registered (FIX-76)
+    project: { id: project.id, name: content(ctx, project.name, 120) },
     environment,
-    scenarios: flows.map((flow) => ({ id: chosen.get(flow.id) ?? '', name: flow.name })),
+    scenarios: flows.map((flow) => ({
+      id: chosen.get(flow.id) ?? '',
+      name: content(ctx, flow.name, 120),
+    })),
   };
   // The view of these checks in the state file is kept per project: a later call replaces it.
   const operationId = `build-scenario:${project.id}`;

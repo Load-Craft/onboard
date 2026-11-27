@@ -1,6 +1,7 @@
 // Controlled clock injected into production code (OPS-01): nothing sleeps for real, a test moves time.
 
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { Socket } from 'node:net';
 
 import { abortError } from '../../src/ops/clock.js';
 
@@ -219,9 +220,40 @@ function requestsInFlight(): string[] {
   return process.getActiveResourcesInfo().filter((name) => REQUEST.test(name));
 }
 
+/**
+ * Bytes one end of an in-process connection (the client and the fake backend share this process)
+ * has written and the other end has not read yet. On a busy machine the kernel delivers a loopback
+ * packet later (its receive work is deferred to a kernel thread that waits for a CPU), and Node sees
+ * nothing in the meantime: no request is pending and the socket only waits. A step of the clock then
+ * lands before an answer that is already on its way: the fake's next wake-up (a plan due in 60 s) ran
+ * ahead of the call's own wait of a few seconds, which it had not armed yet.
+ */
+function bytesInFlight(): string[] {
+  const handles = (process as unknown as { _getActiveHandles(): unknown[] })._getActiveHandles();
+  const sockets = handles.filter(
+    (handle): handle is Socket =>
+      handle instanceof Socket && handle.localPort !== undefined && handle.remotePort !== undefined,
+  );
+  const byEnds = new Map(
+    sockets.map((socket) => [`${String(socket.localPort)}>${String(socket.remotePort)}`, socket]),
+  );
+  const found: string[] = [];
+  for (const socket of sockets) {
+    const peer = byEnds.get(`${String(socket.remotePort)}>${String(socket.localPort)}`);
+    if (peer === undefined || peer.destroyed) continue;
+    const unread = socket.bytesWritten - peer.bytesRead;
+    if (unread > 0) {
+      found.push(
+        `${String(unread)} bytes in flight ${String(socket.localPort)} -> ${String(socket.remotePort)}`,
+      );
+    }
+  }
+  return found;
+}
+
 /** Requests in flight and work of test doubles (the fake backend) the clock must not run ahead of. */
 function pendingNames(): string[] {
-  return [...requestsInFlight(), ...busyWork()];
+  return [...requestsInFlight(), ...busyWork(), ...bytesInFlight()];
 }
 
 function pending(): boolean {

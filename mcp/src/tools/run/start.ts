@@ -25,7 +25,7 @@ import { findAllRunning, recordOperation } from '../../ops/operation.js';
 import type { Link } from '../../outcome.js';
 import { clampProfile, type ClampResult } from '../../profiles/caps.js';
 import { buildPresets, type Profile, type ProfileType } from '../../profiles/presets.js';
-import { inline, num } from '../../render/primitives.js';
+import { num } from '../../render/primitives.js';
 import {
   dataShortage,
   type RunConfirmData,
@@ -33,6 +33,7 @@ import {
   type RunStartData,
 } from '../../render/views/run.js';
 import { createResolver, type Handle, type RunTarget } from '../../resolve/handles.js';
+import { content } from '../moduleCall.js';
 import {
   asProfile,
   profileSchema,
@@ -41,10 +42,11 @@ import {
   type TestRunSaved,
 } from './saved.js';
 import { testRunOperation } from './wait.js';
+import { settleAll } from '../../http/operation.js';
 
 export { asProfile, profileSchema, testRunSaved, type TestRunSaved };
 
-/** Stress stairs reach `5 × max(vusers / 5, 1)` new users per second (`config_generator.py:676-683`). */
+/** Stress stairs reach `5 × max(vusers / 5, 1)` new users per second. */
 const STRESS_MIN_TOP = 5;
 
 /** Longest environment name quoted in a refusal. */
@@ -157,7 +159,7 @@ export function clampToEnvironment(
   environment: { name: string; protected: boolean; caps: RunCaps | null },
   requested: Profile,
 ): { caps: RunCaps; result: ClampResult } {
-  const name = inline(environment.name, ENVIRONMENT_NAME_LIMIT);
+  const name = content(ctx, environment.name, ENVIRONMENT_NAME_LIMIT);
   const { caps } = environment;
   if (caps === null) {
     throw new ToolError('environment_caps_unreadable', { params: { environment: name } });
@@ -224,7 +226,7 @@ export async function startTestRun(
   const project: Handle = await resolver.project(args.project);
 
   // 1. Target and environment: both named by the user, never chosen here.
-  const [target, environmentHandle] = await Promise.all([
+  const [target, environmentHandle] = await settleAll([
     resolver.runScenarioTarget(project.id, args.scenario),
     resolver.environment(project.id, args.environment),
   ]);
@@ -239,7 +241,7 @@ export async function startTestRun(
     const { caps, result } = clampToEnvironment(ctx, environment, requested);
     const effective = result.profile;
 
-    const shownName = inline(environment.name, ENVIRONMENT_NAME_LIMIT);
+    const shownName = content(ctx, environment.name, ENVIRONMENT_NAME_LIMIT);
 
     // An environment under a test is not loaded a second time, whatever the new test is aimed at.
     // The same target with the same load joins the running test; anything else is refused with the
@@ -256,7 +258,7 @@ export async function startTestRun(
       const sameTarget = running.saved.target.id === target.id;
       throw new ToolError(sameTarget ? 'run_already_running' : 'run_environment_busy', {
         params: {
-          target: inline(target.name, ENVIRONMENT_NAME_LIMIT),
+          target: content(ctx, target.name, ENVIRONMENT_NAME_LIMIT),
           environment: shownName,
           handle: `test_run:${running.executionId}`,
           link: ctx.services.links.executionLive(project.id, running.executionId).url,
@@ -271,7 +273,7 @@ export async function startTestRun(
     if (other !== undefined) {
       throw new ToolError(known === undefined ? 'run_build_elsewhere' : 'run_environment_busy', {
         params: {
-          target: inline(target.name, ENVIRONMENT_NAME_LIMIT),
+          target: content(ctx, target.name, ENVIRONMENT_NAME_LIMIT),
           environment: shownName,
           handle: resolver.shortExecution(other.id),
           link: ctx.services.links.executionLive(project.id, other.id).url,
@@ -286,8 +288,12 @@ export async function startTestRun(
         kind: 'confirm',
         data: {
           needsConfirmation: true,
-          target: { kind: target.kind, name: target.name },
-          environment: { name: environment.name, protected: environment.protected, caps },
+          target: { kind: target.kind, name: content(ctx, target.name, ENVIRONMENT_NAME_LIMIT) },
+          environment: {
+            name: content(ctx, environment.name, ENVIRONMENT_NAME_LIMIT),
+            protected: environment.protected,
+            caps,
+          },
           label: labelOf(requested.type),
           requested,
           effective,
@@ -326,11 +332,15 @@ export async function startTestRun(
     const dataCheck = dataRows(demand);
     const label = labelOf(effective.type);
     const saved: TestRunSaved = {
-      project: { id: project.id, name: project.name },
-      target: { kind: target.kind, id: target.id, name: target.name },
+      project: { id: project.id, name: content(ctx, project.name, ENVIRONMENT_NAME_LIMIT) },
+      target: {
+        kind: target.kind,
+        id: target.id,
+        name: content(ctx, target.name, ENVIRONMENT_NAME_LIMIT),
+      },
       environment: {
         id: environment.id,
-        name: environment.name,
+        name: content(ctx, environment.name, ENVIRONMENT_NAME_LIMIT),
         protected: environment.protected,
         caps,
       },
@@ -366,8 +376,12 @@ export async function startTestRun(
       link,
       data: {
         execution: { id: executionId, handle: resolver.shortExecution(executionId) },
-        target: { kind: target.kind, name: target.name },
-        environment: { name: environment.name, protected: environment.protected, caps },
+        target: { kind: target.kind, name: content(ctx, target.name, ENVIRONMENT_NAME_LIMIT) },
+        environment: {
+          name: content(ctx, environment.name, ENVIRONMENT_NAME_LIMIT),
+          protected: environment.protected,
+          caps,
+        },
         label,
         requested,
         effective,

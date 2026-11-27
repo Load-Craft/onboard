@@ -38,12 +38,14 @@ import {
 import { createWriteChain } from '../../ops/writeChain.js';
 import type { DoneOutcome } from '../../outcome.js';
 import { inline } from '../../render/primitives.js';
+import { content } from '../moduleCall.js';
 import { renderBuildFlows, type BuildFlowsData } from '../../render/views/buildFlows.js';
 import { ChannelLost, ChannelUnavailable, openChannel } from '../../ws/channel.js';
 import { FrameParseError } from '../../ws/frames.js';
 import type { ChannelHandle } from '../../ws/channel.js';
 import { importRecording, type ImportedRecording } from '../flowsImportHar.js';
 import { flowsUpdate, readBuilt } from './fromSuggestions.js';
+import { shownNameOf } from '../../flow/maskOutline.js';
 
 /** The longest a split may take: generation (about 2 min) plus the flows of every journey. */
 export const SPLIT_LIMIT_MS = 600_000;
@@ -55,12 +57,13 @@ const MAX_NAME = 80;
 const TOOL = 'flows_generate_from_har';
 /** Journey names listed in an error. */
 const SHOWN_NAMES = 10;
-/** Start of the backend's answer for a session it does not hold (`har_import.py:117-120`). */
+/** Start of the backend's answer for a session it does not hold. */
 const SESSION_LOST = 'HAR session not found';
 /** `flows_import_har` reports the same refusal condition as this warning. */
 const SANITIZED_WARNING = 'sanitized_export';
 
-const quoted = (name: string): string => `"${inline(name, MAX_NAME)}"`;
+/** A name of a journey (the generator's) or one the model gave, masked (FIX-76). */
+const quoted = (ctx: ToolContext, name: string): string => `"${content(ctx, name, MAX_NAME)}"`;
 
 export interface FromHarArgs {
   readonly project?: string;
@@ -88,8 +91,9 @@ async function builtData(
   const failed = [];
   for (const flow of flows) {
     const read = await readBuilt(ctx, projectId, flow.flowId);
-    if (read === undefined) failed.push({ name: flow.name, reason: 'unreadable' as const });
-    else built.push(read);
+    if (read === undefined) {
+      failed.push({ name: content(ctx, flow.name, MAX_NAME), reason: 'unreadable' as const });
+    } else built.push(read);
   }
   const outlines = built.map((item) => item.outline);
   if (outlines.length === 0) {
@@ -232,7 +236,7 @@ export const harGenerationOperation = defineOperationKind({
     if (state.phase === 'lost') {
       throw new ToolError('flow_generation_failed', {
         params: {
-          name: inline(saved.name, MAX_NAME),
+          name: content(ctx, saved.name, MAX_NAME),
           detail: ctx.t('build.flows.reason.not_created'),
           tool: TOOL,
         },
@@ -324,7 +328,7 @@ async function generateOne(
       const existing = listed.find((flow) => flow.name.trim().toLowerCase() === wanted);
       if (existing !== undefined) {
         throw new ToolError('flow_exists', {
-          params: { name: inline(existing.name, MAX_NAME), tool: TOOL },
+          params: { name: content(ctx, existing.name, MAX_NAME), tool: TOOL },
         });
       }
       const id = randomUUID();
@@ -368,15 +372,18 @@ function chooseJourneys(
 ): Journey[] | ToolError {
   if (wanted === undefined) return [...proposed];
   const key = (name: string): string => name.trim().toLowerCase();
+  // a journey is chosen by its raw name or by the name the views showed masked (FIX-76)
+  const keys = (name: string): string[] => [key(name), key(shownNameOf(name))];
   const unknown = wanted.filter(
-    (name) => !proposed.some((journey) => journey.name === name || key(journey.name) === key(name)),
+    (name) =>
+      !proposed.some((journey) => journey.name === name || keys(journey.name).includes(key(name))),
   );
   if (unknown.length > 0) {
-    const shown = proposed.slice(0, SHOWN_NAMES).map((journey) => quoted(journey.name));
+    const shown = proposed.slice(0, SHOWN_NAMES).map((journey) => quoted(ctx, journey.name));
     const more = proposed.length - shown.length;
     return new ToolError('har_split_unknown_paths', {
       params: {
-        names: unknown.map(quoted).join(', '),
+        names: unknown.map((name) => quoted(ctx, name)).join(', '),
         available:
           more > 0
             ? ctx.t('resolve.more', { names: shown.join(', '), count: more })
@@ -385,7 +392,7 @@ function chooseJourneys(
     });
   }
   const picked = new Set(wanted.map(key));
-  return proposed.filter((journey) => picked.has(key(journey.name)));
+  return proposed.filter((journey) => keys(journey.name).some((one) => picked.has(one)));
 }
 
 /** The message that answers the proposal: the journeys exactly as LoadCraft proposed them. */

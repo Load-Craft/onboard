@@ -265,13 +265,21 @@ export const CHANNEL_METADATA = [
 
 /**
  * `next` with the channel metadata of `previous` for every channel of the same id that lacks it; a
- * value `next` has wins. `bare` lists the channels that still have none of the extensions.
+ * value `next` has wins. `bare` lists the channels that still have none of the extensions. The
+ * commit of the backend the document was traced from (`info.x-loadcraft-source.commit`, `dirty`)
+ * is left out: the snapshot lives in a public repository and the backend's history is not public.
  */
 export function carryChannelMetadata(
   previous: AsyncApiDocument | undefined,
   next: AsyncApiDocument,
 ): { document: AsyncApiDocument; bare: string[] } {
   const document = structuredClone(next);
+  const info = (document as unknown as { info?: Record<string, unknown> }).info;
+  const source = info?.['x-loadcraft-source'];
+  if (typeof source === 'object' && source !== null) {
+    delete (source as Record<string, unknown>)['commit'];
+    delete (source as Record<string, unknown>)['dirty'];
+  }
   const bare: string[] = [];
   for (const [id, channel] of Object.entries(document.channels)) {
     const target = channel as unknown as Record<string, unknown>;

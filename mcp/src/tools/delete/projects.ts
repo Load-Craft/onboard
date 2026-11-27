@@ -6,9 +6,10 @@
 import type { ToolContext } from '../../context.js';
 import { ToolError } from '../../errors.js';
 import { LoadcraftApiError } from '../../http/apiError.js';
-import { callOperation } from '../../http/operation.js';
+import { callOperation, settleAll } from '../../http/operation.js';
 import type { DoneOutcome } from '../../outcome.js';
 import { inline } from '../../render/primitives.js';
+import { content } from '../moduleCall.js';
 import {
   renderDeleteQuestion,
   type CardRenewal,
@@ -47,6 +48,7 @@ import {
   tooMany,
   unchecked,
 } from './checks.js';
+import { shownChoice, shownName } from './card.js';
 
 /** The kinds the catalog gives `project_delete`; only `project` is deleted by this server so far. */
 export const PROJECT_DELETE_KINDS = ['project', 'env', 'member', 'note', 'token'] as const;
@@ -120,16 +122,19 @@ async function resolveProjects(ctx: ToolContext, call: DeleteCall): Promise<Reso
   if (call.ids.length === 0 && call.names.length === 0) {
     throw new ToolError('invalid', { params: { detail: 'name the projects: ids or names' } });
   }
-  const byId = await Promise.all(call.ids.map((id) => projectById(ctx, id)));
+  const byId = await settleAll(call.ids.map((id) => projectById(ctx, id)));
   const all = call.names.length === 0 ? [] : await allProjects(ctx);
   const ambiguous: { name: string; matches: DeleteItem[] }[] = [];
   const byName: DeleteItem[] = [];
   for (const name of call.names) {
     const matches = all.filter((project) => same(project.name, name));
     if (matches.length === 0) {
-      const shown = all.slice(0, SHOWN_NAMES).map((project) => `"${inline(project.name, 80)}"`);
+      // names from the backend are a third party's text (FIX-74): masked, secrets registered
+      const shown = all
+        .slice(0, SHOWN_NAMES)
+        .map((project) => `"${content(ctx, project.name, 80)}"`);
       throw notFound(
-        `No project is named "${inline(name, 120)}"${shown.length === 0 ? '' : `; projects: ${shown.join(', ')}`}.`,
+        `No project is named "${content(ctx, name, 120)}"${shown.length === 0 ? '' : `; projects: ${shown.join(', ')}`}.`,
       );
     }
     if (matches.length > 1) ambiguous.push({ name, matches });
@@ -153,7 +158,7 @@ async function countsOf(
 ): Promise<ProjectCounts> {
   const path = { project_id: projectId };
   const [flows, scenarios, compositions, openapi, asyncapi, environments, functional] =
-    await Promise.all([
+    await settleAll([
       counted(async () =>
         exactCount(
           (
@@ -266,7 +271,7 @@ async function refuseBusy(
   const runs = new Map<string, Awaited<ReturnType<typeof readRuns>>>();
   let testsUnknown = false;
   for (const item of items) {
-    const target = `project "${inline(item.name, 80)}"`;
+    const target = `project "${shownName(ctx, item.name)}"`;
     const operation = liveOperation(ctx, item.id);
     if (operation !== undefined) throw busy(operation, target);
     const read = await readRuns(ctx, item.id);
@@ -285,11 +290,13 @@ async function issue(
   renewed: CardRenewal | undefined,
 ): Promise<DoneOutcome<DeleteData>> {
   const resolved = await resolveProjects(ctx, call);
-  if (resolved.kind === 'choice') return { status: 'done', inert: true, data: resolved.data };
+  if (resolved.kind === 'choice') {
+    return { status: 'done', inert: true, data: shownChoice(ctx, resolved.data) };
+  }
   const { items } = resolved;
   if (items.length > MAX_PROJECTS) throw tooMany(MAX_PROJECTS, 'projects');
   const { testsUnknown, runs } = await refuseBusy(ctx, items, false);
-  const withCounts = await Promise.all(
+  const withCounts = await settleAll(
     items.map(async (item) => ({
       ...item,
       counts: await countsOf(
@@ -304,9 +311,12 @@ async function issue(
     tool: 'project_delete',
     kind: 'project',
     scope: SCOPE,
-    items: withCounts,
+    // the card shows the names masked, the same on every call, so the frozen card still matches
+    items: withCounts.map((item) => ({ ...item, name: shownName(ctx, item.name) })),
     ...(bound !== undefined && items.some((item) => item.id === bound.id)
-      ? { bound: items.find((item) => item.id === bound.id)?.name ?? bound.name }
+      ? {
+          bound: shownName(ctx, items.find((item) => item.id === bound.id)?.name ?? bound.name),
+        }
       : {}),
     ...(testsUnknown ? { testsUnknown } : {}),
   };
@@ -338,7 +348,7 @@ async function confirmDeletion(
     params: { link: ctx.services.links.projects().url },
   });
   confirmOnce(ctx, token, renderDeleteQuestion(card.facts, ctx.t), refusal);
-  await useCard(ctx, SCOPE, PROJECTS_KEY);
+  await useCard(ctx, SCOPE, PROJECTS_KEY, token);
   const deleted = await deleteFor(ctx, items);
   return { status: 'done', ...deleted };
 }

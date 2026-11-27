@@ -81,8 +81,22 @@ interface Needle {
   readonly boundEnd: boolean;
 }
 
+/**
+ * The forms of the value made last. A value is registered twice in a row (the log's masker and the
+ * call's), and the encodings cost more than the second registration should; the needles are never
+ * changed after they are made.
+ */
+let lastForms: { readonly value: string; readonly forms: readonly Needle[] } | undefined;
+
 /** Every form of `value` searched for in text, with the word boundaries it asks for. */
-function formsOf(value: string): Needle[] {
+function formsOf(value: string): readonly Needle[] {
+  if (lastForms?.value === value) return lastForms.forms;
+  const forms = makeForms(value);
+  lastForms = { value, forms };
+  return forms;
+}
+
+function makeForms(value: string): Needle[] {
   if (value.length < MIN_SECRET_LENGTH) return [];
   // `oneLine` is the value as `inline()` shows it: breaks and runs of spaces as one space, terminal
   // sequences and invisible marks removed.
@@ -161,9 +175,10 @@ class NeedleTrie {
       if (!merged.boundStart) node.freeStart = true;
       if (text.length - depth < CHUNK) break;
       const key = text.slice(depth, depth + CHUNK);
-      for (let n = 1; n < CHUNK; n += 1) node.heads.add(key.slice(0, n));
       let child = node.children.get(key);
       if (child === undefined) {
+        // The heads of a key are the same for every needle through it: made with the child, once.
+        for (let n = 1; n < CHUNK; n += 1) node.heads.add(key.slice(0, n));
         child = new TrieNode();
         node.children.set(key, child);
       }
@@ -172,9 +187,12 @@ class NeedleTrie {
     }
     const rest = text.slice(depth);
     const at = node.tails.findIndex((tail) => tail.rest === rest);
-    if (at === -1) node.tails.push({ rest, needle: merged });
-    else node.tails[at] = { rest, needle: merged };
-    for (let n = 1; n < rest.length; n += 1) node.heads.add(rest.slice(0, n));
+    if (at === -1) {
+      node.tails.push({ rest, needle: merged });
+      for (let n = 1; n < rest.length; n += 1) node.heads.add(rest.slice(0, n));
+    } else {
+      node.tails[at] = { rest, needle: merged };
+    }
   }
 
   /**
@@ -231,6 +249,7 @@ export class Masker {
   readonly #parent: Masker | undefined;
   readonly #own = new NeedleTrie();
   #empty = true;
+  readonly #values = new Set<string>();
 
   constructor(parent?: Masker) {
     this.#parent = parent;
@@ -241,10 +260,18 @@ export class Masker {
   }
 
   add(value: string): void {
+    // A value already registered here or in an ancestor adds nothing: its forms are in a trie. A
+    // dataset read twice in one call registers its cells twice.
+    if (this.#knows(value)) return;
+    this.#values.add(value);
     for (const needle of formsOf(value)) {
       this.#own.add(needle);
       this.#empty = false;
     }
+  }
+
+  #knows(value: string): boolean {
+    return this.#values.has(value) || (this.#parent !== undefined && this.#parent.#knows(value));
   }
 
   /** This masker's trie and those of its ancestors, the ones that hold a needle. */

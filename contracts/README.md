@@ -30,9 +30,9 @@ are from the backend's side: `send` is server to client; an operation points at 
 - **Check.** `mcp/test/ws.asyncapi.test.ts` fails when `ws-frames.json` lists a channel, frame or key the
   document lacks, with another type, or demands more than the document promises.
 
-## `ws-frames.json` — what the plugin reads and sends on six channels
+## `ws-frames.json` — what the plugin reads and sends on ten channels
 
-This file is the plugin's surface of the document above: for each of the six channels it uses it lists
+This file is the plugin's surface of the document above: for each of the ten channels it uses it lists
 the path, the envelope, what a connection must present, the server frames the plugin reads and the
 messages it sends, with the keys it depends on. It stays a separate file because the plugin reads
 a subset and keeps notes the backend document has no place for (`source`, `requires`); it does not
@@ -57,8 +57,6 @@ repeat what the document says, a test compares them. Client frames are flat on t
   is accepted. `items` describes the elements of an array or the keys of a nested object.
 - **Unknown frames.** A frame type that is not listed is not an error: the backend may add
   frames, and the plugin skips them.
-- **Source.** Every frame has a `source`: backend `file:line` at the commit in `backend_ref`.
-  Line numbers are a pointer, confirm them in the current code.
 
 `mcp/src/ws/frames.ts` holds the matching Zod schemas, written by hand from this file, and
 `parseFrame(channel, raw)`. `mcp/test/ws.frames.test.ts` fails when the two lists drift apart, and

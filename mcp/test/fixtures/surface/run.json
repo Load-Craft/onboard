@@ -1,0 +1,394 @@
+{
+  "tools": [
+    {
+      "name": "run_delete",
+      "title": "Delete a run, a load profile or a saved run",
+      "description": "Delete a run, a load profile or a saved run (kind + item_id). Runs in progress are refused.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["run", "profile", "saved_run"],
+            "description": "What to delete."
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The run, load profile or saved run to delete."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["kind", "item_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_get",
+      "title": "Get one run",
+      "description": "Get one run: state, configuration, failure stage; include=diagnostics adds the build output.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run: its handle (e-1a2b3c4d) from run_test or process_get_status, or its UUID; default: the last run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "include": {
+            "description": "\"diagnostics\": why the run stopped or failed, when LoadCraft knows.",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["diagnostics"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_get_profiles",
+      "title": "Get stored load profiles",
+      "description": "Get stored load profiles: the list, or one with its injection steps.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "description": "One load profile with its injection steps (name or id); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_get_saved",
+      "title": "Get saved runs with their schedules",
+      "description": "Get saved runs with their schedules: the list, or one.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "saved_run": {
+            "description": "One saved run (name or id); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_get_usage",
+      "title": "Get finished runs over a period and the compute time they used",
+      "description": "Get finished runs over a period and the compute time they used.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "default": 30,
+            "description": "How many past days of usage to return (1-365).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_list",
+      "title": "List the project's runs, newest first",
+      "description": "List the project's runs, newest first: status, target, environment; include=results adds headline results.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "How many runs to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "target": {
+            "description": "Only runs of this scenario or composition (name or id).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "include": {
+            "description": "\"results\": the headline numbers of each run.",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["results"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_save",
+      "title": "Save a run definition for reuse",
+      "description": "Save a run definition for reuse (target, load, environment, data bindings; id: update).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "saved_run_id": {
+            "description": "The saved run to change; without it, a new one is created.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "name": {
+            "description": "The name; required for a new saved run.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "scenario_id": {
+            "description": "The scenario a new saved run starts (give this or composition_id; new only).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "composition_id": {
+            "description": "The composition a new saved run starts (give this or scenario_id; new only).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "environment_id": {
+            "description": "The environment; set or change, never clear.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "target_base_url": {
+            "description": "The target address; set or change, never clear.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "workload": {
+            "description": "The load {type, vusers, ramp, hold, thresholds}; replaced as a whole.",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "vusers": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "ramp": {
+                "default": 0,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
+              },
+              "hold": {
+                "default": 0,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
+              },
+              "thresholds": {
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "production": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": ["type", "vusers"],
+            "additionalProperties": false
+          },
+          "feeder_bindings": {
+            "description": "Slot -> dataset id; replaced as a whole.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[0-9a-fA-F-]{36}$"
+            }
+          },
+          "source_execution_id": {
+            "description": "The run this saved run is made from (new only).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_save_profile",
+      "title": "Save a stored load profile",
+      "description": "Save a stored load profile (users, ramp, duration, default flag; no id: create).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "description": "The load profile to change (name or id); without it, a new one is created.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "name": {
+            "description": "The profile name (needed to create; renames on change).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "type": {
+            "description": "The load shape (needed to create).",
+            "type": "string",
+            "enum": [
+              "at_once",
+              "ramp",
+              "constant",
+              "stress",
+              "spike",
+              "soak",
+              "ramp_concurrency",
+              "constant_concurrency",
+              "custom"
+            ]
+          },
+          "users": {
+            "description": "Virtual users.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "duration_seconds": {
+            "description": "How long the load lasts.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          },
+          "ramp_duration_seconds": {
+            "description": "How long the ramp lasts.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400
+          },
+          "description": {
+            "description": "A short description.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "is_default": {
+            "description": "true: make it the default profile of the project.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

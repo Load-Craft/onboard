@@ -55,19 +55,48 @@ function register(ctx: Pick<ToolContext, 'secrets'>, values: readonly string[]):
  * Calls the operation `id` and returns the body of its successful answer; a non-2xx answer is
  * thrown as `LoadcraftApiError` (the registry turns it into the error the model sees).
  */
-export async function callBackend<Id extends OperationId>(
+export function callBackend<Id extends OperationId>(
   ctx: CallContext,
   id: Id,
   ...input: CallInput<Id>
 ): Promise<OpOutput<Id>> {
+  return callWith(ctx, id, input[0], {});
+}
+
+/** The longest a tool call may wait for one operation (3 minutes): a build or a model's answer. */
+export const LONGEST_CALL_MS = 180_000;
+
+/**
+ * `callBackend` for an operation that runs long (a build, a model's answer): the whole call, retries
+ * included, may take `timeoutMs` (up to `LONGEST_CALL_MS`) instead of the client's default.
+ */
+export function callBackendFor<Id extends OperationId>(
+  ctx: CallContext,
+  timeoutMs: number,
+  id: Id,
+  ...input: CallInput<Id>
+): Promise<OpOutput<Id>> {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > LONGEST_CALL_MS) {
+    throw new RangeError(`callBackendFor: timeoutMs must be 1 to ${String(LONGEST_CALL_MS)}`);
+  }
+  return callWith(ctx, id, input[0], { timeoutMs });
+}
+
+async function callWith<Id extends OperationId>(
+  ctx: CallContext,
+  id: Id,
+  input: unknown,
+  extra: { readonly timeoutMs?: number },
+): Promise<OpOutput<Id>> {
   // `callOperation` types its input by the operation; `CallInput` gave the caller the same type,
   // which a generic `Id` cannot carry through its rest parameter.
   const call = callOperation as AnyCall;
-  const data = await call(ctx.services.http, id, input[0], {
+  const data = await call(ctx.services.http, id, input, {
     signal: ctx.signal,
     secrets: ctx.secrets,
+    ...extra,
   });
-  register(ctx, secretFieldValues(data));
+  register(ctx, secretFieldValues(data, { ownContract: true }));
   return data as OpOutput<Id>;
 }
 
@@ -76,8 +105,13 @@ export async function callBackend<Id extends OperationId>(
  * secrets the call already knows (the token among them) go first: a mask by shape that replaced a
  * part of one would leave the rest where the scope no longer finds it.
  */
-export function content(ctx: Pick<ToolContext, 'secrets'>, text: string, max?: number): string {
-  const masked = maskText(ctx.secrets.scrub(text));
+export function content(
+  ctx: Pick<ToolContext, 'secrets'>,
+  text: string,
+  max?: number,
+  options: { readonly documentation?: boolean } = {},
+): string {
+  const masked = maskText(ctx.secrets.scrub(text), options);
   register(ctx, masked.secrets);
   return inline(masked.text, max);
 }
@@ -93,8 +127,9 @@ export function body(
   text: string,
   type: string | null,
   side: 'request' | 'response' = 'response',
+  options: { readonly documentation?: boolean } = {},
 ): ShownBody {
-  const masked = maskBody(ctx.secrets.scrub(text), type, side);
+  const masked = maskBody(ctx.secrets.scrub(text), type, side, options);
   if (masked.kind === 'hidden') return masked;
   register(ctx, masked.secrets);
   return { kind: 'shown', text: masked.text };

@@ -8,6 +8,11 @@ import { LINK_KEYS } from '../src/outcome.js';
 import { createTranslator } from '../src/render/i18n/index.js';
 import { en, type Dictionary, type DictionaryKey } from '../src/render/i18n/en.js';
 import { pl } from '../src/render/i18n/pl.js';
+import { MODULE_TEXTS } from '../src/render/i18n/_generated/modules.js';
+
+// the codes of the tools of a module have their texts in the module's dictionary (`error.<module>_…`)
+const enAll: Dictionary = { ...en, ...MODULE_TEXTS.en };
+const plAll: Dictionary = { ...pl, ...MODULE_TEXTS.pl };
 
 describe('createTranslator', () => {
   it('substitutes {name} parameters', () => {
@@ -223,13 +228,35 @@ describe('error texts', () => {
   });
 
   // Slots the translator fills itself in `http/errors.ts` (the reason text is looked up by kind; the test below renders every kind).
-  const FILLED_BY_TRANSLATION = new Map([['backend_too_old', new Set(['reason'])]]);
+  const FILLED_BY_TRANSLATION = new Map([
+    ['backend_too_old', new Set(['reason'])],
+    ['invalid_arguments', new Set(['reason'])],
+    ['github_not_linked', new Set(['reason'])],
+  ]);
+
+  it('every rule of an invalid_arguments refusal has its text in both dictionaries', () => {
+    const srcDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src');
+    const rules = sourceFiles(srcDir).flatMap((file) =>
+      [
+        ...readFileSync(file, 'utf8').matchAll(
+          /new ToolError\(\s*'invalid_arguments'[^;]*?rule:\s*'([a-z0-9_]+)'/gsu,
+        ),
+      ].map((match) => match[1] ?? ''),
+    );
+    expect(rules.length).toBeGreaterThan(3);
+    const missing = rules.filter(
+      (rule) =>
+        text(en, `error.invalid_arguments.rule.${rule}`) === undefined ||
+        text(pl, `error.invalid_arguments.rule.${rule}`) === undefined,
+    );
+    expect(missing).toEqual([]);
+  });
 
   it('every thrown code has a message in both dictionaries', () => {
     const missing = [...new Set(sites.map((site) => site.code))].filter(
       (code) =>
-        text(en, `error.${code}.message`) === undefined ||
-        text(pl, `error.${code}.message`) === undefined,
+        text(enAll, `error.${code}.message`) === undefined ||
+        text(plAll, `error.${code}.message`) === undefined,
     );
     expect(missing).toEqual([]);
   });
@@ -239,8 +266,8 @@ describe('error texts', () => {
     for (const site of sites) {
       if (site.params === undefined) continue;
       for (const [name, dictionary] of [
-        ['en', en],
-        ['pl', pl],
+        ['en', enAll],
+        ['pl', plAll],
       ] as const) {
         const slots = slotsOf(
           text(dictionary, `error.${site.code}.message`),
@@ -256,10 +283,11 @@ describe('error texts', () => {
   });
 
   it('en and pl use the same slots in every error text', () => {
-    const different = Object.keys(en)
+    const different = Object.keys(enAll)
       .filter((key) => key.startsWith('error.'))
       .filter(
-        (key) => slotsOf(text(en, key)).sort().join() !== slotsOf(text(pl, key)).sort().join(),
+        (key) =>
+          slotsOf(text(enAll, key)).sort().join() !== slotsOf(text(plAll, key)).sort().join(),
       );
     expect(different).toEqual([]);
   });

@@ -104,6 +104,11 @@ export const paneEn = {
   'pane.runs.title': 'Test runs',
   'pane.runs.loading': 'Loading the runs…',
   'pane.runs.failed': 'The runs could not be read.',
+  'pane.read.failed': '{sentence} (reason: {reason}).',
+  'pane.read.busy': 'the panel reads were busy',
+  'pane.read.exception': 'exception',
+  'pane.read.bad_answer': 'the answer held no data',
+  'pane.read.missing': 'no {field} in the data',
   'pane.runs.none': 'No test run yet.',
   'pane.runs.filterPlaceholder': 'scenario or result',
   'pane.runs.more': {
@@ -300,6 +305,11 @@ export const panePl = {
   'pane.runs.title': 'Przebiegi testów',
   'pane.runs.loading': 'Wczytuję przebiegi…',
   'pane.runs.failed': 'Nie udało się wczytać przebiegów.',
+  'pane.read.failed': '{sentence} (powód: {reason}).',
+  'pane.read.busy': 'odczyty panelu zajęte',
+  'pane.read.exception': 'wyjątek',
+  'pane.read.bad_answer': 'odpowiedź bez danych',
+  'pane.read.missing': 'brak {field} w danych',
   'pane.runs.none': 'Brak przebiegów testów.',
   'pane.runs.filterPlaceholder': 'scenariusz albo wynik',
   'pane.runs.more': {

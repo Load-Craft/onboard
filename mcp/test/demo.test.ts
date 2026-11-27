@@ -303,7 +303,7 @@ describe('the notice in demonstration mode', () => {
     expect(status.text.split('\n')[0]).toBe(NOTICE_PL);
     expect(lastLine(status.text)).toBe(NOTICE_PL);
 
-    const flows = await r.call('flows_get', { flow: 'zakupy' });
+    const flows = await r.call('flows_get', { flow_id: 'zakupy' });
     expect(flows.isError, flows.text).toBe(false);
     expect(flows.text.split('\n')[0]).not.toBe(NOTICE_PL);
     expect(lastLine(flows.text)).toBe(NOTICE_PL);
@@ -311,7 +311,7 @@ describe('the notice in demonstration mode', () => {
 
   it('ends an error result too, in the language of the user', async () => {
     const r = await rig(true, 'en', false);
-    const result = await r.call('flows_get', { flow: 'zakupy' });
+    const result = await r.call('flows_get', { flow_id: 'zakupy' });
     expect(result.isError).toBe(true);
     expect(lastLine(result.text)).toBe(NOTICE_EN);
   });
@@ -320,7 +320,7 @@ describe('the notice in demonstration mode', () => {
     const r = await rig(false, 'pl');
     const status = await r.call('process_get_status', {});
     expect(status.text).not.toContain(NOTICE_PL);
-    const missing = await (await rig(false, 'pl', false)).call('flows_get', { flow: 'zakupy' });
+    const missing = await (await rig(false, 'pl', false)).call('flows_get', { flow_id: 'zakupy' });
     expect(missing.text).not.toContain(NOTICE_PL);
   });
 });
@@ -664,7 +664,7 @@ describe('the built server in demonstration mode', () => {
       expect((await session.client.listTools()).tools.length).toBeGreaterThan(10);
       for (const [tool, args] of [
         ['process_get_status', {}],
-        ['flows_get', { flow: 'zakupy' }],
+        ['flows_get', { flow_id: 'zakupy' }],
       ] as const) {
         const result = await session.call(tool, args);
         expect(result.isError, tool).toBe(true);

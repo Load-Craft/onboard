@@ -66,11 +66,33 @@ export const TRAFFIC_LIST_SNAPSHOTS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['format_sample'],
+      max_items: 1,
+      from_state: null,
+      doc: '"format_sample": the field names and shape of a traffic packet (no values).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 20,
+      from_state: null,
+      doc: 'How many snapshots to return (1-100).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `traffic_get_snapshot`: Get one snapshot: quality report, excluded windows, per-route series (summarized by default). */
@@ -129,11 +151,30 @@ export const TRAFFIC_GET_SNAPSHOT = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'snapshot_id',
+      type: 'uuid',
+      from_state: 'choices.run.traffic_snapshot_id',
+      doc: 'The snapshot; default: the one chosen for runs of this workspace.',
+    },
+    {
+      name: 'series',
+      type: 'enum',
+      enum: ['summary', 'points'],
+      default: 'summary',
+      from_state: null,
+      doc: 'summary: per route the count, min, max and sum; points: up to 20 routes of 60 points.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `traffic_import_snapshot`: Import a production traffic file (JSON or CSV): validate it and, with save=true, store it as a snapshot. */
@@ -249,8 +290,12 @@ export const TRAFFIC_IMPORT_SNAPSHOT = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `traffic_delete`: Delete traffic snapshots or revoke push tokens (kind + ids). Runs using a snapshot are not checked. */
@@ -282,8 +327,8 @@ export const TRAFFIC_DELETE = {
           source: 'args',
         },
         {
-          label: 'Items',
-          from: 'ids (names resolved by the registry)',
+          label: 'Item',
+          from: 'item_id (name resolved by the registry)',
           source: 'labels',
         },
       ],
@@ -294,7 +339,7 @@ export const TRAFFIC_DELETE = {
     freeze: [
       {
         path: 'choices.run.traffic_snapshot_id',
-        arg: 'ids',
+        arg: 'item_id',
         explicit: true,
       },
       {
@@ -331,7 +376,10 @@ export const TRAFFIC_DELETE = {
       path: '/api/v1/projects/{project_id}/production-traffic/tokens/{token_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_snapshot_api_v1_projects__project_id__production_traffic_snapshots__snapshot_id__get',
+    'list_ingest_tokens_api_v1_projects__project_id__production_traffic_tokens_get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'choices.run.traffic_snapshot_id'],
   state_writes: ['choices.run.traffic_snapshot_id', 'steps.traffic.snapshot'],
@@ -340,11 +388,31 @@ export const TRAFFIC_DELETE = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: ['snapshot', 'token'],
+      required: true,
+      from_state: null,
+      doc: 'What to delete: a traffic snapshot or a push token (revoked).',
+    },
+    {
+      name: 'item_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The snapshot or token to delete.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `traffic_get_push_setup`: Get the setup for pushing traffic from production: sender address and recipe, excluded run windows, existing push tokens (no secrets). */
@@ -410,8 +478,12 @@ export const TRAFFIC_GET_PUSH_SETUP = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `traffic_create_token`: Create a push token; its secret is written to a local file and never returned. */
@@ -493,11 +565,15 @@ export const TRAFFIC_CREATE_TOKEN = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

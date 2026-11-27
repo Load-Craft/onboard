@@ -13,11 +13,14 @@ import { discardCard, issueCard, redeemCard, sameFrozen } from '../../consent/co
 import type { ToolContext } from '../../context.js';
 import type {
   CardRenewal,
+  DeleteChoiceData,
+  DeleteData,
   DeleteFacts,
   DeleteItem,
   DeleteKind,
   DeleteTool,
 } from '../../render/views/deletion.js';
+import { content } from '../moduleCall.js';
 
 /** The card scope of each tool, and the key its one card lives under. */
 export const DELETE_SCOPES: Readonly<Record<DeleteTool, string>> = {
@@ -120,8 +123,13 @@ export function cardFor(
 }
 
 /** The card is used: it is gone before anything is deleted, so its token never deletes twice. */
-export function useCard(ctx: ToolContext, scope: string, key: string): Promise<void> {
-  return discardCard(ctx, scope, key);
+export function useCard(
+  ctx: ToolContext,
+  scope: string,
+  key: string,
+  token: string,
+): Promise<void> {
+  return discardCard(ctx, scope, key, token.trim());
 }
 
 /** The key of the card of a tool: projects have one card, flows one per project. */
@@ -132,4 +140,26 @@ export function cardKey(tool: DeleteTool, projectId: string): string {
 /** `"a", "b"` of the items, for the log and the result. */
 export function namesOf(items: readonly Pick<DeleteItem, 'name'>[]): string {
   return items.map((one) => one.name).join(', ');
+}
+
+/**
+ * A name from the backend (a project, a flow, the label of an operation) as the card and its
+ * messages show it: masked by shape, its secrets registered, one line (FIX-76). Deterministic, so a
+ * card frozen on the first call matches the one the confirming call computes.
+ */
+export function shownName(ctx: Pick<ToolContext, 'secrets'>, name: string): string {
+  return content(ctx, name, 80);
+}
+
+/** The choice between items of the same name, their names shown masked. */
+export function shownChoice(ctx: Pick<ToolContext, 'secrets'>, data: DeleteData): DeleteData {
+  if (!('ambiguous' in data)) return data;
+  const choice: DeleteChoiceData = data;
+  return {
+    ...choice,
+    ambiguous: choice.ambiguous.map((entry) => ({
+      name: shownName(ctx, entry.name),
+      matches: entry.matches.map((item) => ({ ...item, name: shownName(ctx, item.name) })),
+    })),
+  };
 }

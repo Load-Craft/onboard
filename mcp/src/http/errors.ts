@@ -5,7 +5,13 @@
 import { ToolError } from '../errors.js';
 import type { TranslationParams, Translator } from '../context.js';
 import { inline } from '../render/primitives.js';
-import { codeForStatus, cutForLog, LoadcraftApiError, quotesBackendText } from './apiError.js';
+import {
+  codeForStatus,
+  cutForLog,
+  LoadcraftApiError,
+  quotesBackendText,
+  withheldCopy,
+} from './apiError.js';
 import type { Logger } from '../log.js';
 import { SchemaError } from '../workspace/processState.js';
 
@@ -192,14 +198,32 @@ function unknownCode(error: LoadcraftApiError, t: Translator): ToolError {
 }
 
 /** A `ToolError` thrown by the plugin itself: translated when the dictionary knows its code. */
+/**
+ * `rule` names the `error.<code>.rule.<rule>` text that fills `{reason}` (`invalid_arguments`: the
+ * plugin's own refusal of arguments that do not fit together, in the language of the call).
+ */
+function withRule(base: string, params: Params | undefined, t: Translator): Params | undefined {
+  const rule = params?.['rule'];
+  if (typeof rule !== 'string' || !t.has(`${base}.rule.${rule}`)) return params;
+  return { ...params, reason: t(`${base}.rule.${rule}`, params) };
+}
+
 function fromDictionary(error: ToolError, t: Translator): ToolError {
   const base = `error.${error.code}`;
   if (!t.has(`${base}.message`)) return error;
   const params =
     error.code === 'backend_too_old' && error.params !== undefined
       ? withReason(error.params, t)
-      : error.params;
-  const hint = t.has(`${base}.hint`) ? t(`${base}.hint`, params) : error.hint;
+      : withRule(base, error.params, t);
+  // A hint for one argument (`error.missing_argument.hint.docs_id`) wins over the hint of the code.
+  const name = error.params?.['name'];
+  const own = typeof name === 'string' ? `${base}.hint.${name}` : undefined;
+  const hint =
+    own !== undefined && t.has(own)
+      ? t(own, params)
+      : t.has(`${base}.hint`)
+        ? t(`${base}.hint`, params)
+        : error.hint;
   return new ToolError(error.code, {
     message: t(`${base}.message`, params),
     ...(hint === undefined ? {} : { hint }),
@@ -248,14 +272,19 @@ function forModel(error: LoadcraftApiError): LoadcraftApiError {
   });
 }
 
+/** `withhold`: the call could not register every secret it read, so no backend text is shown. */
+interface ShownOptions {
+  readonly withhold?: boolean;
+}
+
 /**
  * The error a tool reports to the model, in the user's language. A backend refusal is looked up
  * by code; a plugin error by its own code; both fall back to their literal text when the
  * dictionary has no entry. Anything that is not a `ToolError` gets a sentence without its text.
  */
-export function toToolError(error: unknown, t: Translator): ToolError {
+export function toToolError(error: unknown, t: Translator, options: ShownOptions = {}): ToolError {
   if (error instanceof LoadcraftApiError) {
-    const shown = forModel(error);
+    const shown = forModel(options.withhold === true ? withheldCopy(error) : error);
     return fromCatalog(shown, t) ?? unknownCode(shown, t);
   }
   if (error instanceof ToolError) return fromDictionary(error, t);

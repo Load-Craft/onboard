@@ -1,6 +1,6 @@
 // Routes that describe the project's documentation as LoadCraft understands it: the API map
-// (`project_api_map.py`) and the endpoint-conformance probe of one environment
-// (`project_environments.py`). Both read the operations of the stored specification, so they answer
+// and the endpoint-conformance probe of one environment
+//. Both read the operations of the stored specification, so they answer
 // from the same records as `GET …/openapi`. Registration is idempotent per fake.
 //
 // The conformance probe of the sklep world finds every GET operation on the target and leaves the
@@ -28,7 +28,7 @@ const registeredUpload = new WeakSet<Fake>();
 type ProjectDetail = components['schemas']['ProjectDetail'];
 
 /**
- * `POST …/openapi/upload` (`projects.py:1131`): the file becomes the current specification as a new
+ * `POST …/openapi/upload`: the file becomes the current specification as a new
  * row; the previous one stays in the history. 400 for a file that is not a JSON object.
  */
 export function registerOpenapiUploadRoute(fake: Fake): void {
@@ -64,48 +64,144 @@ function operations(store: Store, specId: string): SklepEndpoint[] {
   return operationsOf(store, specId).filter((endpoint) => !NOT_OPERATIONS.has(endpoint.method));
 }
 
-/** `GET …/api-map`: 404 while the project has no specification; areas are the first tags. */
+/** The area prefixes saved by hand, per project (what the profile of the real backend holds). */
+export const SAVED_AREA_PREFIXES = 'project_saved_area_prefixes';
+
+interface SavedPrefixes {
+  readonly id: string;
+  readonly prefixes: readonly string[];
+}
+
+/** The prefixes saved for the project, sorted; null while the areas are the detected ones. */
+export function savedAreaPrefixes(store: Store, projectId: string): readonly string[] | null {
+  return store.collection<SavedPrefixes>(SAVED_AREA_PREFIXES).get(projectId)?.prefixes ?? null;
+}
+
+/** Plants the prefixes saved for the project (a test's start state), as the backend keeps them. */
+export function seedAreaPrefixes(
+  store: Store,
+  projectId: string,
+  prefixes: readonly string[],
+): void {
+  const collection = store.collection<SavedPrefixes>(SAVED_AREA_PREFIXES);
+  collection.delete(projectId);
+  collection.insert({ id: projectId, prefixes: [...prefixes].sort() });
+}
+
+const whole = (endpoint: SklepEndpoint): string => `${endpoint.method} ${endpoint.path}`;
+
+/** The map of the project: the saved prefixes make the areas, else the first tags do. */
+function apiMapOf(store: Store, projectId: string): ApiMapResponse {
+  store
+    .collection(SKLEP_COLLECTIONS.projects)
+    .require(projectId, `Project not found: ${projectId}`);
+  const spec = currentSpec(store, projectId);
+  if (spec === undefined) {
+    throw new FakeHttpError(404, {
+      detail: `Project ${projectId} has no OpenAPI specification to map`,
+    });
+  }
+  const all = operations(store, spec.id);
+  const saved = savedAreaPrefixes(store, projectId);
+  const areaOf = (endpoint: SklepEndpoint): string =>
+    endpoint.tags[0] ?? endpoint.path.split('/')[1] ?? '';
+  const detected = [...new Set(all.map(areaOf))];
+  const base = {
+    budget: {
+      budget_chars: 60000,
+      description_counted: false,
+      fixed_chars: 4000,
+      site: 'flow_generation' as const,
+      subject: 'selection' as const,
+      whole_api_chars: 30000,
+    },
+    digest: 'sklep-map',
+    preview: false,
+    title: spec.title,
+    total_operations: all.length,
+  };
+  if (saved === null) {
+    return {
+      ...base,
+      area_rule: 'detected',
+      areas: detected.map((prefix) => ({
+        name: prefix,
+        prefix: `/${prefix}`,
+        operations: all.filter((endpoint) => areaOf(endpoint) === prefix).map(whole),
+      })),
+    };
+  }
+  const longest = (path: string): string | undefined =>
+    [...saved]
+      .filter((prefix) => path === prefix || path.startsWith(`${prefix}/`))
+      .sort((a, b) => b.length - a.length)[0];
+  const areas = saved
+    .map((prefix) => ({
+      name: prefix.slice(1),
+      prefix,
+      operations: all.filter((endpoint) => longest(endpoint.path) === prefix).map(whole),
+    }))
+    .filter((area) => area.operations.length > 0);
+  return {
+    ...base,
+    area_rule: 'manual',
+    areas,
+    saved_area_prefixes: [...saved],
+    empty_area_prefixes: saved.filter((prefix) => !areas.some((area) => area.prefix === prefix)),
+    outside_area: all.filter((endpoint) => longest(endpoint.path) === undefined).map(whole),
+    detected_area_prefixes: detected.map((prefix) => `/${prefix}`),
+  };
+}
+
+/** What the backend refuses of a list of prefixes (422), else the list as it keeps it. */
+function normalized(prefixes: readonly string[]): string[] {
+  const seen = new Set<string>();
+  for (const raw of prefixes) {
+    const prefix = raw.trim();
+    if (!prefix.startsWith('/')) {
+      throw new FakeHttpError(422, { detail: `area prefix '${prefix}' must start with /` });
+    }
+    if (/\s/u.test(prefix)) {
+      throw new FakeHttpError(422, { detail: `area prefix '${prefix}' has whitespace in it` });
+    }
+    if (prefix.replace(/\/+$/u, '') === '') {
+      throw new FakeHttpError(422, {
+        detail: `area prefix '${prefix}' is the whole API, not an area of it`,
+      });
+    }
+    const kept = prefix.replace(/\/+$/u, '');
+    if (seen.has(kept)) {
+      throw new FakeHttpError(422, { detail: `area prefix '${kept}' is given twice` });
+    }
+    seen.add(kept);
+  }
+  if (seen.size === 0) throw new FakeHttpError(422, { detail: 'set at least one area prefix' });
+  return [...seen].sort();
+}
+
+/**
+ * `GET …/api-map` (404 while the project has no specification; the areas are the saved prefixes,
+ * else the first tags) and `PUT …/api-map/area-prefixes` (saves them; null: the detected areas).
+ */
 export function registerApiMapRoute(fake: Fake): void {
   if (registeredMap.has(fake)) return;
   registeredMap.add(fake);
-  fake.route('GET', '/api/v1/projects/{project_id}/api-map', (req, store) => {
+  fake.route('GET', '/api/v1/projects/{project_id}/api-map', (req, store) => ({
+    status: 200,
+    body: apiMapOf(store, req.params.project_id),
+  }));
+  fake.route('PUT', '/api/v1/projects/{project_id}/api-map/area-prefixes', (req, store) => {
     const projectId = req.params.project_id;
-    store
-      .collection(SKLEP_COLLECTIONS.projects)
-      .require(projectId, `Project not found: ${projectId}`);
-    const spec = currentSpec(store, projectId);
-    if (spec === undefined) {
-      throw new FakeHttpError(404, {
-        detail: `Project ${projectId} has no OpenAPI specification to map`,
-      });
+    apiMapOf(store, projectId);
+    const { area_prefixes: wanted } = req.body as { area_prefixes: string[] | null };
+    const collection = store.collection<SavedPrefixes>(SAVED_AREA_PREFIXES);
+    if (wanted === null) collection.delete(projectId);
+    else {
+      const prefixes = normalized(wanted);
+      collection.delete(projectId);
+      collection.insert({ id: projectId, prefixes });
     }
-    const all = operations(store, spec.id);
-    const areaOf = (endpoint: SklepEndpoint): string =>
-      endpoint.tags[0] ?? endpoint.path.split('/')[1] ?? '';
-    const prefixes = [...new Set(all.map(areaOf))];
-    const body: ApiMapResponse = {
-      area_rule: 'detected',
-      areas: prefixes.map((prefix) => ({
-        name: prefix,
-        prefix: `/${prefix}`,
-        operations: all
-          .filter((endpoint) => areaOf(endpoint) === prefix)
-          .map((endpoint) => `${endpoint.method} ${endpoint.path}`),
-      })),
-      budget: {
-        budget_chars: 60000,
-        description_counted: false,
-        fixed_chars: 4000,
-        site: 'flow_generation',
-        subject: 'selection',
-        whole_api_chars: 30000,
-      },
-      digest: 'sklep-map',
-      preview: false,
-      title: spec.title,
-      total_operations: all.length,
-    };
-    return { status: 200, body };
+    return { status: 200, body: apiMapOf(store, projectId) };
   });
 }
 

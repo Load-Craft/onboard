@@ -19,6 +19,7 @@ import { paneEn } from './pane.js';
 import { cardEn } from './card.js';
 import { profileEn } from './profile.js';
 import { deletionEn } from './deletion.js';
+import { consentEn } from './consent.js';
 import { failuresEn } from './failures.js';
 
 export type Entry = string | PluralForms;
@@ -32,6 +33,7 @@ export const en = {
   ...cardEn,
   ...profileEn,
   ...deletionEn,
+  ...consentEn,
   ...failuresEn,
 
   'demo.notice': 'demo mode — sample data',
@@ -86,6 +88,32 @@ export const en = {
     'The argument {name} is needed: it was not given and the process state holds none.',
   'error.missing_argument.hint':
     'Pass {name}, or run process_get_status to see what the state holds, then call the tool again.',
+  'error.missing_argument.hint.scenario_id':
+    'Pass scenario_id: scenario_list shows the scenarios of the project with their ids (for the traffic-split planner pass draft_id instead), then call the tool again.',
+  'error.missing_argument.hint.docs_id':
+    'Pass docs_id: project_get_docs with versions=true lists the ids of the stored documentation (project_get_docs alone gives the active one), then call the tool again.',
+  'error.missing_argument.hint.composition_id':
+    'Pass composition_id, its id or name: scenario_list_compositions lists the compositions of the project (scenario_generate makes one when it has none), then call the tool again.',
+  'error.missing_argument.hint.environment_id':
+    'Pass environment_id, the environment the saved run uses: project_get_envs lists them. A saved run takes the environment it is given, never one this workspace picked, then call the tool again.',
+  'error.missing_argument.hint.workload':
+    'Pass workload, the load of the saved run as {type, vusers, ramp, hold}: run_plan gives ready profiles. It replaces the stored load as a whole, then call the tool again.',
+  'error.missing_argument.hint.profile':
+    'Pass profile, the load profile to use (type, vusers, ramp, hold): run_get_profiles lists the stored profiles; this workspace has chosen none yet, then call the tool again.',
+  'error.missing_argument.hint.snapshot_id':
+    "Pass snapshot_id: traffic_list_snapshots lists the project's production traffic snapshots with their ids (an empty list means none has been pushed yet), then call the tool again.",
+  'error.missing_argument.hint.run_id':
+    "Pass run_id: run_list lists the project's runs, newest first, with their handles (e-xxxxxxxx), then call the tool again.",
+  'error.missing_argument.hint.compare_to':
+    'Pass compare_to: a run handle or UUID from run_list, or "baseline" for the pinned reference; then call the tool again.',
+  'error.missing_argument.hint.flow_id':
+    "Pass flow_id: flows_list lists the project's flows with their ids, then call the tool again.",
+  'error.missing_argument.hint.dataset_id':
+    "Pass dataset_id: data_list_datasets lists the project's datasets with their ids, then call the tool again.",
+  'error.missing_argument.hint.walk_id':
+    'Pass walk_id: no tool lists the walks. The id is printed by the call that recorded the walk (flows_record_journeys) and the process state keeps the last one; this workspace has none, so ask the user which walk is meant.',
+  'error.missing_argument.hint.draft_id':
+    'Pass draft_id: the id of the traffic-split draft that scenario_suggest_split returned. No tool lists the drafts, and this workspace holds none: propose a split first.',
   'resolve.kind.project': 'project',
   'resolve.kind.environment': 'environment',
   'resolve.kind.flow': 'flow',
@@ -165,6 +193,22 @@ export const en = {
   'data.title': { one: 'data plan · {count} slot', other: 'data plan · {count} slots' },
   'data.title.none': 'data plan · no slots',
   'data.label.more': '+{count} more',
+  'data.cause': '{label}: {counts}{message}{kind}',
+  'data.cause.have': '{have} rows in the dataset · ',
+  'data.cause.both': '{have} rows in the dataset, {need} needed · ',
+  'data.cause.fresh':
+    ' · {identity}: a new dataset (data_create_dataset with scenario and slot) starts the count of used values over',
+  'data.cause.spent': '{have} rows in the dataset, {free} free{by} · ',
+  'data.cause.spentNeed': '{have} rows in the dataset, {free} free{by}, {need} needed · ',
+  'data.cause.by': ' (spent by {runs})',
+  'data.cause.byEarlier': ' (spent by earlier runs)',
+  'data.cause.rereads':
+    'its "{strategy}" strategy reads the file from the top on every run, so this run would hand out the spent values first',
+  'data.cause.backend': 'backend: "{message}"',
+  'data.cause.identity': ' · {identity}',
+  'data.cause.regenerate':
+    ' · regenerate dataset "{dataset}" (id {id}): data_create_dataset with scenario and slot makes new rows, or load a CSV file of unused values with file and slot',
+  'data.identity.fresh': 'new identities for sign-up, each used once',
   'data.exclusive': 'exclusive',
   'data.state.bound': 'pinned',
   'data.state.auto': 'auto',
@@ -179,6 +223,10 @@ export const en = {
   'data.fix.data_missing': '{label}: no data yet, a call of the suggestion fills it',
   'data.fix.data_generate':
     "{label}: no data yet, data_create_dataset makes its rows from the slot's columns",
+  'data.fix.data_generate.fresh':
+    "{label}: no data yet, data_create_dataset makes new identities from the slot's columns; make them again after every run that reached the target, the used ones are registered",
+  'data.fix.slot_mixed':
+    '{label}: one slot serves a sign-in and a sign-up: split it, a separate slot for the sign-up',
   'data.fix.data_from_file':
     '{label}: no data, and no tool can make it ({reason}){hub} · give a CSV file with the columns {columns} to data_create_dataset with file and slot',
   'data.fix.data_from_file.hub': ' · the data hub: {reply}',
@@ -193,7 +241,8 @@ export const en = {
     one: '{count} fix before the test: {fixes}',
     other: '{count} fixes before the test: {fixes}',
   },
-  'data.ready': 'every slot filled · the test can start',
+  'data.ready':
+    'every slot is bound and filled · whether the rows suffice for a profile, run_plan with a profile checks',
   'data.ready.noSlots': 'the scenario needs no test data · the test can start',
   'data.provision.progress': '{done} / {total} accounts',
   'data.provision.created': { one: '{count} created', other: '{count} created' },
@@ -265,6 +314,10 @@ export const en = {
   'data.card.slot': 'For slot: {slot} of {target}',
   'data.card.rows': 'Rows: {rows}',
   'data.card.revision': 'The dataset exists: the file becomes its new revision.',
+  'data.card.regenerate':
+    'The dataset exists: its rows are made again, with new values (a new count of used values).',
+  'data.card.cost.fresh':
+    "Cost: LoadCraft may use its model and the project's daily dataset budget for the rows; nothing is sent to the target · new identities for sign-up, each used once: after a run that reached the target, make them again",
   'data.card.next':
     '→ ask the user; only after their yes call {tool} again with the same arguments and confirm: "{confirm}"',
   'data.card.cost.slot':
@@ -294,6 +347,14 @@ export const en = {
   'error.slot_unknown.message': 'The scenario has no data slot "{slot}". Slots: {available}.',
   'error.slot_unknown.hint':
     'Call data_check_readiness with the scenario to see the slots, then pick one.',
+  'error.slot_new_identities.message':
+    'The slot "{slot}" holds new identities for a sign-up (each used once), so no account is created for it beforehand.',
+  'error.slot_new_identities.hint':
+    'Fill it with data_create_dataset with the scenario and the slot: LoadCraft makes new rows, and after every run that reached the target they are made again. Nothing was sent to the target.',
+  'error.slot_mixed_identities.message':
+    'The slot "{slot}" serves a sign-in in one scenario and a sign-up in another, so no single dataset fits it.',
+  'error.slot_mixed_identities.hint':
+    'Split the slot: a separate slot for the sign-up, so the sign-in keeps real accounts and the sign-up gets new identities. Nothing was sent to the target.',
   'error.slot_not_accounts.message':
     'The slot "{slot}" holds plain data, not accounts, so no account can be created for it.',
   'error.slot_not_accounts.hint': '{next} Nothing was sent to the target.',
@@ -357,6 +418,10 @@ export const en = {
   'error.slot_data_unavailable.hint':
     'Give a CSV file with the columns {columns} to data_create_dataset with file and slot (accounts: data_create_accounts after the user agrees). Nothing was sent.',
   'error.slot_data_unavailable.reason.accounts': 'it holds accounts',
+  'error.never_fabricated_columns.message':
+    'LoadCraft never makes up the values of {columns} for slot {slot}: they must be real (a login, a secret, a value naming something that exists on the target).',
+  'error.never_fabricated_columns.hint':
+    'Give a CSV file with real values of the columns {all} to data_create_dataset with file, scenario and slot; the data tools do not offer the generation for this slot again.',
   'error.slot_data_refused.message': 'LoadCraft refused to make the rows of slot {slot}: {detail}',
   'error.slot_data_refused.hint':
     'Give a CSV file with the columns {columns} to data_create_dataset with file and slot; the data tools do not offer the generation for this slot again.',
@@ -444,7 +509,7 @@ export const en = {
   'error.timeout.hint': 'Retry once; if it happens again, run /loadcraft:doctor.',
   'error.network_error.message': 'LoadCraft cannot be reached over the network.',
   'error.network_error.hint':
-    'Check that the LoadCraft address in the plugin options is right and the server is running, then run /loadcraft:doctor.',
+    'Try again in a moment; if it keeps happening, run /loadcraft:doctor.',
   'error.unexpected_redirect.message':
     'LoadCraft answered {request} with a redirect (HTTP {status}) to {host}. The plugin does not follow redirects, so the request was not repeated there.',
   'error.unexpected_redirect.hint':
@@ -462,6 +527,174 @@ export const en = {
   'error.backend_too_old.reason.noMeta': 'the server does not report its version',
   'error.backend_too_old.hint':
     'Tell the user to update the LoadCraft server, or install an older plugin version.{advice}',
+  'error.invalid_arguments.message': 'The arguments do not fit together: {reason}.',
+  'error.invalid_arguments.hint': 'Change the arguments and call again; nothing was sent.',
+  'error.invalid_arguments.rule.generate_one_target': 'give flow_id or scenario_id, not both',
+  'error.invalid_arguments.rule.generate_slot_needs_scenario':
+    'slot is a slot of a scenario: pass scenario_id with it, not flow_id',
+  'error.invalid_arguments.rule.generate_slot_name':
+    'the dataset of a slot is named by LoadCraft after the slot: leave name out',
+  'error.invalid_arguments.rule.update_without_fields':
+    'send the new name, the new description, or both',
+  'error.invalid_arguments.rule.apimap_one_of':
+    'pass prefixes (paths separated by commas) or detected: true, not both and not neither',
+  'error.invalid_arguments.rule.apimap_prefix_limits':
+    'at most 64 prefixes, each at most 512 characters, and none of them empty',
+  'error.invalid_arguments.rule.note_nothing_to_change':
+    'send the new text, the new scope, or both',
+  'error.invalid_arguments.rule.note_at_without_scope':
+    'at names the page or the step of a scope, pass scope with it',
+  'error.invalid_arguments.rule.choices_empty':
+    'send at least one field of choices, for example flows.method',
+  'error.invalid_arguments.rule.choices_secret':
+    '{path} looks like a secret; choices are saved in the workspace state, name a file instead',
+  'error.invalid_arguments.rule.flows_merge_count':
+    'flow_ids must hold 2 to 20 flows, comma-separated',
+  'error.invalid_arguments.rule.flows_duplicate_count':
+    'flow_ids must hold 1 to 20 flows, comma-separated',
+  'error.invalid_arguments.rule.flows_duplicate_docs_one':
+    'docs_id copies one flow: pass exactly one flow in flow_ids',
+  'error.invalid_arguments.rule.flows_duplicate_name_needs_docs':
+    'name is for the copy onto a docs version: pass docs_id with it',
+  'error.invalid_arguments.rule.walk_note_remember_new':
+    'remember applies to a new note: do not pass it with note_id',
+  'error.invalid_arguments.rule.composition_save_at_least_one':
+    'send a name, members or a profile to change',
+  'error.invalid_arguments.rule.composition_save_create_needs_members':
+    'a new composition needs members: scenario -> share in percent',
+  'error.invalid_arguments.rule.composition_save_duplicate_member':
+    'members names a scenario twice (by id and by name, or twice by name)',
+  'error.invalid_arguments.rule.composition_save_variants':
+    'the composition has several members of one scenario (variants): members cannot say which; change them in the app',
+  'error.invalid_arguments.rule.copilot_ask_one_of': 'send exactly one of message and review: true',
+  'error.invalid_arguments.rule.composition_spec_type':
+    'the kind of test goes in type: leave type out of spec',
+  'error.invalid_arguments.rule.functional_template_new_needs':
+    'a new template needs name and, in fields, api_description and flow_definition',
+  'error.invalid_arguments.rule.functional_template_nothing':
+    'send a name or at least one field to change',
+  'error.invalid_arguments.rule.functional_template_docs_new_only':
+    'docs_id applies to a new template: do not pass it with template_id',
+  'error.invalid_arguments.rule.functional_flow_new_needs': 'a new flow needs name',
+  'error.invalid_arguments.rule.functional_flow_new_only':
+    'is_active applies to a change: leave it out of a new flow',
+  'error.invalid_arguments.rule.functional_flow_change_only':
+    'docs_id applies to a new flow: do not pass it with flow_id',
+  'error.invalid_arguments.rule.functional_flow_snapshot_alone':
+    'a version snapshot takes flow_id, version and reason only',
+  'error.invalid_arguments.rule.functional_flow_reason_needs_version':
+    'reason belongs to a version snapshot: pass version with it',
+  'error.invalid_arguments.rule.functional_flow_nothing':
+    'send a name or at least one field to change',
+  'error.invalid_arguments.rule.effective_without_env':
+    'effective needs env (an environment id or "default")',
+  'error.invalid_arguments.rule.versions_with_docs_id':
+    'versions lists the stored versions, do not pass docs_id with it',
+  'error.invalid_arguments.rule.include_without_endpoint':
+    'include applies to one endpoint, pass endpoint with it',
+  'error.invalid_arguments.rule.save_profile_create_needs_name_and_type':
+    'a new profile needs a name and a type',
+  'error.invalid_arguments.rule.save_profile_without_fields': 'send at least one field to change',
+  'error.invalid_arguments.rule.versions_without_flow':
+    'versions lists the history of one flow, pass flow with it',
+  'error.invalid_arguments.rule.templates_too_many_tags': 'at most 10 tags can narrow the list',
+  'error.invalid_arguments.rule.runs_one_without_run':
+    'view one reads one run, pass run_id with it',
+  'error.invalid_arguments.rule.runs_by_template_without_template':
+    'by_template lists the runs of one template, pass template with it',
+  'error.invalid_arguments.rule.results_one_without_result':
+    'view one reads one flow result, pass result_id with it',
+  'error.invalid_arguments.rule.compare_same_functional_run':
+    'a run compared with itself has nothing to show, pass two different runs',
+  'error.invalid_arguments.rule.analytics_without_validator':
+    'accuracy, trend and threshold_suggestion are about one validator, pass validator with them',
+  'error.invalid_arguments.rule.catalog_assertion_types_active':
+    'is_active does not narrow assertion types, leave it out',
+  'error.invalid_arguments.rule.list_active_with_query':
+    'is_active narrows the list of projects, not a search: leave one of them out',
+  'error.invalid_arguments.rule.filter_with_endpoint':
+    'method and query filter the list, do not pass them with endpoint',
+  'log.foreignWriter':
+    'Another version of the LoadCraft plugin writes the same state file (a session started earlier is still open): close the old session or reconnect the plugin; entries of this one it dropped were put back.',
+  'log.entryNotSaved':
+    'The call succeeded, but its entry in the log of the workspace was not saved ({code}).',
+  'log.entryNotSaved.refused':
+    'The call succeeded, but its entry in the log of the workspace was not saved ({code}; the state schema refused: {fields}).',
+  'error.invalid_arguments.rule.get_templates_only_with': 'include works only with template',
+  'error.invalid_arguments.rule.catalog_field_not_of_kind':
+    'a field in fields does not belong to that kind (test type: category, display_name, description, expected_outcome, input_generation_prompt, input_schema, example_inputs, is_active; validator: category, display_name, description, validator_type, activation, group, scope, requires_profile_flags, ai_prompt_template, parameters, is_active; assertion type: category, display_name, description, prompt_template, parameters, is_active)',
+  'error.invalid_arguments.rule.catalog_new_needs':
+    'a new entry needs name and the required fields of its kind (test type: category, display_name, input_generation_prompt; validator: activation, category, display_name, group, scope, validator_type; assertion type: category, display_name)',
+  'error.invalid_arguments.rule.catalog_name_new_only':
+    'name is for a new entry; the name of an existing one cannot change',
+  'error.invalid_arguments.rule.catalog_nothing': 'give at least one field to change in fields',
+  'error.invalid_arguments.rule.test_types_one_mode':
+    'give source with items (an addition), or test_type_id with fields (a change of one), not both and not neither',
+  'error.invalid_arguments.rule.test_types_field_unknown':
+    'a field does not fit here (add: category, display_name, description, input_prompt, example_inputs, expected_outcome, default_count, priority, poll_completion_values, poll_timeout_ms; suggestions: the same without the two poll fields; a change also takes name and is_enabled)',
+  'error.invalid_arguments.rule.test_types_items_count': 'items takes 1 to 50 entries',
+  'error.invalid_arguments.rule.test_types_catalog_ids':
+    'with source catalog, each key of items is the id of a catalog test type and its value is {}',
+  'error.invalid_arguments.rule.test_types_suggestion_needs':
+    'an accepted suggestion needs category, display_name, description and input_prompt',
+  'error.invalid_arguments.rule.test_types_nothing': 'give at least one field to change in fields',
+  'error.invalid_arguments.rule.validators_one_mode':
+    'give source with items (an addition), or validator_id with fields (a change of one), not both and not neither',
+  'error.invalid_arguments.rule.validators_field_unknown':
+    'a field does not fit here (add: display_name, description, ai_prompt, parameters, validator_type, default_params, scope, template, priority; proposals: display_name, description, template, default_params, rationale, scope, priority; a change: name, display_name, description, ai_prompt, parameters, validator_type, default_params, priority, is_enabled, needs_review)',
+  'error.invalid_arguments.rule.validators_items_count': 'items takes 1 to 50 entries',
+  'error.invalid_arguments.rule.validators_catalog_ids':
+    'with source catalog, each key of items is the id of a catalog validator and its value is {}',
+  'error.invalid_arguments.rule.validators_proposal_needs':
+    'an accepted proposal needs display_name, description and template',
+  'error.invalid_arguments.rule.validators_nothing': 'give at least one field to change in fields',
+  'error.invalid_arguments.rule.suggest_docs_not_active':
+    'docs_id is not the active docs of the project; the suggestion reads the active docs (project_get_docs lists them)',
+  'error.invalid_arguments.rule.payloads_items_count':
+    'flow_ids and test_types take 1 to 50 entries each',
+  'error.invalid_arguments.rule.payloads_ids':
+    'every key of flow_ids and test_types is an id (a UUID)',
+  'error.invalid_arguments.rule.data_copilot_one_of':
+    'pass scenario_id or composition_id, not both',
+  'error.invalid_arguments.rule.poll_terminals_success_needed':
+    'give at least one success status in success_terminals',
+  'error.invalid_arguments.rule.poll_terminals_too_many':
+    'give at most 20 statuses in each of success_terminals and failure_terminals',
+  'error.invalid_arguments.rule.copilot_apply_nothing':
+    'give at least one change id in accept or in reject',
+  'error.invalid_arguments.rule.copilot_apply_too_many':
+    'give at most 50 change ids in each of accept and reject',
+  'error.invalid_arguments.rule.copilot_apply_overlap':
+    'a change id cannot be in both accept and reject',
+  'error.invalid_arguments.rule.delete_at_least_one': 'pass scenario_id or composition_id',
+  'error.invalid_arguments.rule.delete_one_of': 'pass scenario_id or composition_id, not both',
+  'error.invalid_arguments.rule.regenerate_expand_needs_rows':
+    'mode=expand needs rows, the row count to expand to',
+  'error.invalid_arguments.rule.regenerate_expand_above_current':
+    'for mode=expand, rows must be above the current row count of the dataset',
+  'error.invalid_arguments.rule.update_dataset_at_least_one':
+    'pass at least one of: name, description, file',
+  'error.invalid_arguments.rule.http_settings_at_least_one':
+    'pass at least one of: base_url, protocol, headers_env_file',
+  'error.invalid_arguments.rule.http_settings_base_url':
+    'base_url is an http or https address without a user name or password',
+  'error.invalid_arguments.rule.http_settings_headers_empty':
+    'headers_env_file holds no KEY=VALUE line with a value',
+  'error.invalid_arguments.rule.http_settings_headers_count':
+    'headers_env_file holds more than 20 headers',
+  'error.invalid_arguments.rule.http_settings_header_name':
+    'a header name in headers_env_file is letters, digits and hyphens, and not host, content-length, transfer-encoding, connection or authorization',
+  'error.invalid_arguments.rule.http_settings_header_value':
+    'a header value in headers_env_file has no control character and is at most 8192 characters',
+  'error.invalid_arguments.rule.run_save_name_required': 'a new saved run needs a name',
+  'error.invalid_arguments.rule.run_save_target_one_of':
+    'a new saved run needs exactly one of scenario_id and composition_id',
+  'error.invalid_arguments.rule.run_save_target_fixed':
+    'scenario_id, composition_id and source_execution_id are for a new saved run; a saved run keeps its target',
+  'error.invalid_arguments.rule.run_save_at_least_one':
+    'pass at least one of: name, environment_id, target_base_url, workload, feeder_bindings',
+  'error.invalid_arguments.rule.run_save_production_only':
+    'a workload of type production takes a production plan and ramp and hold 0; no other type takes one',
   'error.invalid.message': 'LoadCraft rejected the input as invalid. Backend said: "{detail}"',
   'error.invalid.hint':
     'Fix the input named in the message and repeat the call; if the data is missing (for example too few rows), prepare it first.',
@@ -1108,8 +1341,6 @@ export const en = {
   'profiles.data.slot': '{label}: {have} of {need} rows',
   'profiles.data.refused': 'data ✕ {reason}',
   'profiles.data.slotNone': '{label}: no dataset',
-  'profiles.data.compositionOnly':
-    'The data check covers compositions only; "{name}" is a scenario.',
   'profiles.json.title': 'The "profile" argument of run_start, per number above:',
   'profiles.next':
     'Next: run_start with the profile you pick, passing its line above as "profile".',
@@ -1623,6 +1854,15 @@ export const en = {
   'error.record_stop_refused.message': 'LoadCraft did not stop the walk ({code}).',
   'error.record_stop_refused.hint':
     'The user steers the browser in the app now: they stop the walk there or hand the browser back first ({link}).',
+  'error.report_not_archived.message': 'LoadCraft keeps no Gatling report of run {run}.',
+  'error.report_not_archived.hint':
+    'A report is archived when a run finishes; a run that failed to start has none.',
+  'error.not_a_production_run.message': 'Run {run} did not replay production traffic.',
+  'error.not_a_production_run.hint': 'results_get_report reports any run.',
+  'error.no_baseline.message': 'No baseline is pinned for the scenario and load of run {run}.',
+  'error.no_baseline.hint': 'Pass compare_to with a run handle instead.',
+  'error.report_exists.message': 'A report of run {run} was exported before: {path}.',
+  'error.report_exists.hint': 'Pass overwrite: true only when the user wants it replaced.',
 } as const satisfies Readonly<Record<string, Entry>>;
 
 export type DictionaryKey = keyof typeof en;

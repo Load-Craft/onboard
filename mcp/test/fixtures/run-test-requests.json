@@ -2,6 +2,10 @@
   "plan-composition": [
     {
       "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/projects/:id/gatling/compositions",
       "query": {
         "limit": "100"
@@ -23,6 +27,10 @@
   "plan-scenario": [
     {
       "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/projects/:id/gatling/compositions",
       "query": {
         "limit": "100"
@@ -42,6 +50,10 @@
     }
   ],
   "plan-with-data": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
     {
       "method": "GET",
       "path": "/api/v1/projects/:id/gatling/compositions",
@@ -173,6 +185,10 @@
   "plan-with-data-scenario": [
     {
       "method": "GET",
+      "path": "/api/v1/meta"
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/projects/:id/gatling/compositions",
       "query": {
         "limit": "100"
@@ -189,9 +205,139 @@
       "method": "GET",
       "path": "/api/v1/projects/:id/environments",
       "times": 2
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "smoke",
+          "vusers": 1,
+          "ramp": 0,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp",
+          "vusers": 50,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "constant",
+          "vusers": 1,
+          "ramp": 0,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_hold",
+          "vusers": 1,
+          "ramp": 60,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "stress",
+          "vusers": 5,
+          "ramp": 180,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "constant_concurrency",
+          "vusers": 50,
+          "ramp": 0,
+          "hold": 900
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "ramp_concurrency",
+          "vusers": 50,
+          "ramp": 600,
+          "hold": 0
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "spike",
+          "vusers": 25,
+          "ramp": 60,
+          "hold": 60
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/:id/gatling/executions/preflight",
+      "body": {
+        "scenario_id": ":id",
+        "environment_id": ":id",
+        "workload": {
+          "type": "soak",
+          "vusers": 25,
+          "ramp": 60,
+          "hold": 7200
+        }
+      }
     }
   ],
   "plan-protected-clamped": [
+    {
+      "method": "GET",
+      "path": "/api/v1/meta"
+    },
     {
       "method": "GET",
       "path": "/api/v1/projects/:id/gatling/compositions",
@@ -2667,10 +2813,6 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/meta"
-    },
-    {
-      "method": "GET",
       "path": "/api/v1/projects/:id/gatling/compositions",
       "query": {
         "limit": "100"
@@ -2754,10 +2896,6 @@
       "method": "GET",
       "path": "/api/v1/projects/:id/gatling/executions/:id",
       "times": 2
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/meta"
     },
     {
       "method": "GET",

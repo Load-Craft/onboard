@@ -31,7 +31,6 @@ export const UNTYPED_SUCCESS_RESPONSES: readonly string[] = [
   'GET /api/v1/projects/{project_id}/gatling/environments 200',
   'GET /api/v1/projects/{project_id}/gatling/environments/{env_id} 200',
   'GET /api/v1/projects/{project_id}/gatling/executions/{execution_id}/logs/download 200',
-  'GET /api/v1/projects/{project_id}/gatling/executions/{execution_id}/report 200',
   'GET /api/v1/projects/{project_id}/gatling/executions/{execution_id}/report/{filepath} 200',
   'GET /api/v1/projects/{project_id}/gatling/scenarios/{scenario_id}/export 200',
   'GET /api/v1/projects/{project_id}/generate-payloads/{run_id}/download 200',
@@ -47,10 +46,9 @@ export const UNTYPED_SUCCESS_RESPONSES: readonly string[] = [
 
 /**
  * Error responses the snapshot types as FastAPI's validation list while the route answers with an
- * object under `detail` (`{code, message, endpoint_ids}`, project_flows.py:1856-1869 @ d93e08d80)
- * or with a text under `detail` (the refusals of `generate_slot_feeder`, `HTTPException(422, …)`,
- * api/routes/gatling.py:5986-5995 @ 47a52b419). They are checked against the error envelope
- * instead, as `METHOD path status`.
+ * object under `detail` (`{code, message, endpoint_ids}`) or with a text under `detail` (the
+ * refusals of `generate_slot_feeder`, `HTTPException(422, …)`). They are checked against the error
+ * envelope instead, as `METHOD path status`.
  */
 export const ERROR_ENVELOPE_RESPONSES: readonly string[] = [
   'POST /api/v1/projects/{project_id}/flows/generate-async 422',
@@ -178,7 +176,7 @@ function problemsOf(validate: ValidateFunction, body: unknown): string[] {
 /**
  * Path parameters the backend declares with FastAPI's `:path` converter, so they match several
  * segments (`assets/js/app.js`, an endpoint name with slashes). The snapshot writes them as plain
- * `{name}`. Source: backend/api/routes/gatling_results.py:830, :859, :968 @ d93e08d80.
+ * `{name}`.
  */
 export const PATH_CONVERTER_PARAMS: Readonly<Record<string, string>> = {
   '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/endpoints/{name}/percentiles':

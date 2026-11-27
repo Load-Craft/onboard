@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it } from 'vitest';
 
+import { EXCLUDED_OPERATIONS } from '../scripts/sync-api/excluded.js';
 import { loadConfig } from '../src/config.js';
 import { LoadcraftApiError } from '../src/http/apiError.js';
 import { createHttp, type HttpClient } from '../src/http/client.js';
@@ -58,8 +59,8 @@ for (const [path, item] of Object.entries(contract.paths)) {
 }
 
 describe('OPERATIONS: the table is the snapshot', () => {
-  it('has all 390 operations of the snapshot, with the snapshot method and path', () => {
-    expect(Object.keys(OPERATIONS)).toHaveLength(390);
+  it('has all 389 operations of the snapshot, with the snapshot method and path', () => {
+    expect(Object.keys(OPERATIONS)).toHaveLength(389);
     const differs = [...snapshot.entries()]
       .filter(([id, s]) => {
         const row = (OPERATIONS as Record<string, { method: string; path: string } | undefined>)[
@@ -77,7 +78,10 @@ describe('OPERATIONS: the table is the snapshot', () => {
       ...catalog.excluded.operations,
     ].map((o) => o.operationId);
     expect(ids.length).toBeGreaterThan(300);
-    expect(ids.filter((id) => !(id in OPERATIONS))).toEqual([]);
+    // dev-login is left out of the public snapshot (scripts/sync-api/excluded.ts).
+    const leftOut = new Set(EXCLUDED_OPERATIONS.map((entry) => entry.operationId));
+    expect(ids.filter((id) => !(id in OPERATIONS) && !leftOut.has(id))).toEqual([]);
+    expect([...leftOut].filter((id) => id in OPERATIONS)).toEqual([]);
   });
 
   it('names how the answer is read: 204 is empty, a JPEG is a blob, the rest is JSON', () => {

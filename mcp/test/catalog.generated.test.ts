@@ -288,8 +288,8 @@ describe('CURRENT_TO_TOOLS: mapa dzisiejszych nazw na nowe', () => {
     'list_profiles',
   ];
 
-  it("has exactly the 37 tools of surface-baseline.json: today's, renamed, from the splits done and added", () => {
-    expect(baseline.tools).toHaveLength(37);
+  it("has exactly the 36 tools of surface-baseline.json: today's, renamed, from the splits done and added", () => {
+    expect(baseline.tools).toHaveLength(36);
     // A tool renamed 1:1 is in the surface under its new name (the first element of the map), a
     // split already done under the names of all its tools.
     const shipped = keys.flatMap((name): string[] => {
@@ -311,9 +311,12 @@ describe('CURRENT_TO_TOOLS: mapa dzisiejszych nazw na nowe', () => {
       'results_get_traces',
     ];
     expect(added.every((name) => (TOOL_NAMES as readonly string[]).includes(name))).toBe(true);
-    expect([...new Set([...shipped, ...added])].sort()).toEqual(
-      [...baseline.tools.map((t) => t.name), ...helpers].sort(),
-    );
+    // a tool of today written again as a tool of a module leaves the baseline of today's surface
+    // (its pinned entry is in test/fixtures/surface/<module>.json now)
+    const movedToModules = ['flows_get'];
+    expect(
+      [...new Set([...shipped, ...added])].filter((name) => !movedToModules.includes(name)).sort(),
+    ).toEqual([...baseline.tools.map((t) => t.name), ...helpers].sort());
     for (const name of added) {
       expect(
         Object.values(CURRENT_TO_TOOLS).some((ways) => (ways as readonly string[]).includes(name)),

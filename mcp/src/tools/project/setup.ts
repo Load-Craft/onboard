@@ -66,8 +66,7 @@ import {
 
 /**
  * A proposal below this confidence is shown for review. The frontend's threshold for a "high
- * confidence" suggestion (`HIGH_CONFIDENCE_THRESHOLD`, `features/projects/types/suggestion.types.ts:39`
- * at `d93e08d80`).
+ * confidence" suggestion (`HIGH_CONFIDENCE_THRESHOLD` of the frontend).
  */
 export const HIGH_CONFIDENCE = 0.8;
 
@@ -82,7 +81,7 @@ function plainPhase(phase: string | undefined): string {
 
 /**
  * Profile fields the analysis proposes, by the path the backend gives them
- * (`_PROFILE_DRAFT_FIELDS`, `domain/services/project_setup_analyzer.py:59-71` at `d93e08d80`).
+ * (`_PROFILE_DRAFT_FIELDS`).
  * The schema of a field decides whether a proposed value is usable.
  */
 const SUGGESTABLE = {

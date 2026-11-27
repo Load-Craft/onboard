@@ -42,6 +42,8 @@ export const resultsGetErrors = defineTool({
     'Read-only. For the requests behind the errors, with their responses, call results_get_traces.',
   input,
   annotations: { readOnlyHint: true },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   async run(ctx, args) {
     const resolver = createResolver(ctx);
     const { id: projectId } = await resolver.project(args.project?.trim() ?? '');

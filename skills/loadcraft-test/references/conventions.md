@@ -17,6 +17,10 @@ These rules hold in every step of a LoadCraft session. Each one exists because b
 - The connection state of other MCP servers in the user's Claude Code, such as a log server that failed to connect, describes the user's machine, not LoadCraft: do not conclude from it that LoadCraft cannot reach that server or that the diagnosis runs without logs. Step 2 connects the logs and reads LoadCraft's own answer.
 - Use the parameters from each tool's schema. Never invent a tool, a parameter or an identifier; take identifiers from earlier results.
 
+## Remembering the user's decisions
+
+When the user decides something the later steps should use as a default (how to build the flows, which environment or load profile, the run target), `process_set_choices` stores it with `choices` grouped as `{"flows":{"method":"har"}}`; a field set to `null` is cleared. It sends nothing to LoadCraft or the target. Store only what the user said; never a password or a token, the tool refuses a value that looks like one. To take a change back, call it again with the previous values.
+
 ## Secrets
 
 - Find, do not read. To learn which credentials exist, search `.env*` and similar files for key names (for example a pattern for `PASSWORD`, `TOKEN` or `SECRET` keys) and list the matching **files**, not the matching lines — a matching line contains the value. Never open such a file with a read tool, `cat`, `grep` with line output, `echo $VAR` or `env`. The one exception: the lines of exact address keys, filtered so that no address with credentials is printed, as [step-02-project.md](step-02-project.md) describes.

@@ -2,8 +2,7 @@
 // strictly), and the two starts — a composition (`POST …/compositions/{id}/execute`) or a single
 // scenario (`POST …/executions`). The load always travels inside `workload`, thresholds included:
 // keys at the top level of either body are dropped by the backend without an error
-// (`ExecuteCompositionBody`, `api/routes/gatling_compositions.py:400-420`; `StartExecutionBody`,
-// `api/routes/gatling.py:1085-1101`; loadcraft commit d93e08d80).
+// (`ExecuteCompositionBody`, `StartExecutionBody`).
 
 import * as z from 'zod';
 
@@ -29,12 +28,12 @@ export interface RunEnvironment {
   readonly caps: RunCaps | null;
 }
 
-/** `SlaThreshold` variants the plugin sends (`domain/models/sla_threshold.py:55-103`). */
+/** `SlaThreshold` variants the plugin sends (`SlaThreshold`). */
 export type SlaThreshold =
   | { readonly type: 'responseTime'; readonly percentile: 95; readonly max_ms: number }
   | { readonly type: 'failedRequests'; readonly max_percent: number };
 
-/** `WorkloadBody` as the plugin fills it (`api/routes/gatling.py:974-1082`, `extra='forbid'`). */
+/** `WorkloadBody` as the plugin fills it (`extra='forbid'`). */
 export interface RunWorkload {
   readonly type: ProfileType;
   readonly vusers: number;
@@ -52,7 +51,7 @@ const CAP_KEYS = ['max_vu', 'max_rps'] as const;
 
 /**
  * Limits as the run admission sees them: a key that is present and not null counts as a limit
- * (`has_configured_caps`, `domain/services/gatling/run_admission.py:61-66`). A limit the plugin
+ * (`has_configured_caps`). A limit the plugin
  * cannot apply is reported as `null` rather than dropped, so it never reads as "no limit".
  */
 function strictCaps(raw: unknown): RunCaps | null {
@@ -108,8 +107,7 @@ function workloadBody(workload: RunWorkload): RunWorkload {
 
 /**
  * A scenario without a modular build cannot run (409, the detail sentence starts with the code:
- * `_full_rebuild_required_detail`, `api/routes/gatling.py:10522`; the composition gate,
- * `api/routes/gatling_compositions.py:7652`).
+ * `_full_rebuild_required_detail`; the composition gate answers the same way).
  */
 async function starting<T>(call: Promise<T>): Promise<T> {
   try {
@@ -190,9 +188,9 @@ export async function startScenarioRun(
 
 // ---- following a run -----------------------------------------------------------------------------
 //
-// The state of a started run comes from `GET …/gatling/executions/{id}` (`get_execution`,
-// `api/routes/gatling.py:13274`), the numbers of a run under way from `GET …/executions/{id}/result`
-// (`get_execution_result`, `api/routes/gatling_results.py:613`): for a run in flight the backend
+// The state of a started run comes from `GET …/gatling/executions/{id}` (`get_execution`),
+// the numbers of a run under way from `GET …/executions/{id}/result` (`get_execution_result`):
+// for a run in flight the backend
 // answers from the metrics store, and while that has no series yet it waits up to 30 s.
 
 export const RUN_STATUSES = [
@@ -361,19 +359,17 @@ export async function readRunNumbers(
 /** Executions the project list returns at most (`list_executions`, newest first). */
 const LIST_LIMIT = 100;
 
-/** Statuses after which a run no longer loads anything (`ExecutionStatus`, `domain/models/enums.py:10-17`). */
+/** Statuses after which a run no longer loads anything (`ExecutionStatus`). */
 const FINISHED_STATUSES: ReadonlySet<string> = new Set(['completed', 'failed', 'cancelled']);
 
 /**
  * How long after its creation a run can still be going. The load window by type of workload
- * (`_during_equivalent_seconds`, `domain/services/gatling/codegen/injection_builder.py:789-813`,
- * loadcraft 7d383e0ec), with `ramp` and `hold` at most 86400 s each (`WorkloadBody`,
- * `api/routes/gatling.py:1005-1006`):
- * - stress: `STRESS_LEVELS * max(ramp, STRESS_MIN_LEVEL_SECONDS)` (`injection_builder.py:810-811`,
- *   `:894`, `:899`), so 5 * 86400 s = 120 h: the longest of all;
- * - soak: `max(ramp, 1) + hold` (`:806-807`), at most 48 h;
- * - spike and ramp: `ramp + hold` (`:808-809`), at most 48 h;
- * - production plan: `MAX_PLAN_SECONDS` = 86400 s (`domain/models/production_traffic.py:525`).
+ * (`_during_equivalent_seconds`), with `ramp` and `hold` at most 86400 s each (`WorkloadBody`):
+ * - stress: `STRESS_LEVELS * max(ramp, STRESS_MIN_LEVEL_SECONDS)`, so 5 * 86400 s = 120 h: the
+ *   longest of all;
+ * - soak: `max(ramp, 1) + hold`, at most 48 h;
+ * - spike and ramp: `ramp + hold`, at most 48 h;
+ * - production plan: `MAX_PLAN_SECONDS` = 86400 s.
  * The build before the load is given an hour. A run created longer ago than this is over.
  */
 const RUN_MAX_AGE_MS = (5 * 86_400 + 3_600) * 1000;

@@ -8,5 +8,7 @@ export function noopSecretScope(): SecretScope {
     scrub: (text: string) => text,
     scrubDeep: <T>(value: T): T => value,
     containsSecret: () => false,
+    incomplete: false,
+    markIncomplete: () => undefined,
   };
 }

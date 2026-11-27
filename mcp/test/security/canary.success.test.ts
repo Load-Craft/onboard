@@ -47,7 +47,9 @@ describe.each(CASES)('sentinel: $tool ($label)', (item) => {
     const calls = await callUnderTest(item, drive, before);
     const last = calls[calls.length - 1];
     expect(last, 'the tool answered').toBeDefined();
-    expect(proxy.tainted, 'the proxy tainted an answer').toBeGreaterThan(0);
+    if (item.local !== true && item.fileAnswer !== true) {
+      expect(proxy.tainted, 'the proxy tainted an answer').toBeGreaterThan(0);
+    }
     if (item.refusedAs === undefined) {
       expect(last?.isError, `the call finished: ${last?.text ?? ''}`).toBe(false);
     } else {

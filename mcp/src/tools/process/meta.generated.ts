@@ -123,8 +123,12 @@ export const PROCESS_GET_STATUS = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `process_wait`: Wait on a running operation by handle; returns the starting tool's result, or the handle again when the call times out. */
@@ -195,8 +199,12 @@ export const PROCESS_WAIT = {
   arguments: null,
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `process_cancel`: Cancel a running operation by its handle (a load run also by its id); what was already built is kept. */
@@ -360,13 +368,17 @@ export const PROCESS_CANCEL = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `process_answer`: Answer a pending card by id: yes runs its stored calls with their stored arguments (needs the user's decision), no drops them. */
@@ -421,8 +433,12 @@ export const PROCESS_ANSWER = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `process_set_choices`: Set user decisions (flow method, journeys, traffic split, environment, load profile, run target) that module tools use as defaults. */
@@ -480,11 +496,23 @@ export const PROCESS_SET_CHOICES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'choices',
+      type: 'object',
+      from_state: null,
+      required: true,
+      doc: 'The choices to set, grouped as the process state groups them (flows, scenario, run, data, functional); null clears a field.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `process_set_decision`: Panel only: set the user's decision (yes, no, change, undo) on a pending card or a log entry. Calls from the model are refused. */
@@ -539,6 +567,10 @@ export const PROCESS_SET_DECISION = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

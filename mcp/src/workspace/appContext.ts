@@ -12,7 +12,7 @@ import { Masker, MIN_SECRET_LENGTH } from '../security/mask.js';
 import { isEnvFileName, readEveryEnvValue } from './envFile.js';
 import { openAllowed, readTextAllowed } from './uploads.js';
 
-/** Longest project description (`PROJECT_DESCRIPTION_MAX_LENGTH`, `domain/contracts/projects.py`). */
+/** Longest project description (`PROJECT_DESCRIPTION_MAX_LENGTH`). */
 export const APP_CONTEXT_MAX = 8000;
 /** Where `loadcraft-overview` writes the overview of the application. */
 export const OVERVIEW_PATH = 'loadcraft/overview.md';

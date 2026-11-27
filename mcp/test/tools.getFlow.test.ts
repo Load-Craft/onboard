@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { FlowOutline } from '../src/flow/outline.js';
 import type { components } from '../src/http/generated/api.js';
-import { flowsGet } from '../src/tools/flowsGet.js';
+import { flowsGet } from '../src/tools/flows/get.js';
 import { goldenText, SKLEP_IDS } from './golden/index.js';
 import { FLOW_COLLECTIONS, registerFlowRoutes } from './fake-backend/routes/flows.js';
 import { registerLookupRoutes } from './fake-backend/routes/lookup.js';
@@ -36,7 +36,7 @@ async function rig(options: { bound?: boolean; locale?: 'en' | 'pl' } = {}): Pro
 }
 
 interface FlowData {
-  readonly project: { readonly id: string; readonly name: string };
+  readonly project: { readonly id: string };
   readonly outline: FlowOutline;
   readonly questions: readonly { field: string; question: string }[];
 }
@@ -59,7 +59,7 @@ async function read(
 describe('flows_get', () => {
   it('shows the outline of a flow by name, as the golden text, with its version and link', async () => {
     const r = await rig();
-    const { text, data, links } = await read(r, { flow: 'zakupy' });
+    const { text, data, links } = await read(r, { flow_id: 'zakupy' });
     const golden = goldenText('run1', '04-flows_generate_from_suggestions').split('\n');
     const rows = golden.slice(1, 9);
     expect(text.split('\n').slice(0, 8)).toEqual(rows);
@@ -68,7 +68,7 @@ describe('flows_get', () => {
       `↗ https://app.loadcraft.io/projects/${SKLEP_IDS.project}/flows/${SKLEP_IDS.flowZakupy}`,
     );
     expect(links).toHaveLength(1);
-    expect(data.project).toEqual({ id: SKLEP_IDS.project, name: 'sklep' });
+    expect(data.project).toEqual({ id: SKLEP_IDS.project });
     expect(data.outline).toMatchObject({
       flowId: SKLEP_IDS.flowZakupy,
       stepCount: 7,
@@ -79,17 +79,10 @@ describe('flows_get', () => {
 
   it('draws the same outline in English', async () => {
     const r = await rig({ locale: 'en' });
-    const { text } = await read(r, { flow: 'zakupy' });
+    const { text } = await read(r, { flow_id: 'zakupy' });
     expect(text).toContain('zakupy · 7 steps (4 requests · 3 pauses)');
     expect(text).toContain('assumed · form');
     expect(text).toContain('version 1');
-  });
-
-  it('reads the project named in the call instead of the binding', async () => {
-    const r = await rig({ bound: false });
-    const { data } = await read(r, { flow: 'konto', project: 'sklep' });
-    expect(data.outline.name).toBe('konto');
-    expect(data.outline.stepCount).toBe(3);
   });
 
   it('puts the questions the generator left under the outline', async () => {
@@ -99,7 +92,7 @@ describe('flows_get', () => {
         { field: 'auth.token', question: 'Które konto loguje?', why: 'brak danych', kind: 'auth' },
       ] as unknown as NonNullable<FlowDetail['needs_input']>,
     });
-    const { text, data } = await read(r, { flow: 'zakupy' });
+    const { text, data } = await read(r, { flow_id: 'zakupy' });
     expect(data.questions).toEqual([
       expect.objectContaining({ field: 'auth.token', question: 'Które konto loguje?' }),
     ]);
@@ -124,7 +117,7 @@ describe('flows_get', () => {
         { kind: 'static_credential', field: 'x-api-key', question: 'Which value?', why: '' },
       ] as unknown as NonNullable<FlowDetail['needs_input']>,
     });
-    const { text } = await read(r, { flow: 'zakupy' });
+    const { text } = await read(r, { flow_id: 'zakupy' });
     const flat = text.replace(/\s+/gu, ' ');
     expect(flat).toMatch(/"Checkout" (will get 401|dostan)/u);
     expect(flat).toContain('POST /auth/staff-login');
@@ -145,14 +138,14 @@ describe('flows_get', () => {
       .collection<FlowDetail>(FLOW_COLLECTIONS.flows)
       .get(SKLEP_IDS.flowZakupy);
     expect(listed?.blocks).toHaveLength(7);
-    const { text, data } = await read(r, { flow: 'zakupy' });
+    const { text, data } = await read(r, { flow_id: 'zakupy' });
     expect(data.outline.stepCount).toBe(6);
     expect(text).toContain('zakupy · 6 kroków (3 żądania · 3 pauzy)');
   });
 
   it('names the flows of the project when the name matches none', async () => {
     const r = await rig();
-    const result = await r.call('flows_get', { flow: 'platnosci' });
+    const result = await r.call('flows_get', { flow_id: 'platnosci' });
     expect(result.isError).toBe(true);
     expect(result.text).toContain('platnosci');
     for (const name of ['zakupy', 'przeglądanie', 'konto']) expect(result.text).toContain(name);
@@ -160,7 +153,7 @@ describe('flows_get', () => {
 
   it('asks for a project when the repository is bound to none and none is named', async () => {
     const r = await rig({ bound: false });
-    const result = await r.call('flows_get', { flow: 'zakupy' });
+    const result = await r.call('flows_get', { flow_id: 'zakupy' });
     expect(result.isError).toBe(true);
     expect(result.text).toContain('project_create');
   });
@@ -171,22 +164,23 @@ describe('flows_get', () => {
       status: 401,
       body: { detail: 'Invalid token' },
     });
-    const result = await r.call('flows_get', { flow: 'zakupy' });
+    const result = await r.call('flows_get', { flow_id: 'zakupy' });
     expect(result.isError).toBe(true);
     expect(result.text).toContain('LoadCraft nie przyjął tokenu API');
   });
 
-  it('refuses a backend without /meta as too old', async () => {
+  it('refuses a backend without /meta as too old, before it reads the flow', async () => {
     const r = await rig();
     r.fake.faults.next('GET', '/api/v1/meta', { status: 404, body: { detail: 'Not Found' } });
-    const result = await r.call('flows_get', { flow: 'zakupy' });
+    const result = await r.call('flows_get', { flow_id: 'zakupy' });
     expect(result.isError).toBe(true);
     expect(result.text).toContain('starszy');
+    expect(r.fake.calls.some((call) => /\/flows\/[0-9a-f-]{36}$/u.test(call.path))).toBe(false);
   });
 
   it('is read-only and sends nothing but reads', async () => {
     const r = await rig();
-    await read(r, { flow: 'zakupy' });
+    await read(r, { flow_id: 'zakupy' });
     expect(r.fake.calls.every((call) => call.method === 'GET')).toBe(true);
     expect(flowsGet.annotations.readOnlyHint).toBe(true);
   });

@@ -25,6 +25,8 @@ import { inline } from '../render/primitives.js';
 import { renderRecordRun } from '../render/views/recordFlows.js';
 import { planHandle, recordRunOperation, type RecordRunSaved } from './flowsDescribeJourneys.js';
 import { respondWalk, type WalkSaved } from './recordWalk.js';
+import { content } from './moduleCall.js';
+import { shownNameOf } from '../flow/maskOutline.js';
 
 const ADVICE =
   'Update the LoadCraft server, or record the journeys in a browser and use flows_import_har.';
@@ -53,8 +55,11 @@ const input = z.strictObject({
   max_wait_s: maxWaitInput('the walk of the paths'),
 });
 
-const quoted = (name: string): string => `"${inline(name, MAX_NAME)}"`;
+/** A name of a path (the generator's) or one the model gave, masked (FIX-76). */
+const quoted = (ctx: ToolContext, name: string): string => `"${content(ctx, name, MAX_NAME)}"`;
 const nameKey = (name: string): string => name.trim().toLowerCase();
+/** The keys a path is chosen by: its raw name and the name the views showed masked. */
+const keysOf = (name: string): string[] => [nameKey(name), nameKey(shownNameOf(name))];
 
 /** The run of the plan this workspace recorded, by its short handle, operation handle or id. */
 function findPlan(ctx: ToolContext, given: string): { id: string; saved: RecordRunSaved } {
@@ -94,15 +99,15 @@ function choosePaths(
   wanted: 'all' | readonly string[],
 ): Readonly<Record<string, unknown>>[] {
   if (wanted === 'all') return [...proposed];
-  const known = new Set(proposed.map((path) => nameKey(nameOf(path))));
+  const known = new Set(proposed.flatMap((path) => keysOf(nameOf(path))));
   const unknown = wanted.filter((name) => !known.has(nameKey(name)));
   if (unknown.length > 0) {
-    const shown = proposed.slice(0, SHOWN_NAMES).map((path) => quoted(nameOf(path)));
+    const shown = proposed.slice(0, SHOWN_NAMES).map((path) => quoted(ctx, nameOf(path)));
     const more = proposed.length - shown.length;
     throw new ToolError('record_unknown_paths', {
       params: {
         plan,
-        names: unknown.map(quoted).join(', '),
+        names: unknown.map((name) => quoted(ctx, name)).join(', '),
         available:
           more > 0
             ? ctx.t('record.unknownPaths.more', { names: shown.join(', '), count: more })
@@ -111,7 +116,7 @@ function choosePaths(
     });
   }
   const picked = new Set(wanted.map(nameKey));
-  return proposed.filter((path) => picked.has(nameKey(nameOf(path))));
+  return proposed.filter((path) => keysOf(nameOf(path)).some((key) => picked.has(key)));
 }
 
 /** A refused handshake of the run's channel, which the walk cannot go on without. */
@@ -153,9 +158,13 @@ export const flowsRecordJourneys = defineTool({
     }
     const { proposed } = saved.plan;
     const chosen = choosePaths(ctx, plan, proposed, args.paths);
+    // the names as the live view shows them: masked like the frames of the walk (FIX-77); the
+    // approval below sends the paths as the planner wrote them
+    const shown = (path: Readonly<Record<string, unknown>>): string =>
+      content(ctx, nameOf(path), 200);
     const walk: WalkSaved = {
-      names: chosen.map(nameOf),
-      steps: Object.fromEntries(proposed.map((path) => [nameOf(path), stepCount(path)])),
+      names: chosen.map(shown),
+      steps: Object.fromEntries(proposed.map((path) => [shown(path), stepCount(path)])),
     };
     // The approval is this call's alone: it is never saved, so no later call can send it.
     const approval = chosen.map((path) => ({ ...path }));

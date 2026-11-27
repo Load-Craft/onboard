@@ -9,6 +9,7 @@ import { toToolError } from '../src/http/errors.js';
 import { createTranslator } from '../src/render/i18n/index.js';
 import { en } from '../src/render/i18n/en.js';
 import { pl } from '../src/render/i18n/pl.js';
+import { MODULE_TEXTS } from '../src/render/i18n/_generated/modules.js';
 import { SCHEMA_ERROR_CODES, SchemaError } from '../src/workspace/processState.js';
 import { isCatalogDataFile } from './helpers/catalogDataFiles.js';
 
@@ -327,7 +328,11 @@ describe('dictionaries cover every code the source can throw', () => {
     const wanted = [...new Set([...toolCodes, ...apiCodes, ...SCHEMA_ERROR_CODES])].filter(
       (code) => code !== 'x',
     );
-    for (const dictionary of [en, pl] as Record<string, unknown>[]) {
+    // the codes of the tools of a module have their texts in the module's dictionary (`error.<module>_…`)
+    for (const dictionary of [
+      { ...en, ...MODULE_TEXTS.en },
+      { ...pl, ...MODULE_TEXTS.pl },
+    ] as Record<string, unknown>[]) {
       const missing = wanted.filter((code) => dictionary[`error.${code}.message`] === undefined);
       expect(missing).toEqual([]);
     }

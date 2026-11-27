@@ -89,6 +89,8 @@ export const dataCreateAccounts = defineTool({
     idempotentHint: false,
     openWorldHint: true,
   },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   // Claude Code shows the permission prompt for this tool on every call, in every mode.
   meta: { 'anthropic/requiresUserInteraction': true },
   async run(ctx, args) {

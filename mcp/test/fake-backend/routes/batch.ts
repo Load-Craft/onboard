@@ -1,6 +1,6 @@
-// Batch flow generation of the fake backend (`api/routes/flow_suggestions.py`, `batch-generate`):
+// Batch flow generation of the fake backend (`batch-generate`):
 // the POST answers with a run id at once, the run generates the baskets on the test clock and tells
-// about each over the `batch` channel (`api/websocket/batch_generation_ws.py`). A flow that a basket
+// about each over the `batch` channel. A flow that a basket
 // produces is saved with the tags of the basket, so `GET …/flows?tags=<tag>` finds it as it does on
 // the real backend. The run lives in memory only: the channel forgets it 600 s after the end.
 
@@ -74,7 +74,7 @@ export interface BatchHandles {
 
 const registered = new WeakMap<Fake, BatchHandles>();
 
-/** A pause the generator adds before an API call (flow_generation/service.py:592). */
+/** A pause the generator adds before an API call. */
 const PAUSE_DESCRIPTION = 'Assumed default think time before an API call (not measured)';
 
 /** One request per endpoint with a pause between neighbours, in a chain. */

@@ -8,7 +8,7 @@ export interface TelemetryToolInfo {
   readonly name: string;
   /**
    * True when the backend can call the tool on its own: its only required inputs are `start`
-   * and `end`, the window of the run (`mcp_evidence.py`, `window_tool`).
+   * and `end`, the window of the run (`window_tool`).
    */
   readonly eligible: boolean;
 }

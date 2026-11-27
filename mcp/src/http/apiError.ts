@@ -130,6 +130,22 @@ function nonEmpty(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() !== '' ? value : undefined;
 }
 
+/**
+ * The error as a server failure would have been reported: the status and a plain machine code, no
+ * text, no body. For a call that could not register every secret it read: the backend's text may
+ * quote one it does not know, so the text is treated like that of a 5xx. A status whose text is not
+ * shown anyway is returned as it is.
+ */
+export function withheldCopy(error: LoadcraftApiError): LoadcraftApiError {
+  if (!quotesBackendText(error.status)) return error;
+  return new LoadcraftApiError({
+    status: error.status,
+    code: codeForStatus(error.status),
+    message: genericMessage(error.status),
+    retryable: error.retryable,
+  });
+}
+
 function genericMessage(status: number): string {
   return `LoadCraft API answered HTTP ${String(status)}.`;
 }
@@ -247,4 +263,17 @@ export function apiErrorInit(status: number, text: string): LoadcraftApiErrorIni
     ...withoutText(status, init.code, init.retryable, logTextOf(text, body)),
     ...(status === 401 || init.details === undefined ? {} : { details: init.details }),
   };
+}
+
+/**
+ * Whether `error` is the backend's 404 for a run the project does not have: unknown, deleted, or a
+ * run of another project. A result route answers it before reading any store, so it never means
+ * "this run has no such data"; a reader that takes a 404 as an absence asks this first.
+ */
+export function isRunNotFound(error: unknown, executionId: string): boolean {
+  return (
+    error instanceof LoadcraftApiError &&
+    error.status === 404 &&
+    error.message === `Execution ${executionId} not found`
+  );
 }

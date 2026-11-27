@@ -106,8 +106,12 @@ export const FLOWS_SUGGEST_JOURNEYS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_generate_from_suggestions`: Generate flows for the approved journey proposals. */
@@ -197,9 +201,13 @@ export const FLOWS_GENERATE_FROM_SUGGESTIONS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt:
     'Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód.',
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_generate_from_endpoints`: Generate one flow from a description and chosen endpoints. */
@@ -304,9 +312,13 @@ export const FLOWS_GENERATE_FROM_ENDPOINTS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt:
     'Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód.',
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_generate_from_har`: Generate flows from an analyzed HAR session; split=true lets the backend propose journeys first. */
@@ -416,9 +428,13 @@ export const FLOWS_GENERATE_FROM_HAR = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt:
     'Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód.',
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_regenerate`: Regenerate a flow from its recorded sources; saved as a new version. */
@@ -495,7 +511,10 @@ export const FLOWS_REGENERATE = {
       path: '/api/v1/projects/{project_id}/flows/{flow_id}/regenerate',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_flow_api_v1_projects__project_id__flows__flow_id__get',
+    'get_flow_generation_status_api_v1_projects__project_id__flows_flow_generation__run_id__status_get',
+  ],
   channels: ['flowGeneration'],
   state_reads: ['ids.project_id', 'ids.flow_ids'],
   state_writes: ['steps.flows.flows_built', 'operations', 'problems'],
@@ -504,11 +523,39 @@ export const FLOWS_REGENERATE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow (id or name); default: the only one of this workspace.',
+    },
+    {
+      name: 'description',
+      type: 'string',
+      min_length: 1,
+      max_length: 4000,
+      from_state: null,
+      doc: 'What the flow should do; default: the description it was generated from.',
+    },
+    {
+      name: 'skip_validators',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: do not generate validators for the new version.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_import_har`: Import a HAR recording and analyze it: kept and noise requests, login, groups, values passed between requests. */
@@ -607,8 +654,12 @@ export const FLOWS_IMPORT_HAR = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_describe_journeys`: Describe journeys in plain words: a backend browser opens the app, signs in with a test account and returns the path plan. */
@@ -715,13 +766,17 @@ export const FLOWS_DESCRIBE_JOURNEYS = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_record_journeys`: Record the approved plan (all or chosen paths): the backend browser walks it until the flows are saved. */
@@ -825,13 +880,17 @@ export const FLOWS_RECORD_JOURNEYS = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_get_walks`: Get description runs (browser walks): the list, or one with its paths and optional review timeline. */
@@ -902,11 +961,41 @@ export const FLOWS_GET_WALKS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'walk_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      doc: 'One walk: its handle or id; without it, the list of your walks.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 50,
+      default: 20,
+      from_state: null,
+      doc: 'How many walks of the list to return (1-50).',
+    },
+    {
+      name: 'include',
+      type: 'string[]',
+      enum: ['timeline'],
+      max_items: 1,
+      from_state: null,
+      doc: '"timeline": the review timeline of the walk (with walk_id only).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_retry_walk`: Retry one path of a finished walk: preview and re-drive it in the browser (part=path), or save its flow again as a new flow (part=flow). */
@@ -1011,13 +1100,17 @@ export const FLOWS_RETRY_WALK = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_save_walk_note`: Save a note at a step of a walk (new or changed); notes steer the next retry. */
@@ -1083,7 +1176,9 @@ export const FLOWS_SAVE_WALK_NOTE = {
       path: '/api/v1/projects/{project_id}/scenario-from-description/runs/{run_id}/notes/{note_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_run_timeline_api_v1_projects__project_id__scenario_from_description_runs__run_id__timeline_get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.walk_id'],
   state_writes: [],
@@ -1092,11 +1187,57 @@ export const FLOWS_SAVE_WALK_NOTE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'walk_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: 'ids.walk_id',
+      doc: 'The walk: its handle or id; default: the walk of this workspace.',
+    },
+    {
+      name: 'step',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      required: true,
+      doc: 'The step of the walk (from flows_get_walks include timeline).',
+    },
+    {
+      name: 'text',
+      type: 'string',
+      min_length: 1,
+      max_length: 500,
+      from_state: null,
+      required: true,
+      doc: 'The note.',
+    },
+    {
+      name: 'note_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      doc: 'An existing note to change; without it, a new note.',
+    },
+    {
+      name: 'remember',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: also keep it as a note of the project for later walks.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_export_walk_image`: Export a walk image to a local file and return its path: a live snapshot of a path attempt, or a timeline still. */
@@ -1161,11 +1302,57 @@ export const FLOWS_EXPORT_WALK_IMAGE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'walk_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: 'ids.walk_id',
+      doc: 'The walk: its handle or id; default: the walk of this workspace.',
+    },
+    {
+      name: 'path_index',
+      type: 'integer',
+      min: 0,
+      max: 10000,
+      from_state: null,
+      doc: 'The step of the walk to capture live (not with still_id).',
+    },
+    {
+      name: 'attempt',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 1,
+      from_state: null,
+      doc: 'The attempt of that step (with path_index).',
+    },
+    {
+      name: 'still_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      doc: 'A still of the review timeline (not with path_index).',
+    },
+    {
+      name: 'overwrite',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: 'true: replace an image saved earlier under the same name.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason:
+      'zapisuje obraz kroku przebiegu lokalnie pod loadcraft/walks/<przebieg>/ (ignorowane przez git); nic w backendzie się nie zmienia',
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_list`: List the project's flows: name, type, version, step count. */
@@ -1222,11 +1409,33 @@ export const FLOWS_LIST = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'query',
+      type: 'string',
+      min_length: 1,
+      max_length: 100,
+      from_state: null,
+      doc: 'Only flows whose name contains this text (any case).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many flows to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_get`: Get one flow as a numbered outline with variables, pauses and open questions. */
@@ -1294,11 +1503,24 @@ export const FLOWS_GET = {
       ref: null,
     },
   ],
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow: its id or name; default: the only flow of this workspace.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_get_versions`: Get a flow's stored versions: the list, or one version as an outline. */
@@ -1361,11 +1583,41 @@ export const FLOWS_GET_VERSIONS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow: its id or name; default: the only flow of this workspace.',
+    },
+    {
+      name: 'version',
+      type: 'integer',
+      min: 1,
+      max: 100000,
+      from_state: null,
+      doc: 'One version as an outline; without it, the list (newest first).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 20,
+      from_state: null,
+      doc: 'How many versions of the list to return (1-100).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_restore_version`: Restore an older flow version as the newest one. */
@@ -1429,11 +1681,40 @@ export const FLOWS_RESTORE_VERSION = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow: its id or name; default: the only flow of this workspace.',
+    },
+    {
+      name: 'version',
+      type: 'integer',
+      min: 1,
+      max: 100000,
+      from_state: null,
+      required: true,
+      doc: 'The version to make current.',
+    },
+    {
+      name: 'reason',
+      type: 'string',
+      max_length: 200,
+      from_state: null,
+      doc: 'Why, shown in the version history.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_save`: Save a flow from blocks (flow_id: new version; none: new flow). Direct edit, only on the user's request; normally use flows_ask_copilot. */
@@ -1472,6 +1753,11 @@ export const FLOWS_SAVE = {
         for: 'update',
       },
       {
+        tool: 'flows_save',
+        how: 'the previous values',
+        for: 'update',
+      },
+      {
         tool: 'flows_delete',
         how: 'the new flow',
         for: 'create',
@@ -1498,7 +1784,10 @@ export const FLOWS_SAVE = {
       path: '/api/v1/projects/{project_id}/flows/{flow_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'list_flows_api_v1_projects__project_id__flows_get',
+    'get_flow_api_v1_projects__project_id__flows__flow_id__get',
+  ],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: ['ids.flow_ids', 'steps.flows.flows_built', 'problems'],
@@ -1507,11 +1796,61 @@ export const FLOWS_SAVE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The flow to change (id or name); without it, a new flow is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 255,
+      from_state: null,
+      doc: "The flow's name; required for a new flow.",
+    },
+    {
+      name: 'description',
+      type: 'string',
+      max_length: 2000,
+      from_state: null,
+      doc: "The flow's description.",
+    },
+    {
+      name: 'graph',
+      type: 'object',
+      from_state: null,
+      doc: 'The whole graph {blocks, edges, entry_block_id} (no variables); a new flow or a full replacement.',
+    },
+    {
+      name: 'drop_steps',
+      type: 'string',
+      min_length: 1,
+      max_length: 300,
+      from_state: null,
+      doc: 'Step numbers to remove, as flows_get numbers them, comma-separated (at most 50); with flow_id, not with graph.',
+    },
+    {
+      name: 'reason',
+      type: 'string',
+      min_length: 1,
+      max_length: 300,
+      from_state: null,
+      doc: 'Why the graph changes (with graph or drop_steps); kept on the new version.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_delete`: Delete flows, walk notes, or a walk's review (kind=review: its timeline, stills, notes and browser recordings; flows stay). */
@@ -1624,8 +1963,12 @@ export const FLOWS_DELETE = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_duplicate`: Duplicate flows, or copy one flow onto another docs version (docs_id). */
@@ -1694,11 +2037,39 @@ export const FLOWS_DUPLICATE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_ids',
+      type: 'string',
+      min_length: 1,
+      max_length: 4000,
+      from_state: null,
+      required: true,
+      doc: 'The flows to copy, ids or names, comma-separated (1-20; exactly one with docs_id).',
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'Copy the flow onto this documentation version.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The name of the copy (with docs_id).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_migrate_docs`: Migrate flows to the current docs version in place; preview=true saves nothing, adopt_values adopts new example values. */
@@ -1852,9 +2223,13 @@ export const FLOWS_MIGRATE_DOCS = {
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt:
     'Karta zgody poziomu 2 działa wzorcem confirm z tokenem, bo ogólnych kart pending i process_answer jeszcze nie ma; po ich wdrożeniu narzędzie przechodzi na kartę z katalogu.',
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_merge`: Merge several flows into one new flow (the first kept whole, later ones lose their leading reads). */
@@ -1918,11 +2293,33 @@ export const FLOWS_MERGE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_ids',
+      type: 'string',
+      min_length: 1,
+      max_length: 4000,
+      from_state: null,
+      required: true,
+      doc: 'The flows to merge, ids or names, comma-separated (2-20).',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'The name of the merged flow.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_set_poll_terminals`: Set the success and failure terminal statuses that answer a flow's open poll-loop questions. */
@@ -1956,8 +2353,8 @@ export const FLOWS_SET_POLL_TERMINALS = {
     reversible: 'yes',
     ways: [
       {
-        tool: 'flows_set_poll_terminals',
-        how: 'answer again with other statuses',
+        tool: 'flows_restore_version',
+        how: 'the previous version',
         for: 'update',
       },
     ],
@@ -1965,7 +2362,7 @@ export const FLOWS_SET_POLL_TERMINALS = {
   },
   log: {
     args: '{flow_id}',
-    result: '{count} poll questions answered',
+    result: '{field} answered as v{version}; {open} open',
   },
   route: null,
   description:
@@ -1978,20 +2375,58 @@ export const FLOWS_SET_POLL_TERMINALS = {
       path: '/api/v1/projects/{project_id}/flows/{flow_id}/poll-terminals',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_flow_api_v1_projects__project_id__flows__flow_id__get'],
   channels: [],
-  state_reads: ['ids.project_id', 'steps.flows.questions_answered'],
+  state_reads: ['ids.project_id', 'steps.flows.questions_answered', 'ids.flow_ids'],
   state_writes: ['steps.flows.questions_answered'],
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow (id or name); default: the only one of this workspace.',
+    },
+    {
+      name: 'field',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      required: true,
+      from_state: null,
+      doc: 'The status field of an open poll question: the field of a poll_status item in flows_get.',
+    },
+    {
+      name: 'success_terminals',
+      type: 'string',
+      min_length: 1,
+      max_length: 1000,
+      required: true,
+      from_state: null,
+      doc: 'The statuses that mean the job succeeded, comma-separated (at most 20).',
+    },
+    {
+      name: 'failure_terminals',
+      type: 'string',
+      max_length: 1000,
+      from_state: null,
+      doc: 'The statuses that mean it failed, comma-separated (at most 20); without it, none.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_ask_copilot`: Ask the flow copilot for changes to a flow; without a message it runs its standard review. Returns a proposal, changes nothing. */
@@ -2075,7 +2510,7 @@ export const FLOWS_ASK_COPILOT = {
       path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/messages/review',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_flow_api_v1_projects__project_id__flows__flow_id__get'],
   channels: [],
   state_reads: ['ids.project_id', 'ids.flow_ids'],
   state_writes: [],
@@ -2084,11 +2519,32 @@ export const FLOWS_ASK_COPILOT = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow (id or name); default: the only one of this workspace.',
+    },
+    {
+      name: 'message',
+      type: 'string',
+      min_length: 1,
+      max_length: 4000,
+      from_state: null,
+      doc: 'What to ask; without it the copilot runs its standard review.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_apply_copilot_changes`: Apply the accepted copilot changes to a flow as one new version and record what was rejected. */
@@ -2156,7 +2612,10 @@ export const FLOWS_APPLY_COPILOT_CHANGES = {
       path: '/api/v1/projects/{project_id}/flows/{flow_id}/copilot/resolutions',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_flow_api_v1_projects__project_id__flows__flow_id__get',
+    'get_copilot_history_api_v1_projects__project_id__flows__flow_id__copilot_history_get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.flow_ids'],
   state_writes: ['steps.flows.flows_built'],
@@ -2165,11 +2624,47 @@ export const FLOWS_APPLY_COPILOT_CHANGES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow (id or name); default: the only one of this workspace.',
+    },
+    {
+      name: 'message_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      required: true,
+      from_state: null,
+      doc: 'The copilot turn the changes come from: message_id of flows_ask_copilot or flows_get_copilot_history.',
+    },
+    {
+      name: 'accept',
+      type: 'string',
+      max_length: 2000,
+      from_state: null,
+      doc: 'Ids of the changes to apply, comma-separated (at most 50).',
+    },
+    {
+      name: 'reject',
+      type: 'string',
+      max_length: 2000,
+      from_state: null,
+      doc: 'Ids of the changes to record as rejected, comma-separated (at most 50).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `flows_get_copilot_history`: Get a flow's copilot conversation, or its improvement suggestions. */
@@ -2233,9 +2728,38 @@ export const FLOWS_GET_COPILOT_HISTORY = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: 'ids.flow_ids',
+      doc: 'The flow: its id or name; default: the only flow of this workspace.',
+    },
+    {
+      name: 'suggestions',
+      type: 'boolean',
+      default: false,
+      from_state: null,
+      doc: "true: the copilot's open suggestions instead of the conversation.",
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 50,
+      default: 20,
+      from_state: null,
+      doc: 'How many of the latest turns to return (1-50).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

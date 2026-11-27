@@ -21,6 +21,8 @@ export const profileEn = {
   'projectProfile.card.renewed.missing':
     'Nothing was written: there is no card for this token any more (it was used or replaced).',
   'projectProfile.card.renewed.expired': 'Nothing was written: the card has expired.',
+  'projectProfile.card.renewed.expired_at':
+    'Nothing was written: the card issued at {time} has expired (a card is valid for {minutes} min).',
   'projectProfile.card.renewed.token':
     'Nothing was written: the token is not the one of the current card.',
   'projectProfile.card.renewed.changed':
@@ -75,6 +77,8 @@ export const profilePl = {
   'projectProfile.card.renewed.missing':
     'Nic nie zapisano: karty z tym tokenem już nie ma (została użyta albo zastąpiona).',
   'projectProfile.card.renewed.expired': 'Nic nie zapisano: karta straciła ważność.',
+  'projectProfile.card.renewed.expired_at':
+    'Nic nie zapisano: karta wydana o {time} straciła ważność (karta jest ważna {minutes} min).',
   'projectProfile.card.renewed.token': 'Nic nie zapisano: token nie należy do bieżącej karty.',
   'projectProfile.card.renewed.changed':
     'Nic nie zapisano: profil albo pola różnią się od karty, na którą użytkownik się zgodził.',

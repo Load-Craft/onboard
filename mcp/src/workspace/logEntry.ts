@@ -69,6 +69,9 @@ export function logToolOf(tool: string, args: unknown, data?: unknown): ToolName
   return isToolName(tool) ? tool : undefined;
 }
 
+/** The result of the entry of a call that only made a consent card. */
+const AWAITING_DECISION = "awaiting the user's decision";
+
 /** The tool whose entry a call that only planned a run uses. */
 const PLANNING: ToolName = 'run_plan';
 
@@ -99,7 +102,8 @@ function shown(value: unknown): Value | undefined {
 /**
  * Values a template may name: the fields of each source and of the objects one level down (an
  * outer field wins over a nested one, an earlier source over a later one). A list of plain values
- * is joined, a list of objects counts its items.
+ * is joined, a list of objects counts its items. An entry passes the `log.values` of the tool first:
+ * they are its explicit intent and win over a field of the same name in the data or the arguments.
  */
 export function templateValues(...sources: readonly unknown[]): Map<string, Value> {
   const values = new Map<string, Value>();
@@ -115,6 +119,50 @@ export function templateValues(...sources: readonly unknown[]): Map<string, Valu
     for (const inner of Object.values(record)) if (isRecord(inner)) take(inner);
   }
   return values;
+}
+
+/** The digits after the decimal mark of a number as JavaScript writes it. */
+function digitsOf(value: number): number {
+  const [, fraction = ''] = String(value).split('.');
+  return fraction.length;
+}
+
+/** Whether the log value and the data value say the same: equal as text, or the data number shown with the log number's digits. */
+function agrees(own: Value, other: Value): boolean {
+  if (String(own) === String(other)) return true;
+  return (
+    typeof own === 'number' &&
+    typeof other === 'number' &&
+    Number(other.toFixed(digitsOf(own))) === own
+  );
+}
+
+/**
+ * The slots of a result `template` whose value in `values` (the `log.values` of a tool) says
+ * something else than the field of the same name in `data`, read like the templates read it. The
+ * `log.values` win in the entry; a slot the data fills differently is still a mistake of the tool
+ * (the data says one thing, its log another), which the registry refuses under tests. A number of
+ * the log that is the data number with fewer digits (`410` for `410.237`) says the same; an empty
+ * data value (`''`, `0`, `false`) says nothing to disagree with.
+ */
+export function logValueCollisions(
+  template: string,
+  values: Readonly<Record<string, unknown>> | undefined,
+  data: unknown,
+): string[] {
+  if (values === undefined) return [];
+  const slots = new Set(
+    [...template.matchAll(PLACEHOLDER)].flatMap(([, inner = '']) => inner.split('|')),
+  );
+  const fromData = templateValues(data);
+  return Object.entries(values)
+    .filter(([key, raw]) => {
+      if (!slots.has(key)) return false;
+      const own = shown(raw);
+      const other = fromData.get(key);
+      return own !== undefined && isSet(other) && other !== undefined && !agrees(own, other);
+    })
+    .map(([key]) => key);
 }
 
 function isValueMap(
@@ -134,21 +182,36 @@ export function fillTemplate(
   template: string,
   values: ReadonlyMap<string, Value> | Args,
 ): string | undefined {
+  return unfilledSlots(template, values).length > 0 ? undefined : fillWith(template, values, '');
+}
+
+/** What a slot of a template prints: its value, the first set alternative, or undefined. */
+function slotText(inner: string, map: ReadonlyMap<string, Value>): string | undefined {
+  const names = inner.split('|');
+  if (names.length > 1) return names.find((name) => isSet(map.get(name)));
+  const value = map.get(inner);
+  return value === undefined ? undefined : cut(String(value), LIMIT.value);
+}
+
+/** `template` with every slot filled, a slot no value fills printing `missing`. */
+function fillWith(
+  template: string,
+  values: ReadonlyMap<string, Value> | Args,
+  missing: string,
+): string {
   const map: ReadonlyMap<string, Value> = isValueMap(values) ? values : templateValues(values);
-  let complete = true;
-  const text = template.replace(PLACEHOLDER, (_slot, inner: string) => {
-    const names = inner.split('|');
-    const value = map.get(inner);
-    const found =
-      names.length > 1
-        ? names.find((name) => isSet(map.get(name)))
-        : value === undefined
-          ? undefined
-          : cut(String(value), LIMIT.value);
-    if (found === undefined) complete = false;
-    return found ?? '';
-  });
-  return complete ? text : undefined;
+  return template.replace(PLACEHOLDER, (_slot, inner: string) => slotText(inner, map) ?? missing);
+}
+
+/** The slots of `template` (`name`, or `a|b` for alternatives) no value fills. */
+export function unfilledSlots(
+  template: string,
+  values: ReadonlyMap<string, Value> | Args,
+): string[] {
+  const map: ReadonlyMap<string, Value> = isValueMap(values) ? values : templateValues(values);
+  return [...template.matchAll(PLACEHOLDER)]
+    .map(([, inner = '']) => inner)
+    .filter((inner) => slotText(inner, map) === undefined);
 }
 
 /**
@@ -173,17 +236,15 @@ export function pairsOf(source: unknown): string {
   return pairs.join(', ');
 }
 
-/** The template filled, or a summary of the source when a slot has no value. */
-function summary(
-  template: string,
-  values: ReadonlyMap<string, Value>,
-  source: unknown,
-  empty: string,
-): string {
-  const filled = fillTemplate(template, values);
-  if (filled !== undefined) return filled;
-  const pairs = pairsOf(source);
-  return pairs === '' ? empty : pairs;
+/** Printed in place of a slot of a template that no value fills. */
+export const UNFILLED_SLOT = 'none';
+
+/**
+ * The template filled, a slot with no value printing `none`: the entry says what the call did in the
+ * words of the catalog, never the fields of the call's data in their place (FIX-69).
+ */
+function summary(template: string, values: ReadonlyMap<string, Value>): string {
+  return fillWith(template, values, UNFILLED_SLOT);
 }
 
 /** What the call ended with, as the registration layer saw it. */
@@ -193,6 +254,8 @@ export type CallEnd =
       readonly data: unknown;
       readonly link?: string;
       readonly handle?: string;
+      /** The call only made a consent card (`asked`), or ran after the person's yes (`given`). */
+      readonly consent?: 'asked' | 'given';
     }
   | { readonly kind: 'error'; readonly code: string; readonly message: string }
   | { readonly kind: 'cancelled' };
@@ -257,6 +320,11 @@ function undoArgsOf(way: LogMetaUndo, end: CallEnd): Record<string, unknown> | u
       );
       return ids.length > 0 ? { kind: 'flow', ids } : undefined;
     }
+    case 'scenario_delete': {
+      // the scenario a save created (`scenario_save` with no id); a save of an existing one has none
+      const [id] = idsOf([data.created === true ? data.scenario_id : undefined]);
+      return id === undefined ? undefined : { scenario_id: id };
+    }
     case 'process_cancel':
       return end.kind === 'running' && end.handle !== undefined
         ? { handle: end.handle }
@@ -287,15 +355,20 @@ function undoOf(
   end: CallEnd,
   given?: Readonly<Record<string, unknown>>,
 ): LogEntryInput['undo'] {
-  const [first] = meta.undo;
+  // The arguments the tool gave belong to one way of the catalog: the one it names with `undo_tool`
+  // (removed from the arguments), else the first. A name that is none of the entry's ways leaves the
+  // entry without an undo.
+  const { undo_tool: named, ...undoArgs } = given ?? {};
+  const first = named === undefined ? meta.undo[0] : meta.undo.find((way) => way.tool === named);
   if (given !== undefined && first !== undefined) {
     return {
       tool: first.tool,
-      args: { ...given },
+      args: undoArgs,
       level: first.level,
       note: cut(first.how, LIMIT.note),
     };
   }
+  if (named !== undefined) return undefined;
   const reused = reusedSomething(end);
   for (const way of meta.undo) {
     if (reused && way.for === 'create') continue;
@@ -328,12 +401,10 @@ export function buildLogEntry(call: LogEntryCall): LogEntryInput {
   const meta = LOG_META[call.catalogTool];
   const effect = effectOf(meta);
   const masked = (text: string): string => cut(secrets.scrub(text), LIMIT.summary);
-  const args = summary(
-    meta.log.args,
-    templateValues(call.args, call.values),
-    call.args,
-    'no arguments',
-  );
+  // a call that only made a consent card did nothing yet: its entry waits, and has no undo
+  const asked = end.kind === 'done' && end.consent === 'asked';
+  const given = end.kind === 'done' && end.consent === 'given';
+  const args = summary(meta.log.args, templateValues(call.values, call.args));
   const result =
     end.kind === 'error'
       ? end.message
@@ -341,13 +412,17 @@ export function buildLogEntry(call: LogEntryCall): LogEntryInput {
         ? 'cancelled'
         : end.kind === 'running'
           ? `running: ${end.handle ?? 'operation'}`
-          : summary(
-              meta.log.result,
-              templateValues(end.data, call.args, call.values),
-              end.data,
-              'done',
-            );
-  const status = end.kind === 'error' ? 'error' : end.kind === 'cancelled' ? 'cancelled' : 'ok';
+          : asked
+            ? AWAITING_DECISION
+            : summary(meta.log.result, templateValues(call.values, end.data, call.args));
+  const status =
+    end.kind === 'error'
+      ? 'error'
+      : end.kind === 'cancelled'
+        ? 'cancelled'
+        : asked
+          ? 'queued'
+          : 'ok';
   const link = end.kind === 'done' || end.kind === 'running' ? secrets.scrub(end.link ?? '') : '';
   const handle = end.kind === 'done' || end.kind === 'running' ? end.handle : undefined;
   const undo = status === 'ok' && effect !== 'read' ? undoOf(meta, end, call.undoArgs) : undefined;
@@ -367,6 +442,8 @@ export function buildLogEntry(call: LogEntryCall): LogEntryInput {
     ...(end.kind === 'error'
       ? { error_code: CODE_SHAPE.test(end.code) ? end.code : 'unknown' }
       : {}),
+    // the person said yes in the client's dialog; the question of the server leaves no card in the state
+    ...(given ? { consent: { via: 'client_dialog' as const } } : {}),
     ...(link !== '' && Url.safeParse(link).success ? { link } : {}),
     ...(handle === undefined ? {} : { handle: cut(secrets.scrub(handle), LIMIT.handle) }),
     has_detail: false,

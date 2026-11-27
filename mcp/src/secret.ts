@@ -38,12 +38,28 @@ export class Secret {
 }
 
 /** Secrets of one tool call: registered values never appear in any output of the call. */
+export interface ScrubOptions {
+  readonly keys?: 'scrub' | 'keep';
+}
+
 export interface SecretScope {
   /** Registers a value that must never appear in any output of this call. */
   add(value: string): Secret;
   scrub(text: string): string;
-  scrubDeep<T>(value: T): T;
+  /**
+   * Copy of `value` with the registered values scrubbed. `keys: 'keep'` (a tool's data): the keys of
+   * an object are names of the answer's shape and stay as they are; an entry whose key holds a
+   * registered value is left out. By default a key is scrubbed like any string (the state file).
+   */
+  scrubDeep<T>(value: T, options?: ScrubOptions): T;
   containsSecret(value: unknown): boolean;
+  /**
+   * Whether this call read more secret values than it registered (a dataset cut at the limit): a
+   * text of the backend's error may then quote one the scope does not know, so it is not shown.
+   */
+  readonly incomplete: boolean;
+  /** Notes that a read left secret values unregistered. */
+  markIncomplete(): void;
 }
 
 /**

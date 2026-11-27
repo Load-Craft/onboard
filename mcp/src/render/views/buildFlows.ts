@@ -56,6 +56,8 @@ export interface BuildFlowsData {
   readonly uncheckedFlows?: number;
   /** `single_journey`: a split was asked for, but the recording holds one journey only. */
   readonly note?: 'single_journey';
+  /** Present when the flow was regenerated (`flows_regenerate`): the version it had and the one it has. */
+  readonly regenerated?: { readonly previous_version: number; readonly version: number };
 }
 
 const INDENT = '  ';
@@ -174,12 +176,36 @@ function adviceLines(data: BuildFlowsData, t: Translator): string[] {
   return key === undefined ? [] : wrap(`→ ${t(key)}`, VIEW_WIDTH, INDENT.length);
 }
 
+/** The first line of a regenerated flow, and the way back. */
+function regeneratedLines(data: BuildFlowsData, t: Translator): { head: string[]; tail: string[] } {
+  const [only] = data.built;
+  if (data.regenerated === undefined || only === undefined) return { head: [], tail: [] };
+  const { previous_version: previous, version } = data.regenerated;
+  return {
+    head: [
+      t('flows_regenerate.done', {
+        name: inline(only.name, MAX_NAME),
+        previous: num(previous, t.locale),
+        version: num(version, t.locale),
+      }),
+    ],
+    tail: wrap(
+      `→ ${t('flows_regenerate.undo', { previous: num(previous, t.locale) })}`,
+      VIEW_WIDTH,
+      INDENT.length,
+    ),
+  };
+}
+
 export function renderBuildFlows(data: BuildFlowsData, t: Translator): string {
+  const regenerated = regeneratedLines(data, t);
   return [
+    ...regenerated.head,
     ...warningLines(data, t),
     ...builtLines(data, t),
     ...data.failed.flatMap((failure) => failureLines(failure, t)),
     ...questionLines(data, t),
+    ...regenerated.tail,
     ...retryLines(data, t),
     ...adviceLines(data, t),
     ...(data.note === undefined

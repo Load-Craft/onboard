@@ -174,6 +174,8 @@ declare module 'claude-code' {
         readonly flows?: {
           readonly stamp: string;
           readonly failed?: true;
+          /** Why the read failed (`readFailure` in src/pane/lists.ts). */
+          readonly why?: string;
           readonly items: readonly {
             readonly name: string;
             readonly steps: number;
@@ -186,6 +188,8 @@ declare module 'claude-code' {
         readonly runs?: {
           readonly stamp: string;
           readonly failed?: true;
+          /** Why the read failed (`readFailure` in src/pane/lists.ts). */
+          readonly why?: string;
           readonly items: readonly {
             readonly handle: string;
             readonly target: string;
@@ -198,6 +202,8 @@ declare module 'claude-code' {
         readonly outline?: {
           readonly flow: string;
           readonly failed?: true;
+          /** Why the read failed (`readFailure` in src/pane/lists.ts). */
+          readonly why?: string;
           readonly steps: readonly {
             readonly num: string;
             readonly kind: 'request' | 'pause' | 'other';

@@ -39,6 +39,7 @@ export function isRequired(argument: RawArgument): boolean {
 export interface RawEntry {
   readonly name: string;
   readonly class: string;
+  readonly secret?: boolean;
   readonly description: string;
   readonly consent: {
     readonly level: number;
@@ -127,6 +128,40 @@ export function expectedUserInteraction(entry: RawEntry): boolean {
   if (entry.requires_user_interaction === true) return true;
   if (entry.class.split('+')[0] === 'destructive' || reachesOut) return true;
   return entry.requires_user_interaction === null && consent.cost !== null;
+}
+
+/**
+ * A tool the consent card may ask for (docs/consent-card.md, "Out of scope"), read from the raw
+ * catalog: level 2 or 3, fixed, no secret, no traffic to the target, no reason but a deletion, a schedule
+ * or an external service, never pre-allowed at install; or a level-1 tool that asks at level 3 by argument.
+ */
+export function cardCovers(entry: RawEntry): boolean {
+  const { consent } = entry;
+  const fixed =
+    (consent.level === 2 || consent.level === 3) &&
+    consent.by_argument === null &&
+    consent.target_traffic === null &&
+    ['delete', 'schedule', 'external', null].includes(consent.level3_reason);
+  // a level-1 tool that asks at level 3 for the calls that meet an escalation of its entry
+  const conditional =
+    consent.level === 1 &&
+    typeof consent.by_argument === 'object' &&
+    consent.by_argument !== null &&
+    (consent.by_argument as { level?: unknown }).level === 3 &&
+    consent.escalate_to_3.length > 0 &&
+    consent.target_traffic === null &&
+    consent.level3_reason === null;
+  return (
+    (fixed || conditional) &&
+    entry.secret !== true &&
+    !entry.class.includes('secret') &&
+    entry.install_allow !== true
+  );
+}
+
+/** Every tool of the catalog, as its file has it. */
+export function catalogEntries(): readonly RawEntry[] {
+  return CATALOG.modules.flatMap((module) => module.tools);
 }
 
 /** A tool that never asks: level 1, no level by argument, no escalation to level 3. */

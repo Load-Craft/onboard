@@ -6,9 +6,9 @@
 import type { ToolContext } from '../../context.js';
 import { ToolError } from '../../errors.js';
 import { callOperation } from '../../http/operation.js';
-import { inline } from '../../render/primitives.js';
 import type { DeleteCount } from '../../render/views/deletion.js';
 import { readProjectBinding } from '../../workspace/binding.js';
+import { shownName } from './card.js';
 
 /** The largest page of the lists of runs, scenarios and compositions. */
 export const LIST_LIMIT = 100;
@@ -55,7 +55,7 @@ export function liveOperation(ctx: ToolContext, projectId: string): string | und
   if (boundProject(ctx)?.id !== projectId) return undefined;
   const row = ctx.state.process()?.operations.find((operation) => LIVE.has(operation.status));
   if (row === undefined) return undefined;
-  return `${row.kind} "${inline(row.label ?? row.handle, 80)}"`;
+  return `${row.kind} "${shownName(ctx, row.label ?? row.handle)}"`;
 }
 
 /** A test of the project that is under way. */

@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import type { components } from '../src/http/generated/api.js';
-import { flowsGet } from '../src/tools/flowsGet.js';
+import { flowsGet } from '../src/tools/flows/get.js';
 import { processGetStatus } from '../src/tools/processGetStatus.js';
 import { projectSaveEnv } from '../src/tools/projectSaveEnv.js';
 import { runStart } from '../src/tools/runStart.js';
@@ -140,7 +140,7 @@ describe('flows_need_input', () => {
   it('flows_get reads the items from the flow itself, not from a version snapshot', async () => {
     const r = await rig();
     leave(r, SKLEP_IDS.flowZakupy, [DEFINITE]);
-    const result = await r.call('flows_get', { flow: 'zakupy' });
+    const result = await r.call('flows_get', { flow_id: 'zakupy' });
     expect(result.isError, result.text).toBe(false);
     expect(flat(result.text)).toMatch(/"Checkout" will get 401/u);
     expect(r.fake.calls.some((call) => call.path.includes('/versions/'))).toBe(false);

@@ -1,0 +1,127 @@
+{
+  "tools": [
+    {
+      "name": "traffic_delete",
+      "title": "Delete traffic snapshots or revoke push tokens",
+      "description": "Delete traffic snapshots or revoke push tokens (kind + ids). Runs using a snapshot are not checked.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["snapshot", "token"],
+            "description": "What to delete: a traffic snapshot or a push token (revoked)."
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The snapshot or token to delete."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["kind", "item_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "traffic_get_push_setup",
+      "title": "Get the setup for pushing traffic from production",
+      "description": "Get the setup for pushing traffic from production: sender address and recipe, excluded run windows, existing push tokens (no secrets).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "traffic_get_snapshot",
+      "title": "Get one snapshot",
+      "description": "Get one snapshot: quality report, excluded windows, per-route series (summarized by default).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "snapshot_id": {
+            "description": "The snapshot; default: the one chosen for runs of this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "series": {
+            "default": "summary",
+            "description": "summary: per route the count, min, max and sum; points: up to 20 routes of 60 points.",
+            "type": "string",
+            "enum": ["summary", "points"]
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "traffic_list_snapshots",
+      "title": "List traffic snapshots",
+      "description": "List traffic snapshots, newest first, with quality summary and limits; include=format_sample adds the packet format by example.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include": {
+            "description": "\"format_sample\": the field names and shape of a traffic packet (no values).",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["format_sample"]
+            }
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many snapshots to return (1-100).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

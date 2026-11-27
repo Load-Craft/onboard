@@ -36,6 +36,8 @@ export const dataSetBindings = defineTool<typeof input, BindingsView>({
     idempotentHint: true,
     openWorldHint: true,
   },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   async run(ctx, args) {
     const { projectId, target } = await resolveTarget(ctx, args);
     const result = await setBindings(ctx, projectId, target, args.bindings);

@@ -20,7 +20,7 @@ interface KeySpec {
 interface FrameSpec {
   type: string;
   envelope?: 'payload' | 'flat';
-  source: string;
+  source?: string;
   keys: KeySpec[];
 }
 interface ChannelSpec {
@@ -64,6 +64,10 @@ const EXPECTED_SERVER: Record<Channel, string[]> = {
     'cancelled',
     'interrupted',
   ],
+  healthCheck: ['progress', 'complete', 'error', 'cancelled'],
+  testTypes: ['progress', 'complete', 'error'].map((e) => `test-types:${e}`),
+  payloadGen: ['progress', 'complete', 'error'].map((e) => `payload-gen:${e}`),
+  gatlingFeeder: ['progress', 'complete', 'error'].map((e) => `gatling-feeder:${e}`),
 };
 const EXPECTED_CLIENT: Record<Channel, string[]> = {
   refine: [],
@@ -72,6 +76,11 @@ const EXPECTED_CLIENT: Record<Channel, string[]> = {
   analysis: [],
   har: ['har:generate', 'split_resume', 'har:cancel'],
   describe: ['split_resume', 'stop'],
+  // written as a key: the plain word in quotes is an old tool name to the names check
+  healthCheck: Object.keys({ cancel: true }),
+  testTypes: [],
+  payloadGen: [],
+  gatlingFeeder: [],
 };
 
 /** Describes a zod object shape as {name: required} for comparison with the contract. */
@@ -142,6 +151,10 @@ describe('contract file shape', () => {
       analysis: 'none',
       har: 'identity',
       describe: 'identity_and_origin',
+      healthCheck: 'none',
+      testTypes: 'none',
+      payloadGen: 'none',
+      gatlingFeeder: 'none',
     });
   });
 
@@ -156,13 +169,13 @@ describe('contract file shape', () => {
     }
   });
 
-  it('gives every frame a backend source reference', () => {
+  it('points no frame at a file of the backend: the repository is public, the backend is not', () => {
     for (const channel of CHANNELS) {
       for (const f of [
         ...(contract.channels[channel]?.server ?? []),
         ...(contract.channels[channel]?.client ?? []),
       ]) {
-        expect(f.source, `${channel}/${f.type}`).toMatch(/^backend\/.+\.py:\d+/);
+        expect(f.source, `${channel}/${f.type}`).toBeUndefined();
       }
     }
   });
@@ -360,5 +373,56 @@ describe('client message schemas', () => {
 
   it('refuse a har:generate without a flow name', () => {
     expect(CLIENT_SCHEMAS.har['har:generate']?.safeParse({}).success).toBe(false);
+  });
+
+  it('reads flat health-check frames, and rejects the same type wrapped in a payload', () => {
+    const progress = parseFrame('healthCheck', {
+      type: 'progress',
+      node: 'compare',
+      progress: 60,
+      status: 'completed',
+      details: {},
+    });
+    expect(progress).toMatchObject({
+      kind: 'frame',
+      type: 'progress',
+      data: { node: 'compare', progress: 60 },
+    });
+    expect(
+      parseFrame('healthCheck', { type: 'complete', result: { staleness_score: 0.2 } }).kind,
+    ).toBe('frame');
+    expect(
+      parseFrame('healthCheck', { type: 'error', error: 'LLM refused', node: null }).kind,
+    ).toBe('frame');
+    expect(parseFrame('healthCheck', { type: 'cancelled' }).kind).toBe('frame');
+    expect(() =>
+      parseFrame('healthCheck', {
+        type: 'progress',
+        payload: { node: 'compare', progress: 60, status: 'x' },
+      }),
+    ).toThrow(FrameParseError);
+  });
+
+  it('reads the frames of an AI dataset generation, enveloped in payload', () => {
+    expect(
+      parseFrame('gatlingFeeder', {
+        type: 'gatling-feeder:progress',
+        payload: {
+          progress: 35,
+          current_step: 'generate',
+          step_label: 'Generating',
+          status: 'in_progress',
+        },
+      }),
+    ).toMatchObject({ kind: 'frame', data: { progress: 35, current_step: 'generate' } });
+    expect(
+      parseFrame('gatlingFeeder', {
+        type: 'gatling-feeder:complete',
+        payload: { feeder_id: 'f1', run_id: 'r1', status: 'completed' },
+      }).kind,
+    ).toBe('frame');
+    expect(() =>
+      parseFrame('gatlingFeeder', { type: 'gatling-feeder:complete', run_id: 'r1' }),
+    ).toThrow(FrameParseError);
   });
 });

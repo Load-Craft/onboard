@@ -2,6 +2,8 @@
 // tool reads the backend, this file decides what the facts mean.
 
 import {
+  identityOf,
+  isFreshIdentitySlot,
   isPlainDataSlot,
   SECRET_NAME,
   type ColumnSpec,
@@ -133,11 +135,14 @@ export function dataSlotRemedy(slot: string, facts: RemedyFacts): DataSlotRemedy
 }
 
 /**
- * The scenario whose slot the rows of a slot of plain data are made from, or why there is none.
- * The backend generates from one scenario's slot, with that slot's columns: the first member, in
- * the order the target runs them, that declares the slot as plain data and has every column the
- * target requires (for a composition, the columns of all its members), so the dataset passes the
- * run's column check. A slot with a secret column is left to a file: the backend never invents one.
+ * The scenario whose slot the rows of a slot of plain data or of new identities are made from, or
+ * why there is none. The backend generates from one scenario's slot, with that slot's columns: the
+ * first member, in the order the target runs them, that declares the slot as such and has every
+ * column the target requires (for a composition, the columns of all its members), so the dataset
+ * passes the run's column check. A slot of plain data with a secret column is left to a file: the
+ * backend never invents one. A slot of new identities invents the e-mail and the password of the
+ * account its flow creates; what it may not invent (a token, a key) the backend refuses itself,
+ * and that refusal is kept like any other.
  */
 export function generationSourceOf(
   slot: string,
@@ -146,14 +151,14 @@ export function generationSourceOf(
 ): { readonly scenarioId: string } | { readonly none: NoGeneration } {
   const declared = members.flatMap((member) =>
     member.slots
-      .filter((spec) => spec.slot === slot && isPlainDataSlot(spec))
-      .map((spec) => ({ id: member.id, columns: spec.columns })),
+      .filter((spec) => spec.slot === slot && (isPlainDataSlot(spec) || isFreshIdentitySlot(spec)))
+      .map((spec) => ({ id: member.id, columns: spec.columns, fresh: isFreshIdentitySlot(spec) })),
   );
   const covering = declared.find((candidate) =>
     required.every((column) => candidate.columns.includes(column)),
   );
   if (covering === undefined) return { none: 'no_source' };
-  if (covering.columns.some((column) => SECRET_NAME.test(column))) {
+  if (!covering.fresh && covering.columns.some((column) => SECRET_NAME.test(column))) {
     return { none: 'secret_columns' };
   }
   return { scenarioId: covering.id };
@@ -180,6 +185,10 @@ function datasetOf(
   );
 }
 
+/** What the target's members say the slot holds (see `identityOf`). */
+const slotIdentity = (slot: string, facts: Pick<PlanFacts, 'members'>) =>
+  identityOf(facts.members.flatMap((member) => member.slots.filter((spec) => spec.slot === slot)));
+
 function planSlot(verdict: SlotVerdictState, facts: PlanFacts): PlanSlot {
   const spec = facts.specs.find((candidate) => candidate.slot === verdict.slot);
   const dataset = datasetOf(verdict, spec, facts);
@@ -199,6 +208,7 @@ function planSlot(verdict: SlotVerdictState, facts: PlanFacts): PlanSlot {
     sources: [...new Set(sources)],
     exclusive: spec?.strategy === 'queue' || dataset?.exclusive === true,
     usedBy: [...(spec?.usedBy ?? [])],
+    ...(slotIdentity(verdict.slot, facts) === 'fresh' ? { fresh: true as const } : {}),
   };
 }
 
@@ -219,6 +229,8 @@ function fixOf(slot: PlanSlot, facts: PlanFacts): PlanFix | undefined {
   const base = { slot: slot.slot, label: slot.label };
   if (isFault(slot.state)) return { kind: slot.state, ...base };
   const spec = facts.specs.find((candidate) => candidate.slot === slot.slot);
+  const identity = slotIdentity(slot.slot, facts);
+  if (identity === 'mixed') return { kind: 'slot_mixed', ...base };
   if (spec?.identityKind === 'existing' && facts.environment !== null) {
     const dataset = proposedDataset(slot.slot, facts);
     return {
@@ -228,17 +240,23 @@ function fixOf(slot: PlanSlot, facts: PlanFacts): PlanFix | undefined {
       environment: facts.environment,
     };
   }
-  // A slot the backend judged to be plain data: `data_create_dataset` makes its rows when a
-  // scenario of the target can be their source (or the hub's suggestion fills it); otherwise it
-  // comes from a file. The accounts of the other slots come from `data_create_accounts` or a file.
-  if (spec !== undefined && isPlainDataSlot(spec)) return dataFix(slot, facts);
+  // A slot the backend judged to be plain data or new identities: `data_create_dataset` makes its
+  // rows when a scenario of the target can be their source (or the hub's suggestion fills it);
+  // otherwise it comes from a file. The accounts of the other slots come from `data_create_accounts`
+  // or a file.
+  if (spec !== undefined && (isPlainDataSlot(spec) || identity === 'fresh')) {
+    return dataFix(slot, facts);
+  }
   return { kind: 'dataset_missing', ...base };
 }
 
 function dataFix(slot: PlanSlot, facts: PlanFacts): PlanFix {
   const base = { slot: slot.slot, label: slot.label };
   const remedy = dataSlotRemedy(slot.slot, facts);
-  if (remedy.kind === 'slot_generates') return { kind: 'data_generate', ...base };
+  if (remedy.kind === 'slot_generates') {
+    const fresh = slotIdentity(slot.slot, facts) === 'fresh';
+    return { kind: 'data_generate', ...base, ...(fresh ? { fresh: true as const } : {}) };
+  }
   if (remedy.kind === 'suggested') return { kind: 'data_missing', ...base };
   return {
     kind: 'data_from_file',

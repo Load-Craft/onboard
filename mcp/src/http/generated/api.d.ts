@@ -53,7 +53,7 @@ export interface paths {
         };
         /**
          * List recent activity
-         * @description Merges project creations, flow creations, Gatling executions (not pending) and functional-check executions (not unstarted pending) across all projects; newest first.
+         * @description Merges project creations, flow creations, Gatling executions (not pending) and functional-check executions (not unstarted pending) of the projects the caller is a member of (an API token pinned to a project: that project only); newest first.
          */
         get: operations["get_recent_activity_api_v1_activity_get"];
         put?: never;
@@ -345,26 +345,6 @@ export interface paths {
          * @description Revoke one of the caller's tokens; revoking it again is a no-op.
          */
         delete: operations["revoke_api_token_api_v1_auth_api_tokens__token_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/dev-login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Log in as any user (dev only)
-         * @description Issues a session for `user_id` without credentials; loopback clients only.
-         */
-        post: operations["dev_login_api_v1_auth_dev_login_post"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -759,7 +739,7 @@ export interface paths {
         };
         /**
          * List active Gatling executions
-         * @description Pending, building or running executions across all projects; newest start (else creation) first.
+         * @description Pending, building or running executions of the projects the caller is a member of (an API token pinned to a project: that project only); newest start (else creation) first.
          */
         get: operations["get_active_executions_api_v1_gatling_executions_active_get"];
         put?: never;
@@ -1196,13 +1176,13 @@ export interface paths {
         };
         /**
          * List actions
-         * @description Process-memory store shared by all projects; lost on restart.
+         * @description Process-memory store, per project (another project's action is 404); lost on restart.
          */
         get: operations["list_actions_api_v1_projects__project_id__actions_get"];
         put?: never;
         /**
          * Create an action
-         * @description Process-memory store shared by all projects; lost on restart.
+         * @description Process-memory store, per project (another project's action is 404); lost on restart.
          */
         post: operations["create_action_api_v1_projects__project_id__actions_post"];
         delete?: never;
@@ -3181,7 +3161,7 @@ export interface paths {
         };
         /**
          * List per-endpoint metrics of an execution
-         * @description From Prometheus. Both bounds given with end_ts > start_ts: counts and rps over that slice. Unknown execution_id → 200 with empty lists. order=count (default): by count, descending. order=run: in the order the run first answered each request (console requests table), with run_order per row (grouped console names read by request name, cut names by prefix); rows the console lacks last, run_order null.
+         * @description From Prometheus. Both bounds given with end_ts > start_ts: counts and rps over that slice. order=count (default): by count, descending. order=run: in the order the run first answered each request (console requests table), with run_order per row (grouped console names read by request name, cut names by prefix); rows the console lacks last, run_order null.
          */
         get: operations["get_execution_endpoints_api_v1_projects__project_id__gatling_executions__execution_id__endpoints_get"];
         put?: never;
@@ -3261,7 +3241,7 @@ export interface paths {
         };
         /**
          * List error groups of an execution
-         * @description Prometheus KO groups merged with the stored console errors. A console entry naming a group's status, or a wire failure, folds into that group (console_messages) instead of adding a row. Unknown execution_id → 200, empty.
+         * @description Prometheus KO groups merged with the stored console errors. A console entry naming a group's status, or a wire failure, folds into that group (console_messages) instead of adding a row.
          */
         get: operations["get_execution_errors_api_v1_projects__project_id__gatling_executions__execution_id__errors_get"];
         put?: never;
@@ -3301,7 +3281,7 @@ export interface paths {
         };
         /**
          * List an execution's Gatling logs
-         * @description Loki lines labelled with the execution, over Loki's default range (last hour); the run window is not passed.
+         * @description Loki lines labelled with the execution, over the run's window (its lifetime padded by one scrape interval; Loki's default last hour when the run never started). level filters lines containing that word in upper case. logs_source says whether Loki still keeps the window.
          */
         get: operations["get_execution_logs_api_v1_projects__project_id__gatling_executions__execution_id__logs_get"];
         put?: never;
@@ -3447,7 +3427,7 @@ export interface paths {
         };
         /**
          * List execution traces
-         * @description Tempo search; value-ledger spans excluded. Tempo unreachable: empty traces, still 200. Unknown execution: empty list, no 404.
+         * @description Tempo search; value-ledger spans excluded. Tempo unreachable: empty traces, still 200.
          */
         get: operations["get_execution_traces_api_v1_projects__project_id__gatling_executions__execution_id__traces_get"];
         put?: never;
@@ -3467,7 +3447,7 @@ export interface paths {
         };
         /**
          * Get trace detail
-         * @description First span of the trace from Tempo; execution_id unused. Protected header values in request.headers/response.headers masked.
+         * @description First span of the trace from Tempo; the execution only has to belong to the project. Protected header values in request.headers/response.headers masked.
          */
         get: operations["get_execution_trace_detail_api_v1_projects__project_id__gatling_executions__execution_id__traces__trace_id__get"];
         put?: never;
@@ -3487,7 +3467,7 @@ export interface paths {
         };
         /**
          * List project feeders
-         * @description Newest first; every item carries its full content.
+         * @description Newest first. Metadata only (FeederSummary): no content and no audit sample rows, so a list never carries a cell; read one feeder for its content.
          */
         get: operations["list_feeders_api_v1_projects__project_id__gatling_feeders_get"];
         put?: never;
@@ -6058,7 +6038,7 @@ export interface paths {
         };
         /**
          * Get the result of an async suggest or generate run
-         * @description Serves runs from suggest-async and generate-async. In-process memory: unknown, lost (restart) or other-worker run_id reports pending forever. project_id ignored.
+         * @description Serves runs from suggest-async and generate-async. In-process memory: unknown, lost (restart), other-worker run_id, or a run of another project reports pending forever.
          */
         get: operations["get_suggest_test_types_result_api_v1_projects__project_id__test_types_suggest__run_id__get"];
         put?: never;
@@ -6238,7 +6218,7 @@ export interface paths {
         };
         /**
          * Search pages, projects, flows, scenarios and executions
-         * @description Case-insensitive substring match across all projects. Per source: static pages (title, subtitle), projects (name, description), flows and Gatling scenarios (name, description, project name), Gatling executions (project name, id). Each source capped at limit; results concatenated in that order, deduplicated, then truncated to limit, so later sources may be dropped.
+         * @description Case-insensitive substring match over the projects the caller is a member of (an API token pinned to a project: that project only). Per source: static pages (title, subtitle), projects (name, description), flows and Gatling scenarios (name, description, project name), Gatling executions (project name, id). Each source capped at limit; results concatenated in that order, deduplicated, then truncated to limit, so later sources may be dropped.
          */
         get: operations["search_dashboard_api_v1_search_get"];
         put?: never;
@@ -10708,11 +10688,6 @@ export interface components {
             /** Source Kinds */
             source_kinds?: components["schemas"]["SuggestionSourceKind"][];
         };
-        /** DevLoginBody */
-        DevLoginBody: {
-            /** User Id */
-            user_id: string;
-        };
         /**
          * DiscoverResponse
          * @description Result of an AI validator-discovery run.
@@ -12616,6 +12591,67 @@ export interface components {
             strategy: string;
         };
         /**
+         * FeederSummary
+         * @description A feeder as the list names it: every field of Feeder but its cells (no content, no audit sample_rows_preview). Credentials in jdbc_config and redis_config are masked; read one feeder for its content.
+         */
+        FeederSummary: {
+            /** @description source (llm-generated|rule-generated|llm-generated-context-aware), prompt, model, llm_cost_usd, warnings, generator, data_profile_id, sample_rows_preview (secrets redacted).; never sample_rows_preview. */
+            audit_metadata: Record<string, unknown> | null;
+            /** @description Scenario it was generated for. */
+            auto_linked_scenario_id: string | null;
+            /** @description Column → identity | credential | entity-ref | synthetic | derived. */
+            column_semantics: {
+                [key: string]: "identity" | "credential" | "entity-ref" | "synthetic" | "derived";
+            } | null;
+            columns: string[];
+            /**
+             * @description 'exclusive' when a column is identity or credential, unless set explicitly.
+             * @enum {string}
+             */
+            consumption: "shared" | "exclusive";
+            /** @description SHA-256 of content; send as expected_content_hash. */
+            content_hash: string | null;
+            /** Format: date-time */
+            created_at: string | null;
+            created_by: string | null;
+            description: string | null;
+            feed_records_count: number | null;
+            /** @description File-feeder modifiers, e.g. unzip, shard. */
+            feeder_options: Record<string, unknown> | null;
+            /** @enum {string} */
+            feeder_type: "csv" | "tsv" | "ssv" | "json" | "jdbc" | "redis" | "custom";
+            file_name: string;
+            gatling_project_id: string;
+            /** @description Regenerate/expand possible. */
+            has_recipe: boolean;
+            id: string;
+            /** @description Password masked as ***. */
+            jdbc_config: components["schemas"]["JDBCFeederConfigBody"] | null;
+            manually_edited: boolean;
+            name: string;
+            /**
+             * @description 'uploaded' when auto_linked_scenario_id is null.
+             * @enum {string}
+             */
+            provenance: "uploaded" | "auto" | "auto-edited";
+            rebinding_patch?: {
+                new_feeder_id: string;
+                old_feeder_id: string;
+            };
+            /** @description Persisted FeederRecipe dump; null for uploads. */
+            recipe?: Record<string, unknown> | null;
+            recipe_summary: components["schemas"]["RecipeSummaryItem"][];
+            /** @description csv/tsv/ssv/json with content: parsed from content. */
+            record_count: number;
+            /** @description Password masked as ***. */
+            redis_config: components["schemas"]["RedisFeederConfigBody"] | null;
+            separator: string | null;
+            /** @enum {string} */
+            strategy: "queue" | "random" | "shuffle" | "circular";
+            /** Format: date-time */
+            updated_at: string | null;
+        };
+        /**
          * FieldSuggestion
          * @description A single field-level suggestion with provenance metadata.
          */
@@ -12676,7 +12712,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "bind" | "rebind" | "expand_rows" | "switch_strategy" | "create_dataset" | "use_redis_pool" | "provision_accounts";
+            kind: "bind" | "rebind" | "expand_rows" | "switch_strategy" | "create_dataset" | "use_redis_pool" | "provision_accounts" | "regenerate_dataset";
             /** Rows */
             rows?: number | null;
             /** Slot */
@@ -13231,7 +13267,7 @@ export interface components {
             needs_input_count: number;
             /**
              * Needs Input Definite Count
-             * @description Of them, the ones proved to fail: steps answered 401 as built.
+             * @description Of them, the ones whose steps fail as built (see NeedsInputItem.definite).
              * @default 0
              */
             needs_input_definite_count: number;
@@ -14952,7 +14988,7 @@ export interface components {
         NeedsInputItem: {
             /**
              * Definite
-             * @description true: the documentation proves a failure (the steps are answered 401 as built). false: a suspicion or an open question.
+             * @description true: the steps fail as built (answered 401, or a value they need has no source; a data_column item with provided=all is false). false: a suspicion or an open question.
              * @default false
              */
             definite: boolean;
@@ -14964,19 +15000,39 @@ export interface components {
             field: string;
             /**
              * Kind
-             * @description What the item is. poll_status: statuses of a poll loop; websocket_frames: messages of a socket never captured; auth: single-use sign-in value replayed as captured; step_outside_approved_endpoints: step cut for calling an unapproved endpoint; asyncapi_channel_parameter: channel parameter with no value; obstacle: part the customer marked as an obstacle, cut; credential_scheme: step whose token may not fit its security scheme; static_credential: static key nothing supplies. null: kind this version does not know (see kind_raw).
+             * @description What the item is. poll_status: statuses of a poll loop; websocket_frames: messages of a socket never captured; auth: single-use sign-in value replayed as captured; step_outside_approved_endpoints: step cut for calling an unapproved endpoint; asyncapi_channel_parameter: channel parameter with no value; obstacle: part the customer marked as an obstacle, cut; credential_scheme: step whose token may not fit its security scheme; static_credential: static key nothing supplies; data_column: value steps read from a data column no step produces (see provided). null: kind this version does not know (see kind_raw).
              */
-            kind?: ("poll_status" | "websocket_frames" | "auth" | "step_outside_approved_endpoints" | "asyncapi_channel_parameter" | "obstacle" | "credential_scheme" | "static_credential") | null;
+            kind?: ("poll_status" | "websocket_frames" | "auth" | "step_outside_approved_endpoints" | "asyncapi_channel_parameter" | "obstacle" | "credential_scheme" | "static_credential" | "data_column") | null;
             /**
              * Kind Raw
              * @description The stored kind when it is not one of the above; else null.
              */
             kind_raw?: string | null;
             /**
+             * Location
+             * @description Where the value goes: path, query or body (data_column); header, query or cookie (static_credential).
+             */
+            location?: string | null;
+            /**
+             * Operations
+             * @description "METHOD path" of each of `steps`, same order (data_column); empty when not stored.
+             */
+            operations?: string[];
+            /**
+             * Parameter
+             * @description Name of the parameter or body field taking the value (data_column).
+             */
+            parameter?: string | null;
+            /**
              * Producer
              * @description Operation that issued that token, "METHOD path" (credential_scheme).
              */
             producer?: string | null;
+            /**
+             * Provided
+             * @description data_column only: which active scenarios of the flow have a dataset with the column pinned. none: no scenario has (also when the flow has none); some: one or more have, one or more do not (their runs lack the column); all: every one has. null for other kinds.
+             */
+            provided?: ("none" | "some" | "all") | null;
             /**
              * Question
              * @description What the user is asked; at most 500 characters.
@@ -14984,13 +15040,23 @@ export interface components {
              */
             question: string;
             /**
+             * Scenarios Providing
+             * @description data_column only: active scenarios of the flow with the column pinned.
+             */
+            scenarios_providing?: number | null;
+            /**
+             * Scenarios Total
+             * @description data_column only: active scenarios of the flow.
+             */
+            scenarios_total?: number | null;
+            /**
              * Scheme
              * @description Security scheme concerned (credential kinds only).
              */
             scheme?: string | null;
             /**
              * Slot
-             * @description Data column the key is read from (static_credential).
+             * @description Data column the value is read from (static_credential, data_column).
              */
             slot?: string | null;
             /**
@@ -15048,6 +15114,20 @@ export interface components {
             is_builtin: boolean;
             /** Name */
             name: string;
+        };
+        /**
+         * NeverFabricatedHttpError
+         * @description A generation route refused columns the never-fabricated rule claims.
+         */
+        NeverFabricatedHttpError: {
+            detail: {
+                /** @description The refused columns, in the order they were asked. */
+                columns: string[];
+                /** @enum {string} */
+                error: "never_fabricated_columns";
+                /** @description Human-readable reason, naming the columns. */
+                message: string;
+            };
         };
         /** NotificationConfigBody */
         NotificationConfigBody: {
@@ -19074,7 +19154,7 @@ export interface components {
              */
             identity_kind: "existing" | "fresh" | null;
             label: string | null;
-            /** @description Must not be generated. */
+            /** @description Must not be generated: logins, credentials, secrets, and values naming an existing resource (sent in a URL path or id-named, no declared enum). */
             never_fabricated_columns: string[];
             /** @description Datasets covering all columns; credential datasets of the wrong identity kind excluded. */
             options: {
@@ -23071,7 +23151,9 @@ export interface operations {
             query?: {
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                Authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -23084,6 +23166,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActivityFeedResponse"];
+                };
+            };
+            /** @description Missing or invalid credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
                 };
             };
             /** @description Query parameter out of bounds. */
@@ -23997,55 +24088,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    dev_login_api_v1_auth_dev_login_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DevLoginBody"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthSessionStatus"];
-                };
-            };
-            /** @description Client not on loopback, or dev login off (on via `dev_login_enabled`, or with no signing secret and a loopback Host). detail: `Dev login is disabled`. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HttpError"];
-                };
-            };
-            /** @description Validation error. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Whitespace-only `user_id` (unhandled). */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -25118,7 +25160,9 @@ export interface operations {
             query?: {
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                Authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -25131,6 +25175,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActiveExecutionsResponse"];
+                };
+            };
+            /** @description Missing or invalid credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
                 };
             };
             /** @description Query parameter out of bounds. */
@@ -26565,7 +26618,7 @@ export interface operations {
                     "application/json": components["schemas"]["Action"];
                 };
             };
-            /** @description Unknown action_id. detail: string. */
+            /** @description Unknown action_id, or one of another project. detail: string. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -26608,7 +26661,7 @@ export interface operations {
                     "application/json": components["schemas"]["Action"];
                 };
             };
-            /** @description Unknown action_id. detail: string. */
+            /** @description Unknown action_id, or one of another project. detail: string. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -26645,7 +26698,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Unknown action_id. detail: string. */
+            /** @description Unknown action_id, or one of another project. detail: string. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33365,6 +33418,15 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
+            /** @description Execution unknown or of another project. detail: "Execution {id} not found". */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
+                };
+            };
             /** @description Parameter validation. */
             422: {
                 headers: {
@@ -33482,7 +33544,7 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description Unknown project, or 'Endpoint not found': name not among the run's endpoints, unknown execution, samples expired, or Prometheus unreachable. */
+            /** @description Unknown project; execution unknown or of another project (detail 'Execution {id} not found'); or 'Endpoint not found': name not among the run's endpoints, samples expired, or Prometheus unreachable. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33550,7 +33612,7 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description Unknown project, or 'Endpoint not found': name not among the run's endpoints, unknown execution, samples expired, or Prometheus unreachable. */
+            /** @description Unknown project; execution unknown or of another project (detail 'Execution {id} not found'); or 'Endpoint not found': name not among the run's endpoints, samples expired, or Prometheus unreachable. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33608,6 +33670,15 @@ export interface operations {
             };
             /** @description Not a member of the project, token pinned to another project, or role too low. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
+                };
+            };
+            /** @description Execution unknown or of another project. detail: "Execution {id} not found". */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -33717,6 +33788,15 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
+            /** @description Execution unknown or of another project. detail: "Execution {id} not found". */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
+                };
+            };
             /** @description Parameter validation. */
             422: {
                 headers: {
@@ -33806,7 +33886,7 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description Unknown project, or 'Error group not found' (hash absent, incl. unknown execution). */
+            /** @description Unknown project; execution unknown or of another project (detail 'Execution {id} not found'); or 'Error group not found' (hash absent). */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33839,7 +33919,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                level?: string | null;
+                level?: ("error" | "warn" | "info" | "debug") | null;
             };
             header?: {
                 Authorization?: string | null;
@@ -33869,6 +33949,17 @@ export interface operations {
                             /** @description Unix nanoseconds. */
                             timestamp: string;
                         }[];
+                        /** @description Loki's retention (e.g. '24h') when it deletes old lines; null when it keeps them or its configuration cannot be read. */
+                        logs_retention: string | null;
+                        /**
+                         * @description Whether Loki still holds the window. loki: within retention (or none known); partial_retention: the window starts before the retention cutoff, early lines are gone; absent_retention: the window ends before it, an empty list means deleted, not silent.
+                         * @enum {string}
+                         */
+                        logs_source: "loki" | "partial_retention" | "absent_retention";
+                        /** @description End of the window read (unix seconds): the run's end, or now while it runs, plus one scrape interval; null with logs_window_start. */
+                        logs_window_end: number | null;
+                        /** @description Start of the window read (unix seconds): the run's start less one scrape interval; null when the run never started (Loki's default last hour is read). */
+                        logs_window_start: number | null;
                         /** @description Prometheus retention (e.g. '15d'); only with absent_retention. */
                         series_retention: string | null;
                         /**
@@ -33897,7 +33988,16 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description Parameter validation. */
+            /** @description Execution unknown or of another project. detail: "Execution {id} not found". */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
+                };
+            };
+            /** @description Parameter validation: level other than error, warn, info or debug; limit outside 1-5000. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -34047,15 +34147,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
             /** @description Location: /api/v1/projects/{project_id}/gatling/executions/{execution_id}/report/index.html. No body. */
             307: {
                 headers: {
@@ -34063,7 +34154,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description No archived report. detail: "No Gatling report archived for this execution". */
+            /** @description Execution unknown or of another project (detail "Execution {id} not found"), or no archived report (detail "No Gatling report archived for this execution"). */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -34114,7 +34205,7 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description No such file. detail: "Report asset not found". */
+            /** @description Execution unknown or of another project (detail "Execution {id} not found"), or no such file (detail "Report asset not found"). */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -34229,7 +34320,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Unknown execution (detail "Execution {id} not found"), or no stored row and no samples (detail "No results found for execution {id}"). detail: string. */
+            /** @description Execution unknown or of another project (detail "Execution {id} not found"), or no stored row and no samples (detail "No results found for execution {id}"). detail: string. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -34355,6 +34446,15 @@ export interface operations {
                     };
                 };
             };
+            /** @description Execution unknown or of another project. detail: "Execution {id} not found". */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
+                };
+            };
             /** @description limit outside 1..2000 or non-numeric start_ts/end_ts (HTTPValidationError). */
             422: {
                 headers: {
@@ -34427,7 +34527,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Tempo has no such trace, or it has no span. detail: "Trace not found". */
+            /** @description Execution unknown or of another project (detail "Execution {id} not found"), or Tempo has no such trace, or it has no span (detail "Trace not found"). */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -34479,7 +34579,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        feeders: components["schemas"]["Feeder"][];
+                        feeders: components["schemas"]["FeederSummary"][];
                         total: number;
                     };
                 };
@@ -34650,13 +34750,13 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description HTTPValidationError on body validation. Also `{detail: string}`: secret or never-generated column, producer refused a column, model returned no columns, empty generated cells. */
+            /** @description HTTPValidationError on body validation. A column that must never be generated, also a field of the flow request on the selected_data_profile_ids path or a column the model designed (a login, a secret, a value naming an existing resource: sent in a URL path or id-named, no declared enum): `detail {error: never_fabricated_columns, message, columns}`. Also `{detail: string}`: a secret column by name, producer refused a column, model returned no columns, empty generated cells. */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["NeverFabricatedHttpError"] | components["schemas"]["HttpError"];
                 };
             };
             /** @description Daily feeder LLM budget exhausted. */
@@ -34847,13 +34947,13 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description HTTPValidationError on body validation. Also `{detail: string}`: secret or never-generated column, producer refused a column, empty generated cells. */
+            /** @description HTTPValidationError on body validation. A column that must never be generated (a login, a secret, a value naming an existing resource: sent in a URL path or id-named, no declared enum): `detail {error: never_fabricated_columns, message, columns}`. Also `{detail: string}`: a secret column by name, producer refused a column, empty generated cells. */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["NeverFabricatedHttpError"] | components["schemas"]["HttpError"];
                 };
             };
             /** @description Daily feeder LLM budget exhausted. */
@@ -37666,7 +37766,7 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description Unknown project, or run unknown or already finished (usually lost race with completion). detail: string. */
+            /** @description Unknown project, or run unknown, of another project, or already finished (usually lost race with completion). detail: string. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -38659,13 +38759,13 @@ export interface operations {
                     "application/json": components["schemas"]["HttpError"];
                 };
             };
-            /** @description Request validation (HTTPValidationError), or detail string: slot has columns that must not be fabricated (logins, credentials, secrets); generator refusal; empty cells; repeated unique values; enum/label expansion or semantic synthesis failed. */
+            /** @description Request validation (HTTPValidationError). Columns that must not be fabricated (logins, credentials, secrets; a value naming an existing resource: a column sent in a URL path or an id-named one, with no recorded value or declared enum): `detail {error: never_fabricated_columns, message, columns}`. Otherwise detail string: generator refusal; empty cells; repeated unique values; enum/label expansion or semantic synthesis failed. */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["HttpError"];
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["NeverFabricatedHttpError"] | components["schemas"]["HttpError"];
                 };
             };
             /** @description Daily AI test-data budget exhausted. */
@@ -39700,7 +39800,7 @@ export interface operations {
                     "application/zip": string;
                 };
             };
-            /** @description Unknown run, still running, failed, already downloaded, or served by another process. */
+            /** @description Unknown run, a run of another project, still running, failed, already downloaded, or served by another process. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -44953,7 +45053,9 @@ export interface operations {
                 q: string;
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                Authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -44966,6 +45068,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchResponse"];
+                };
+            };
+            /** @description Missing or invalid credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpError"];
                 };
             };
             /** @description q empty or over 100 chars, or limit out of bounds. */

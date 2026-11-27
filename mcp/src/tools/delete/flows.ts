@@ -9,9 +9,10 @@ import type { ToolContext } from '../../context.js';
 import { ToolError } from '../../errors.js';
 import { OLD_DOCS_CODE, oldDocsUpdate } from '../../flow/oldDocs.js';
 import { LoadcraftApiError } from '../../http/apiError.js';
-import { callOperation } from '../../http/operation.js';
+import { callOperation, settleAll } from '../../http/operation.js';
 import type { DoneOutcome } from '../../outcome.js';
 import { inline } from '../../render/primitives.js';
+import { content } from '../moduleCall.js';
 import {
   renderDeleteQuestion,
   type CardRenewal,
@@ -43,6 +44,7 @@ import {
   tooMany,
   unchecked,
 } from './checks.js';
+import { shownChoice, shownName } from './card.js';
 
 /** The kinds the catalog gives `flows_delete`; only `flow` is deleted by this server so far. */
 export const FLOWS_DELETE_KINDS = ['flow', 'walk_note', 'review'] as const;
@@ -141,7 +143,7 @@ async function resolveFlows(
     });
   }
   const listed = new Map(list.flows.map((flow) => [flow.id, flow]));
-  const byId = await Promise.all(
+  const byId = await settleAll(
     call.ids.map(async (id) => {
       const flow = listed.get(id);
       return flow === undefined ? flowById(ctx, project.id, id) : itemOf(flow);
@@ -152,9 +154,12 @@ async function resolveFlows(
   for (const name of call.names) {
     const matches = list.flows.filter((flow) => same(flow.name, name)).map(itemOf);
     if (matches.length === 0) {
-      const shown = list.flows.slice(0, SHOWN_NAMES).map((flow) => `"${inline(flow.name, 80)}"`);
+      // names from the backend are a third party's text (FIX-74): masked, secrets registered
+      const shown = list.flows
+        .slice(0, SHOWN_NAMES)
+        .map((flow) => `"${content(ctx, flow.name, 80)}"`);
       throw notFound(
-        `No flow is named "${inline(name, 120)}"${shown.length === 0 ? '' : `; flows: ${shown.join(', ')}`}.`,
+        `No flow is named "${content(ctx, name, 120)}"${shown.length === 0 ? '' : `; flows: ${shown.join(', ')}`}.`,
       );
     }
     if (matches.length > 1) ambiguous.push({ name, matches });
@@ -241,7 +246,7 @@ async function refuseBusy(
   dependents: Dependents,
   strict: boolean,
 ): Promise<boolean> {
-  const target = `project "${inline(project.name, 80)}"`;
+  const target = `project "${shownName(ctx, project.name)}"`;
   const operation = liveOperation(ctx, project.id);
   if (operation !== undefined) throw busy(operation, target);
   const runs = await readRuns(ctx, project.id);
@@ -265,7 +270,9 @@ async function issue(
   renewed: CardRenewal | undefined,
 ): Promise<DoneOutcome<DeleteData>> {
   const resolved = await resolveFlows(ctx, project, call);
-  if (resolved.kind === 'choice') return { status: 'done', inert: true, data: resolved.data };
+  if (resolved.kind === 'choice') {
+    return { status: 'done', inert: true, data: shownChoice(ctx, resolved.data) };
+  }
   const { items } = resolved;
   if (items.length > MAX_FLOWS) throw tooMany(MAX_FLOWS, 'flows');
   const dependents = await dependentsOf(ctx, project.id, new Set(items.map((item) => item.id)));
@@ -274,8 +281,9 @@ async function issue(
     tool: 'flows_delete',
     kind: 'flow',
     scope: SCOPE,
-    project,
-    items,
+    // the card shows the names masked, the same on every call, so the frozen card still matches
+    project: { ...project, name: shownName(ctx, project.name) },
+    items: items.map((item) => ({ ...item, name: shownName(ctx, item.name) })),
     stays: dependents.counts,
     ...(testsUnknown ? { testsUnknown } : {}),
   };
@@ -335,7 +343,7 @@ async function confirmDeletion(
     params: { link: ctx.services.links.flows(project.id).url },
   });
   confirmOnce(ctx, token, renderDeleteQuestion(card.facts, ctx.t), refusal);
-  await useCard(ctx, SCOPE, project.id);
+  await useCard(ctx, SCOPE, project.id, token);
   const deletion = await callOperation(
     ctx.services.http,
     'batch_delete_flows_api_v1_projects__project_id__flows_batch_delete_post',

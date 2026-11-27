@@ -30,6 +30,9 @@ import { createWriteChain, type WriteChain } from './writeChain.js';
 
 // ---- handles ----------------------------------------------------------------------------
 
+/** The name of a WebSocket channel, for the code that is generic over the channel of a kind (`src/tools/kit/operation.ts`). */
+export type KindChannel = Channel;
+
 /** Kinds accepted by the `process_wait` tool. */
 export const OPERATION_KINDS = [
   'setup_analysis',
@@ -44,6 +47,10 @@ export const OPERATION_KINDS = [
   'test_run',
   'analysis',
   'account_provision',
+  'drift_check',
+  'test_types_generation',
+  'payload_generation',
+  'dataset_generation',
 ] as const;
 export type OperationKindName = (typeof OPERATION_KINDS)[number];
 
@@ -158,12 +165,31 @@ export interface OperationSnapshot {
 export interface OperationChannel<S, V, C extends Channel> {
   readonly name: C;
   params(id: string, saved: V): ChannelParams<C>;
+  /**
+   * For a channel that sends nothing on connect and replays nothing (the backend says "connect first"): the
+   * address of the channel from the id alone. `startOrJoin` then chooses the id first (`StartOrJoin.newId`),
+   * connects, and only then starts the work, so no frame sent right after the start is lost; the same
+   * connection is the one the wait follows. Without it the channel is opened once the work has started.
+   */
+  connectFirst?(id: string): ChannelParams<C>;
+  /**
+   * The message that asks the backend to stop (`process_cancel`). A kind that has it and no cancel method of its own is
+   * stopped by sending it on a fresh connection and waiting for the answer frame; the stop counts as accepted
+   * (`'stopping'`): a backend that cannot interrupt the work it already does still ends the operation itself.
+   */
+  readonly cancelMessage?: ClientMessage;
   // What the connection presents (token, Origin) follows the frame contract of the channel.
   /**
    * Whether this operation follows the channel at all; default: it does. A kind whose operation
    * has a part without a channel says which saved data has one.
    */
   enabled?(saved: V): boolean;
+  /**
+   * Takes a frame as it arrives, before `reduce`: where the call's context is at hand, so a text of a
+   * third party in it (a name, a label) is masked with the secrets of the call registered (FIX-77).
+   * The answer of the call (`respond`) still sees the frame as it came.
+   */
+  accept?(ctx: OperationContext, frame: ParsedFrame<C>): ParsedFrame<C>;
   /** Folds one frame into the state; keep-alive and unknown frames never reach it. */
   reduce(state: S, frame: ParsedFrame<C>): S;
   /**
@@ -271,6 +297,8 @@ export interface AwaitOptions<V, S = unknown, C extends Channel = Channel> {
    * cannot send it.
    */
   readonly respond?: (state: S, frame: ParsedFrame<C>) => ClientMessage | undefined;
+  /** The connection `startOrJoin` opened before the start (`connectFirst`); the wait follows it instead of opening one. */
+  readonly connected?: ChannelHandle<C>;
 }
 
 /** A kind with its type parameters bound, ready to be awaited by handle (the `process_wait` tool). */
@@ -291,9 +319,55 @@ export interface AnyOperationKind {
   readonly cancel?: (ctx: OperationContext, id: string) => Promise<boolean | 'stopping'>;
 }
 
+/** How long the answer to a stop message is awaited before the stop counts as sent. */
+const STOP_ANSWER_MS = 2000;
+
+/** `cancelMessage` of a channel: sent on a fresh connection, the first frame back is the answer. */
+async function stopOnChannel<S, V, C extends Channel>(
+  ctx: OperationContext,
+  channel: OperationChannel<S, V, C>,
+  message: ClientMessage,
+  id: string,
+  saved: V,
+): Promise<boolean | 'stopping'> {
+  const timer = new AbortController();
+  let handle: ChannelHandle<C> | undefined;
+  try {
+    handle = await openChannel(
+      { config: ctx.config, log: ctx.log, signal: ctx.signal },
+      { channel: channel.name, params: channel.params(id, saved), clock: ctx.clock },
+    );
+    const open = handle;
+    handle.send(message);
+    ctx.clock.sleep(STOP_ANSWER_MS, timer.signal).then(
+      () => open.close(),
+      () => undefined,
+    );
+    for await (const frame of handle.frames) {
+      ctx.log.debug('stop answered', { channel: channel.name, type: frame.type });
+      break;
+    }
+    return 'stopping';
+  } catch (error) {
+    if (ctx.signal.aborted) throw abortError(ctx.signal);
+    if (error instanceof ChannelLost || error instanceof ChannelUnavailable) return false;
+    throw error;
+  } finally {
+    timer.abort();
+    handle?.close();
+  }
+}
+
 export function defineOperationKind<S, D, V, C extends Channel = Channel>(
   spec: OperationKindSpec<S, D, V, C>,
 ): OperationKind<S, D, V, C> & AnyOperationKind {
+  const cancelMessage = spec.channel?.cancelMessage;
+  const cancelling =
+    spec.cancel?.bind(spec) ??
+    (spec.channel !== undefined && cancelMessage !== undefined
+      ? (ctx: OperationContext, id: string, saved: V) =>
+          stopOnChannel(ctx, spec.channel as OperationChannel<S, V, C>, cancelMessage, id, saved)
+      : undefined);
   const kind: OperationKind<S, D, V, C> & AnyOperationKind = {
     kind: spec.kind,
     spec,
@@ -337,13 +411,13 @@ export function defineOperationKind<S, D, V, C extends Channel = Channel>(
         ...(shown.selfCheck === undefined ? {} : { selfCheck: shown.selfCheck }),
       };
     },
-    ...(spec.cancel === undefined
+    ...(cancelling === undefined
       ? {}
       : {
           cancel: async (ctx, id) => {
             const { saved } = resolveSaved(ctx, spec.saved, encodeHandle(spec.kind, id), undefined);
             await spec.secrets?.(ctx, saved);
-            return spec.cancel?.(ctx, id, saved) ?? false;
+            return cancelling(ctx, id, saved);
           },
         }),
   };
@@ -526,6 +600,8 @@ interface Follow<S, V, C extends Channel> {
   /** Every new state, after its frame was folded in and answered. */
   readonly seen: (state: S) => void;
   readonly respond?: (state: S, frame: ParsedFrame<C>) => ClientMessage | undefined;
+  /** An open connection to follow (see `AwaitOptions.connected`). */
+  readonly connected?: ChannelHandle<C>;
 }
 
 async function followChannel<S, D, V, C extends Channel>(
@@ -551,19 +627,26 @@ async function followChannel<S, D, V, C extends Channel>(
 
   let handle: ChannelHandle<C> | undefined;
   try {
-    handle = await openChannel(
-      { config: ctx.config, log: ctx.log, signal: ctx.signal },
-      {
-        channel: channel.name,
-        params: channel.params(id, follow.saved()),
-        signal: limit.signal,
-        reconnect: channel.reconnect ?? DEFAULT_RECONNECT,
-        clock: ctx.clock,
-        ...(channel.silenceMs === undefined ? {} : { silenceMs: channel.silenceMs }),
-      },
-    );
+    if (follow.connected === undefined) {
+      handle = await openChannel(
+        { config: ctx.config, log: ctx.log, signal: ctx.signal },
+        {
+          channel: channel.name,
+          params: channel.params(id, follow.saved()),
+          signal: limit.signal,
+          reconnect: channel.reconnect ?? DEFAULT_RECONNECT,
+          clock: ctx.clock,
+          ...(channel.silenceMs === undefined ? {} : { silenceMs: channel.silenceMs }),
+        },
+      );
+    } else {
+      // Opened before the start: the time limit of this wait ends it here, as it would end one opened above.
+      const opened = follow.connected;
+      handle = opened;
+      limit.signal.addEventListener('abort', () => opened.close(), { once: true });
+    }
     for await (const frame of handle.frames) {
-      state = channel.reduce(state, frame);
+      state = channel.reduce(state, channel.accept?.(ctx, frame) ?? frame);
       const answer = follow.respond?.(state, frame);
       if (answer !== undefined) {
         try {
@@ -585,6 +668,7 @@ async function followChannel<S, D, V, C extends Channel>(
       if (spec.needsUser?.(ctx, id, state, follow.saved()) !== undefined)
         return { kind: 'needs_user', state };
     }
+    if (timedOut) return { kind: 'timeout', state };
     // The server closed the channel normally before a final state: the result is read by REST.
     ctx.log.info('channel ended before the operation did', { channel: channel.name });
     return { kind: 'fallback', state };
@@ -765,6 +849,7 @@ async function followOperation<S, D, V, C extends Channel>(
       saved: () => saved,
       seen,
       ...(opts.respond === undefined ? {} : { respond: opts.respond }),
+      ...(opts.connected === undefined ? {} : { connected: opts.connected }),
     });
     state = result.state;
     switch (result.kind) {
@@ -816,8 +901,16 @@ export interface StartOrJoin<V> {
   readonly matches: (saved: V) => boolean;
   /** An operation older than this is not joined; default 30 minutes. */
   readonly maxAgeMs?: number;
-  /** Starts the work in the backend; called only when no matching operation is under way. */
-  readonly start: () => Promise<{ readonly id: string; readonly saved: V }>;
+  /**
+   * Chooses the id of a new operation before it starts: needed by a kind whose channel is joined first
+   * (`OperationChannel.connectFirst`), which has its own session id in the request that starts the work.
+   */
+  readonly newId?: () => string;
+  /**
+   * Starts the work in the backend; called only when no matching operation is under way. Gets the id
+   * `newId` chose (and must return it), or nothing.
+   */
+  readonly start: (chosen?: string) => Promise<{ readonly id: string; readonly saved: V }>;
 }
 
 /** Longest an operation recorded in the workspace is still taken for one that is under way. */
@@ -874,6 +967,42 @@ export async function startOrJoin<S, D, V, C extends Channel>(
       // The backend forgot it (a restart): the work is started again below.
       if (!(error instanceof ToolError) || error.code !== 'operation_lost') throw error;
     }
+  }
+  const channel = kind.spec.channel;
+  if (channel?.connectFirst !== undefined && plan.newId !== undefined) {
+    const chosen = plan.newId();
+    // A channel that cannot be reached before the start is no reason not to start: the wait then opens it
+    // after, and the result comes through REST if the channel stays down.
+    const connected = await openChannel(
+      { config: ctx.config, log: ctx.log, signal: ctx.signal },
+      {
+        channel: channel.name,
+        params: channel.connectFirst(chosen),
+        reconnect: channel.reconnect ?? DEFAULT_RECONNECT,
+        clock: ctx.clock,
+        ...(channel.silenceMs === undefined ? {} : { silenceMs: channel.silenceMs }),
+      },
+    ).catch((error: unknown): undefined => {
+      if (ctx.signal.aborted) throw abortError(ctx.signal);
+      if (!(error instanceof ChannelLost || error instanceof ChannelUnavailable)) throw error;
+      ctx.log.info('channel not reached before the start', {
+        channel: channel.name,
+        error,
+      });
+      return undefined;
+    });
+    let started: { readonly id: string; readonly saved: V };
+    try {
+      started = await plan.start(chosen);
+    } catch (error) {
+      connected?.close();
+      throw error;
+    }
+    return awaitOperation(ctx, kind, started.id, {
+      maxWaitS: plan.maxWaitS,
+      saved: started.saved,
+      ...(connected === undefined ? {} : { connected }),
+    });
   }
   const { id, saved } = await plan.start();
   return awaitOperation(ctx, kind, id, { maxWaitS: plan.maxWaitS, saved });

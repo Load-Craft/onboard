@@ -3,8 +3,7 @@
 // clock: its frames go out on the `scenario` channel (which hands the last terminal frame to the
 // first socket opened after the end, and nothing else), and its scenario is stored when the clock
 // reaches the end, whether anybody listens or not. A failed run stores nothing. Shapes follow
-// loadcraft @ d93e08d80 `api/routes/gatling.py:8762-8781` (start), `:8837-9024` (frames) and
-// `api/websocket/gatling_scenario_ws.py:103-172`.
+// the backend's routes for the start and the frames and its scenario socket.
 //
 // A generated scenario is the world's scenario of that flow as the `scenario` stage has it (slots,
 // self-check, its run), with the requested class mix and the time it ended. For a flow the world
@@ -111,7 +110,7 @@ export const MINUTES_PER_FLOW: GenerationScript = {
     { afterMs: 120_000, progress: 75, step: 'validate_compilation', label: 'Compiling' },
   ],
 };
-/** Errors of a run that cannot start (unknown flow, bad mix) come this soon (`gatling.py:8837`). */
+/** Errors of a run that cannot start (unknown flow, bad mix) come this soon. */
 const EARLY_ERROR_MS = 500;
 const HAPPY_PATH = 'happy_path';
 
@@ -155,7 +154,7 @@ function requireProject(store: Store, id: string): void {
   store.collection(SKLEP_COLLECTIONS.projects).require(id, `Project not found: ${id}`);
 }
 
-/** Weights normalised to 100, as `resolve_class_mix` stores them (`feeders/class_mix.py:122-190`). */
+/** Weights normalised to 100, as `resolve_class_mix` stores them. */
 function resolvedMix(mix: Readonly<Record<string, number>> | null): Record<string, number> {
   if (mix === null || Object.keys(mix).every((key) => key === HAPPY_PATH)) {
     return { [HAPPY_PATH]: 100 };
@@ -322,7 +321,7 @@ function copySelfCheckRuns(store: Store, scenario: SklepScenario): void {
 }
 
 /**
- * `GET …/test-types[?is_enabled=]` (`api/routes/project_test_types.py`), from the world's
+ * `GET …/test-types[?is_enabled=]`, from the world's
  * collection. Registration is idempotent per fake.
  */
 export function registerTestTypeRoutes(fake: Fake): void {

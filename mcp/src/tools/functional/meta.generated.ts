@@ -110,11 +110,55 @@ export const FUNCTIONAL_GET_CATALOG = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: ['test_types', 'validators', 'assertion_types'],
+      from_state: null,
+      required: true,
+      doc: 'Which catalog: test_types, validators or assertion_types.',
+    },
+    {
+      name: 'entry_id',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One entry: its id (assertion_types also by name); without it, the list.',
+    },
+    {
+      name: 'category',
+      type: 'string',
+      min_length: 1,
+      max_length: 80,
+      from_state: null,
+      doc: 'Only entries of this category.',
+    },
+    {
+      name: 'is_active',
+      type: 'boolean',
+      from_state: null,
+      doc: 'Only active (true) or inactive (false) entries (test_types, validators).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many entries of the list to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_save_catalog`: Save a custom catalog entry (base test type, base validator or assertion type; no id: create). The catalog is shared by all projects. */
@@ -216,7 +260,11 @@ export const FUNCTIONAL_SAVE_CATALOG = {
       path: '/api/v1/base-validators/{validator_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_base_test_type_api_v1_base_test_types__test_type_id__get',
+    'get_base_validator_api_v1_base_validators__validator_id__get',
+    'get_assertion_type_api_v1_assertion_types__type_id__get',
+  ],
   channels: [],
   state_reads: [],
   state_writes: [],
@@ -225,11 +273,44 @@ export const FUNCTIONAL_SAVE_CATALOG = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: ['catalog_test_type', 'catalog_validator', 'catalog_assertion_type'],
+      required: true,
+      from_state: null,
+      doc: 'Which shared catalog: base test type, base validator or assertion type.',
+    },
+    {
+      name: 'entry_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The entry to change; without it, a new one is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 255,
+      from_state: null,
+      doc: "The entry's name; required for a new one.",
+    },
+    {
+      name: 'fields',
+      type: 'object',
+      from_state: null,
+      doc: 'Fields to set: the create or update body of that catalog.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_import_catalog`: Import built-in catalog entries (base test types, validators, assertion types); built-in validators missing from the catalog are deleted. */
@@ -316,11 +397,24 @@ export const FUNCTIONAL_IMPORT_CATALOG = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'parts',
+      type: 'string[]',
+      enum: ['test_types', 'validators', 'assertion_types'],
+      max_items: 3,
+      from_state: null,
+      doc: 'Which built-in parts to import; default: all three.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_test_types`: Get the project's test types: list, one, or expected-outcome candidates. */
@@ -388,11 +482,38 @@ export const FUNCTIONAL_GET_TEST_TYPES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'test_type',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One test type (id or name); without it, the list.',
+    },
+    {
+      name: 'view',
+      type: 'enum',
+      enum: ['list', 'expected_outcomes'],
+      from_state: null,
+      doc: 'list (default) or the expected outcomes.',
+      default: 'list',
+    },
+    {
+      name: 'is_enabled',
+      type: 'boolean',
+      from_state: null,
+      doc: 'Only enabled (true) or disabled (false) ones.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_save_test_types`: Save test types in the project: add custom ones, catalog ones in bulk or accepted AI suggestions, or update one. */
@@ -490,7 +611,11 @@ export const FUNCTIONAL_SAVE_TEST_TYPES = {
       path: '/api/v1/projects/{project_id}/test-types/{test_type_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'list_project_test_types_api_v1_projects__project_id__test_types_get',
+    'get_test_type_api_v1_projects__project_id__test_types__test_type_id__get',
+    'list_base_test_types_api_v1_base_test_types_get',
+  ],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: ['steps.functional.test_types'],
@@ -499,11 +624,41 @@ export const FUNCTIONAL_SAVE_TEST_TYPES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'source',
+      type: 'enum',
+      enum: ['custom', 'catalog', 'suggestions'],
+      from_state: null,
+      doc: 'custom: new items; catalog: catalog entries to add; suggestions: accepted AI items.',
+    },
+    {
+      name: 'items',
+      type: 'object',
+      from_state: null,
+      doc: 'The items to add (key: name or id; value: its fields, {} for catalog ids); 1-50.',
+    },
+    {
+      name: 'test_type_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'Change this test type of the project instead (not with source or items).',
+    },
+    {
+      name: 'fields',
+      type: 'object',
+      from_state: null,
+      doc: 'With test_type_id: the fields to set.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_suggest_test_types`: Suggest custom test types from the project's API docs (LLM); nothing is saved until accepted. */
@@ -591,11 +746,30 @@ export const FUNCTIONAL_SUGGEST_TEST_TYPES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The API docs to read (project_get_docs lists them).',
+    },
+    {
+      name: 'focus_areas',
+      type: 'string',
+      max_length: 300,
+      from_state: null,
+      doc: 'Comma-separated areas to prioritize (e.g. security, limits); default: none.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_generate_test_types`: Generate all missing base test types for the project; the LLM fills their expected outcomes. */
@@ -694,6 +868,8 @@ export const FUNCTIONAL_GENERATE_TEST_TYPES = {
   ],
   also_calls: [
     'get_suggest_test_types_result_api_v1_projects__project_id__test_types_suggest__run_id__get',
+    'list_base_test_types_api_v1_base_test_types_get',
+    'list_project_test_types_api_v1_projects__project_id__test_types_get',
   ],
   channels: ['testTypes'],
   state_reads: ['ids.project_id'],
@@ -703,11 +879,23 @@ export const FUNCTIONAL_GENERATE_TEST_TYPES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'include_categories',
+      type: 'string',
+      max_length: 300,
+      from_state: null,
+      doc: 'Comma-separated categories to generate (e.g. functional, security); default: all.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_validators`: Get the project's validators: list, one, applicable catalog validators, or Gatling enforcement levels. */
@@ -782,11 +970,38 @@ export const FUNCTIONAL_GET_VALIDATORS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'validator',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One validator (id or name); without it, the list.',
+    },
+    {
+      name: 'view',
+      type: 'enum',
+      enum: ['list', 'applicable', 'gatling_enforcement'],
+      from_state: null,
+      doc: 'list (default), the applicable ones, or how load runs enforce them.',
+      default: 'list',
+    },
+    {
+      name: 'is_enabled',
+      type: 'boolean',
+      from_state: null,
+      doc: 'Only enabled (true) or disabled (false) ones.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_save_validators`: Save validators in the project: add custom ones, catalog ones in bulk or accepted proposals, or update one. */
@@ -879,7 +1094,11 @@ export const FUNCTIONAL_SAVE_VALIDATORS = {
       path: '/api/v1/projects/{project_id}/validators/{validator_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'list_project_validators_api_v1_projects__project_id__validators_get',
+    'get_validator_api_v1_projects__project_id__validators__validator_id__get',
+    'list_base_validators_api_v1_base_validators_get',
+  ],
   channels: [],
   state_reads: ['ids.project_id'],
   state_writes: ['steps.functional.validators'],
@@ -888,11 +1107,41 @@ export const FUNCTIONAL_SAVE_VALIDATORS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'source',
+      type: 'enum',
+      enum: ['custom', 'catalog', 'proposals'],
+      from_state: null,
+      doc: 'custom: new items; catalog: catalog entries to add; proposals: accepted AI items.',
+    },
+    {
+      name: 'items',
+      type: 'object',
+      from_state: null,
+      doc: 'The items to add (key: name or id; value: its fields, {} for catalog ids); 1-50.',
+    },
+    {
+      name: 'validator_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'Change this validator of the project instead (not with source or items).',
+    },
+    {
+      name: 'fields',
+      type: 'object',
+      from_state: null,
+      doc: 'With validator_id: the fields to set.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_suggest_validators`: Suggest project-specific validators from the API docs and recorded runs (LLM); nothing is saved. */
@@ -968,11 +1217,23 @@ export const FUNCTIONAL_SUGGEST_VALIDATORS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The API docs to read (project_get_docs lists them).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_analytics`: Get validator quality over N days: dashboard, flaky validators, failure patterns, accuracy, trend, threshold suggestion (view). */
@@ -1061,11 +1322,50 @@ export const FUNCTIONAL_GET_ANALYTICS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'view',
+      type: 'enum',
+      enum: ['dashboard', 'flaky', 'failure_patterns', 'accuracy', 'trend', 'threshold_suggestion'],
+      from_state: null,
+      doc: 'Which analysis; default: dashboard.',
+      default: 'dashboard',
+    },
+    {
+      name: 'days',
+      type: 'integer',
+      min: 1,
+      max: 365,
+      default: 30,
+      from_state: null,
+      doc: 'How many past days (1-365).',
+    },
+    {
+      name: 'validator',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'The validator (id or name); needed for accuracy, trend and threshold_suggestion.',
+    },
+    {
+      name: 'threshold_pct',
+      type: 'integer',
+      min: 0,
+      max: 100,
+      default: 20,
+      from_state: null,
+      doc: 'With view flaky: the flakiness threshold in percent.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_flows`: Get functional test flows (block graphs, per docs version): list, one, or version history. */
@@ -1133,11 +1433,47 @@ export const FUNCTIONAL_GET_FLOWS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One functional flow (id); without it, the list.',
+    },
+    {
+      name: 'view',
+      type: 'enum',
+      enum: ['list', 'versions'],
+      from_state: null,
+      doc: 'list (default) or the versions of one flow.',
+      default: 'list',
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: 'ids.docs_id',
+      doc: 'Only flows of this documentation version; default: the one of this workspace.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many flows to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_save_flow`: Save a functional test flow (blocks and edges; no id: create), or snapshot it as a version. */
@@ -1176,6 +1512,11 @@ export const FUNCTIONAL_SAVE_FLOW = {
         for: 'update',
       },
       {
+        tool: 'functional_save_flow',
+        how: 'the previous values',
+        for: 'update',
+      },
+      {
         tool: 'functional_delete',
         how: 'kind=flow, for a new one',
         for: 'create',
@@ -1207,7 +1548,10 @@ export const FUNCTIONAL_SAVE_FLOW = {
       path: '/api/v1/test-flows/{flow_id}/versions',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_test_flow_api_v1_test_flows__flow_id__get',
+    'list_versions_api_v1_test_flows__flow_id__versions_get',
+  ],
   channels: [],
   state_reads: ['ids.docs_id'],
   state_writes: [],
@@ -1216,11 +1560,58 @@ export const FUNCTIONAL_SAVE_FLOW = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The flow to change; without it, a new flow is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 255,
+      from_state: null,
+      doc: "The flow's name; required for a new flow.",
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: 'ids.docs_id',
+      doc: 'The API docs of a new flow; default: the active docs.',
+    },
+    {
+      name: 'fields',
+      type: 'object',
+      from_state: null,
+      doc: 'Fields to set: blocks, edges, entry_block_id, description, tags, variables, timeout_ms, retry_count, retry_delay_ms, is_active.',
+    },
+    {
+      name: 'version',
+      type: 'string',
+      min_length: 1,
+      max_length: 60,
+      from_state: null,
+      doc: 'Save a named snapshot of the current blocks and edges instead (not with name or fields).',
+    },
+    {
+      name: 'reason',
+      type: 'string',
+      min_length: 1,
+      max_length: 200,
+      from_state: null,
+      doc: 'With version: why the snapshot is taken.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_restore_flow`: Restore a functional flow to a saved version; the current state is snapshotted first. */
@@ -1284,11 +1675,32 @@ export const FUNCTIONAL_RESTORE_FLOW = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_id',
+      type: 'uuid',
+      from_state: null,
+      required: true,
+      doc: 'The functional flow.',
+    },
+    {
+      name: 'version',
+      type: 'string',
+      min_length: 1,
+      max_length: 60,
+      from_state: null,
+      required: true,
+      doc: 'The label of the stored version to restore.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_templates`: Get functional test templates: list (by docs version or tags) or one. */
@@ -1350,11 +1762,47 @@ export const FUNCTIONAL_GET_TEMPLATES = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'template',
+      type: 'string',
+      min_length: 1,
+      max_length: 120,
+      from_state: null,
+      doc: 'One template (id or name); without it, the list.',
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: 'ids.docs_id',
+      doc: 'Only templates of this documentation version; default: the one of this workspace.',
+    },
+    {
+      name: 'tags',
+      type: 'string',
+      min_length: 1,
+      max_length: 500,
+      from_state: null,
+      doc: 'Only templates with these tags, comma-separated (at most 10).',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many templates to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_save_template`: Save a functional test template (no id: create). */
@@ -1418,7 +1866,7 @@ export const FUNCTIONAL_SAVE_TEMPLATE = {
       path: '/api/v1/test-templates/{template_id}',
     },
   ],
-  also_calls: [],
+  also_calls: ['get_test_template_api_v1_test_templates__template_id__get'],
   channels: [],
   state_reads: ['ids.docs_id'],
   state_writes: [],
@@ -1427,14 +1875,45 @@ export const FUNCTIONAL_SAVE_TEMPLATE = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'template_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The template to change; without it, a new template is created.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      min_length: 1,
+      max_length: 255,
+      from_state: null,
+      doc: "The template's name; required for a new one.",
+    },
+    {
+      name: 'docs_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'The API docs the template belongs to, if any.',
+    },
+    {
+      name: 'fields',
+      type: 'object',
+      from_state: null,
+      doc: 'Fields to set: api_description and flow_definition (required for a new one), assertions, endpoint_ids, tags, description, is_active.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
-/** `functional_delete`: Delete functional items (kind + ids): flow, template, test_type, validator, run, or a custom catalog entry. */
+/** `functional_delete`: Delete one functional flow, template, test type, validator, run or catalog entry (kind + item_id). */
 export const FUNCTIONAL_DELETE = {
   name: 'functional_delete',
   module: 'functional',
@@ -1463,8 +1942,8 @@ export const FUNCTIONAL_DELETE = {
           source: 'args',
         },
         {
-          label: 'Items',
-          from: 'ids (names resolved by the registry)',
+          label: 'Item',
+          from: 'item_id (name resolved by the registry)',
           source: 'labels',
         },
       ],
@@ -1497,7 +1976,7 @@ export const FUNCTIONAL_DELETE = {
   },
   route: null,
   description:
-    'Delete functional items (kind + ids): flow, template, test_type, validator, run, or a custom catalog entry.',
+    'Delete one functional flow, template, test type, validator, run or catalog entry (kind + item_id).',
   operations: [
     {
       operationId: 'delete_test_flow_api_v1_test_flows__flow_id__delete',
@@ -1540,7 +2019,15 @@ export const FUNCTIONAL_DELETE = {
       path: '/api/v1/base-validators/{validator_id}',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_test_flow_api_v1_test_flows__flow_id__get',
+    'get_test_template_api_v1_test_templates__template_id__get',
+    'get_test_type_api_v1_projects__project_id__test_types__test_type_id__get',
+    'get_validator_api_v1_projects__project_id__validators__validator_id__get',
+    'get_base_test_type_api_v1_base_test_types__test_type_id__get',
+    'get_base_validator_api_v1_base_validators__validator_id__get',
+    'get_assertion_type_api_v1_assertion_types__type_id__get',
+  ],
   channels: [],
   state_reads: ['ids.project_id', 'ids.functional_run_id'],
   state_writes: ['ids.functional_run_id'],
@@ -1549,11 +2036,40 @@ export const FUNCTIONAL_DELETE = {
   requires_capability: null,
   requires_user_interaction: true,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'kind',
+      type: 'enum',
+      enum: [
+        'flow',
+        'template',
+        'test_type',
+        'validator',
+        'run',
+        'catalog_test_type',
+        'catalog_validator',
+        'catalog_assertion_type',
+      ],
+      required: true,
+      from_state: null,
+      doc: 'What to delete.',
+    },
+    {
+      name: 'item_id',
+      type: 'uuid',
+      required: true,
+      from_state: null,
+      doc: 'The item to delete (one per call).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_start_run`: Start a functional run of flows with chosen test types on an environment (or rerun with retry_of); returns a handle on timeout. */
@@ -1688,13 +2204,17 @@ export const FUNCTIONAL_START_RUN = {
   next_steps: [],
   pending_operations: null,
   requires_capability: null,
-  requires_user_interaction: false,
+  requires_user_interaction: true,
   views: null,
   arguments: null,
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_runs`: Get functional runs: list (filter by status or type), by run template, or one with its status. */
@@ -1763,11 +2283,68 @@ export const FUNCTIONAL_GET_RUNS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'run_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'One functional run; without it, the list.',
+    },
+    {
+      name: 'view',
+      type: 'enum',
+      enum: ['list', 'one', 'by_template'],
+      from_state: null,
+      doc: 'list (default), one run, or the runs of a template.',
+      default: 'list',
+    },
+    {
+      name: 'template',
+      type: 'uuid',
+      from_state: null,
+      doc: 'With view by_template: the template.',
+    },
+    {
+      name: 'status',
+      type: 'enum',
+      enum: ['pending', 'running', 'completed', 'failed', 'cancelled'],
+      from_state: null,
+      doc: 'Only runs in this status.',
+    },
+    {
+      name: 'type',
+      type: 'enum',
+      enum: ['adhoc', 'template'],
+      from_state: null,
+      doc: 'Only ad hoc or template runs.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 100,
+      default: 20,
+      from_state: null,
+      doc: 'How many runs to return (1-100).',
+    },
+    {
+      name: 'offset',
+      type: 'integer',
+      min: 0,
+      max: 100000,
+      default: 0,
+      from_state: null,
+      doc: 'The first run of the list.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_get_results`: Get the results of a functional run: summary with flow results, one flow result, or the captured HTTP log (secrets masked). */
@@ -1844,11 +2421,53 @@ export const FUNCTIONAL_GET_RESULTS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'run_id',
+      type: 'uuid',
+      from_state: null,
+      required: true,
+      doc: 'The functional run.',
+    },
+    {
+      name: 'view',
+      type: 'enum',
+      enum: ['summary', 'flows', 'one', 'http_log'],
+      from_state: null,
+      doc: 'summary (default), per flow, one result, or the HTTP log.',
+      default: 'summary',
+    },
+    {
+      name: 'result_id',
+      type: 'uuid',
+      from_state: null,
+      doc: 'With view one: the result.',
+    },
+    {
+      name: 'log_type',
+      type: 'enum',
+      enum: ['request', 'response', 'log'],
+      from_state: null,
+      doc: 'With view http_log: which part.',
+    },
+    {
+      name: 'limit',
+      type: 'integer',
+      min: 1,
+      max: 200,
+      default: 50,
+      from_state: null,
+      doc: 'How many entries to return (1-200).',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_compare_runs`: Compare two functional runs block by block: status, response shape, timing. */
@@ -1906,11 +2525,30 @@ export const FUNCTIONAL_COMPARE_RUNS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'run_id',
+      type: 'uuid',
+      from_state: null,
+      required: true,
+      doc: 'The functional run.',
+    },
+    {
+      name: 'other',
+      type: 'uuid',
+      from_state: null,
+      required: true,
+      doc: 'The run to compare with.',
+    },
+  ],
   shows_content: null,
   install_allow: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;
 
 /** `functional_generate_payloads`: Generate request payloads for flows and test types; saves the ZIP to a local file and returns its path. */
@@ -1999,7 +2637,10 @@ export const FUNCTIONAL_GENERATE_PAYLOADS = {
       path: '/api/v1/projects/{project_id}/generate-payloads/{run_id}/download',
     },
   ],
-  also_calls: [],
+  also_calls: [
+    'get_test_flow_api_v1_test_flows__flow_id__get',
+    'get_test_type_api_v1_projects__project_id__test_types__test_type_id__get',
+  ],
   channels: ['payloadGen'],
   state_reads: [
     'ids.project_id',
@@ -2012,9 +2653,36 @@ export const FUNCTIONAL_GENERATE_PAYLOADS = {
   requires_capability: null,
   requires_user_interaction: false,
   views: null,
-  arguments: null,
+  arguments: [
+    {
+      name: 'flow_ids',
+      type: 'object',
+      required: true,
+      from_state: null,
+      doc: 'The flows to generate for (key: flow id; value: {}); 1-50.',
+    },
+    {
+      name: 'test_types',
+      type: 'object',
+      required: true,
+      from_state: null,
+      doc: 'The test types to use (key: test type id; value: cases per flow, 1-20); 1-50.',
+    },
+    {
+      name: 'file',
+      type: 'string',
+      min_length: 1,
+      max_length: 260,
+      from_state: null,
+      doc: 'Where to save the ZIP: a relative path in the project directory; default under loadcraft/payloads/. Never overwrites.',
+    },
+  ],
   shows_content: null,
   install_allow: false,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    override_reason: null,
+  },
   known_debt: null,
-  annotations: null,
 } as const satisfies ToolMeta;

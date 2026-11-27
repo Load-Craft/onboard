@@ -4,6 +4,7 @@
 // it without knowing who registered it first.
 
 import { FakeHttpError, type Fake, type Job, type Store } from '../server.js';
+import { requireRun } from './executionOwner.js';
 import {
   SKLEP_COLLECTIONS,
   type SklepAnalysisDocument,
@@ -27,7 +28,7 @@ export interface AnalysisRunScript {
   }[];
   /** The document is stored and the `complete` frame sent this long after the start. */
   readonly completeAfterMs?: number;
-  /** The run fails instead: only an `error` frame, nothing is stored (`gatling.py:13129-13139`). */
+  /** The run fails instead: only an `error` frame, nothing is stored. */
   readonly failure?: {
     readonly afterMs: number;
     readonly error: string;
@@ -87,7 +88,7 @@ function settle(fake: Fake): void {
 
 /**
  * `GET …/gatling/executions/{id}/analysis`: the newest stored document; 404 `No analysis has been
- * generated for this execution yet.` while there is none (`api/routes/gatling.py:13207-13237`).
+ * generated for this execution yet.` while there is none.
  */
 export function registerAnalysisReadRoute(fake: Fake): void {
   if (registered.has(fake)) return;
@@ -119,7 +120,7 @@ export function registerAnalysisReadRoute(fake: Fake): void {
 
 /**
  * `POST …/gatling/executions/{id}/analyze-async[?force=true]`: a stored analysis and no `force`
- * answers `{cached: true, …}` (`gatling.py:13188-13195`); otherwise every call starts a NEW run —
+ * answers `{cached: true, …}`; otherwise every call starts a NEW run —
  * the backend does not deduplicate — and answers `{cached: false, run_id, status: 'started'}`.
  * The run is a fake job: it sends its frames on the `analysis` channel and stores its document
  * when the test clock reaches the end, whether or not anybody listens. The script is that of the
@@ -213,7 +214,7 @@ export function registerAnalysisStartRoute(fake: Fake, script: AnalysisRunScript
 
 /**
  * `GET …/gatling/executions/{id}/errors`: the error groups of the stored result
- * (`gatling_results.py:1047-1091`), the counts the diagnosis shows.
+ *, the counts the diagnosis shows.
  */
 export function registerErrorGroupsRoute(fake: Fake): void {
   if (errorsRegistered.has(fake)) return;
@@ -222,6 +223,7 @@ export function registerErrorGroupsRoute(fake: Fake): void {
     'GET',
     '/api/v1/projects/{project_id}/gatling/executions/{execution_id}/errors',
     (req, store) => {
+      requireRun(store, req.params.execution_id, req.params.project_id);
       const result = store
         .collection<SklepExecutionResult>(SKLEP_COLLECTIONS.results)
         .require(req.params.execution_id, 'Result not found');

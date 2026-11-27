@@ -83,7 +83,7 @@ const started = reads<
 
 /**
  * The backend's default class name: sent as is, it makes the backend derive the class name from
- * the flow name and add a number on a clash (`api/routes/gatling.py:8606-8617` @ d93e08d80).
+ * the flow name and add a number on a clash.
  */
 const DERIVED_CLASS_NAME = 'GeneratedSimulation';
 

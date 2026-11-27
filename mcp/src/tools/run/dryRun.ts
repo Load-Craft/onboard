@@ -12,6 +12,11 @@ import type { DryRunBusy, DryRunData, DryRunSlot } from '../../render/views/run.
 import { createResolver } from '../../resolve/handles.js';
 import { checkData, clampToEnvironment, labelOf, liveRunsOn, type StartArgs } from './start.js';
 import { asProfile } from './saved.js';
+import { settleAll } from '../../http/operation.js';
+import { content } from '../moduleCall.js';
+
+/** A name from the backend, as a view shows it. */
+const NAME_LIMIT = 120;
 
 /** The slot with the least rows to spare among those that count rows: its numbers stand for the data. */
 function tightest(slots: readonly DryRunSlot[]): { needed: number; available: number } | null {
@@ -32,7 +37,7 @@ export async function dryRunStart(
   await getCompat(ctx);
   const resolver = createResolver(ctx);
   const project = await resolver.project(args.project);
-  const [target, environmentHandle] = await Promise.all([
+  const [target, environmentHandle] = await settleAll([
     resolver.runScenarioTarget(project.id, args.scenario),
     resolver.environment(project.id, args.environment),
   ]);
@@ -64,14 +69,23 @@ export async function dryRunStart(
     need: slot.need,
     status: slot.status,
     blocking: slot.blocking,
+    message: slot.message ?? null,
+    identity_kind: slot.identityKind ?? null,
+    ...(slot.regenerate == null
+      ? {}
+      : {
+          regenerate: { dataset_id: slot.regenerate.datasetId, dataset: slot.regenerate.dataset },
+        }),
+    ...(slot.spent == null ? {} : { spent: slot.spent }),
   }));
   const tight = tightest(slots);
 
   return {
     dry_run: true,
-    target: { kind: target.kind, name: target.name },
+    // names from the backend are shown masked, their secrets registered (FIX-76)
+    target: { kind: target.kind, name: content(ctx, target.name, NAME_LIMIT) },
     environment: {
-      name: environment.name,
+      name: content(ctx, environment.name, NAME_LIMIT),
       protected: environment.protected,
       ...(caps.maxVu === undefined && caps.maxRps === undefined
         ? {}

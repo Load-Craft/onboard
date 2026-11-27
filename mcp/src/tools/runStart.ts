@@ -7,7 +7,7 @@ import * as z from 'zod';
 
 import { openNeedsInput } from '../flow/needsInput.js';
 import { awaitOperation, maxWaitInput } from '../ops/operation.js';
-import { inline } from '../render/primitives.js';
+import { content } from './moduleCall.js';
 import { defineTool } from '../registry.js';
 import { needsInputRunLine } from '../render/views/needsInput.js';
 import {
@@ -94,8 +94,8 @@ export const runStart = defineTool({
           message: [
             ...warning,
             ctx.t('runStart.joined', {
-              target: inline(saved.target.name, 80),
-              environment: inline(saved.environment.name, 80),
+              target: content(ctx, saved.target.name, 80),
+              environment: content(ctx, saved.environment.name, 80),
               handle: waited.operation,
             }),
             `↗ ${ctx.services.links.executionLive(saved.project.id, started.executionId).url}`,

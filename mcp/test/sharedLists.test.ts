@@ -4,8 +4,9 @@
 // - evals/mocks/lc/_tools.json: the `tools/list` answer of the server, sorted by name;
 // - the permission blocks of docs/plugin/INSTALL.md and INSTALL.pl.md, between their markers: today's
 //   tools keep their entries as written; a tool of a module goes to both variants when the catalog
-//   allows it at install (`install_allow`), to variant B only when it is a write that stays inside
-//   LoadCraft, and to the generated sentence of the tools left out otherwise.
+//   allows it at install (`install_allow`) and it has no consent card (level 1) and is a read only
+//   (`readOnlyHint`), to variant B only when it is allowed so but writes, and to the generated
+//   sentence of the tools left out otherwise. No variant ever holds a tool with a consent card.
 //
 // `npm run update:shared` writes them; this test fails while one differs.
 
@@ -19,7 +20,7 @@ import { loadConfig } from '../src/config.js';
 import { createLogger } from '../src/log.js';
 import { createServer } from '../src/server.js';
 import { EXPOSED_MODULE_TOOLS, MODULE_TOOLS } from '../src/tools/_generated/modules.js';
-import { catalogEntry } from './helpers/moduleContract.js';
+import { catalogEntry, expectedAnnotations } from './helpers/moduleContract.js';
 
 const UPDATE = process.env['UPDATE_SHARED'] === '1';
 const ROOT = resolve(import.meta.dirname, '..', '..');
@@ -54,15 +55,45 @@ async function liveTools(): Promise<unknown[]> {
 
 type Variant = 'reads' | 'inside';
 
-/** Where a tool of a module goes: both variants, variant B only, or the sentence of the left out. */
+/**
+ * Whether a list allowed up front may hold the tool: only what the catalog allows at install
+ * (`install_allow`), and never a tool with a consent card (level 2 or more), whatever the catalog says
+ * of it. Both are checked: a tool with a card is asked for each time, never allowed up front.
+ */
+function allowedUpFront(entry: {
+  readonly install_allow?: boolean | null | undefined;
+  readonly consent: { readonly level: number };
+}): boolean {
+  return entry.install_allow === true && entry.consent.level < 2;
+}
+
+/**
+ * Where a tool of a module goes: both variants, variant B only, or the sentence of the left out. A
+ * tool allowed up front goes to both only when it is a read only (`readOnlyHint`): one that writes,
+ * even inside the workspace, is left to variant B. Anything else is left out: a write the catalog does
+ * not allow at install no longer goes to variant B because it stays inside LoadCraft (it let a tool of
+ * level 2 in).
+ */
 function placeOf(name: string): 'both' | 'inside' | 'left_out' {
   const entry = catalogEntry(name)?.entry;
-  if (entry === undefined) return 'left_out';
-  if (entry.install_allow === true) return 'both';
-  return entry.class === 'write' && entry.consent.target_traffic === null ? 'inside' : 'left_out';
+  if (entry === undefined || !allowedUpFront(entry)) return 'left_out';
+  return expectedAnnotations(entry).readOnlyHint === true ? 'both' : 'inside';
 }
 
 const MODULE_NAMES = new Set(MODULE_TOOLS.map((tool) => tool.name));
+
+/** A tool of today (outside the modules) may stay in a list: the catalog does not name it, or allows it up front. */
+function keptToday(name: string): boolean {
+  const entry = catalogEntry(name)?.entry;
+  return entry === undefined || allowedUpFront(entry);
+}
+
+/** The tools of today the server offers (outside the modules), from its `tools/list`. */
+function todayNames(): string[] {
+  return (live as { name: string }[])
+    .map((tool) => tool.name)
+    .filter((name) => !MODULE_NAMES.has(name));
+}
 const OFFERED = EXPOSED_MODULE_TOOLS.map((tool) => tool.name).sort();
 
 function block(text: string, variant: Variant): { start: number; end: number; body: string } {
@@ -99,9 +130,9 @@ function blockText(names: readonly string[]): string {
 
 const LEFT_OUT = {
   en: (names: string) =>
-    `Left out as well, as the catalog does not allow them at install: ${names}.`,
+    `Left out as well, because they ask for your consent each time (a consent card) or the catalog does not allow them at install: ${names}.`,
   pl: (names: string) =>
-    `Pominięte są też, bo katalog nie dopuszcza ich przy instalacji: ${names}.`,
+    `Pominięte są też, bo za każdym razem pytają o zgodę (karta zgody) albo katalog nie dopuszcza ich przy instalacji: ${names}.`,
 };
 
 /** The text of an install guide with its generated parts written from the registry and the catalog. */
@@ -109,7 +140,9 @@ function installText(text: string, language: 'en' | 'pl'): string {
   let out = text;
   for (const variant of ['reads', 'inside'] as const) {
     const { start, end, body } = block(out, variant);
-    const today = entriesOf(body).filter((name) => !MODULE_NAMES.has(name));
+    // a tool of today keeps its entry as written, unless the catalog says it asks for consent or is not
+    // allowed at install: the catalog is the authority over today's tools as well
+    const today = entriesOf(body).filter((name) => !MODULE_NAMES.has(name) && keptToday(name));
     const modules = OFFERED.filter((name) =>
       variant === 'reads' ? placeOf(name) === 'both' : placeOf(name) !== 'left_out',
     );
@@ -120,7 +153,14 @@ function installText(text: string, language: 'en' | 'pl'): string {
   const from = out.indexOf(open);
   const to = out.indexOf(close);
   if (from === -1 || to === -1) throw new Error(`left-out markers missing: ${HOW}`);
-  const left = OFFERED.filter((name) => placeOf(name) === 'left_out');
+  const left = [
+    ...OFFERED.filter((name) => placeOf(name) === 'left_out'),
+    // a tool of today the guide already names elsewhere (left out on purpose, with its reason) is not repeated
+    ...todayNames().filter(
+      (name) =>
+        !keptToday(name) && !`${out.slice(0, from)}${out.slice(to)}`.includes(`\`${name}\``),
+    ),
+  ].sort();
   const sentence =
     left.length === 0 ? '' : LEFT_OUT[language](left.map((name) => `\`${name}\``).join(', '));
   return `${out.slice(0, from + open.length)}${sentence}${out.slice(to)}`;
@@ -160,5 +200,36 @@ describe('shared lists of the offered tools', () => {
       expect(inside, name).toContain(name);
     }
     expect(reads).toContain('project_list_notes');
+  });
+
+  it.each(['en', 'pl'] as const)(
+    'no variant of the %s install guide on disk allows up front a tool with a consent card or one the catalog does not allow at install',
+    (language) => {
+      const text = readFileSync(INSTALL[language], 'utf8');
+      const wrong = (['reads', 'inside'] as const).flatMap((variant) =>
+        entriesOf(block(text, variant).body)
+          .filter((name) => {
+            const entry = catalogEntry(name)?.entry;
+            // a tool the catalog does not name keeps its entry as written
+            return entry !== undefined && !allowedUpFront(entry);
+          })
+          .map((name) => `${variant}: ${name}`),
+      );
+      expect(wrong).toEqual([]);
+    },
+  );
+
+  it('a tool the catalog allows at install that is no read only stays out of the variant of reads', () => {
+    const reads = entriesOf(block(install.en, 'reads').body);
+    const inside = entriesOf(block(install.en, 'inside').body);
+    const writing = OFFERED.filter((name) => {
+      const entry = catalogEntry(name)?.entry;
+      return entry?.install_allow === true && expectedAnnotations(entry).readOnlyHint !== true;
+    });
+    expect(writing).toContain('results_export_report');
+    for (const name of writing) {
+      expect(reads, name).not.toContain(name);
+      expect(inside, name).toContain(name);
+    }
   });
 });

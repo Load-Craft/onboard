@@ -416,6 +416,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "process_wait": {
@@ -464,6 +469,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "process_cancel": {
@@ -583,11 +593,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "process_answer": {
@@ -636,6 +651,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "process_set_choices": {
@@ -687,9 +707,22 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "choices",
+        "type": "object",
+        "from_state": null,
+        "required": true,
+        "doc": "The choices to set, grouped as the process state groups them (flows, scenario, run, data, functional); null clears a field."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "process_set_decision": {
@@ -738,6 +771,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_list": {
@@ -783,9 +821,38 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "query",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "Search projects, flows, scenarios and runs by this text; without it, the list of projects."
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "Only active (true) or inactive (false) projects (the list, not the search)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many projects or search hits to return (1-100)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get": {
@@ -834,6 +901,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_create": {
@@ -905,6 +977,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_update": {
@@ -956,9 +1033,30 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 255,
+        "from_state": null,
+        "doc": "The project's new name; a name another project uses is refused."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "max_length": 8000,
+        "from_state": null,
+        "doc": "The project's new description; an empty text clears it."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_set_profile": {
@@ -1050,6 +1148,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": "Karta zgody poziomu 2 działa wzorcem confirm z tokenem, bo ogólnych kart pending i process_answer jeszcze nie ma; po ich wdrożeniu narzędzie przechodzi na kartę z katalogu."
   },
   "project_delete": {
@@ -1128,6 +1231,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get_envs": {
@@ -1173,9 +1281,28 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "env",
+        "type": "uuid|default",
+        "from_state": null,
+        "doc": "One environment: its id, or \"default\" for the default one; without it, the list."
+      },
+      {
+        "name": "effective",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: values inherited from the default environment are resolved (with env only)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_save_env": {
@@ -1320,6 +1447,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_check_env": {
@@ -1413,11 +1545,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get_docs": {
@@ -1463,9 +1600,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "openapi",
+          "asyncapi"
+        ],
+        "default": "openapi",
+        "from_state": null,
+        "doc": "Which documentation: openapi (default) or asyncapi."
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "One stored version by its id; without it, the active documentation."
+      },
+      {
+        "name": "versions",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: the list of stored versions instead (not with docs_id)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get_endpoints": {
@@ -1511,9 +1678,71 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": "ids.docs_id",
+        "doc": "The documentation version; default: the one of this workspace (see project_get_docs)."
+      },
+      {
+        "name": "endpoint",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 300,
+        "from_state": null,
+        "doc": "One endpoint: its id, operationId or \"METHOD /path\" (POST /checkout); without it, the list."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "bindings"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"bindings\": expected statuses, response schemas in short and suggested assertions (with endpoint only)."
+      },
+      {
+        "name": "method",
+        "type": "enum",
+        "enum": [
+          "get",
+          "post",
+          "put",
+          "patch",
+          "delete",
+          "head",
+          "options"
+        ],
+        "from_state": null,
+        "doc": "List only endpoints of this method."
+      },
+      {
+        "name": "query",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "doc": "List only endpoints whose path, summary or operationId contains this text (any case)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many endpoints of the list to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_import_docs": {
@@ -1621,6 +1850,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_set_active_docs": {
@@ -1672,9 +1906,33 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "openapi",
+          "asyncapi"
+        ],
+        "default": "openapi",
+        "from_state": null,
+        "doc": "Which documentation: openapi (default) or asyncapi."
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": null,
+        "required": true,
+        "doc": "The stored version to make active (project_get_docs versions=true lists them)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_analyze_setup": {
@@ -1741,6 +1999,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_apply_setup": {
@@ -1812,6 +2075,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get_apimap": {
@@ -1860,6 +2128,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_set_apimap": {
@@ -1911,9 +2184,30 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "prefixes",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 8000,
+        "from_state": null,
+        "doc": "Path prefixes of the areas, comma-separated (at most 64); not with detected."
+      },
+      {
+        "name": "detected",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: go back to the areas LoadCraft detects (not with prefixes)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_connect_telemetry": {
@@ -2021,6 +2315,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_disconnect_telemetry": {
@@ -2101,9 +2400,14 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_list_notes": {
@@ -2152,6 +2456,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_update_note": {
@@ -2203,9 +2512,50 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "note_id",
+        "type": "string",
+        "min_length": 32,
+        "max_length": 32,
+        "from_state": null,
+        "required": true,
+        "doc": "The note id (32 hex characters) from project_list_notes."
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 500,
+        "from_state": null,
+        "doc": "The note's new text."
+      },
+      {
+        "name": "scope",
+        "type": "enum",
+        "enum": [
+          "url_path",
+          "plan_step"
+        ],
+        "from_state": null,
+        "doc": "Where the note applies: a page path or a plan step (a step can only become a page)."
+      },
+      {
+        "name": "at",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 500,
+        "from_state": null,
+        "doc": "The page path (url_path) or words of the step (plan_step); with scope."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_list_team": {
@@ -2251,9 +2601,22 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "me",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: your own role and permissions instead of the list."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_save_member": {
@@ -2280,11 +2643,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       },
       "cost": null,
       "card": {
-        "title": "Give {email} the role {role}",
+        "title": "Give {user_id} the role {role}",
         "fields": [
           {
             "label": "Member",
-            "from": "email",
+            "from": "user_id",
             "source": "args"
           },
           {
@@ -2323,8 +2686,8 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "reason": null
     },
     "log": {
-      "args": "Give {email} the role {role}",
-      "result": "{email}: {role}"
+      "args": "Give {user_id} the role {role}",
+      "result": "{user_id}: {role}"
     },
     "route": null,
     "description": "Save a project member: add one, or change a member's role.",
@@ -2333,9 +2696,34 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The person to add or whose role changes (their user id, as project_list_team shows)."
+      },
+      {
+        "name": "role",
+        "type": "enum",
+        "enum": [
+          "owner",
+          "editor",
+          "viewer"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "The role the person gets."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get_activity": {
@@ -2381,9 +2769,24 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 50,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many recent events to return (1-50)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_get_http_settings": {
@@ -2432,6 +2835,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "project_set_http_settings": {
@@ -2531,9 +2939,37 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "base_url",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 2000,
+        "from_state": null,
+        "doc": "The base URL of the tested application."
+      },
+      {
+        "name": "protocol",
+        "type": "object",
+        "from_state": null,
+        "doc": "Protocol options to change (no proxy credentials); the rest stays."
+      },
+      {
+        "name": "headers_env_file",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 260,
+        "from_state": null,
+        "doc": "An env file of the project directory whose KEY=VALUE lines become the default headers."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_suggest_journeys": {
@@ -2617,6 +3053,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_generate_from_suggestions": {
@@ -2694,6 +3135,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": "Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód."
   },
   "flows_generate_from_endpoints": {
@@ -2781,6 +3227,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": "Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód."
   },
   "flows_generate_from_har": {
@@ -2873,6 +3324,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": "Implementacja ma argumenty dawnych dróg (suggestions, har = ścieżka pliku, project) zamiast journeys, har_session_id, project_id; brak docs_id i wymaganego split; brak kart zgody poziomu 2 (koszt: LLM). Do dopasowania przy przeglądzie narzędzi generujących flowy i wdrożeniu mechanizmu zgód."
   },
   "flows_regenerate": {
@@ -2947,9 +3403,38 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow (id or name); default: the only one of this workspace."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 4000,
+        "from_state": null,
+        "doc": "What the flow should do; default: the description it was generated from."
+      },
+      {
+        "name": "skip_validators",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: do not generate validators for the new version."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_import_har": {
@@ -3036,6 +3521,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_describe_journeys": {
@@ -3132,11 +3622,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_record_journeys": {
@@ -3232,11 +3727,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_get_walks": {
@@ -3282,9 +3782,42 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "walk_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "doc": "One walk: its handle or id; without it, the list of your walks."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 50,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many walks of the list to return (1-50)."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "timeline"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"timeline\": the review timeline of the walk (with walk_id only)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_retry_walk": {
@@ -3364,11 +3897,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_save_walk_note": {
@@ -3425,9 +3963,56 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "walk_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": "ids.walk_id",
+        "doc": "The walk: its handle or id; default: the walk of this workspace."
+      },
+      {
+        "name": "step",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "required": true,
+        "doc": "The step of the walk (from flows_get_walks include timeline)."
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 500,
+        "from_state": null,
+        "required": true,
+        "doc": "The note."
+      },
+      {
+        "name": "note_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "doc": "An existing note to change; without it, a new note."
+      },
+      {
+        "name": "remember",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: also keep it as a note of the project for later walks."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_export_walk_image": {
@@ -3473,9 +4058,55 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "walk_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": "ids.walk_id",
+        "doc": "The walk: its handle or id; default: the walk of this workspace."
+      },
+      {
+        "name": "path_index",
+        "type": "integer",
+        "min": 0,
+        "max": 10000,
+        "from_state": null,
+        "doc": "The step of the walk to capture live (not with still_id)."
+      },
+      {
+        "name": "attempt",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 1,
+        "from_state": null,
+        "doc": "The attempt of that step (with path_index)."
+      },
+      {
+        "name": "still_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "doc": "A still of the review timeline (not with path_index)."
+      },
+      {
+        "name": "overwrite",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: replace an image saved earlier under the same name."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": "zapisuje obraz kroku przebiegu lokalnie pod loadcraft/walks/<przebieg>/ (ignorowane przez git); nic w backendzie się nie zmienia"
+    },
     "known_debt": null
   },
   "flows_list": {
@@ -3521,9 +4152,32 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "query",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "doc": "Only flows whose name contains this text (any case)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many flows to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_get": {
@@ -3580,9 +4234,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
         "ref": null
       }
     ],
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow: its id or name; default: the only flow of this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_get_versions": {
@@ -3628,9 +4296,40 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow: its id or name; default: the only flow of this workspace."
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "min": 1,
+        "max": 100000,
+        "from_state": null,
+        "doc": "One version as an outline; without it, the list (newest first)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many versions of the list to return (1-100)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_restore_version": {
@@ -3682,9 +4381,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow: its id or name; default: the only flow of this workspace."
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "min": 1,
+        "max": 100000,
+        "from_state": null,
+        "required": true,
+        "doc": "The version to make current."
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "max_length": 200,
+        "from_state": null,
+        "doc": "Why, shown in the version history."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_save": {
@@ -3723,6 +4452,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
           "for": "update"
         },
         {
+          "tool": "flows_save",
+          "how": "the previous values",
+          "for": "update"
+        },
+        {
           "tool": "flows_delete",
           "how": "the new flow",
           "for": "create"
@@ -3741,9 +4475,60 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The flow to change (id or name); without it, a new flow is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 255,
+        "from_state": null,
+        "doc": "The flow's name; required for a new flow."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "max_length": 2000,
+        "from_state": null,
+        "doc": "The flow's description."
+      },
+      {
+        "name": "graph",
+        "type": "object",
+        "from_state": null,
+        "doc": "The whole graph {blocks, edges, entry_block_id} (no variables); a new flow or a full replacement."
+      },
+      {
+        "name": "drop_steps",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 300,
+        "from_state": null,
+        "doc": "Step numbers to remove, as flows_get numbers them, comma-separated (at most 50); with flow_id, not with graph."
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 300,
+        "from_state": null,
+        "doc": "Why the graph changes (with graph or drop_steps); kept on the new version."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_delete": {
@@ -3827,6 +4612,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_duplicate": {
@@ -3878,9 +4668,38 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_ids",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 4000,
+        "from_state": null,
+        "required": true,
+        "doc": "The flows to copy, ids or names, comma-separated (1-20; exactly one with docs_id)."
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "Copy the flow onto this documentation version."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The name of the copy (with docs_id)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_migrate_docs": {
@@ -4020,6 +4839,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": "Karta zgody poziomu 2 działa wzorcem confirm z tokenem, bo ogólnych kart pending i process_answer jeszcze nie ma; po ich wdrożeniu narzędzie przechodzi na kartę z katalogu."
   },
   "flows_merge": {
@@ -4071,9 +4895,32 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_ids",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 4000,
+        "from_state": null,
+        "required": true,
+        "doc": "The flows to merge, ids or names, comma-separated (2-20)."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The name of the merged flow."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_set_poll_terminals": {
@@ -4107,8 +4954,8 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "reversible": "yes",
       "ways": [
         {
-          "tool": "flows_set_poll_terminals",
-          "how": "answer again with other statuses",
+          "tool": "flows_restore_version",
+          "how": "the previous version",
           "for": "update"
         }
       ],
@@ -4116,7 +4963,7 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     },
     "log": {
       "args": "{flow_id}",
-      "result": "{count} poll questions answered"
+      "result": "{field} answered as v{version}; {open} open"
     },
     "route": null,
     "description": "Set the success and failure terminal statuses that answer a flow's open poll-loop questions.",
@@ -4125,9 +4972,48 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow (id or name); default: the only one of this workspace."
+      },
+      {
+        "name": "field",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "required": true,
+        "from_state": null,
+        "doc": "The status field of an open poll question: the field of a poll_status item in flows_get."
+      },
+      {
+        "name": "success_terminals",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 1000,
+        "required": true,
+        "from_state": null,
+        "doc": "The statuses that mean the job succeeded, comma-separated (at most 20)."
+      },
+      {
+        "name": "failure_terminals",
+        "type": "string",
+        "max_length": 1000,
+        "from_state": null,
+        "doc": "The statuses that mean it failed, comma-separated (at most 20); without it, none."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_ask_copilot": {
@@ -4201,9 +5087,31 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow (id or name); default: the only one of this workspace."
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 4000,
+        "from_state": null,
+        "doc": "What to ask; without it the copilot runs its standard review."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_apply_copilot_changes": {
@@ -4255,9 +5163,46 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow (id or name); default: the only one of this workspace."
+      },
+      {
+        "name": "message_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "required": true,
+        "from_state": null,
+        "doc": "The copilot turn the changes come from: message_id of flows_ask_copilot or flows_get_copilot_history."
+      },
+      {
+        "name": "accept",
+        "type": "string",
+        "max_length": 2000,
+        "from_state": null,
+        "doc": "Ids of the changes to apply, comma-separated (at most 50)."
+      },
+      {
+        "name": "reject",
+        "type": "string",
+        "max_length": 2000,
+        "from_state": null,
+        "doc": "Ids of the changes to record as rejected, comma-separated (at most 50)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "flows_get_copilot_history": {
@@ -4303,9 +5248,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "The flow: its id or name; default: the only flow of this workspace."
+      },
+      {
+        "name": "suggestions",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: the copilot's open suggestions instead of the conversation."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 50,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many of the latest turns to return (1-50)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_list": {
@@ -4351,9 +5326,24 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many scenarios to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_get": {
@@ -4393,15 +5383,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "result": "{name} v{version}; self-check {self_check}"
     },
     "route": null,
-    "description": "Get a scenario: status, self-check, data slots; include adds the session-variable contract, drift score, Scala source (literals masked).",
+    "description": "Get a scenario: status, self-check, data slots; include adds the variable contract, drift and stored artifact (masked).",
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario; default: the only one in this workspace."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "contract",
+          "drift",
+          "artifact"
+        ],
+        "max_items": 3,
+        "from_state": null,
+        "doc": "contract: the session-variable contract; drift: the drift score; artifact: the stored scenario artifact (literals masked)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_save": {
@@ -4458,9 +5472,56 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The scenario to change (id or name); without it, a new empty scenario is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The name; required for a new scenario."
+      },
+      {
+        "name": "tags",
+        "type": "string",
+        "max_length": 1000,
+        "from_state": null,
+        "doc": "Tags, comma-separated (at most 20); replaces the list, an empty text clears it."
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "Whether the scenario is active."
+      },
+      {
+        "name": "slo_thresholds",
+        "type": "object",
+        "from_state": null,
+        "doc": "SLO thresholds (key: number); {} sets the standard SLO."
+      },
+      {
+        "name": "slo_from_project",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "true: drop the scenario's own SLO thresholds; it inherits the project's."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_delete": {
@@ -4530,15 +5591,33 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "result": "{count} {kind} deleted"
     },
     "route": null,
-    "description": "Delete scenarios or compositions (kind + ids). Past runs stay.",
+    "description": "Delete a scenario or a composition. Past runs stay.",
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The scenario to delete; give this or composition_id."
+      },
+      {
+        "name": "composition_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The composition to delete; give this or scenario_id."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_generate": {
@@ -4669,11 +5748,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_regenerate": {
@@ -4743,11 +5827,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_check_self": {
@@ -4837,11 +5926,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_check_drift": {
@@ -4915,9 +6009,43 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario to check (id or name); default: the only one in this workspace."
+      },
+      {
+        "name": "reference_source",
+        "type": "enum",
+        "enum": [
+          "har",
+          "openapi"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "What to compare the scenario with: a recorded HAR session or a documentation version."
+      },
+      {
+        "name": "reference_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 128,
+        "required": true,
+        "from_state": null,
+        "doc": "The HAR session id or the documentation version id to compare with."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_export": {
@@ -4957,15 +6085,27 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "result": "{path}"
     },
     "route": null,
-    "description": "Export the scenario's Gatling project as a local ZIP and return its path (dataset secrets masked).",
+    "description": "Export the scenario's Gatling project as a local ZIP without dataset values; returns its path and what to add to run it.",
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario; default: the only one in this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": "zapisuje ZIP projektu Gatlinga lokalnie pod loadcraft/exports/ (ignorowane przez git); nic w backendzie się nie zmienia"
+    },
     "known_debt": null
   },
   "scenario_get_versions": {
@@ -5011,9 +6151,29 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario; default: the only one in this workspace."
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "min": 1,
+        "max": 100000,
+        "from_state": null,
+        "doc": "One version with its stored artifact (literals masked); without it, the list."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_restore_version": {
@@ -5065,9 +6225,32 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario: its id or name; default: the only one in this workspace."
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "min": 1,
+        "max": 100000,
+        "from_state": null,
+        "required": true,
+        "doc": "The version to make current."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_suggest_split": {
@@ -5169,6 +6352,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_ask_copilot": {
@@ -5252,9 +6440,43 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario (id or name); default: the only one of this workspace."
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 4000,
+        "from_state": null,
+        "doc": "The question for the scenario copilot."
+      },
+      {
+        "name": "review",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "true: the standard readiness review instead of a question (not with message)."
+      },
+      {
+        "name": "profile",
+        "type": "object",
+        "from_state": "choices.run.profile",
+        "doc": "The load profile to discuss; default: the chosen one."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_get_copilot_history": {
@@ -5300,9 +6522,36 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "A scenario's copilot conversation (not with draft_id)."
+      },
+      {
+        "name": "draft_id",
+        "type": "uuid",
+        "from_state": "ids.split_draft_id",
+        "doc": "The traffic-split planner draft; default: the draft of this workspace."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many of the latest messages to return (1-100)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_list_compositions": {
@@ -5348,9 +6597,32 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "status",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 40,
+        "from_state": null,
+        "doc": "List only compositions with this status."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many compositions to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_get_composition": {
@@ -5396,9 +6668,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_save_composition": {
@@ -5503,9 +6789,43 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The composition to change (id or name); without it, a new one is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The name; required for a new composition."
+      },
+      {
+        "name": "members",
+        "type": "object",
+        "from_state": null,
+        "doc": "Scenario (id or name) -> its share in percent; replaces the member list."
+      },
+      {
+        "name": "profile",
+        "type": "object",
+        "from_state": null,
+        "doc": "The composition's load profile (users, ramp, duration), as scenario_get_composition shows it."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_check_composition": {
@@ -5551,9 +6871,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_compile_composition": {
@@ -5622,9 +6956,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_get_composition_code": {
@@ -5670,9 +7018,31 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      },
+      {
+        "name": "path",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 300,
+        "from_state": null,
+        "doc": "One file of the project by its path in the tree (as listed); without it, the file tree."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_update_pins": {
@@ -5724,9 +7094,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_set_composition_type": {
@@ -5778,9 +7162,45 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      },
+      {
+        "name": "type",
+        "type": "enum",
+        "enum": [
+          "load_test",
+          "stress_test",
+          "soak_test",
+          "spike_test",
+          "breakpoint_test",
+          "capacity_test"
+        ],
+        "from_state": null,
+        "required": true,
+        "doc": "The kind of test the composition runs."
+      },
+      {
+        "name": "spec",
+        "type": "object",
+        "from_state": null,
+        "required": true,
+        "doc": "The parameters of that kind (users, durations, ramps, steps…); LoadCraft checks them."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "scenario_get_templates": {
@@ -5820,15 +7240,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "result": "{count} templates"
     },
     "route": null,
-    "description": "Get built-in scenario templates: the list, one, or its draft composition config for the project (nothing saved).",
+    "description": "Get scenario templates; for one, its generic draft (the template's own scenarios and load, not fitted to the project).",
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "template",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One template with its scenarios and data files (id or name); without it, the list."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "draft"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"draft\": its composition config for this project, nothing saved (with template only)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_suggest_actions": {
@@ -5908,6 +7352,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_ask_copilot": {
@@ -5938,7 +7387,7 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
         "fields": [
           {
             "label": "For",
-            "from": "scenario_ids | composition_id",
+            "from": "scenario_id | composition_id",
             "source": "args"
           },
           {
@@ -5969,7 +7418,7 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
         },
         {
           "path": "ids.scenario_ids",
-          "arg": "scenario_ids",
+          "arg": "scenario_id",
           "explicit": true
         },
         {
@@ -5996,9 +7445,46 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "message",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 4000,
+        "required": true,
+        "from_state": null,
+        "doc": "The question for the data hub copilot."
+      },
+      {
+        "name": "scenario_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario (id or name) the question is about; give this or composition_id."
+      },
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition (id or name); give this or scenario_id."
+      },
+      {
+        "name": "profile",
+        "type": "object",
+        "from_state": "choices.run.profile",
+        "doc": "The load profile to discuss; default: the chosen one."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_get_copilot_history": {
@@ -6044,9 +7530,24 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many of the latest messages to return (1-100)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_get_slots": {
@@ -6092,9 +7593,27 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario; default: the only one in this workspace."
+      },
+      {
+        "name": "composition_id",
+        "type": "uuid",
+        "from_state": "ids.composition_id",
+        "doc": "The composition (not with scenario_id)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_set_bindings": {
@@ -6149,6 +7668,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_set_slot_label": {
@@ -6200,9 +7724,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": "ids.scenario_ids",
+        "doc": "The scenario; default: the only one in this workspace."
+      },
+      {
+        "name": "slot",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "required": true,
+        "doc": "The data slot."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "required": true,
+        "doc": "The slot's new label."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_check_readiness": {
@@ -6251,6 +7805,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_list_datasets": {
@@ -6299,6 +7858,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_get_dataset": {
@@ -6344,9 +7908,53 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "dataset_id",
+        "type": "uuid",
+        "from_state": "ids.dataset_ids",
+        "doc": "The dataset; default: the only one in this workspace."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "rows",
+          "consumers",
+          "history",
+          "snippet",
+          "redis"
+        ],
+        "max_items": 5,
+        "from_state": null,
+        "doc": "rows: a masked preview (secret columns hidden); consumers: who uses it; history: revisions; snippet: the feed snippet; redis: pool status."
+      },
+      {
+        "name": "rows",
+        "type": "integer",
+        "min": 1,
+        "max": 50,
+        "default": 10,
+        "from_state": null,
+        "doc": "With include rows: how many rows (1-50)."
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "min": 0,
+        "max": 100000,
+        "default": 0,
+        "from_state": null,
+        "doc": "With include rows: the first row."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_create_dataset": {
@@ -6459,6 +8067,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_update_dataset": {
@@ -6568,9 +8181,44 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "dataset_id",
+        "type": "uuid",
+        "from_state": "ids.dataset_ids",
+        "doc": "The dataset; default: the only one in this workspace."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 255,
+        "from_state": null,
+        "doc": "The new name."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "max_length": 500,
+        "from_state": null,
+        "doc": "The new description; an empty text clears it."
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 260,
+        "from_state": null,
+        "doc": "A CSV file of the project directory (relative path, up to 2 MB) whose rows replace the dataset's; the server reads it."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_regenerate_dataset": {
@@ -6655,9 +8303,40 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "dataset_id",
+        "type": "uuid",
+        "from_state": "ids.dataset_ids",
+        "doc": "The dataset; default: the only one in this workspace."
+      },
+      {
+        "name": "mode",
+        "type": "enum",
+        "enum": [
+          "expand",
+          "reroll"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "expand: add new rows up to `rows`, existing rows stay; reroll: replace all rows with fresh ones."
+      },
+      {
+        "name": "rows",
+        "type": "integer",
+        "min": 1,
+        "max": 100000,
+        "from_state": null,
+        "doc": "expand: the target row count (required, above the current count); reroll: the new row count (default: the current count)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_restore_dataset": {
@@ -6709,9 +8388,21 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "dataset_id",
+        "type": "uuid",
+        "from_state": "ids.dataset_ids",
+        "doc": "The dataset; default: the only one in this workspace."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_delete": {
@@ -6735,11 +8426,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "scope": null,
       "cost": null,
       "card": {
-        "title": "Delete datasets: {names}",
+        "title": "Delete dataset: {names}",
         "fields": [
           {
-            "label": "Items",
-            "from": "ids (names resolved by the registry)",
+            "label": "Item",
+            "from": "dataset_id (name resolved by the registry)",
             "source": "labels"
           },
           {
@@ -6772,7 +8463,7 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "reason": "permanent"
     },
     "log": {
-      "args": "Delete datasets: {names}",
+      "args": "Delete dataset: {names}",
       "result": "{count} datasets deleted"
     },
     "route": null,
@@ -6782,9 +8473,29 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "dataset_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The dataset to delete."
+      },
+      {
+        "name": "force",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "Also delete it when scenarios or compositions still use it."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_generate_dataset": {
@@ -6869,9 +8580,75 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.flow_ids",
+        "doc": "Generate for a flow: the data its steps need (give this or scenario_id)."
+      },
+      {
+        "name": "scenario_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.scenario_ids",
+        "doc": "Generate for a scenario, or (with slot) for one of its data slots."
+      },
+      {
+        "name": "slot",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 100,
+        "from_state": null,
+        "doc": "One data slot of the scenario (with scenario_id)."
+      },
+      {
+        "name": "rows",
+        "type": "integer",
+        "min": 1,
+        "max": 100000,
+        "default": 100,
+        "from_state": null,
+        "doc": "How many rows to generate."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "The name of the new dataset; default: made from the target."
+      },
+      {
+        "name": "feeder_type",
+        "type": "enum",
+        "enum": [
+          "csv",
+          "tsv",
+          "json"
+        ],
+        "default": "csv",
+        "from_state": null,
+        "doc": "The file format of the dataset (not for a slot)."
+      },
+      {
+        "name": "enrich_with_llm",
+        "type": "boolean",
+        "default": true,
+        "from_state": null,
+        "doc": "A slot only: let a model enrich the values (a cost)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_regenerate_column": {
@@ -6969,6 +8746,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_get_generators": {
@@ -7014,9 +8796,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "columns",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 2000,
+        "from_state": null,
+        "doc": "Column names to guess generators for, comma-separated (at most 50); without it, the list of all generators."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_check_dataset": {
@@ -7139,11 +8935,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "data_create_accounts": {
@@ -7251,11 +9052,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_plan": {
@@ -7304,6 +9110,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_start": {
@@ -7423,11 +9234,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_start_saved": {
@@ -7519,11 +9335,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_list": {
@@ -7569,9 +9390,42 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many runs to return (1-200)."
+      },
+      {
+        "name": "target",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "Only runs of this scenario or composition (name or id)."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "results"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"results\": the headline numbers of each run."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_get": {
@@ -7617,9 +9471,31 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "run_id",
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "diagnostics"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"diagnostics\": why the run stopped or failed, when LoadCraft knows."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_delete": {
@@ -7651,8 +9527,8 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
             "source": "args"
           },
           {
-            "label": "Items",
-            "from": "ids (names resolved by the registry)",
+            "label": "Item",
+            "from": "item_id (name resolved by the registry)",
             "source": "labels"
           }
         ]
@@ -7684,15 +9560,40 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "result": "{count} {kind} deleted"
     },
     "route": null,
-    "description": "Delete runs with their results and reports, load profiles, or saved runs (kind + ids).",
+    "description": "Delete a run, a load profile or a saved run (kind + item_id). Runs in progress are refused.",
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "run",
+          "profile",
+          "saved_run"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "What to delete."
+      },
+      {
+        "name": "item_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The run, load profile or saved run to delete."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_get_profiles": {
@@ -7738,9 +9639,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "profile",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One load profile with its injection steps (name or id); without it, the list."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_save_profile": {
@@ -7797,9 +9712,85 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "profile",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "The load profile to change (name or id); without it, a new one is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "The profile name (needed to create; renames on change)."
+      },
+      {
+        "name": "type",
+        "type": "enum",
+        "enum": [
+          "at_once",
+          "ramp",
+          "constant",
+          "stress",
+          "spike",
+          "soak",
+          "ramp_concurrency",
+          "constant_concurrency",
+          "custom"
+        ],
+        "from_state": null,
+        "doc": "The load shape (needed to create)."
+      },
+      {
+        "name": "users",
+        "type": "integer",
+        "min": 1,
+        "max": 1000000,
+        "from_state": null,
+        "doc": "Virtual users."
+      },
+      {
+        "name": "duration_seconds",
+        "type": "integer",
+        "min": 1,
+        "max": 86400,
+        "from_state": null,
+        "doc": "How long the load lasts."
+      },
+      {
+        "name": "ramp_duration_seconds",
+        "type": "integer",
+        "min": 0,
+        "max": 86400,
+        "from_state": null,
+        "doc": "How long the ramp lasts."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "max_length": 500,
+        "from_state": null,
+        "doc": "A short description."
+      },
+      {
+        "name": "is_default",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "true: make it the default profile of the project."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_get_saved": {
@@ -7845,9 +9836,23 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "saved_run",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One saved run (name or id); without it, the list."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_save": {
@@ -7963,12 +9968,12 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
         },
         {
           "path": "ids.dataset_ids",
-          "arg": "dataset_ids",
+          "arg": "feeder_bindings",
           "explicit": true
         },
         {
           "path": "ids.env_id",
-          "arg": "env",
+          "arg": "environment_id",
           "explicit": true
         }
       ],
@@ -7999,11 +10004,75 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "saved_run_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The saved run to change; without it, a new one is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "The name; required for a new saved run."
+      },
+      {
+        "name": "scenario_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The scenario a new saved run starts (give this or composition_id; new only)."
+      },
+      {
+        "name": "composition_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The composition a new saved run starts (give this or scenario_id; new only)."
+      },
+      {
+        "name": "environment_id",
+        "type": "uuid",
+        "from_state": "ids.env_id",
+        "doc": "The environment; set or change, never clear."
+      },
+      {
+        "name": "target_base_url",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 500,
+        "from_state": null,
+        "doc": "The target address; set or change, never clear."
+      },
+      {
+        "name": "workload",
+        "type": "object",
+        "from_state": "choices.run.profile",
+        "doc": "The load {type, vusers, ramp, hold, thresholds}; replaced as a whole."
+      },
+      {
+        "name": "feeder_bindings",
+        "type": "object",
+        "from_state": null,
+        "doc": "Slot -> dataset id; replaced as a whole."
+      },
+      {
+        "name": "source_execution_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The run this saved run is made from (new only)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_set_schedule": {
@@ -8117,11 +10186,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "run_get_usage": {
@@ -8167,9 +10241,24 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "days",
+        "type": "integer",
+        "min": 1,
+        "max": 365,
+        "default": 30,
+        "from_state": null,
+        "doc": "How many past days of usage to return (1-365)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_get_report": {
@@ -8218,17 +10307,24 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       },
       {
         "name": "compare_to",
-        "type": "uuid|baseline",
-        "from_state": "choices.run.compare_to"
+        "type": "uuid|run_handle|baseline",
+        "from_state": "choices.run.compare_to",
+        "doc": "The run to compare with (handle or UUID), or \"baseline\"; default: the choice of this workspace."
       }
     ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_get_request": {
@@ -8277,17 +10373,36 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       },
       {
         "name": "request",
         "type": "string",
-        "from_state": null
+        "from_state": null,
+        "required": true,
+        "max_length": 300,
+        "doc": "The request as the run names it (POST /checkout), as results_get_report lists it."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "series"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"series\": the request over time, at the step of the run; without it, totals only."
       }
     ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_get_errors": {
@@ -8336,12 +10451,18 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       }
     ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_get_traces": {
@@ -8390,8 +10511,9 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       }
     ],
     "shows_content": {
@@ -8399,6 +10521,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "unrecognized": "hidden_entirely"
     },
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_get_logs": {
@@ -8447,12 +10574,39 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
+      },
+      {
+        "name": "level",
+        "type": "enum",
+        "enum": [
+          "error",
+          "warn",
+          "info",
+          "debug"
+        ],
+        "from_state": null,
+        "doc": "Only lines of this level: error, warn, info or debug."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many lines to return (1-200)."
       }
     ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_export_report": {
@@ -8501,12 +10655,25 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
+      },
+      {
+        "name": "overwrite",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: replace a report of this run exported earlier; without it an existing folder is refused."
       }
     ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": "zapisuje pliki raportu lokalnie pod loadcraft/reports/<uchwyt>/ (ignorowane przez git); nic w backendzie się nie zmienia, więc klasa i poziom 1 zostają"
+    },
     "known_debt": null
   },
   "results_check_production": {
@@ -8555,12 +10722,18 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       }
     ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_compare_runs": {
@@ -8609,17 +10782,34 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
+      },
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "errors"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"errors\": the console errors only in one run and in both."
       },
       {
         "name": "compare_to",
-        "type": "uuid|baseline",
-        "from_state": "choices.run.compare_to"
+        "type": "uuid|run_handle|baseline",
+        "from_state": "choices.run.compare_to",
+        "doc": "The run to compare with (handle or UUID), or \"baseline\" for the pinned baseline of this run; default: the choice of this workspace."
       }
     ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_set_baseline": {
@@ -8674,12 +10864,18 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       }
     ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "results_analyze_run": {
@@ -8756,12 +10952,18 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": [
       {
         "name": "run_id",
-        "type": "uuid",
-        "from_state": "ids.run_id"
+        "type": "uuid|run_handle",
+        "from_state": "ids.run_id",
+        "doc": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace."
       }
     ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "traffic_list_snapshots": {
@@ -8807,9 +11009,34 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "format_sample"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"format_sample\": the field names and shape of a traffic packet (no values)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many snapshots to return (1-100)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "traffic_get_snapshot": {
@@ -8855,9 +11082,32 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "snapshot_id",
+        "type": "uuid",
+        "from_state": "choices.run.traffic_snapshot_id",
+        "doc": "The snapshot; default: the one chosen for runs of this workspace."
+      },
+      {
+        "name": "series",
+        "type": "enum",
+        "enum": [
+          "summary",
+          "points"
+        ],
+        "default": "summary",
+        "from_state": null,
+        "doc": "summary: per route the count, min, max and sum; points: up to 20 routes of 60 points."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "traffic_import_snapshot": {
@@ -8960,6 +11210,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "traffic_delete": {
@@ -8991,8 +11246,8 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
             "source": "args"
           },
           {
-            "label": "Items",
-            "from": "ids (names resolved by the registry)",
+            "label": "Item",
+            "from": "item_id (name resolved by the registry)",
             "source": "labels"
           }
         ]
@@ -9003,7 +11258,7 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "freeze": [
         {
           "path": "choices.run.traffic_snapshot_id",
-          "arg": "ids",
+          "arg": "item_id",
           "explicit": true
         },
         {
@@ -9030,9 +11285,33 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "snapshot",
+          "token"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "What to delete: a traffic snapshot or a push token (revoked)."
+      },
+      {
+        "name": "item_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The snapshot or token to delete."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "traffic_get_push_setup": {
@@ -9081,6 +11360,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "arguments": null,
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "traffic_create_token": {
@@ -9150,11 +11434,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_catalog": {
@@ -9200,9 +11489,58 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "test_types",
+          "validators",
+          "assertion_types"
+        ],
+        "from_state": null,
+        "required": true,
+        "doc": "Which catalog: test_types, validators or assertion_types."
+      },
+      {
+        "name": "entry_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One entry: its id (assertion_types also by name); without it, the list."
+      },
+      {
+        "name": "category",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 80,
+        "from_state": null,
+        "doc": "Only entries of this category."
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "Only active (true) or inactive (false) entries (test_types, validators)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many entries of the list to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_save_catalog": {
@@ -9276,9 +11614,47 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "catalog_test_type",
+          "catalog_validator",
+          "catalog_assertion_type"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "Which shared catalog: base test type, base validator or assertion type."
+      },
+      {
+        "name": "entry_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The entry to change; without it, a new one is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 255,
+        "from_state": null,
+        "doc": "The entry's name; required for a new one."
+      },
+      {
+        "name": "fields",
+        "type": "object",
+        "from_state": null,
+        "doc": "Fields to set: the create or update body of that catalog."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_import_catalog": {
@@ -9338,9 +11714,27 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "parts",
+        "type": "string[]",
+        "enum": [
+          "test_types",
+          "validators",
+          "assertion_types"
+        ],
+        "max_items": 3,
+        "from_state": null,
+        "doc": "Which built-in parts to import; default: all three."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_test_types": {
@@ -9386,9 +11780,40 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "test_type",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One test type (id or name); without it, the list."
+      },
+      {
+        "name": "view",
+        "type": "enum",
+        "enum": [
+          "list",
+          "expected_outcomes"
+        ],
+        "from_state": null,
+        "doc": "list (default) or the expected outcomes.",
+        "default": "list"
+      },
+      {
+        "name": "is_enabled",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "Only enabled (true) or disabled (false) ones."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_save_test_types": {
@@ -9468,9 +11893,44 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "source",
+        "type": "enum",
+        "enum": [
+          "custom",
+          "catalog",
+          "suggestions"
+        ],
+        "from_state": null,
+        "doc": "custom: new items; catalog: catalog entries to add; suggestions: accepted AI items."
+      },
+      {
+        "name": "items",
+        "type": "object",
+        "from_state": null,
+        "doc": "The items to add (key: name or id; value: its fields, {} for catalog ids); 1-50."
+      },
+      {
+        "name": "test_type_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "Change this test type of the project instead (not with source or items)."
+      },
+      {
+        "name": "fields",
+        "type": "object",
+        "from_state": null,
+        "doc": "With test_type_id: the fields to set."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_suggest_test_types": {
@@ -9539,9 +11999,29 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The API docs to read (project_get_docs lists them)."
+      },
+      {
+        "name": "focus_areas",
+        "type": "string",
+        "max_length": 300,
+        "from_state": null,
+        "doc": "Comma-separated areas to prioritize (e.g. security, limits); default: none."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_generate_test_types": {
@@ -9638,9 +12118,22 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "include_categories",
+        "type": "string",
+        "max_length": 300,
+        "from_state": null,
+        "doc": "Comma-separated categories to generate (e.g. functional, security); default: all."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_validators": {
@@ -9686,9 +12179,41 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "validator",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One validator (id or name); without it, the list."
+      },
+      {
+        "name": "view",
+        "type": "enum",
+        "enum": [
+          "list",
+          "applicable",
+          "gatling_enforcement"
+        ],
+        "from_state": null,
+        "doc": "list (default), the applicable ones, or how load runs enforce them.",
+        "default": "list"
+      },
+      {
+        "name": "is_enabled",
+        "type": "boolean",
+        "from_state": null,
+        "doc": "Only enabled (true) or disabled (false) ones."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_save_validators": {
@@ -9768,9 +12293,44 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "source",
+        "type": "enum",
+        "enum": [
+          "custom",
+          "catalog",
+          "proposals"
+        ],
+        "from_state": null,
+        "doc": "custom: new items; catalog: catalog entries to add; proposals: accepted AI items."
+      },
+      {
+        "name": "items",
+        "type": "object",
+        "from_state": null,
+        "doc": "The items to add (key: name or id; value: its fields, {} for catalog ids); 1-50."
+      },
+      {
+        "name": "validator_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "Change this validator of the project instead (not with source or items)."
+      },
+      {
+        "name": "fields",
+        "type": "object",
+        "from_state": null,
+        "doc": "With validator_id: the fields to set."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_suggest_validators": {
@@ -9834,9 +12394,22 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The API docs to read (project_get_docs lists them)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_analytics": {
@@ -9882,9 +12455,56 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "view",
+        "type": "enum",
+        "enum": [
+          "dashboard",
+          "flaky",
+          "failure_patterns",
+          "accuracy",
+          "trend",
+          "threshold_suggestion"
+        ],
+        "from_state": null,
+        "doc": "Which analysis; default: dashboard.",
+        "default": "dashboard"
+      },
+      {
+        "name": "days",
+        "type": "integer",
+        "min": 1,
+        "max": 365,
+        "default": 30,
+        "from_state": null,
+        "doc": "How many past days (1-365)."
+      },
+      {
+        "name": "validator",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "The validator (id or name); needed for accuracy, trend and threshold_suggestion."
+      },
+      {
+        "name": "threshold_pct",
+        "type": "integer",
+        "min": 0,
+        "max": 100,
+        "default": 20,
+        "from_state": null,
+        "doc": "With view flaky: the flakiness threshold in percent."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_flows": {
@@ -9930,9 +12550,49 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One functional flow (id); without it, the list."
+      },
+      {
+        "name": "view",
+        "type": "enum",
+        "enum": [
+          "list",
+          "versions"
+        ],
+        "from_state": null,
+        "doc": "list (default) or the versions of one flow.",
+        "default": "list"
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": "ids.docs_id",
+        "doc": "Only flows of this documentation version; default: the one of this workspace."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many flows to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_save_flow": {
@@ -9971,6 +12631,11 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
           "for": "update"
         },
         {
+          "tool": "functional_save_flow",
+          "how": "the previous values",
+          "for": "update"
+        },
+        {
           "tool": "functional_delete",
           "how": "kind=flow, for a new one",
           "for": "create"
@@ -9989,9 +12654,57 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The flow to change; without it, a new flow is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 255,
+        "from_state": null,
+        "doc": "The flow's name; required for a new flow."
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": "ids.docs_id",
+        "doc": "The API docs of a new flow; default: the active docs."
+      },
+      {
+        "name": "fields",
+        "type": "object",
+        "from_state": null,
+        "doc": "Fields to set: blocks, edges, entry_block_id, description, tags, variables, timeout_ms, retry_count, retry_delay_ms, is_active."
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 60,
+        "from_state": null,
+        "doc": "Save a named snapshot of the current blocks and edges instead (not with name or fields)."
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": null,
+        "doc": "With version: why the snapshot is taken."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_restore_flow": {
@@ -10043,9 +12756,31 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_id",
+        "type": "uuid",
+        "from_state": null,
+        "required": true,
+        "doc": "The functional flow."
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 60,
+        "from_state": null,
+        "required": true,
+        "doc": "The label of the stored version to restore."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_templates": {
@@ -10091,9 +12826,46 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "template",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 120,
+        "from_state": null,
+        "doc": "One template (id or name); without it, the list."
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": "ids.docs_id",
+        "doc": "Only templates of this documentation version; default: the one of this workspace."
+      },
+      {
+        "name": "tags",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 500,
+        "from_state": null,
+        "doc": "Only templates with these tags, comma-separated (at most 10)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many templates to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_save_template": {
@@ -10150,9 +12922,41 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "template_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The template to change; without it, a new template is created."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 255,
+        "from_state": null,
+        "doc": "The template's name; required for a new one."
+      },
+      {
+        "name": "docs_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "The API docs the template belongs to, if any."
+      },
+      {
+        "name": "fields",
+        "type": "object",
+        "from_state": null,
+        "doc": "Fields to set: api_description and flow_definition (required for a new one), assertions, endpoint_ids, tags, description, is_active."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_delete": {
@@ -10184,8 +12988,8 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
             "source": "args"
           },
           {
-            "label": "Items",
-            "from": "ids (names resolved by the registry)",
+            "label": "Item",
+            "from": "item_id (name resolved by the registry)",
             "source": "labels"
           }
         ]
@@ -10217,15 +13021,45 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
       "result": "{count} {kind} deleted"
     },
     "route": null,
-    "description": "Delete functional items (kind + ids): flow, template, test_type, validator, run, or a custom catalog entry.",
+    "description": "Delete one functional flow, template, test type, validator, run or catalog entry (kind + item_id).",
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "kind",
+        "type": "enum",
+        "enum": [
+          "flow",
+          "template",
+          "test_type",
+          "validator",
+          "run",
+          "catalog_test_type",
+          "catalog_validator",
+          "catalog_assertion_type"
+        ],
+        "required": true,
+        "from_state": null,
+        "doc": "What to delete."
+      },
+      {
+        "name": "item_id",
+        "type": "uuid",
+        "required": true,
+        "from_state": null,
+        "doc": "The item to delete (one per call)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_start_run": {
@@ -10330,11 +13164,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_runs": {
@@ -10380,9 +13219,80 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "run_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "One functional run; without it, the list."
+      },
+      {
+        "name": "view",
+        "type": "enum",
+        "enum": [
+          "list",
+          "one",
+          "by_template"
+        ],
+        "from_state": null,
+        "doc": "list (default), one run, or the runs of a template.",
+        "default": "list"
+      },
+      {
+        "name": "template",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "With view by_template: the template."
+      },
+      {
+        "name": "status",
+        "type": "enum",
+        "enum": [
+          "pending",
+          "running",
+          "completed",
+          "failed",
+          "cancelled"
+        ],
+        "from_state": null,
+        "doc": "Only runs in this status."
+      },
+      {
+        "name": "type",
+        "type": "enum",
+        "enum": [
+          "adhoc",
+          "template"
+        ],
+        "from_state": null,
+        "doc": "Only ad hoc or template runs."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 100,
+        "default": 20,
+        "from_state": null,
+        "doc": "How many runs to return (1-100)."
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "min": 0,
+        "max": 100000,
+        "default": 0,
+        "from_state": null,
+        "doc": "The first run of the list."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_get_results": {
@@ -10428,9 +13338,61 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "run_id",
+        "type": "uuid",
+        "from_state": null,
+        "required": true,
+        "doc": "The functional run."
+      },
+      {
+        "name": "view",
+        "type": "enum",
+        "enum": [
+          "summary",
+          "flows",
+          "one",
+          "http_log"
+        ],
+        "from_state": null,
+        "doc": "summary (default), per flow, one result, or the HTTP log.",
+        "default": "summary"
+      },
+      {
+        "name": "result_id",
+        "type": "uuid",
+        "from_state": null,
+        "doc": "With view one: the result."
+      },
+      {
+        "name": "log_type",
+        "type": "enum",
+        "enum": [
+          "request",
+          "response",
+          "log"
+        ],
+        "from_state": null,
+        "doc": "With view http_log: which part."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many entries to return (1-200)."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_compare_runs": {
@@ -10476,9 +13438,29 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "run_id",
+        "type": "uuid",
+        "from_state": null,
+        "required": true,
+        "doc": "The functional run."
+      },
+      {
+        "name": "other",
+        "type": "uuid",
+        "from_state": null,
+        "required": true,
+        "doc": "The run to compare with."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "functional_generate_payloads": {
@@ -10557,9 +13539,37 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "flow_ids",
+        "type": "object",
+        "required": true,
+        "from_state": null,
+        "doc": "The flows to generate for (key: flow id; value: {}); 1-50."
+      },
+      {
+        "name": "test_types",
+        "type": "object",
+        "required": true,
+        "from_state": null,
+        "doc": "The test types to use (key: test type id; value: cases per flow, 1-20); 1-50."
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 260,
+        "from_state": null,
+        "doc": "Where to save the ZIP: a relative path in the project directory; default under loadcraft/payloads/. Never overwrites."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "github_get_status": {
@@ -10605,9 +13615,34 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "include",
+        "type": "string[]",
+        "enum": [
+          "history"
+        ],
+        "max_items": 1,
+        "from_state": null,
+        "doc": "\"history\": the latest syncs."
+      },
+      {
+        "name": "history_limit",
+        "type": "integer",
+        "min": 1,
+        "max": 50,
+        "default": 10,
+        "from_state": null,
+        "doc": "With include history: how many syncs (1-50)."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "github_connect": {
@@ -10700,11 +13735,16 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
     "arguments": null,
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "github_plan_push": {
@@ -10750,9 +13790,30 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      },
+      {
+        "name": "diffs",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: a short diff per file (up to 10 files, 40 lines each); without it, the file list."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "github_push": {
@@ -10854,11 +13915,41 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "next_steps": [],
     "pending_operations": null,
     "requires_capability": null,
-    "requires_user_interaction": false,
+    "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "composition_id",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "from_state": "ids.composition_id",
+        "doc": "The composition: its id or name; default: the one of this workspace."
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "min_length": 1,
+        "max_length": 200,
+        "required": true,
+        "from_state": null,
+        "doc": "The commit message."
+      },
+      {
+        "name": "create_pr",
+        "type": "boolean",
+        "default": false,
+        "from_state": null,
+        "doc": "true: open a pull request instead of committing to the branch."
+      }
+    ],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": null
+    },
     "known_debt": null
   },
   "github_get_changes": {
@@ -10904,9 +13995,24 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": false,
     "views": null,
-    "arguments": null,
+    "arguments": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "min": 1,
+        "max": 200,
+        "default": 50,
+        "from_state": null,
+        "doc": "How many changed files to list (1-200); the count is always the whole number."
+      }
+    ],
     "shows_content": null,
     "install_allow": true,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "override_reason": "pull przesuwa znacznik synchronizacji w backendzie: drugie wywołanie zwraca pustą listę"
+    },
     "known_debt": null
   },
   "github_disconnect": {
@@ -10987,9 +14093,14 @@ export const CATALOG: Readonly<Record<ToolName, CatalogTool>> = {
     "requires_capability": null,
     "requires_user_interaction": true,
     "views": null,
-    "arguments": null,
+    "arguments": [],
     "shows_content": null,
     "install_allow": false,
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "override_reason": null
+    },
     "known_debt": null
   }
 };
@@ -12096,8 +15207,8 @@ export const LOG_META: Readonly<Record<ToolName, LogMeta>> = {
     "level": 2,
     "class": "write",
     "log": {
-      "args": "Give {email} the role {role}",
-      "result": "{email}: {role}"
+      "args": "Give {user_id} the role {role}",
+      "result": "{user_id}: {role}"
     },
     "undo": [
       {
@@ -12389,6 +15500,12 @@ export const LOG_META: Readonly<Record<ToolName, LogMeta>> = {
         "level": 1
       },
       {
+        "tool": "flows_save",
+        "how": "the previous values",
+        "for": "update",
+        "level": 1
+      },
+      {
         "tool": "flows_delete",
         "how": "the new flow",
         "for": "create",
@@ -12463,12 +15580,12 @@ export const LOG_META: Readonly<Record<ToolName, LogMeta>> = {
     "class": "write",
     "log": {
       "args": "{flow_id}",
-      "result": "{count} poll questions answered"
+      "result": "{field} answered as v{version}; {open} open"
     },
     "undo": [
       {
-        "tool": "flows_set_poll_terminals",
-        "how": "answer again with other statuses",
+        "tool": "flows_restore_version",
+        "how": "the previous version",
         "for": "update",
         "level": 1
       }
@@ -12985,7 +16102,7 @@ export const LOG_META: Readonly<Record<ToolName, LogMeta>> = {
     "level": 3,
     "class": "destructive",
     "log": {
-      "args": "Delete datasets: {names}",
+      "args": "Delete dataset: {names}",
       "result": "{count} datasets deleted"
     },
     "undo": []
@@ -13580,6 +16697,12 @@ export const LOG_META: Readonly<Record<ToolName, LogMeta>> = {
       {
         "tool": "functional_restore_flow",
         "how": "the previous version",
+        "for": "update",
+        "level": 1
+      },
+      {
+        "tool": "functional_save_flow",
+        "how": "the previous values",
         "for": "update",
         "level": 1
       },
@@ -15274,7 +18397,8 @@ export const EXTENDED: readonly ToolName[] = [
 ];
 
 /**
- * Every backend operation the catalog names (tools and excluded). `satisfies` makes the compiler refuse an
+ * Every backend operation the catalog names (tools and excluded), but those the public snapshot leaves
+ * out (scripts/sync-api/excluded.ts). `satisfies` makes the compiler refuse an
  * operationId that is not a key of the generated client's operations.
  */
 export const CATALOG_OPERATION_IDS = [
@@ -15368,7 +18492,6 @@ export const CATALOG_OPERATION_IDS = [
   "delete_test_template_api_v1_test_templates__template_id__delete",
   "delete_test_type_api_v1_projects__project_id__test_types__test_type_id__delete",
   "delete_validator_api_v1_projects__project_id__validators__validator_id__delete",
-  "dev_login_api_v1_auth_dev_login_post",
   "disconnect_github_api_v1_projects__project_id__github_disconnect_post",
   "discover_validators_api_v1_projects__project_id__validators_discover_post",
   "download_execution_logs_api_v1_projects__project_id__gatling_executions__execution_id__logs_download_get",

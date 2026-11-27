@@ -13,6 +13,7 @@ import createClient, { type Client } from 'openapi-fetch';
 
 import type { Config } from '../config.js';
 import type { Logger } from '../log.js';
+import { maskText } from '../security/traceMask.js';
 import { abortError, systemClock, type Clock } from '../ops/clock.js';
 import { CallSecretScope } from '../workspace/secrets.js';
 import { VERSION } from '../version.js';
@@ -22,6 +23,7 @@ import {
   LoadcraftApiError,
   type LoadcraftApiErrorInit,
 } from './apiError.js';
+import { forgetMeta, getMeta } from './compat.js';
 import type { paths } from './generated/api.js';
 
 export type HttpClient = Client<paths>;
@@ -34,7 +36,18 @@ export interface HttpOptions {
    * its controlled clock while the time limit of a request in flight stays on real time.
    */
   pauseClock?: Clock;
+  /**
+   * The one compatibility check of the tools (FIX-72): before the first request of the client the
+   * backend is asked `GET /api/v1/meta` (`getMeta`), a backend without it or with an older API
+   * revision ends the request with `backend_too_old` and nothing else is sent. The answer is kept
+   * per client and asked again after a request that lost the connection. On in the clients the
+   * tools use (`createServices`); off in a client under test of its own.
+   */
+  checkCompat?: boolean;
 }
+
+/** The route the compatibility check asks; it is never checked itself. */
+const META_PATH = '/api/v1/meta';
 
 export const DEFAULT_TIMEOUT_MS = 30_000;
 /** Default limit of a successful answer's body (after decompression). */
@@ -168,6 +181,8 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
   const secrets = new CallSecretScope(log);
   secrets.add(config.token.reveal());
   const httpLog = log.child({ component: 'http' });
+  /** The route template (`/projects/{project_id}`) of each request, as the client built it. */
+  const templates = new WeakMap<Request, string>();
 
   const fail = (init: LoadcraftApiErrorInit): LoadcraftApiError =>
     new LoadcraftApiError({
@@ -192,6 +207,10 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
     }
 
     const { pathname } = new URL(request.url);
+    // The process log names the route template, never the concrete path: its segments can come from
+    // the target's own text (a file name, a handle) and so carry a secret the call's mask would
+    // catch but the process log's does not see. A request without a template is masked by shape.
+    const logPath = templates.get(request) ?? maskText(pathname).text;
     const method = request.method;
     const delays = method === 'GET' ? RETRY_DELAYS_MS : [];
     const timer = startTimer(clock, timeoutMs);
@@ -213,7 +232,7 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
         if (truncated && response.ok) {
           httpLog.warn('http response too large', {
             method,
-            path: pathname,
+            path: logPath,
             status: response.status,
             limitBytes: maxResponseBytes,
           });
@@ -240,7 +259,7 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
           outcome = await attempt(n);
         } catch (error) {
           if (!(error instanceof NetworkFailure) || delay === undefined) throw error;
-          httpLog.warn('http retry', { method, path: pathname, attempt: n + 1, reason: 'network' });
+          httpLog.warn('http retry', { method, path: logPath, attempt: n + 1, reason: 'network' });
           await pauseClock.sleep(delay, signal);
           continue;
         }
@@ -248,24 +267,24 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
         const { status } = response;
         httpLog.debug('http response', {
           method,
-          path: pathname,
+          path: logPath,
           status,
           attempt: n + 1,
           ms: clock.now() - started,
         });
         if (REDIRECT_STATUSES.has(status)) {
           const host = redirectHost(response.headers.get('Location'), request.url);
-          httpLog.warn('http unexpected redirect', { method, path: pathname, status, host });
+          httpLog.warn('http unexpected redirect', { method, path: logPath, status, host });
           throw fail({
             status,
             code: 'unexpected_redirect',
             message: `LoadCraft API answered ${method} ${pathname} with a redirect (HTTP ${String(status)}) to ${host === '' ? 'an unknown address' : host}; the plugin does not follow redirects.`,
-            details: { method, path: pathname, status, host },
+            details: { method, path: logPath, status, host },
             hint: 'Check the LoadCraft address in the plugin options (http or https, a trailing slash).',
           });
         }
         if (RETRY_STATUSES.has(status) && delay !== undefined) {
-          httpLog.warn('http retry', { method, path: pathname, attempt: n + 1, status });
+          httpLog.warn('http retry', { method, path: logPath, attempt: n + 1, status });
           await pauseClock.sleep(delay, signal);
           continue;
         }
@@ -296,7 +315,7 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
       if (error instanceof LoadcraftApiError) throw error;
       if (caller.aborted) throw abortError(caller);
       if (timer.signal.aborted) {
-        httpLog.warn('http timeout', { method, path: pathname, timeoutMs });
+        httpLog.warn('http timeout', { method, path: logPath, timeoutMs });
         throw new LoadcraftApiError({
           status: 0,
           code: 'timeout',
@@ -306,7 +325,7 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
       }
       if (error instanceof NetworkFailure) {
         const reason = innermostMessage(error.cause);
-        httpLog.warn('http network error', { method, path: pathname, reason });
+        httpLog.warn('http network error', { method, path: logPath, reason });
         throw fail({
           status: 0,
           code: 'network_error',
@@ -320,5 +339,25 @@ export function createHttp(config: Config, log: Logger, options: HttpOptions = {
     }
   };
 
-  return createClient<paths>({ baseUrl, fetch: send });
+  const checked = async (request: Request): Promise<Response> => {
+    if (templates.get(request) === META_PATH) return send(request);
+    await getMeta(client);
+    try {
+      return await send(request);
+    } catch (error) {
+      if (error instanceof LoadcraftApiError && error.code === 'network_error') forgetMeta(client);
+      throw error;
+    }
+  };
+
+  const client: HttpClient = createClient<paths>({
+    baseUrl,
+    fetch: options.checkCompat === true ? checked : send,
+  });
+  client.use({
+    onRequest({ request, schemaPath }) {
+      templates.set(request, schemaPath);
+    },
+  });
+  return client;
 }

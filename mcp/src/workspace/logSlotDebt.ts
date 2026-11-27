@@ -1,0 +1,48 @@
+// Slots of the result template of a tool's log entry that its tests leave without a value today
+// (inventory of FIX-69, every test of every tool). The entry prints `none` there, never the fields of
+// the call's data in their place. Under the tests the registry refuses any OTHER unfilled slot: a
+// tool whose data may lack a slot gives its value in `log.values`. Each entry is a debt to pay back
+// (the tool fills the slot, or the catalog template names what the data carries); none is added.
+
+export const UNFILLED_RESULT_SLOTS: Readonly<Record<string, readonly string[]>> = {
+  data_check_readiness: ['ok', 'short'],
+  data_create_accounts: ['created', 'failed'],
+  data_create_dataset: ['name', 'rows'],
+  data_get_dataset: ['name', 'rows'],
+  data_set_bindings: ['count'],
+  data_suggest_actions: ['actions'],
+  flows_delete: ['count'],
+  flows_describe_journeys: ['paths'],
+  flows_generate_from_har: ['built'],
+  flows_generate_from_suggestions: ['built', 'failed'],
+  flows_import_har: ['kept', 'noise'],
+  flows_migrate_docs: ['changed', 'count', 'matched', 'unmatched'],
+  flows_record_journeys: ['built', 'failed'],
+  flows_save: ['name', 'version'],
+  flows_suggest_journeys: ['count'],
+  functional_get_results: ['failed', 'passed'],
+  process_cancel: ['handle'],
+  process_get_status: ['pending', 'problems', 'running', 'step'],
+  process_wait: ['handle', 'status'],
+  project_analyze_setup: ['fields'],
+  project_apply_setup: ['fields', 'test_types', 'validators'],
+  project_check_env: ['documented', 'found', 'ok'],
+  project_connect_telemetry: ['tools'],
+  project_create: ['created|adopted'],
+  project_delete: ['count'],
+  project_get: ['name'],
+  project_get_docs: ['version'],
+  project_get_envs: ['count'],
+  project_import_docs: ['endpoints', 'kind', 'old_flows', 'version'],
+  project_save_env: ['name'],
+  project_set_profile: ['fields', 'n'],
+  results_analyze_run: ['findings'],
+  results_get_errors: ['groups'],
+  results_get_report: ['errors', 'p95', 'requests', 'verdict'],
+  results_get_traces: ['count'],
+  run_plan: ['ok', 'profiles', 'sessions'],
+  run_start: ['run_id', 'status'],
+  scenario_check_self: ['n', 'passed'],
+  scenario_generate: ['built', 'n', 'passed'],
+  scenario_suggest_split: ['split'],
+};

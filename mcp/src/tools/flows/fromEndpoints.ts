@@ -15,6 +15,7 @@ import { LoadcraftApiError } from '../../http/apiError.js';
 import { defineOperationKind, startOrJoin, type OperationOutcome } from '../../ops/operation.js';
 import type { DoneOutcome } from '../../outcome.js';
 import { inline } from '../../render/primitives.js';
+import { content } from '../moduleCall.js';
 import { renderBuildFlows, type BuildFlowsData } from '../../render/views/buildFlows.js';
 import { createResolver } from '../../resolve/handles.js';
 import { flowsUpdate, readBuilt } from './fromSuggestions.js';
@@ -104,10 +105,14 @@ async function unknownEndpoints(
   const shown = ids.slice(0, SHOWN_IDS);
   const closest = shown.flatMap((id) => {
     const found = closestEndpoints(id, known);
-    return found.length === 0 ? [] : [`${inline(id, MAX_NAME)} → ${found.join(', ')}`];
+    return found.length === 0
+      ? []
+      : [
+          `${content(ctx, id, MAX_NAME)} → ${found.map((name) => content(ctx, name, MAX_NAME)).join(', ')}`,
+        ];
   });
   const more = ids.length - shown.length;
-  const names = shown.map((id) => `"${inline(id, MAX_NAME)}"`).join(', ');
+  const names = shown.map((id) => `"${content(ctx, id, MAX_NAME)}"`).join(', ');
   return new ToolError('unknown_endpoints', {
     params: {
       what: ctx.t.plural('build.manual.unknownIds', ids.length, {
@@ -127,10 +132,19 @@ const savedSchema = z.object({
   name: z.string(),
   /** Flows of the project when the name could not be checked against all of them. */
   unchecked: z.number().int().optional(),
+  /**
+   * Set by `flows_regenerate`: the run rewrites this flow as a new version (the one it had is the way back),
+   * instead of making a new one.
+   */
+  regenerate: z
+    .object({ flowId: z.string().min(1).max(64), previousVersion: z.number().int().min(0) })
+    .optional(),
 });
 
 interface GenerationState {
   readonly name: string;
+  /** The run regenerates a flow (`flows_regenerate`): its lines of progress say so. */
+  readonly regenerating?: true;
   readonly phase: 'running' | 'completed' | 'failed' | 'cancelled';
   /** 0..100 */
   readonly progress: number;
@@ -139,11 +153,65 @@ interface GenerationState {
   readonly error?: string;
 }
 
+/** The tool of the regeneration, named in its log entry and in the problems it opens. */
+const REGENERATE_TOOL = 'flows_regenerate';
+
+/**
+ * A run of `flows_regenerate` that ended: the flow it rewrote with the version it has now, read back; a run that
+ * failed or whose result cannot be read is an error of the module, and the flow is as it was.
+ */
+async function finishRegeneration(
+  ctx: ToolContext,
+  state: GenerationState,
+  saved: z.infer<typeof savedSchema>,
+  regenerate: NonNullable<z.infer<typeof savedSchema>['regenerate']>,
+): Promise<DoneOutcome<BuildFlowsData>> {
+  const name = content(ctx, saved.name, MAX_NAME);
+  if (state.phase === 'cancelled') {
+    throw new ToolError('flow_generation_cancelled', { params: { name, tool: REGENERATE_TOOL } });
+  }
+  const built =
+    state.phase === 'completed'
+      ? await readBuilt(ctx, saved.projectId, regenerate.flowId)
+      : undefined;
+  if (built === undefined) {
+    const detail =
+      withheldJobText(ctx, REGENERATE_TOOL, state.error) ??
+      ctx.t(
+        state.phase === 'completed' ? 'build.flows.reason.unreadable' : 'build.manual.noDetail',
+      );
+    throw new ToolError('flows_regenerate_failed', { params: { name, detail } });
+  }
+  const update = flowsUpdate([built], ctx.state.process(), REGENERATE_TOOL);
+  return {
+    status: 'done',
+    data: {
+      built: [built.outline],
+      questions: built.questions,
+      failed: [],
+      lead: 'single',
+      regenerated: {
+        previous_version: regenerate.previousVersion,
+        version: built.outline.version,
+      },
+    },
+    links: [ctx.services.links.flow(saved.projectId, regenerate.flowId)],
+    update: {
+      ...update,
+      log: {
+        values: { name: built.outline.name, version: built.outline.version },
+        undo_args: { flow_id: regenerate.flowId, version: regenerate.previousVersion },
+      },
+    },
+  };
+}
+
 export const flowGenerationOperation = defineOperationKind({
   kind: 'flow_generation',
   saved: savedSchema,
   initial: (_ctx, _id, saved): GenerationState => ({
     name: saved.name,
+    ...(saved.regenerate === undefined ? {} : { regenerating: true as const }),
     phase: 'running',
     progress: 0,
   }),
@@ -152,6 +220,7 @@ export const flowGenerationOperation = defineOperationKind({
     const status = await getFlowGenerationStatus(ctx, saved.projectId, id);
     return {
       name: saved.name,
+      ...(saved.regenerate === undefined ? {} : { regenerating: true as const }),
       phase: status.phase,
       progress: status.progress,
       ...(status.step === null ? {} : { step: status.step }),
@@ -164,16 +233,19 @@ export const flowGenerationOperation = defineOperationKind({
     state.phase === 'failed' || state.phase === 'cancelled' ? state.phase : undefined,
   describe(state, t) {
     const name = inline(state.name, MAX_NAME);
+    const prefix = state.regenerating === true ? 'flows_regenerate' : 'build.manual';
     return {
       message:
         state.step === undefined
-          ? t('build.manual.running', { name })
-          : t('build.manual.progress', { name, step: inline(state.step, 60) }),
+          ? t(`${prefix}.running`, { name })
+          : t(`${prefix}.progress`, { name, step: inline(state.step, 60) }),
       fraction: Math.min(1, Math.max(0, state.progress / 100)),
     };
   },
   async finish(ctx, _id, state, saved): Promise<DoneOutcome<BuildFlowsData>> {
-    const name = inline(saved.name, MAX_NAME);
+    const name = content(ctx, saved.name, MAX_NAME);
+    if (saved.regenerate !== undefined)
+      return finishRegeneration(ctx, state, saved, saved.regenerate);
     if (state.phase === 'cancelled')
       throw new ToolError('flow_generation_cancelled', { params: { name, tool: TOOL } });
     const built =
@@ -233,7 +305,7 @@ export async function buildFromEndpoints(
       const existing = listed.flows.find((flow) => flow.name.trim().toLowerCase() === wanted);
       if (existing !== undefined) {
         throw new ToolError('flow_exists', {
-          params: { name: inline(existing.name, MAX_NAME), tool: TOOL },
+          params: { name: content(ctx, existing.name, MAX_NAME), tool: TOOL },
         });
       }
       let runId: string;

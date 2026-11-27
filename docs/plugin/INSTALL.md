@@ -98,14 +98,53 @@ Lets the assistant read the state of your work and results, and nothing else:
   "permissions": {
     "allow": [
       "mcp__plugin_loadcraft_lc__process_get_status",
-      "mcp__plugin_loadcraft_lc__flows_get",
       "mcp__plugin_loadcraft_lc__run_plan",
       "mcp__plugin_loadcraft_lc__results_get_report",
       "mcp__plugin_loadcraft_lc__results_get_errors",
       "mcp__plugin_loadcraft_lc__process_wait",
       "mcp__plugin_loadcraft_lc__project_get",
       "mcp__plugin_loadcraft_lc__data_check_readiness",
-      "mcp__plugin_loadcraft_lc__project_list_notes"
+      "mcp__plugin_loadcraft_lc__data_get_copilot_history",
+      "mcp__plugin_loadcraft_lc__data_get_generators",
+      "mcp__plugin_loadcraft_lc__data_get_slots",
+      "mcp__plugin_loadcraft_lc__flows_get",
+      "mcp__plugin_loadcraft_lc__flows_get_copilot_history",
+      "mcp__plugin_loadcraft_lc__flows_get_versions",
+      "mcp__plugin_loadcraft_lc__flows_get_walks",
+      "mcp__plugin_loadcraft_lc__flows_list",
+      "mcp__plugin_loadcraft_lc__functional_compare_runs",
+      "mcp__plugin_loadcraft_lc__functional_get_analytics",
+      "mcp__plugin_loadcraft_lc__functional_get_catalog",
+      "mcp__plugin_loadcraft_lc__functional_get_flows",
+      "mcp__plugin_loadcraft_lc__functional_get_runs",
+      "mcp__plugin_loadcraft_lc__functional_get_templates",
+      "mcp__plugin_loadcraft_lc__functional_get_test_types",
+      "mcp__plugin_loadcraft_lc__functional_get_validators",
+      "mcp__plugin_loadcraft_lc__github_get_status",
+      "mcp__plugin_loadcraft_lc__github_plan_push",
+      "mcp__plugin_loadcraft_lc__project_get_activity",
+      "mcp__plugin_loadcraft_lc__project_get_apimap",
+      "mcp__plugin_loadcraft_lc__project_get_docs",
+      "mcp__plugin_loadcraft_lc__project_get_endpoints",
+      "mcp__plugin_loadcraft_lc__project_list",
+      "mcp__plugin_loadcraft_lc__project_list_notes",
+      "mcp__plugin_loadcraft_lc__project_list_team",
+      "mcp__plugin_loadcraft_lc__results_check_production",
+      "mcp__plugin_loadcraft_lc__results_compare_runs",
+      "mcp__plugin_loadcraft_lc__results_get_request",
+      "mcp__plugin_loadcraft_lc__run_get",
+      "mcp__plugin_loadcraft_lc__run_get_profiles",
+      "mcp__plugin_loadcraft_lc__run_get_saved",
+      "mcp__plugin_loadcraft_lc__run_get_usage",
+      "mcp__plugin_loadcraft_lc__run_list",
+      "mcp__plugin_loadcraft_lc__scenario_check_composition",
+      "mcp__plugin_loadcraft_lc__scenario_get_copilot_history",
+      "mcp__plugin_loadcraft_lc__scenario_get_templates",
+      "mcp__plugin_loadcraft_lc__scenario_list",
+      "mcp__plugin_loadcraft_lc__scenario_list_compositions",
+      "mcp__plugin_loadcraft_lc__traffic_get_push_setup",
+      "mcp__plugin_loadcraft_lc__traffic_get_snapshot",
+      "mcp__plugin_loadcraft_lc__traffic_list_snapshots"
     ]
   }
 }
@@ -118,8 +157,10 @@ cannot read is hidden whole.
 
 ### Variant B: everything that stays inside LoadCraft
 
-Adds the tools that create and change things in LoadCraft only (project, documentation, flows, scenario, AI
-analysis):
+Adds the few tools that are no read only but that the catalog allows up front (exports and the changes of
+the linked repository). The tools that create or change things in LoadCraft are not here: each of them asks for
+your consent (a consent card) or the catalog does not allow it at install, so Claude Code asks every time; they
+are listed below the block:
 
 <!-- allow:inside begin: npm run update:shared writes this block from the catalog; do not edit -->
 ```json
@@ -127,34 +168,63 @@ analysis):
   "permissions": {
     "allow": [
       "mcp__plugin_loadcraft_lc__process_get_status",
-      "mcp__plugin_loadcraft_lc__flows_get",
       "mcp__plugin_loadcraft_lc__run_plan",
       "mcp__plugin_loadcraft_lc__results_get_report",
       "mcp__plugin_loadcraft_lc__results_get_errors",
       "mcp__plugin_loadcraft_lc__process_wait",
       "mcp__plugin_loadcraft_lc__project_get",
       "mcp__plugin_loadcraft_lc__data_check_readiness",
-      "mcp__plugin_loadcraft_lc__project_create",
-      "mcp__plugin_loadcraft_lc__project_save_env",
-      "mcp__plugin_loadcraft_lc__project_check_env",
-      "mcp__plugin_loadcraft_lc__project_analyze_setup",
-      "mcp__plugin_loadcraft_lc__project_apply_setup",
-      "mcp__plugin_loadcraft_lc__project_set_profile",
-      "mcp__plugin_loadcraft_lc__project_connect_telemetry",
-      "mcp__plugin_loadcraft_lc__project_import_docs",
-      "mcp__plugin_loadcraft_lc__flows_suggest_journeys",
-      "mcp__plugin_loadcraft_lc__flows_migrate_docs",
-      "mcp__plugin_loadcraft_lc__flows_generate_from_suggestions",
-      "mcp__plugin_loadcraft_lc__flows_generate_from_endpoints",
-      "mcp__plugin_loadcraft_lc__scenario_suggest_split",
-      "mcp__plugin_loadcraft_lc__results_analyze_run",
-      "mcp__plugin_loadcraft_lc__project_list_notes"
+      "mcp__plugin_loadcraft_lc__data_get_copilot_history",
+      "mcp__plugin_loadcraft_lc__data_get_generators",
+      "mcp__plugin_loadcraft_lc__data_get_slots",
+      "mcp__plugin_loadcraft_lc__flows_export_walk_image",
+      "mcp__plugin_loadcraft_lc__flows_get",
+      "mcp__plugin_loadcraft_lc__flows_get_copilot_history",
+      "mcp__plugin_loadcraft_lc__flows_get_versions",
+      "mcp__plugin_loadcraft_lc__flows_get_walks",
+      "mcp__plugin_loadcraft_lc__flows_list",
+      "mcp__plugin_loadcraft_lc__functional_compare_runs",
+      "mcp__plugin_loadcraft_lc__functional_get_analytics",
+      "mcp__plugin_loadcraft_lc__functional_get_catalog",
+      "mcp__plugin_loadcraft_lc__functional_get_flows",
+      "mcp__plugin_loadcraft_lc__functional_get_runs",
+      "mcp__plugin_loadcraft_lc__functional_get_templates",
+      "mcp__plugin_loadcraft_lc__functional_get_test_types",
+      "mcp__plugin_loadcraft_lc__functional_get_validators",
+      "mcp__plugin_loadcraft_lc__github_get_changes",
+      "mcp__plugin_loadcraft_lc__github_get_status",
+      "mcp__plugin_loadcraft_lc__github_plan_push",
+      "mcp__plugin_loadcraft_lc__project_get_activity",
+      "mcp__plugin_loadcraft_lc__project_get_apimap",
+      "mcp__plugin_loadcraft_lc__project_get_docs",
+      "mcp__plugin_loadcraft_lc__project_get_endpoints",
+      "mcp__plugin_loadcraft_lc__project_list",
+      "mcp__plugin_loadcraft_lc__project_list_notes",
+      "mcp__plugin_loadcraft_lc__project_list_team",
+      "mcp__plugin_loadcraft_lc__results_check_production",
+      "mcp__plugin_loadcraft_lc__results_compare_runs",
+      "mcp__plugin_loadcraft_lc__results_export_report",
+      "mcp__plugin_loadcraft_lc__results_get_request",
+      "mcp__plugin_loadcraft_lc__run_get",
+      "mcp__plugin_loadcraft_lc__run_get_profiles",
+      "mcp__plugin_loadcraft_lc__run_get_saved",
+      "mcp__plugin_loadcraft_lc__run_get_usage",
+      "mcp__plugin_loadcraft_lc__run_list",
+      "mcp__plugin_loadcraft_lc__scenario_check_composition",
+      "mcp__plugin_loadcraft_lc__scenario_export",
+      "mcp__plugin_loadcraft_lc__scenario_get_copilot_history",
+      "mcp__plugin_loadcraft_lc__scenario_get_templates",
+      "mcp__plugin_loadcraft_lc__scenario_list",
+      "mcp__plugin_loadcraft_lc__scenario_list_compositions",
+      "mcp__plugin_loadcraft_lc__traffic_get_push_setup",
+      "mcp__plugin_loadcraft_lc__traffic_get_snapshot",
+      "mcp__plugin_loadcraft_lc__traffic_list_snapshots"
     ]
   }
 }
 ```
 <!-- allow:inside end -->
-<!-- left-out begin: npm run update:shared --><!-- left-out end -->
+<!-- left-out begin: npm run update:shared -->Left out as well, because they ask for your consent each time (a consent card) or the catalog does not allow them at install: `data_ask_copilot`, `data_delete`, `data_generate_dataset`, `data_get_dataset`, `data_list_datasets`, `data_regenerate_dataset`, `data_restore_dataset`, `data_set_slot_label`, `data_update_dataset`, `flows_apply_copilot_changes`, `flows_ask_copilot`, `flows_duplicate`, `flows_generate_from_endpoints`, `flows_generate_from_suggestions`, `flows_merge`, `flows_regenerate`, `flows_restore_version`, `flows_save`, `flows_save_walk_note`, `flows_set_poll_terminals`, `flows_suggest_journeys`, `functional_delete`, `functional_generate_payloads`, `functional_generate_test_types`, `functional_get_results`, `functional_restore_flow`, `functional_save_catalog`, `functional_save_flow`, `functional_save_template`, `functional_save_test_types`, `functional_save_validators`, `functional_suggest_test_types`, `functional_suggest_validators`, `github_disconnect`, `github_push`, `process_set_choices`, `project_analyze_setup`, `project_connect_telemetry`, `project_create`, `project_disconnect_telemetry`, `project_get_envs`, `project_get_http_settings`, `project_save_env`, `project_save_member`, `project_set_active_docs`, `project_set_apimap`, `project_set_http_settings`, `project_update`, `project_update_note`, `results_analyze_run`, `results_get_logs`, `results_set_baseline`, `run_delete`, `run_save`, `run_save_profile`, `scenario_ask_copilot`, `scenario_check_drift`, `scenario_compile_composition`, `scenario_delete`, `scenario_get`, `scenario_get_composition`, `scenario_get_composition_code`, `scenario_get_versions`, `scenario_restore_version`, `scenario_save`, `scenario_save_composition`, `scenario_set_composition_type`, `scenario_suggest_split`, `scenario_update_pins`, `traffic_delete`.<!-- left-out end -->
 
 Left out on purpose, so Claude Code keeps asking: `run_start` and `data_create_accounts` (they touch your system;
 Claude Code asks for them every time anyway), `data_create_dataset` (it can send a file of accounts to LoadCraft),

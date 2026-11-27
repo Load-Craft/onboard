@@ -395,3 +395,31 @@ describe('tool call uses a logger scope (B10)', () => {
     expect(after).not.toContain('process-token');
   });
 });
+
+describe('registering the same value again', () => {
+  const VALUE = 'repeat-secret-value-91';
+
+  it('masks as before when a value is added twice, also through a fork', () => {
+    const parent = new Masker();
+    parent.add(VALUE);
+    parent.add(VALUE);
+    const child = parent.fork();
+    child.add(VALUE);
+    for (const masker of [parent, child]) {
+      expect(masker.text(`x ${VALUE} y`)).toBe(`x ${REDACTED} y`);
+    }
+  });
+
+  it('a fork keeps its own value to itself and sees a value the parent learns later', () => {
+    const parent = new Masker();
+    const child = parent.fork();
+    child.add(VALUE);
+    parent.add(VALUE);
+    expect(child.text(VALUE)).toBe(REDACTED);
+    expect(parent.text(VALUE)).toBe(REDACTED);
+    const other = new Masker();
+    const own = other.fork();
+    own.add('only-in-the-fork-77');
+    expect(other.text('only-in-the-fork-77')).toBe('only-in-the-fork-77');
+  });
+});

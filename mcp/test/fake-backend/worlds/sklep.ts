@@ -191,7 +191,7 @@ export interface SklepSelfCheck {
   finished_at: string | null;
 }
 
-/** The scenario detail document (`_scenario_detail_payload`, `api/routes/gatling.py:4118`). */
+/** The scenario detail document (`_scenario_detail_payload`). */
 export interface SklepScenario {
   id: string;
   name: string;
@@ -250,7 +250,7 @@ export interface SklepScenario {
   updated_at: string;
 }
 
-/** A member of a composition (`_format_composition`, `gatling_compositions.py:812-871`). */
+/** A member of a composition (`_format_composition`). */
 /** What a composition link can drift in, as the contract enumerates it. */
 export type SklepDriftField =
   'name' | 'description' | 'scenario_contract_v2' | 'scenario_artifact' | 'simulation_class_name';
@@ -289,7 +289,7 @@ export interface SklepCompositionLink {
   current_version: number;
 }
 
-/** The composition document (`_format_composition`, `gatling_compositions.py:745-792`). */
+/** The composition document (`_format_composition`). */
 export type SklepThrottleStep = {
   action: 'hold' | 'reach_rps' | 'jump_to_rps';
   duration_seconds?: number | null;
@@ -368,7 +368,7 @@ export interface SklepComposition {
   scenarios: SklepCompositionLink[];
 }
 
-/** A project dataset (`_serialize_feeder_model`, `api/routes/gatling.py:2050-2098`). */
+/** A project dataset (`_serialize_feeder_model`). */
 export interface SklepFeeder {
   id: string;
   gatling_project_id: string;
@@ -419,7 +419,7 @@ export type SklepFeederManifestEntry = {
   binding_source: 'persisted';
 };
 
-/** The run manifest (`_run_manifest_payload`, `api/routes/gatling.py:12412`). */
+/** The run manifest (`_run_manifest_payload`). */
 export interface SklepRunManifest {
   workload: { kind: 'adr005'; value: { type: string; vusers: number; ramp: number } } | null;
   proportions: {
@@ -456,7 +456,7 @@ export type SklepAssertionOutcome = {
   message: string;
 };
 
-/** `SlaVerdictV1.to_json` (`domain/services/gatling/sla_verdict.py:89-115`). */
+/** `SlaVerdictV1.to_json`. */
 export interface SklepSlaVerdict {
   format_version: 1;
   source: 'loadcraft-exact';
@@ -474,8 +474,8 @@ export interface SklepSlaVerdict {
 }
 
 /**
- * A run row: the union of the execution list row (`list_executions`, `gatling.py:12486`) and the
- * detail document (`get_execution`, `gatling.py:13296`). A self-check is a run with one
+ * A run row: the union of the execution list row (`list_executions`) and the
+ * detail document (`get_execution`). A self-check is a run with one
  * `scenario_id`; a composition run has `composite_id`.
  */
 export interface SklepExecution {
@@ -520,7 +520,7 @@ export type SklepPerRequest = {
   p99_histogram: number;
 };
 
-/** `EndpointRow` of `get_endpoints_summary` (`prometheus_query.py:994-1035`), without `time_series`. */
+/** `EndpointRow` of `get_endpoints_summary`, without `time_series`. */
 export type SklepEndpointRow = {
   name: string;
   group: string;
@@ -543,7 +543,7 @@ export type SklepEndpointRow = {
   http_status_counts: Record<string, number>;
 };
 
-/** An error group from Prometheus (`prometheus_query.py:800-842`). */
+/** An error group from Prometheus. */
 export type SklepErrorGroup = {
   error_hash: string;
   message: string;
@@ -572,7 +572,7 @@ export type SklepTimePoint = {
 
 /**
  * The `…/result` document of a finished run, `aggregates_source: persisted`
- * (`gatling_results.py:741-751`, `executor.py:1127-1150`, `prometheus_query.py`).
+
  * `id` is the execution id: the document is keyed by its run.
  */
 export interface SklepExecutionResult {
@@ -1217,7 +1217,7 @@ interface PauseStep {
 }
 
 /**
- * What the backend writes on a pause it adds before an API call (flow_generation/service.py:592):
+ * What the backend writes on a pause it adds before an API call:
  * a fixed English sentence, never the person's activity.
  */
 const PAUSE_DESCRIPTION = 'Assumed default think time before an API call (not measured)';
@@ -1535,8 +1535,8 @@ const GENERATED_ROWS: Record<string, number> = { [SLOT_SEARCH]: 500, [SLOT_ORDER
 function slot(key: string): SklepSlot {
   const found = SLOTS[key];
   if (found === undefined) throw new Error(`sklep world: no slot ${key}`);
-  // `generated` is true where the rows ride in the artifact (`_bundle_satisfied_slot_rows`,
-  // api/routes/gatling.py:4068-4089): the slots of plain data of this world; the accounts never.
+  // `generated` is true where the rows ride in the artifact (`_bundle_satisfied_slot_rows`):
+  // the slots of plain data of this world; the accounts never.
   const rows = GENERATED_ROWS[key];
   return {
     ...found,

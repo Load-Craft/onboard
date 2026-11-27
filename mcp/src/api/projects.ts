@@ -8,12 +8,12 @@ import { callOperation } from '../http/operation.js';
 import { must, type ApiContext, type SecretApiContext } from './context.js';
 import type { Named } from './lookup.js';
 
-/** Most results `GET /api/v1/search` returns (`limit: int = Query(20, ge=1, le=50)`, `dashboard.py:429`). */
+/** Most results `GET /api/v1/search` returns (`limit` is at most 50). */
 const SEARCH_LIMIT = 50;
-/** Longest query the search accepts (`q: str = Query(min_length=1, max_length=100)`, `dashboard.py:428`). */
+/** Longest query the search accepts (`q` is 1 to 100 characters). */
 const SEARCH_QUERY_MAX = 100;
 
-/** Text of the create route's refusal of a taken name (`projects.py:337-342`, 400 `{detail}`). */
+/** Text of the create route's refusal of a taken name (400 `{detail}`). */
 const NAME_TAKEN = /already exists/i;
 
 /**

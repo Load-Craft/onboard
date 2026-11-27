@@ -273,8 +273,11 @@ text, max)`: the known secrets out, then the shapes of secrets masked, then one 
   ```
 
 - **The log.** The registry writes the entry from the catalog's templates: the data (or
-  `update.log.values`) must carry the fields the templates name (`{count}` here). A read has no
-  `undo`.
+  `update.log.values`) must carry the fields the templates name (`{count}` here). `update.log.values`
+  win over a field of the same name in the arguments and the data (a handle for the UUID the data
+  carries, a rounded number), so the data never has to bend to the log. A value that fills a slot of
+  the result other than the data of the same name fails the call under the tests; a number shown with
+  fewer digits (`410` for `410.3`) is the same value. A read has no `undo`.
 - **The state.** What the tool writes to the state (`state_writes` of the entry) goes in the
   `update` of its outcome; a tool never writes the state file.
 - **Long lists.** The catalog's `views` (`meta.views`: a page of items, a `ref` to the full list)
@@ -328,9 +331,11 @@ skills fail until it is. Two lists are written by `npm run update:shared`, never
 
 - `evals/mocks/lc/_tools.json`: the `tools/list` of the server, sorted by name;
 - the permission blocks of `docs/plugin/INSTALL.md` and `INSTALL.pl.md`, between their markers: a
-  tool of a module is in both variants when the catalog allows it at install (`install_allow`), in
-  variant B only when it is a write that stays inside LoadCraft, and named in the generated
-  sentence of the tools left out otherwise; today's tools keep their entries as written.
+  tool of a module is in both variants when the catalog allows it at install (`install_allow`) and
+  it is a read only (`readOnlyHint`), in variant B only when it is allowed at install but writes
+  (files of the workspace included) or when it is a write that stays inside LoadCraft, and named in
+  the generated sentence of the tools left out otherwise; today's tools keep their entries as
+  written.
 
 One is written by hand: a skill file of `skills/loadcraft-test` (or `loadcraft-status`,
 `loadcraft-doctor`) names the tool in backticks where its use is described

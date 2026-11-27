@@ -1,4 +1,4 @@
-// Flow-suggestion routes of the fake backend (`api/routes/flow_suggestions.py`): the free heuristic
+// Flow-suggestion routes of the fake backend: the free heuristic
 // answer, the refine call with its two modes (an answer from the backend's cache, or a background
 // job followed over the `refine` channel), and the read of the project's OpenAPI document that
 // names the operations. The job lives on the test clock; the channel behaves as the real one, so a
@@ -32,7 +32,7 @@ const registeredOpenapi = new WeakSet<Fake>();
 const registeredSuggestions = new WeakMap<Fake, SuggestionHandles>();
 
 /**
- * `GET …/openapi` (`api/routes/projects.py`): the current specification of the project with its
+ * `GET …/openapi`: the current specification of the project with its
  * operations. 404 while the project has no specification; the sklep world has one from the
  * `project` stage on.
  */

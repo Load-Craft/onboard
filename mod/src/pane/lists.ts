@@ -14,6 +14,7 @@
 
 import { inline } from '../../../mcp/src/render/primitives.js';
 import { MAX_SCENARIO_FLOWS } from '../../../mcp/src/tools/scenario/limits.js';
+import { parseDataBlock } from '../state/signal.js';
 import { addedMarks, toggledMarks } from '../view/list.js';
 import { finite, isDict, list, str } from '../view/tree.js';
 import {
@@ -297,18 +298,52 @@ export function withOutline(panel: PanelData, outline: OutlineFacts | undefined)
   return { ...panel, outline };
 }
 
-/** The panel after a read that did not work: marked failed, for this state of the project / this flow. */
+/** A code of an error answer as the server writes it on its first line: `[backend_unavailable] …`. */
+const ERROR_CODE = /^\[([a-z][a-z0-9_]{0,63})\]/u;
+
+/**
+ * Why a read of a list gave nothing the list can use, from the answer alone (only for a read that
+ * failed): `code:<code>` for an error answer (the code of its first line, `code:error` without one;
+ * nothing of its text), `bad_answer` for an answer that is not one data block, `missing` for a data
+ * block that lacks what the list reads. `busy` and `exception` are the reader's own (register.ts).
+ */
+export function readFailure(answer: unknown): string {
+  if (
+    typeof answer === 'object' &&
+    answer !== null &&
+    (answer as { isError?: unknown }).isError === true
+  ) {
+    const content = (answer as { content?: unknown }).content;
+    const first = Array.isArray(content)
+      ? (content[0] as { text?: unknown } | undefined)
+      : undefined;
+    const code = typeof first?.text === 'string' ? ERROR_CODE.exec(first.text)?.[1] : undefined;
+    return `code:${code ?? 'error'}`;
+  }
+  return parseDataBlock(answer) === undefined ? 'bad_answer' : 'missing';
+}
+
+/** The field of the data each list reads: what a `missing` failure names. */
+export const READ_FIELD = { flows: 'section', runs: 'recentRuns', outline: 'outline' } as const;
+
+/**
+ * The panel after a read that did not work: marked failed, for this state of the project / this flow,
+ * with why (`readFailure`) when it is known.
+ */
 export function withFailed(
   panel: PanelData,
   what: 'flows' | 'runs' | 'outline',
   flow?: string,
+  why?: string,
 ): PanelData {
+  const reason = why === undefined ? {} : { why };
   if (what === 'flows') {
     return {
       ...panel,
       flows: {
         stamp: flowsStamp(panel.project),
         failed: true,
+        ...reason,
         items: panel.flows?.items ?? [],
         more: panel.flows?.more ?? 0,
       },
@@ -320,6 +355,7 @@ export function withFailed(
       runs: {
         stamp: runsStamp(panel.project),
         failed: true,
+        ...reason,
         items: panel.runs?.items ?? [],
         more: panel.runs?.more ?? 0,
       },
@@ -327,7 +363,7 @@ export function withFailed(
   }
   return {
     ...panel,
-    outline: { flow: flow ?? '', failed: true, steps: [], total: 0, truncated: false },
+    outline: { flow: flow ?? '', failed: true, ...reason, steps: [], total: 0, truncated: false },
   };
 }
 

@@ -99,10 +99,10 @@ function cellsOfContent(dataset: Json, columns: ReadonlySet<string>, out: string
 
 /**
  * Cells taken from each dataset of a list, the first ones, each once. A dataset read on its own
- * gives every cell: a view may show any of its rows. A list of datasets (every dataset of a project,
- * with its whole content) is read by every data tool and none of them shows its rows; a cell costs
- * the masker about 20 µs twice (the scope of the call and the logger), so the 50 000 cells of a 2 MB
- * file of accounts would add seconds to each such call. The reader of the list keeps the same bound.
+ * gives every cell: a view may show any of its rows. The project's list of datasets carries no cells
+ * (the backend names the datasets only), but an answer that lists datasets with their content would
+ * cost the masker about 20 µs a cell twice (the scope of the call and the logger), so the 50 000
+ * cells of a 2 MB file of accounts would add seconds to the call; such a list keeps this bound.
  */
 export const MAX_CELLS_PER_LISTED_DATASET = 1000;
 

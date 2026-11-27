@@ -3,15 +3,20 @@
 
 import * as z from 'zod';
 
-import { preflightCompositionFor, type DataDemand } from '../api/data.js';
+import { preflightCompositionFor, preflightScenarioFor, type DataDemand } from '../api/data.js';
 import { listEnvironmentStates } from '../api/status.js';
 import { ToolError } from '../errors.js';
 import { clampProfile } from '../profiles/caps.js';
 import { plannedDurationSeconds } from '../profiles/duration.js';
-import { buildPresets } from '../profiles/presets.js';
+import { buildPresets, type Profile } from '../profiles/presets.js';
 import { defineTool } from '../registry.js';
 import { renderRunPlan, type ProfileEntry, type ProfilesData } from '../render/views/runPlan.js';
 import { createResolver } from '../resolve/handles.js';
+import { settleAll } from '../http/operation.js';
+import { content } from './moduleCall.js';
+
+/** A name from the backend, as a view shows it. */
+const NAME_LIMIT = 120;
 
 /** Range the backend accepts for `vusers` (`WorkloadBody`). */
 const MAX_USERS = 1_000_000;
@@ -29,7 +34,7 @@ const input = z.strictObject({
     .boolean()
     .default(false)
     .describe(
-      'Also check, for every profile, whether the composition has enough data for it ' +
+      'Also check, for every profile, whether the composition or scenario has enough data for it ' +
         '(nine data checks; slower, off by default).',
     ),
 });
@@ -47,7 +52,7 @@ export const runPlan = defineTool({
   async run(ctx, args) {
     const resolver = createResolver(ctx);
     const { id: projectId } = await resolver.project();
-    const [target, environment] = await Promise.all([
+    const [target, environment] = await settleAll([
       resolver.runScenarioTarget(projectId, args.scenario),
       resolver.environment(projectId, args.environment),
     ]);
@@ -57,14 +62,18 @@ export const runPlan = defineTool({
       throw new ToolError('not_found', { params: { available: '' } });
     }
 
-    const checkData = args.include_data && target.kind === 'composition';
-    const profiles: ProfileEntry[] = await Promise.all(
+    // A composition is checked by its feeders, a scenario on the environment it would run on (DOKTOR-02).
+    const checkFor = (profile: Profile): Promise<DataDemand> =>
+      target.kind === 'composition'
+        ? preflightCompositionFor(ctx, projectId, target.id, profile)
+        : preflightScenarioFor(ctx, projectId, target.id, profile, environment.id);
+    const profiles: ProfileEntry[] = await settleAll(
       buildPresets(args.target_users).map(async (preset): Promise<ProfileEntry> => {
         const result = clampProfile(preset.profile, state.caps);
         // A refused profile cannot run, so there is nothing to check data for.
         const data: DataDemand | undefined =
-          checkData && result.refusal === undefined
-            ? await preflightCompositionFor(ctx, projectId, target.id, result.profile)
+          args.include_data && result.refusal === undefined
+            ? await checkFor(result.profile)
             : undefined;
         return {
           n: preset.n,
@@ -83,10 +92,15 @@ export const runPlan = defineTool({
     );
 
     const data: ProfilesData = {
-      target: { kind: target.kind, name: target.name },
-      environment: { name: state.name, protected: state.protected, caps: state.caps },
+      // names from the backend are shown masked, their secrets registered (FIX-76)
+      target: { kind: target.kind, name: content(ctx, target.name, NAME_LIMIT) },
+      environment: {
+        name: content(ctx, state.name, NAME_LIMIT),
+        protected: state.protected,
+        caps: state.caps,
+      },
       targetUsers: args.target_users,
-      dataCheck: !args.include_data ? 'off' : checkData ? 'done' : 'composition_only',
+      dataCheck: args.include_data ? 'done' : 'off',
       profiles,
     };
     return { status: 'done', data };

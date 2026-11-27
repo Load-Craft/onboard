@@ -7,7 +7,7 @@
 // call, so it is masked wherever else it appears.
 
 import type { ToolContext } from '../../context.js';
-import { LoadcraftApiError } from '../../http/apiError.js';
+import { isRunNotFound, LoadcraftApiError } from '../../http/apiError.js';
 import { callOperation } from '../../http/operation.js';
 import { inline } from '../../render/primitives.js';
 import { DATA_BODY_LIMIT, type BodyView } from '../../render/views/failures.js';
@@ -343,6 +343,7 @@ export async function readFailedRequest(
     if (chosen === undefined) return null;
     return await readTrace(ctx, projectId, executionId, chosen.id, DATA_BODY_LIMIT);
   } catch (error) {
+    if (isRunNotFound(error, executionId)) throw error;
     if (error instanceof LoadcraftApiError && [404, 502, 503].includes(error.status)) return null;
     throw error;
   }

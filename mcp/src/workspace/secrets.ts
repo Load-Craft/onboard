@@ -2,7 +2,7 @@
 // no serialization channel reveals them, and every registered value is masked in text and data.
 
 import type { Logger } from '../log.js';
-import { Secret, type SecretScope } from '../secret.js';
+import { Secret, type ScrubOptions, type SecretScope } from '../secret.js';
 import { Masker } from '../security/mask.js';
 
 function isPlainObject(value: object): boolean {
@@ -19,6 +19,16 @@ export class CallSecretScope implements SecretScope {
     this.#log = log;
   }
 
+  #incomplete = false;
+
+  get incomplete(): boolean {
+    return this.#incomplete;
+  }
+
+  markIncomplete(): void {
+    this.#incomplete = true;
+  }
+
   add(value: string): Secret {
     this.#log.registerSecret(value);
     // Shorter values are still hidden by `Secret`, but not searched for in text.
@@ -30,9 +40,14 @@ export class CallSecretScope implements SecretScope {
     return this.#masker.text(text);
   }
 
-  /** Copy of `value` with every string (keys included) scrubbed; the input is not modified. */
-  scrubDeep<T>(value: T): T {
-    return this.#scrubValue(value, new Map()) as T;
+  /**
+   * Copy of `value` with every string scrubbed; the input is not modified. Keys are scrubbed too,
+   * unless `keys: 'keep'` (a tool's data): then a key stays as it is, because it is a name of the
+   * answer's shape and a scrubbed one changed the structure the code and the model read (DOKTOR-03:
+   * `failure` → `[redacted]`), and an entry whose key holds a registered value is left out.
+   */
+  scrubDeep<T>(value: T, options: ScrubOptions = {}): T {
+    return this.#scrubValue(value, new Map(), options.keys === 'keep') as T;
   }
 
   containsSecret(value: unknown): boolean {
@@ -76,7 +91,7 @@ export class CallSecretScope implements SecretScope {
     return false;
   }
 
-  #scrubValue(value: unknown, seen: Map<object, unknown>): unknown {
+  #scrubValue(value: unknown, seen: Map<object, unknown>, keepKeys = false): unknown {
     if (typeof value === 'string') return this.scrub(value);
     if (typeof value !== 'object' || value === null) return value;
     if (value instanceof Secret || value instanceof Date) return value;
@@ -86,21 +101,21 @@ export class CallSecretScope implements SecretScope {
     if (Array.isArray(value)) {
       const out: unknown[] = [];
       seen.set(value, out);
-      for (const item of value) out.push(this.#scrubValue(item, seen));
+      for (const item of value) out.push(this.#scrubValue(item, seen, keepKeys));
       return out;
     }
     if (value instanceof Map) {
       const out = new Map<unknown, unknown>();
       seen.set(value, out);
       for (const [key, item] of value) {
-        out.set(this.#scrubValue(key, seen), this.#scrubValue(item, seen));
+        out.set(this.#scrubValue(key, seen, keepKeys), this.#scrubValue(item, seen, keepKeys));
       }
       return out;
     }
     if (value instanceof Set) {
       const out = new Set<unknown>();
       seen.set(value, out);
-      for (const item of value) out.add(this.#scrubValue(item, seen));
+      for (const item of value) out.add(this.#scrubValue(item, seen, keepKeys));
       return out;
     }
     if (isPlainObject(value)) {
@@ -108,7 +123,8 @@ export class CallSecretScope implements SecretScope {
       const out = Object.create(proto) as Record<string, unknown>;
       seen.set(value, out);
       for (const [key, item] of Object.entries(value)) {
-        out[this.scrub(key)] = this.#scrubValue(item, seen);
+        if (!keepKeys) out[this.scrub(key)] = this.#scrubValue(item, seen, keepKeys);
+        else if (!this.#hasNeedle(key)) out[key] = this.#scrubValue(item, seen, keepKeys);
       }
       return out;
     }

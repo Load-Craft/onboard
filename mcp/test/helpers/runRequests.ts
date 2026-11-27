@@ -72,6 +72,8 @@ async function rig(tools: readonly Tool[], script: RunScript): Promise<ToolRig> 
     clock,
     env: { LOADCRAFT_LOCALE: 'en' },
     files: BOUND,
+    // one HTTP client for the calls of a path, as in the process: `/meta` is asked once (FIX-72)
+    processServices: true,
   });
 }
 

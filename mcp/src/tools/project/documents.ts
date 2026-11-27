@@ -14,7 +14,7 @@ import {
   type AllowedFile,
 } from '../../workspace/uploads.js';
 
-/** Longest project description (`PROJECT_DESCRIPTION_MAX_LENGTH`, `domain/contracts/projects.py`). */
+/** Longest project description (`PROJECT_DESCRIPTION_MAX_LENGTH`). */
 const DESCRIPTION_MAX = 8000;
 
 /** The inputs that describe the application, shared by the tools that send a description. */

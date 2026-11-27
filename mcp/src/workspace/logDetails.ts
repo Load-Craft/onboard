@@ -185,7 +185,7 @@ export function detailOf(
 /**
  * Whether the log keeps a detail of this call: the entries that go to `log` (writes, costs, errors, decisions,
  * also the ones a panel button made), not a successful read (the ring `reads`) and not a call that the log skips
- * (a successful `format=data`, a read of the panel).
+ * (a successful read with `format=data`, a read of the panel). A write with `format=data` keeps its entry and detail.
  */
 export function storesDetail(
   entry: {
@@ -195,7 +195,7 @@ export function storesDetail(
   },
   format?: string,
 ): boolean {
-  if (format === 'data' && entry.status === 'ok') return false;
+  if (entry.effect === 'read' && format === 'data' && entry.status === 'ok') return false;
   if (entry.effect === 'read') return entry.status !== 'ok' && entry.origin !== 'panel';
   return true;
 }

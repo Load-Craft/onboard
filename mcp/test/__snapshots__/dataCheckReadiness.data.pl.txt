@@ -5,4 +5,5 @@ Quantity & cardnumber (slot: order_details) przypięty
   quantity 1–5 · cardNumber Visa, Mastercard · zakupy
 User accounts (slot: accounts) przypięty
   email, password · wyłączne · zakupy, konto
-każdy slot wypełniony · test może ruszyć
+każdy slot przypięty i wypełniony · czy wierszy starczy na profil, sprawdza
+  run_plan z profilem

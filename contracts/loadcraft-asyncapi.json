@@ -12446,8 +12446,6 @@
     "title": "LoadCraft WebSocket API",
     "version": "1.0.0",
     "x-loadcraft-source": {
-      "commit": "448dd18de665a349360fcfcee6337f08866c744c",
-      "dirty": false,
       "method": "static-trace"
     }
   },

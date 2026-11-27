@@ -1,8 +1,8 @@
 // Flows from a description, walked by LoadCraft's agent browser: the address the browser opens
 // (the frontend of an environment and how its last connection test ended), starting a run, reading
 // its state, and the plan of its paths. The plan exists only as the `split_proposal` frame of the
-// run's channel (`scenario_from_description_ws.py:229-239` sends it again to every new socket while
-// the run waits for the approval), so it is read there: one socket, one frame, closed at once.
+// run's channel (which sends it again to every new socket while the run waits for the approval),
+// so it is read there: one socket, one frame, closed at once.
 // The walk is read the same way (the run's state, its timeline of the user's help) and stopped on
 // the channel, gently, or else through REST.
 
@@ -25,7 +25,7 @@ export interface DescribeTarget {
   readonly frontendProbe: string | null;
 }
 
-// `last_probe` as `POST …/test-connection` writes it (`project_environments.py:1389`).
+// `last_probe` as `POST …/test-connection` writes it.
 const lastProbeSchema = reads<
   ResponseOf<'/api/v1/projects/{project_id}/environments', 'get'>['items'][number]['last_probe']
 >()(
@@ -125,7 +125,7 @@ export async function startDescribeRun(
   return data.run_id;
 }
 
-/** One path of a run as its review lists it (`SessionPath`, `scenario_from_description.py:297-330`). */
+/** One path of a run as its review lists it (`SessionPath`). */
 export interface RunPath {
   readonly index: number;
   readonly name: string;
@@ -318,7 +318,7 @@ export type StopAnswer =
 
 /**
  * Sends `stop` on the run's channel and waits for the answer: the gentle stop the application's
- * Stop button sends (`scenario_from_description.py:962-987`). Rejects as `openChannel` does when
+ * Stop button sends. Rejects as `openChannel` does when
  * the channel is refused or cannot be opened.
  */
 export async function stopRun(

@@ -2,6 +2,7 @@
 
 import type { Locale } from '../../config.js';
 import type { Translator } from '../../context.js';
+import { runsUnderTests } from '../../underTests.js';
 import { createTranslatorCore, type Dictionaries } from './core.js';
 import { en } from './en.js';
 import { pl } from './pl.js';
@@ -14,10 +15,6 @@ export interface TranslatorOptions {
   readonly strict?: boolean;
   /** Replaces the built-in dictionaries (used by tests). */
   readonly dictionaries?: Dictionaries;
-}
-
-function runsUnderTests(): boolean {
-  return process.env['VITEST'] !== undefined || process.env['NODE_ENV'] === 'test';
 }
 
 // The texts of the tools of the modules (`<module>.en.ts`, `<module>.pl.ts`) keep to keys of their own.

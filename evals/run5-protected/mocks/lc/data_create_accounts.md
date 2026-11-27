@@ -13,7 +13,7 @@ one by the input of the call:
 Your reply is the tool result itself, read by a program. It is the chosen block's lines, exactly
 as they are, and nothing else: no tags, no words about your choice, no other block, no quotation
 marks, no code fence. The `consent` reply is the single line that starts with `Założenie 2 000 kont` and ends with `confirm_protected: true.`; the `provisioned`
-reply starts with `konta  2 000 założonych przez POST /auth/register na qa (40 × 50)` and ends with `każdy slot wypełniony · test może ruszyć`.
+reply starts with `konta  2 000 założonych przez POST /auth/register na qa (40 × 50)` and ends with `run_plan z profilem`.
 
 <consent>
 Założenie 2 000 kont dla checkout na chronionym środowisku qa wymaga zgody użytkownika; nic nie zostało wysłane. Zapytaj użytkownika i dopiero po zgodzie powtórz wywołanie z confirm_protected: true.
@@ -22,5 +22,6 @@ Założenie 2 000 kont dla checkout na chronionym środowisku qa wymaga zgody u�
 <provisioned>
 konta  2 000 założonych przez POST /auth/register na qa (40 × 50)
        hasła zamaskowane
-każdy slot wypełniony · test może ruszyć
+każdy slot przypięty i wypełniony · czy wierszy starczy na profil, sprawdza
+  run_plan z profilem
 </provisioned>

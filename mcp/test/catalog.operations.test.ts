@@ -8,6 +8,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { EXCLUDED_OPERATIONS } from '../scripts/sync-api/excluded.js';
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const METHODS = ['get', 'put', 'post', 'delete', 'patch'] as const;
 
@@ -45,6 +47,8 @@ for (const [path, item] of Object.entries(contract.paths)) {
 
 const inTools = catalog.modules.flatMap((m) => m.tools.flatMap((t) => t.operations ?? []));
 const excluded = catalog.excluded.operations;
+/** Operations the import leaves out of the public snapshot (`scripts/sync-api/excluded.ts`). */
+const leftOut = new Set(EXCLUDED_OPERATIONS.map((entry) => entry.operationId));
 
 describe('catalog.operations: katalog ⊆ migawka kontraktu', () => {
   it('migawka ma co najmniej 387 operacji', () => {
@@ -53,9 +57,19 @@ describe('catalog.operations: katalog ⊆ migawka kontraktu', () => {
 
   it('każdy operationId narzędzi i wykluczonych istnieje w migawce (lista brakujących)', () => {
     const missing = [...new Set([...inTools, ...excluded].map((o) => o.operationId))].filter(
-      (id) => !snapshot.has(id),
+      (id) => !snapshot.has(id) && !leftOut.has(id),
     );
     expect(missing).toEqual([]);
+  });
+
+  it('an operation the snapshot leaves out is an excluded one of the catalog, absent from the snapshot', () => {
+    const excludedIds = new Set(excluded.map((o) => o.operationId));
+    const toolIds = new Set(inTools.map((o) => o.operationId));
+    for (const id of leftOut) {
+      expect(excludedIds.has(id), id).toBe(true);
+      expect(toolIds.has(id), id).toBe(false);
+      expect(snapshot.has(id), id).toBe(false);
+    }
   });
 
   it('metoda i ścieżka operacji w katalogu zgadzają się z migawką (lista rozbieżności)', () => {
@@ -72,7 +86,9 @@ describe('catalog.operations: katalog ⊆ migawka kontraktu', () => {
   });
 
   it('zbiór operationId katalogu (narzędzia i wykluczone) równa się zbiorowi migawki', () => {
-    const fromCatalog = new Set([...inTools, ...excluded].map((o) => o.operationId));
+    const fromCatalog = new Set(
+      [...inTools, ...excluded].map((o) => o.operationId).filter((id) => !leftOut.has(id)),
+    );
     const fromSnapshot = new Set(snapshot.keys());
     expect([...fromSnapshot].filter((id) => !fromCatalog.has(id))).toEqual([]);
     expect([...fromCatalog].filter((id) => !fromSnapshot.has(id))).toEqual([]);

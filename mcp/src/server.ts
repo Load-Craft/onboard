@@ -59,7 +59,10 @@ export interface ServerDeps {
  */
 export function createServices(config: Config, log: Logger, clock?: Clock): Services {
   return {
-    http: createHttp(config, log, clock === undefined ? {} : { pauseClock: clock }),
+    http: createHttp(config, log, {
+      checkCompat: true,
+      ...(clock === undefined ? {} : { pauseClock: clock }),
+    }),
     links: createLinks(config.appUrl),
   };
 }

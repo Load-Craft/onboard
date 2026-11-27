@@ -25,6 +25,8 @@ import {
 import { inline } from '../../render/primitives.js';
 import type { EnvironmentDiff } from '../../render/views/projectSetup.js';
 import { readEnvValues } from '../../workspace/envFile.js';
+import { settleAll } from '../../http/operation.js';
+import { content } from '../moduleCall.js';
 
 /** Said when an environment carries a field the tool does not know (`protected`, `limits`, …). */
 const LIMIT_HINT =
@@ -50,7 +52,7 @@ export function strictFields<T extends z.ZodRawShape>(hint: string, shape: T) {
 
 /** Longest header value sent; the backend stores it as it is. */
 const HEADER_VALUE_MAX = 8192;
-/** The names the backend keeps as written (`SAFE_HEADER_KEY_RE`, `codegen/validation.py:23` @ d93e08d80): others are rewritten. */
+/** The names the backend keeps as written (`SAFE_HEADER_KEY_RE`): others are rewritten. */
 const HEADER_NAME = /^[A-Za-z][A-Za-z0-9-]*$/;
 /** Set by the HTTP client or the transport, or the way a test account signs in; never a fixed header. */
 const RESERVED_HEADERS: ReadonlySet<string> = new Set([
@@ -399,11 +401,12 @@ async function applyHeaders(
     if (value === MASKED_VALUE) lost.push(name);
     else keep[name] = value;
   }
+  // the names of headers the backend holds are shown masked (FIX-76)
   if (lost.length > 0) {
     throw new ToolError('init_project_headers_unpreservable', {
       params: {
         environment: planned.name,
-        names: lost.map((name) => inline(name, 100)).join(', '),
+        names: lost.map((name) => content(ctx, name, 100)).join(', '),
       },
     });
   }
@@ -476,6 +479,6 @@ export async function inBatches<T, R>(
       if (item !== undefined) results[index] = await task(item);
     }
   };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  await settleAll(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;
 }

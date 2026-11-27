@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  carryChannelMetadata,
   diffAsyncApi,
   type AsyncChange,
   type PluginSurface,
@@ -224,5 +225,22 @@ describe('diffAsyncApi', () => {
         kind: 'additive',
       });
     });
+  });
+});
+
+describe('carryChannelMetadata', () => {
+  it('leaves the backend commit out of the snapshot and keeps how it was traced', () => {
+    const next = structuredClone(mini) as unknown as AsyncApiDocument;
+    (next as unknown as { info: Record<string, unknown> }).info = {
+      ...(next as unknown as { info?: Record<string, unknown> }).info,
+      'x-loadcraft-source': { commit: 'f'.repeat(40), dirty: false, method: 'static-trace' },
+    };
+    const { document } = carryChannelMetadata(undefined, next);
+    expect(
+      (document as unknown as { info: Record<string, unknown> }).info['x-loadcraft-source'],
+    ).toEqual({
+      method: 'static-trace',
+    });
+    expect(JSON.stringify(document)).not.toContain('f'.repeat(40));
   });
 });

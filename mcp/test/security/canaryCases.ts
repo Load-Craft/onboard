@@ -141,6 +141,8 @@ export interface Case {
   readonly before?: (drive: Drive) => Promise<Before>;
   readonly script?: RunScript;
   readonly capabilities?: readonly string[];
+  /** The tool sends no request (it works on the local state): there is no answer to taint. */
+  readonly local?: true;
   /** Names are tainted as well (only for cases that do not look an object up by name). */
   readonly names?: boolean;
   /**
@@ -160,6 +162,11 @@ export interface Case {
   readonly progress?: boolean;
   /** Only answers to reads are tainted: what a long operation polls, not what it saves at the start. */
   readonly readsOnly?: boolean;
+  /**
+   * The answer under test is a file (a ZIP), not JSON: the proxy has nothing to taint in it, so the
+   * case asserts the error runs and what the tool saves, not a tainted success.
+   */
+  readonly fileAnswer?: boolean;
   /** The person behind the client ticks yes to every question the server asks (elicitation). */
   readonly personSaysYes?: boolean;
   /**
@@ -357,7 +364,6 @@ const OWN_CASES: readonly Case[] = [
     },
     args: () => ({ suggestions: ['zakupy'] }),
   },
-  { tool: 'flows_get', label: 'outline', stage: 'flows', args: () => ({ flow: 'zakupy' }) },
   {
     tool: 'scenario_suggest_split',
     label: 'proposal',
@@ -437,6 +443,8 @@ const OWN_CASES: readonly Case[] = [
   },
   {
     tool: 'data_check_readiness',
+    // The list of datasets carries none of their cells, so no answer of this call holds the
+    // password: the error quotes what the call does know (the token), and the cell never shows.
     label: 'plan, a dataset with a password column',
     stage: 'scenario',
     setup: (fake) => {
@@ -446,7 +454,7 @@ const OWN_CASES: readonly Case[] = [
         audit_metadata: { sample_rows_preview: [{ q: 'shoes', password: BACKEND_CANARY }] },
       });
     },
-    failOptions: { methods: ['POST'], quoteBackend: true },
+    failOptions: { methods: ['POST'] },
     quotes: true,
     args: () => ({ scenario: 'checkout' }),
   },
@@ -479,7 +487,7 @@ const OWN_CASES: readonly Case[] = [
     label: 'every answer tainted',
     stage: 'data',
     script: SHORT_RUN,
-    refusedAs: 'internal_secret_in_state',
+    // names of slots and datasets are masked before the state sees them (FIX-78): no refusal
     args: () => PERF_RUN_ARGS,
   },
   {
@@ -500,7 +508,7 @@ const OWN_CASES: readonly Case[] = [
     label: 'the data check is refused, the refusal quotes a secret of the environment',
     stage: 'data',
     script: SHORT_RUN,
-    refusedAs: 'internal_secret_in_state',
+    // names of slots and datasets are masked before the state sees them (FIX-78): no refusal
     setup: envSecret,
     failOptions: { methods: ['POST'], path: /\/feeders\/preflight$/u, quoteBackend: true },
     args: () => PERF_RUN_ARGS,
@@ -510,7 +518,7 @@ const OWN_CASES: readonly Case[] = [
     label: 'the start is refused, the refusal quotes a secret of the environment',
     stage: 'data',
     script: SHORT_RUN,
-    refusedAs: 'internal_secret_in_state',
+    // names of slots and datasets are masked before the state sees them (FIX-78): no refusal
     setup: envSecret,
     failOptions: { methods: ['POST'], path: /\/execute$/u, quoteBackend: true },
     args: () => PERF_RUN_ARGS,

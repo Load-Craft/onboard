@@ -1,0 +1,1259 @@
+{
+  "id": "0d0c7034-0003-4000-8000-000000001021",
+  "name": "Customer registration and account setup journey",
+  "description": "Generated from flow 0d0c7034-0003-4000-8000-000000001022",
+  "simulation_class_name": "CustomerRegistrationAndAccountSetupJourneySimulation",
+  "source_flow_id": "0d0c7034-0003-4000-8000-000000001022",
+  "source_flow_version": 1,
+  "truncate_after_block_id": null,
+  "flow_overlay_version": null,
+  "current_version": 1,
+  "artifact_version": 1,
+  "scenario_artifact": {
+    "artifact_version": 1,
+    "scenario_name": "Customer registration and account setup journey",
+    "scenario_plan": {
+      "session_variables": {
+        "registration_token": "Captured by request check on register_identity",
+        "customer_id": "Captured by request check on create_customer",
+        "customer_token": "Captured by request check on login_customer",
+        "address_id": "Captured by request check on add_shipping_address"
+      },
+      "feeder_usage": [
+        {
+          "file": "users.csv",
+          "feeder_type": "csv",
+          "strategy": "circular",
+          "columns": ["email", "password", "target_key_storekey"],
+          "column_specs": [
+            {
+              "name": "email",
+              "type": "email"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "target_key_storekey",
+              "type": "string"
+            }
+          ],
+          "column_fingerprints": {},
+          "has_unique_columns": false,
+          "column_types": [],
+          "record_count": null,
+          "content": null,
+          "bundle_evidenced": null,
+          "role": "auth",
+          "identity_kind": null,
+          "label": "User accounts",
+          "description": "Accounts used to sign in.",
+          "separator": null,
+          "feed_records_count": null,
+          "jdbc_config": null,
+          "redis_config": null
+        },
+        {
+          "file": "scenario_auto_data.csv",
+          "feeder_type": "csv",
+          "strategy": "circular",
+          "columns": [
+            "address_1",
+            "address_2",
+            "address_name",
+            "city",
+            "company",
+            "company_name",
+            "country_code",
+            "first_name",
+            "is_default_billing",
+            "is_default_shipping",
+            "last_name",
+            "phone",
+            "phone2",
+            "postal_code"
+          ],
+          "column_specs": [
+            {
+              "name": "address_1",
+              "type": "string",
+              "example": "Examplestrasse 1"
+            },
+            {
+              "name": "address_2",
+              "type": "string",
+              "example": "Apt 2"
+            },
+            {
+              "name": "address_name",
+              "type": "string",
+              "example": "Home"
+            },
+            {
+              "name": "city",
+              "type": "string",
+              "example": "Berlin"
+            },
+            {
+              "name": "company",
+              "type": "string",
+              "example": "Example GmbH"
+            },
+            {
+              "name": "company_name",
+              "type": "string",
+              "example": "Example Ltd"
+            },
+            {
+              "name": "country_code",
+              "type": "string",
+              "example": "de"
+            },
+            {
+              "name": "first_name",
+              "type": "string",
+              "example": "Jane"
+            },
+            {
+              "name": "is_default_billing",
+              "type": "boolean",
+              "example": "false"
+            },
+            {
+              "name": "is_default_shipping",
+              "type": "boolean",
+              "example": "true"
+            },
+            {
+              "name": "last_name",
+              "type": "string",
+              "example": "Doe"
+            },
+            {
+              "name": "phone",
+              "type": "string",
+              "example": "+44 20 7946 0001"
+            },
+            {
+              "name": "phone2",
+              "type": "string",
+              "example": "+491700000000"
+            },
+            {
+              "name": "postal_code",
+              "type": "string",
+              "example": "10115"
+            }
+          ],
+          "column_fingerprints": {},
+          "has_unique_columns": false,
+          "column_types": [],
+          "record_count": null,
+          "content": "address_1,address_2,address_name,city,company,company_name,country_code,first_name,is_default_billing,is_default_shipping,last_name,phone,phone2,postal_code\r\nSina-Bonbach-Weg 5,Walli-Putz-Weg 79-20,Home,Peine,Hebert Inc,Lopez-Ward,de,Lisa,false,true,Palmer,+44 93 4135 6581,+498025410967,15216\r\nRohledergasse 2-8,Jacobi Jäckelstraße 41/85,Home,Soltau,\"Wise, Coleman and Weaver\",Combs-Manning,de,David,false,true,Morse,+44 67 3183 7743,+498609231848,31020\r\nFrankestr. 39/90,Kathleen-Sauer-Weg 7078,Home,Nauen,\"Hernandez, Marks and Miller\",Reyes and Sons,de,Danny,false,true,Wallace,+44 47 9480 5606,+497702267601,84964\r\nReuterweg 8-4,Blanka-Lachmann-Platz 18,Home,Geldern,\"Dawson, Andersen and Brown\",Freeman-Osborne,de,Susan,false,true,Schmitt,+44 90 6387 3161,+495418871455,61304\r\nHeinz-Josef-Hahn-Platz 9-9,Ullrichallee 50-81,Home,Kitzingen,Jensen Ltd,\"Warner, Bowers and Brown\",de,Jorge,false,true,Compton,+44 89 8802 2576,+492137084514,71376\r\nSontagallee 79,Ehlertstraße 37/99,Home,Staßfurt,Roberts PLC,\"Parker, Gibson and Tran\",de,Kimberly,false,true,Steele,+44 22 1321 7792,+491450221398,45805\r\nHarloffweg 0,Helene-Segebahn-Weg 5/4,Home,Germersheim,Cortez-Porter,\"Ramsey, Gonzalez and Evans\",de,Richard,false,true,Smith,+44 93 3939 4329,+493332957999,21458\r\nBeatrice-Dobes-Platz 2,Roskothstr. 66-53,Home,Kusel,Brooks-Holland,Hill-Moreno,de,Mark,false,true,Watts,+44 91 6396 9025,+497026670664,88742\r\nAdlerplatz 4-1,Zeljko-Grein Groth-Straße 280,Home,Mayen,Leonard-Rocha,Gibson Inc,de,Katelyn,false,true,Jones,+44 34 0558 7664,+499293898018,52714\r\nHamannplatz 40/86,Petar-Naser-Gasse 1/6,Home,Kitzingen,\"Luna, Mejia and Hernandez\",Simmons-Alexander,de,Kathy,false,true,Novak,+44 82 2821 5744,+495735887967,68143\r\nRonny-Gehringer-Allee 1-7,Kargering 921,Home,Sankt Goar,Davis Ltd,\"Munoz, Fuentes and Ramirez\",de,Pamela,false,true,Turner,+44 36 6226 2034,+496577239915,88472\r\nTilman-Lorch-Weg 3189,Heinweg 7-7,Home,Dieburg,Brown-Morris,\"Barnes, Carlson and Grant\",de,Belinda,false,true,Foley,+44 63 5777 2024,+493393737759,70204\r\nIlka-Ruppersberger-Straße 4-9,Adolf-Krebs-Gasse 6-1,Home,Bützow,\"Jones, Soto and Lynn\",\"Walker, Floyd and Grant\",de,Belinda,false,true,Stewart,+44 62 3944 1820,+490831739392,69696\r\nKlappweg 4/6,Freudenbergerstr. 26/78,Home,Gräfenhainichen,Skinner-Powell,\"Clarke, Garcia and Delgado\",de,Yvonne,false,true,Deleon,+44 02 8178 6834,+494959125899,70893\r\nHuhngasse 5-5,Nadine-Ladeck-Ring 9/1,Home,Hofgeismar,Garcia-Stark,Green Ltd,de,Cassandra,false,true,Bates,+44 41 8351 7899,+493311133484,17772\r\nAntonie-Schüler-Platz 93/36,Anthony-Misicher-Straße 3,Home,Tecklenburg,Barajas-Rodriguez,Hendrix Ltd,de,Vanessa,false,true,Giles,+44 90 2649 7417,+498947844782,89275\r\nBernd-Dieter-Sorgatz-Allee 94,Concetta-Cichorius-Straße 734,Home,Wittmund,\"Welch, Bond and Oneill\",Munoz-Cruz,de,Maria,false,true,Miller,+44 00 0846 2711,+490053312470,95358\r\nMarian-Weinhage-Gasse 7,Heide-Rose-Platz 2/6,Home,Eberswalde,Johnson-Hudson,Smith Inc,de,Ashley,false,true,Evans,+44 71 5675 7254,+493461665404,77957\r\nAnnegret-Seifert-Allee 144,Grafallee 5/3,Home,Oranienburg,Walker-Perry,\"Jones, Jones and Brown\",de,Melvin,false,true,Webster,+44 14 9377 9398,+496639697233,38548\r\nDietrich-Döhn-Straße 843,Zdravko-Naser-Weg 74,Home,Uffenheim,Marquez-Taylor,Carlson and Sons,de,Kaylee,false,true,Hickman,+44 73 0490 0513,+492443490881,13264\r\nWirthring 70/73,Sauerring 105,Home,Eisenhüttenstadt,Bates-Smith,Anderson PLC,de,Eric,false,true,Lutz,+44 79 1296 3673,+496232389176,67190\r\nSauerallee 76-90,Dussen vanallee 41/49,Home,Badoberan,Waters and Sons,Davis-Murray,de,Johnny,false,true,Atkins,+44 92 5393 6489,+495322357778,37079\r\nRico-Dörschner-Allee 4-7,Haasestraße 2,Home,Leipziger Land,Drake Ltd,Henderson-Jacobs,de,Amanda,false,true,Anderson,+44 35 3173 1449,+491899965863,98607\r\nGiuseppina-Wiek-Weg 5-4,Mohauptstr. 8,Home,Hersbruck,\"Garner, Garcia and Thomas\",Webb-Gregory,de,Eric,false,true,Hall,+44 94 9101 7754,+491322994781,17139\r\nFörsterring 411,Naserring 5/2,Home,Schwandorf,\"Carr, Hubbard and Aguilar\",Andrews Inc,de,Stephanie,false,true,Mills,+44 07 0696 6424,+491290647038,76145\r\nBoucseinstr. 53,Davidsstraße 7,Home,Kelheim,Snyder and Sons,Griffin-Reid,de,Cassandra,false,true,Salinas,+44 75 3816 1941,+491308484107,91473\r\nMargaretha-Schulz-Allee 7/9,Gunther-Hentschel-Gasse 26,Home,Wittmund,Schmidt Group,Brown-Mccann,de,Gina,false,true,Salas,+44 61 3601 7028,+499650029137,70861\r\nJähnallee 2/3,Wähnerplatz 7-6,Home,Aschaffenburg,Ward-Brown,\"Everett, Santana and Davila\",de,Jason,false,true,Berry,+44 20 3626 4853,+496758184627,55638\r\nRömerweg 66/93,Vincent-Täsche-Allee 7260,Home,Mainburg,\"Kidd, Johnson and Guzman\",Carpenter-Gonzalez,de,Chelsea,false,true,Bryant,+44 35 3999 7575,+492874019511,28850\r\nMendestr. 25/36,Leopold-Heintze-Straße 80,Home,Guben,\"Clayton, Robles and Munoz\",Stark PLC,de,Gregory,false,true,Harris,+44 76 4773 8843,+490347420505,48695\r\nLübsstr. 39-41,Margrafring 27/76,Home,Burglengenfeld,\"Gray, Hernandez and Pierce\",Crane-Williams,de,Lawrence,false,true,Leonard,+44 48 3682 6740,+499170451614,47856\r\nWerneckeallee 2-7,Oderwaldgasse 46/90,Home,Regensburg,\"Hicks, Burke and Perez\",Mcpherson-Gilbert,de,Isabel,false,true,Blanchard,+44 18 6280 0988,+497278628189,91095\r\nHertrampfweg 6876,Kostolzingasse 5079,Home,Siegen,Barnett Inc,James-Collins,de,Jessica,false,true,Hernandez,+44 09 8998 1844,+497225168395,14649\r\nThoralf-Martin-Weg 7/8,Anneke-Bien-Straße 79/16,Home,Norden,Richards-Mitchell,Miller PLC,de,David,false,true,Johnson,+44 57 9047 5234,+497005251879,73102\r\nAnnett-Binner-Ring 3/1,Marzena-Krebs-Gasse 31,Home,Duderstadt,Hudson-Newton,\"Rowland, May and Foster\",de,Brandon,false,true,Johnson,+44 48 4556 3847,+498985685442,44770\r\nHörlering 67/98,Rognerring 439,Home,Lemgo,\"Noble, Wright and Potts\",Johnson-Crosby,de,Nicholas,false,true,Barrett,+44 66 8095 5077,+494649541315,78380\r\nHolm-Döhn-Straße 5,Adolphweg 58-17,Home,Klötze,Miller PLC,\"Larson, Brown and Sloan\",de,Kathy,false,true,Hughes,+44 11 1582 7593,+498226982890,38109\r\nEdelbert-Riehl-Gasse 4/4,Rahel-Hänel-Straße 8,Home,Northeim,Roberts Group,Nunez-Cruz,de,Christina,false,true,Carroll,+44 51 5267 4481,+490485532511,68495\r\nKohlring 4667,Camilla-Hartung-Weg 89-11,Home,Jena,Hurst and Sons,\"Oconnor, Gomez and Day\",de,Stephanie,false,true,Costa,+44 37 8021 6460,+498648779394,32404\r\nRupert-Jacob-Weg 50-23,Elise-Wulff-Platz 8/3,Home,Bad Brückenau,Williams-Sims,Gonzalez Group,de,Michael,false,true,Grant,+44 70 3056 0922,+496715658466,83182\r\nRoderich-Gröttner-Allee 55/51,Christa-Maria-Karz-Ring 4-9,Home,Heinsberg,\"Quinn, Scott and Mitchell\",\"Bradford, Ferguson and Yu\",de,Mary,false,true,Gray,+44 40 2317 8719,+490196713865,99454\r\nLöfflergasse 2-6,Marisa-Heinz-Weg 71/69,Home,Arnstadt,Martin-Watson,Taylor-Deleon,de,Lisa,false,true,Jones,+44 88 1590 9755,+491979094113,59926\r\nSemra-Nohlmans-Weg 6/1,Albin-Rogge-Allee 8-8,Home,Schleiz,Green-Greene,Holmes-Allen,de,Frank,false,true,Howard,+44 19 8366 3948,+492160402148,70682\r\nBrit-Mende-Platz 3684,Gerolf-Staude-Straße 49,Home,Witzenhausen,Taylor-Martin,Brady Group,de,Darryl,false,true,Nelson,+44 24 9581 0841,+496686893039,57924\r\nKeudelring 0,Textorplatz 8-4,Home,Füssen,Bridges Inc,Flowers-Hill,de,Alexis,false,true,Paul,+44 83 3519 5187,+492144385425,91827\r\nAlbersplatz 88-82,Thanelstr. 53/20,Home,Erbisdorf,Padilla and Sons,\"Smith, Henry and Barnes\",de,Michael,false,true,Sutton,+44 94 8418 9803,+494182687457,47830\r\nAugustin-Neuschäfer-Ring 436,Kaspar-Henschel-Ring 67-29,Home,Neuruppin,Rush Group,\"Jordan, Quinn and Garner\",de,Joseph,false,true,Hanson,+44 13 0070 8051,+494749660785,39014\r\nVincenzo-Hartmann-Platz 506,Lore-van der Dussen-Platz 69/86,Home,Riesa,Salazar and Sons,\"King, Chen and Johnson\",de,Cory,false,true,Tucker,+44 44 8634 4288,+497483069405,75215\r\nIrmtraud-Staude-Ring 539,Elma-Anders-Gasse 38-25,Home,Wesel,\"Kramer, Evans and Johnson\",Alexander-Terrell,de,Margaret,false,true,Cervantes,+44 96 8492 1816,+495548584826,99867\r\nKochstraße 9,Caroline-Tlustek-Allee 25/70,Home,Rosenheim,\"Crawford, Pope and Atkins\",Bolton-Dominguez,de,Edward,false,true,Daniels,+44 31 3520 2067,+495803773687,63839\r\nUtz-Barth-Platz 6/3,Leopold-Kreusel-Gasse 339,Home,Wertingen,\"Bailey, Sandoval and Mcgrath\",Turner-Munoz,de,Mark,false,true,Neal,+44 36 7554 5366,+497873381503,18395\r\nAthanasios-Dussen van-Weg 2,Klaus-Junck-Allee 94/85,Home,Forchheim,\"Wallace, Brown and Montoya\",Patterson-Faulkner,de,Debra,false,true,Kline,+44 43 6022 4788,+498614173518,48468\r\nRädelallee 729,Mansstr. 96/20,Home,Potsdam,\"Russell, Daniels and Evans\",Walker-Burns,de,Wayne,false,true,Schultz,+44 62 6580 9524,+497877621663,72543\r\nMetzweg 5172,Hessering 2-5,Home,Grimma,\"Sims, Hawkins and Johnson\",\"Chen, Ferguson and Ayers\",de,Kevin,false,true,Thomas,+44 15 4327 5018,+493352096513,64890\r\nKlaus-Grein Groth-Gasse 7963,Mendestraße 420,Home,Kaiserslautern,Schwartz Ltd,\"Shaw, Ashley and Russo\",de,Joseph,false,true,Gilbert,+44 85 0744 2664,+490087322801,95376\r\nHuhnring 545,Henschelstraße 61,Home,Starnberg,Johnson-Rodriguez,\"Garcia, Knox and Brooks\",de,Victor,false,true,Bates,+44 28 6568 0952,+495097489008,52888\r\nDrubinstr. 5/4,Anke-Barkholz-Gasse 9,Home,Uffenheim,\"Torres, Atkinson and Hickman\",Patel Group,de,Richard,false,true,Mcintyre,+44 77 2803 1426,+498707950882,52683\r\nJozef-Kaul-Straße 42/24,Hans-Erich-Radisch-Ring 9,Home,Dachau,\"Jones, Anderson and Howe\",Simon Ltd,de,Mark,false,true,Ramirez,+44 75 3788 1674,+498711320861,10497\r\nPlathstr. 5575,Hans-Adolf-Beer-Ring 6,Home,Saarlouis,Shepard-Harris,Hunter-Savage,de,Mark,false,true,Jacobson,+44 98 4015 7341,+496164449546,48134\r\nLorchstr. 7-2,Marlies-Jacob-Weg 5,Home,Eichstätt,Shannon-Hogan,Ibarra and Sons,de,Caroline,false,true,Mccarthy,+44 50 1226 1406,+491693757421,18116\r\nErnest-Lehmann-Allee 92,Annie-Schmiedecke-Allee 30,Home,Weimar,\"Galloway, Alexander and Baker\",Travis Inc,de,Brian,false,true,Torres,+44 81 4345 7831,+498805232609,96846\r\nHeinzallee 44,Junkring 8,Home,Kehl,Hensley Ltd,\"Smith, Smith and Graham\",de,Daniel,false,true,Moore,+44 46 1178 1647,+491711014163,62906\r\nElmar-Trubin-Platz 345,Auguste-Austermühle-Straße 15,Home,Sternberg,Larson Inc,\"Henry, Mosley and Odom\",de,Christopher,false,true,Spencer,+44 31 5957 6824,+497768862347,34544\r\nZänkerallee 67/14,Pruschkestr. 6,Home,Wismar,Castaneda-Acosta,Moore Ltd,de,Riley,false,true,Mcgee,+44 08 3600 2027,+494293375794,29504\r\nGabor-Nette-Weg 1909,Heringring 765,Home,Holzminden,Roberts-Johnson,Medina and Sons,de,Frank,false,true,Martin,+44 60 0696 1231,+493085000671,93788\r\nKramerallee 90-19,Zänkergasse 718,Home,Cottbus,Berry-Ward,Padilla Ltd,de,Jeffrey,false,true,West,+44 32 6370 3539,+496541687432,47515\r\nSchmidtallee 26/23,Oderwaldstr. 45-33,Home,Mittweida,Carter Inc,Knox and Sons,de,Ryan,false,true,Morrison,+44 85 8392 3908,+499903768875,13014\r\nGino-Wilmsen-Weg 31-73,Jeannine-Buchholz-Weg 7-8,Home,Oranienburg,\"Austin, Gilbert and Taylor\",Gonzalez and Sons,de,Tracy,false,true,Hall,+44 11 6520 6251,+493496244891,58752\r\nJesselstr. 9105,Müllerring 9/6,Home,Wetzlar,Garcia-Rodriguez,\"Lindsey, Morton and Hill\",de,Gregory,false,true,Gray,+44 32 4541 3674,+492410310301,13431\r\nJohanne-Schüler-Allee 2374,Zeynep-Scheuermann-Gasse 48,Home,Wunsiedel,Butler Group,Macias PLC,de,Joe,false,true,Mcdonald,+44 72 6922 1778,+495575023367,12488\r\nLangegasse 73-46,Kay-Uwe-Segebahn-Gasse 27,Home,Plauen,Ward LLC,Cooper-Dougherty,de,David,false,true,Hunter,+44 87 4117 8564,+496182569130,30797\r\nSteyring 9-8,Cengiz-Berger-Straße 35-13,Home,Bad Kissingen,\"Jones, Joyce and Shaffer\",Mills and Sons,de,Matthew,false,true,Nichols,+44 08 3722 7754,+492495308230,27267\r\nRudolphweg 8,Cemil-Beer-Gasse 346,Home,Karlsruhe,Ellis LLC,Rivera Group,de,Karla,false,true,Gibbs,+44 94 1405 6443,+496592757842,26091\r\nOswald-Hövel-Ring 5-8,Weitzelweg 7400,Home,Grimma,Robertson-Burgess,\"Robinson, Scott and Rose\",de,Manuel,false,true,Johnston,+44 86 1499 3745,+490734302753,97203\r\nKambsallee 1-7,Södinggasse 9/7,Home,Beeskow,Martin Group,\"Walker, Cole and Williams\",de,Cassandra,false,true,Kent,+44 06 3841 0672,+494444687642,90859\r\nHans-Karl-Kraushaar-Ring 3962,Oestrovskystraße 23,Home,Eisenach,Lee Group,Hamilton-Reynolds,de,Karen,false,true,Thompson,+44 91 9008 1800,+497217152547,78189\r\nAckermannplatz 5305,Meryem-Gotthard-Gasse 6233,Home,Hechingen,\"Kelley, Clark and Burch\",Flores-Foster,de,Aaron,false,true,Ross,+44 87 2247 7890,+499300757104,43737\r\nGertraud-Kreusel-Gasse 730,Kreuselplatz 930,Home,Vilsbiburg,Chambers-Roberts,James and Sons,de,David,false,true,Solis,+44 52 8459 6228,+493954370200,85520\r\nAda-Hörle-Gasse 903,Klaus Dieter-Jacobi Jäckel-Ring 6-8,Home,Göttingen,Jones LLC,\"Baker, Flores and Hicks\",de,Kevin,false,true,Lee,+44 17 2788 1739,+499771201473,77614\r\nNorma-Riehl-Gasse 35-47,Fischerstr. 6,Home,Apolda,Mendez-Schmidt,\"Maldonado, Moody and Yang\",de,Samuel,false,true,Miller,+44 80 0281 0743,+493766219900,16778\r\nJeanette-Drub-Straße 47,Ekkehard-Hellwig-Platz 53,Home,Lemgo,Fernandez Group,Thomas Inc,de,Nathan,false,true,Collins,+44 33 5370 8780,+499028765587,46315\r\nRolf-Peter-Hettner-Ring 2253,Huhnstr. 52-14,Home,Starnberg,Foster-Leon,Wheeler and Sons,de,Ashley,false,true,Phelps,+44 34 3164 6933,+497918116267,50849\r\nMirjam-Henk-Ring 33/50,Fröhlichgasse 0,Home,Bad Kissingen,\"Collins, Davis and Wolfe\",Perkins-Ramirez,de,Lisa,false,true,Rodriguez,+44 77 4307 1542,+490599099330,60831\r\nFabian-Paffrath-Platz 248,Egon-Wirth-Weg 18/94,Home,Altentreptow,Wilson LLC,\"Bass, Wright and Gordon\",de,Jake,false,true,Taylor,+44 01 1768 8617,+498125313083,20256\r\nAngelina-Rogge-Gasse 38-75,Hans-Günter-Rogner-Allee 65/80,Home,Forchheim,Mcneil Group,Robertson and Sons,de,Walter,false,true,Schwartz,+44 58 2338 3885,+498762195268,12380\r\nDetlef-Scheuermann-Gasse 4/8,Kästerring 6-2,Home,Oschatz,King LLC,\"Holloway, Shaw and Russo\",de,Austin,false,true,Morris,+44 95 9062 9327,+497566408958,45753\r\nDavidsplatz 12-29,Dana-Mälzer-Ring 800,Home,Marienberg,Rose-Schroeder,Rogers PLC,de,Samuel,false,true,Olson,+44 62 7929 1339,+491178939039,88012\r\nHartmanngasse 9/8,Rüdiger-Fritsch-Gasse 34,Home,Freital,\"Wu, Luna and Evans\",Carpenter PLC,de,Jeffrey,false,true,Sanchez,+44 83 6963 1375,+498296917700,38151\r\nImelda-Beier-Platz 6-2,Heydrichstr. 3/3,Home,Sankt Goarshausen,Morgan Ltd,Dean-Wang,de,Stephen,false,true,Gonzalez,+44 74 4157 4713,+493947084013,41193\r\nMarie-Louise-Mende-Platz 2345,Paffrathstraße 323,Home,Recklinghausen,\"Wang, Steele and Joseph\",Whitney-Pope,de,Zachary,false,true,Walker,+44 44 0033 2701,+497881039450,60790\r\nBachmannplatz 6-8,Erica-Seidel-Platz 5-3,Home,Bersenbrück,Wright Ltd,\"Sanchez, Nelson and Monroe\",de,Calvin,false,true,Wagner,+44 12 3850 6689,+496415294914,31625\r\nTlustekgasse 2,Eberthweg 6/9,Home,Meiningen,Barrett-Lynch,Burke-Livingston,de,Tiffany,false,true,Davis,+44 26 4435 0472,+491996198996,40078\r\nBörnerstr. 92,Bertram-Fiebig-Allee 6,Home,Parsberg,\"Garcia, Duffy and Erickson\",Smith PLC,de,Kathy,false,true,Ramos,+44 85 4761 8157,+495552919934,66402\r\nKreuselgasse 39/82,Dussen vanring 375,Home,Bitterfeld,Johnson-Vazquez,Ritter LLC,de,Joseph,false,true,Harris,+44 19 6481 4643,+492774774045,86406\r\nHornichallee 1917,Kobeltring 4-7,Home,Neustadtner Waldnaab,Owen and Sons,\"Mitchell, Patel and Turner\",de,Sharon,false,true,Thompson,+44 18 8854 4609,+494183566784,17451\r\nSchülerweg 4,Fredy-Aumann-Weg 7-9,Home,Ebermannstadt,Rogers LLC,Strickland PLC,de,Jessica,false,true,Gonzales,+44 06 0635 9769,+491094379379,78553\r\nAnsgar-Köster-Ring 8896,Austermühlestr. 3/8,Home,Dinkelsbühl,Thompson Inc,\"Daniels, King and Mckenzie\",de,Kevin,false,true,Mason,+44 64 5816 3500,+495181318986,58750\r\nIngetraut-Ullrich-Straße 8892,Blochgasse 60-75,Home,Nürtingen,\"Cook, Price and Williams\",Turner Ltd,de,Teresa,false,true,Cunningham,+44 89 0531 6745,+490298511831,69537\r\nTheobald-Jessel-Gasse 1008,Lene-Otto-Gasse 1/4,Home,Mittweida,Hamilton-Diaz,Malone-Todd,de,Lindsey,false,true,Brady,+44 66 2302 9480,+492318253340,80353\r\nHertrampfstraße 97,Kitzmannweg 8700,Home,Emmendingen,\"Bradley, Taylor and Montes\",Moody-Caldwell,de,Mike,false,true,Fernandez,+44 12 8808 4203,+491180000839,81908\r\nKonrad-Nohlmans-Gasse 7225,Beata-Geisler-Allee 8,Home,Senftenberg,Reynolds-Perkins,Evans-Cohen,de,Michael,false,true,Howard,+44 05 2430 6699,+495487893814,28054\r\nNikola-Schottin-Ring 8909,Finkeallee 7557,Home,Bruchsal,Freeman LLC,Perez-Shelton,de,Ashley,false,true,Sparks,+44 21 8838 6692,+498047615293,10011\r\nSteinbergring 6/5,Thorsten-Losekann-Allee 3411,Home,Wetzlar,Mendoza and Sons,\"Smith, Acosta and Meyer\",de,Victoria,false,true,Palmer,+44 50 1224 0888,+491130056221,75061\r\nInes-Paffrath-Weg 2-1,Marian-Heinz-Platz 69,Home,Augsburg,Marshall Inc,Mckenzie and Sons,de,Lisa,false,true,Stewart,+44 66 9882 2632,+491994723088,15274\r\nKadeallee 1-7,Wally-Niemeier-Ring 5-1,Home,Bischofswerda,\"Herrera, Combs and Pugh\",\"Foster, Adams and Thomas\",de,Karen,false,true,Harris,+44 84 1162 3130,+494670750196,51226\r\nLiesel-Christoph-Allee 994,Geislerring 64,Home,Biedenkopf,Flores-Cross,Thomas Group,de,Tiffany,false,true,Jones,+44 99 2789 9967,+492228497434,71422\r\nMentzelgasse 49,Ruppertallee 39-39,Home,Wesel,Jones and Sons,Chavez Group,de,Michael,false,true,Jones,+44 75 8759 1612,+493884461501,80011\r\nHäringallee 5,Carlo-Ullmann-Straße 698,Home,Warendorf,\"Romero, Dorsey and Martin\",Gutierrez-Sawyer,de,Daniel,false,true,Everett,+44 81 1606 5893,+495716389629,17652\r\nRoskothgasse 39-36,Britta-Junken-Platz 701,Home,Olpe,Robertson PLC,Robinson-Gardner,de,Billy,false,true,Luna,+44 73 5766 3116,+498233585156,14351\r\nWoldemar-Schuster-Straße 48/94,Tschentscherstr. 4233,Home,Melle,\"Russell, Miller and Potter\",\"Simmons, Gibson and Norman\",de,Jeremy,false,true,Mack,+44 21 9274 5789,+492856300051,77246\r\nAlbersring 39-92,Harloffstraße 3-4,Home,Finsterwalde,\"Flowers, Stokes and Sanchez\",Castaneda-Jackson,de,Kylie,false,true,Carter,+44 30 2517 6694,+496504627803,27128\r\nPutzstraße 306,Reichmanngasse 7-3,Home,Neubrandenburg,\"Williams, Wilkins and Walker\",Webb-Mclean,de,Shannon,false,true,Wright,+44 47 0379 4582,+491541060521,17435\r\nGudeplatz 1-3,Aleksej-Plath-Ring 7,Home,Bad Freienwalde,Miller-Graham,\"Price, Miller and Kennedy\",de,Jason,false,true,Reynolds,+44 40 8577 3072,+499367097355,54730\r\nDöhnstraße 63/57,Drubinstr. 30-37,Home,Naila,Floyd LLC,Rollins-Potts,de,Reginald,false,true,Oliver,+44 49 4549 0478,+497652258464,99883\r\nSchulzweg 53/89,Staudering 93/61,Home,Dieburg,\"Mendoza, Williams and Wong\",Brown Group,de,Stephanie,false,true,Martinez,+44 69 2615 7550,+498226274170,67418\r\nGerlind-Seip-Ring 29-78,Mariusz-Klotz-Weg 48/55,Home,Bergzabern,Stein-Elliott,Sherman-Coleman,de,Stephanie,false,true,Cochran,+44 56 4564 1506,+497891026730,21663\r\nNancy-Seidel-Ring 65-99,Gloria-Tintzmann-Straße 4/4,Home,Kronach,Ortiz-Hall,Hall-Rodriguez,de,Lindsay,false,true,Edwards,+44 32 9041 6490,+495862989956,50638\r\nTrudel-Caspar-Ring 21,Sontagstraße 9-5,Home,Darmstadt,Caldwell-Chavez,Green-Wallace,de,Robert,false,true,Smith,+44 23 6600 5529,+495559794445,38045\r\nWinfried-Trupp-Ring 35/52,Kobeltring 93-10,Home,Konstanz,\"Prince, Rodgers and Fry\",Jones PLC,de,Chad,false,true,Jones,+44 04 9626 0229,+493137531764,39815\r\nDrewesallee 6239,Drubinstraße 89,Home,Mayen,Tyler-Lewis,\"Short, Erickson and Meadows\",de,Sharon,false,true,Carter,+44 14 3709 2579,+498082305243,57057\r\nZirmeweg 1-2,Kornelius-Hauffer-Weg 3-4,Home,Luckau,Coffey-Walter,Johnson-Byrd,de,Felicia,false,true,Black,+44 17 9621 2118,+494697271468,23545\r\nKlaus-Dieter-Junck-Platz 4/8,Dominic-Adler-Straße 2/4,Home,Gerolzhofen,\"Castaneda, Walls and Thomas\",Randall Inc,de,Joshua,false,true,Perez,+44 58 0449 5730,+493449376498,69124\r\nWagenknechtgasse 10/87,Rosenowweg 8-8,Home,Burg,Garcia-Russell,Fernandez-Wilson,de,Kevin,false,true,Wiley,+44 78 1471 5432,+497803932307,22715\r\nSchulzallee 80,Nohlmansstraße 48,Home,Weißwasser,\"Greer, Burke and Novak\",Wolfe and Sons,de,Daniel,false,true,Barr,+44 01 1020 7833,+494622680142,10706\r\nMaria-Luise-Weller-Weg 7694,Wagenknechtstr. 61/19,Home,Iserlohn,Little PLC,Gibson-Logan,de,Heather,false,true,Steele,+44 95 1607 1600,+494353342296,89913\r\nHillerweg 3-3,Dehmelweg 4057,Home,Bad Langensalza,\"Smith, Nelson and Chase\",Smith and Sons,de,Jason,false,true,Quinn,+44 10 2418 9763,+492298311176,86495\r\nOda-Barth-Ring 3950,Fiebigplatz 535,Home,Marienberg,Sanchez Ltd,Davis-Whitehead,de,Alexandra,false,true,Price,+44 02 9175 5869,+498970616143,13272\r\nSagerweg 8/5,Neuschäferring 6,Home,Hofgeismar,Mendez Group,Harris-Bailey,de,Cynthia,false,true,Baldwin,+44 59 0680 9841,+496974778752,20803\r\nJüttnerstraße 2,Victoria-Scheel-Straße 45,Home,Pegnitz,\"Bird, Buckley and Miller\",Crawford Group,de,Shirley,false,true,Cole,+44 53 4668 8128,+496866109438,76651\r\nBergerring 97,Julie-Pechel-Allee 13,Home,Hersbruck,Ellis and Sons,Glenn-Rice,de,Angela,false,true,Jefferson,+44 64 7231 8455,+497049148655,95844\r\nManuela-Müller-Ring 50-44,Kadeweg 75/48,Home,Mettmann,\"Grant, Hammond and Lewis\",Smith-Jones,de,Jacob,false,true,Marks,+44 61 0839 7016,+495703759168,94301\r\nHans D.-Hellwig-Allee 57-67,Sagerallee 7/7,Home,Lichtenfels,Thomas LLC,\"Green, Garza and Cole\",de,Stacy,false,true,Boyer,+44 62 5245 0093,+490011531928,61714\r\nErdal-Ullmann-Ring 603,Buttegasse 5-1,Home,Malchin,Flores Ltd,\"Smith, Prince and Howell\",de,Amanda,false,true,Clements,+44 55 3972 6214,+497692427402,55436\r\nDrewesweg 7-7,Süßebierweg 6,Home,Ludwigsburg,Lewis Ltd,Webster Ltd,de,David,false,true,Sparks,+44 00 6663 1381,+497022890628,88064\r\nSäuberlichstraße 5577,Wojciech-Köster-Weg 1,Home,Neuruppin,Murphy-Hays,Clements and Sons,de,Lawrence,false,true,Weaver,+44 92 7092 1639,+490210647590,11286\r\nMarija-Schacht-Allee 1894,Jörg-Peter-Scholtz-Allee 222,Home,Sömmerda,Mercado-Morgan,\"Perry, Williams and Weaver\",de,Tracey,false,true,Nelson,+44 18 0559 5650,+493617958851,15421\r\nButtegasse 2/7,Drubweg 1/7,Home,Stollberg,Hernandez-Baldwin,Jackson-Baldwin,de,Edward,false,true,Weaver,+44 49 2257 0191,+495034116480,28822\r\nMeisterplatz 9268,Romy-Schleich-Platz 27/38,Home,Goslar,Jones-Strickland,Hall-Burns,de,Jon,false,true,Phillips,+44 76 2694 1513,+497232281915,58737\r\nDavidsstr. 2-5,Heinz-Georg-Salz-Gasse 5,Home,Querfurt,\"Cook, Gray and Morris\",Bartlett and Sons,de,Timothy,false,true,Lopez,+44 87 8215 2281,+490717275058,52293\r\nRalf-Martin-Allee 131,Seifertring 8-4,Home,Stadtsteinach,\"Mueller, Hernandez and Mason\",\"Sandoval, Craig and Jackson\",de,Ricky,false,true,Page,+44 94 7869 1932,+498811965630,45369\r\nKrebsstraße 6-5,Kobeltgasse 2,Home,Deggendorf,Obrien-Franklin,Salazar-Davila,de,Larry,false,true,Smith,+44 75 9065 8130,+496564372756,46195\r\nSontagstr. 73,Adolfine-Ackermann-Platz 5/4,Home,Lüdinghausen,Fisher Inc,Anthony PLC,de,Stacey,false,true,Gomez,+44 34 3964 3760,+493588910384,48087\r\nBarkholzstraße 58-60,Isabelle-Jacob-Allee 28/26,Home,Schmölln,Fleming Group,\"Wagner, Wilson and Lamb\",de,Edward,false,true,Shields,+44 83 6742 1776,+491521849614,72297\r\nAdolphring 8/6,Finkering 6329,Home,Bad Liebenwerda,\"Peters, Bean and Wang\",Young LLC,de,Tara,false,true,Johnson,+44 51 4301 5314,+498252001776,59156\r\nZahnallee 7,Uschi-Stroh-Weg 68/28,Home,Saarbrücken,Rivera-Davis,Lewis PLC,de,Bryan,false,true,Aguilar,+44 42 6632 0357,+492679228641,18556\r\nBärbel-Heydrich-Straße 941,Erna-Zahn-Gasse 7-3,Home,Freital,\"Garcia, Chang and Henry\",Romero Group,de,Jon,false,true,Cannon,+44 78 0757 2091,+499118052088,74732\r\nNikolaus-Ditschlerin-Ring 4/1,Karzweg 81-24,Home,Reutlingen,\"Berger, Wise and Berry\",Murray PLC,de,Lisa,false,true,Roberson,+44 00 6876 0665,+494810901810,27983\r\nMarlis-Mülichen-Allee 90-27,Winklerring 5/4,Home,Dieburg,Riley-Kaufman,Chavez Inc,de,Matthew,false,true,Perez,+44 61 1697 3398,+496985597757,39289\r\nStollstraße 44/72,Langernweg 0,Home,Ludwigsburg,Gregory Ltd,\"Mcdonald, Walton and Young\",de,Tommy,false,true,Hunt,+44 57 9352 7752,+498172417033,69312\r\nChristl-Spieß-Weg 68,Kensyring 73,Home,Genthin,\"Carroll, Taylor and Jimenez\",Mitchell-Solis,de,Susan,false,true,Hill,+44 50 1184 2096,+494699944335,80908\r\nAdlerring 10/69,Andres-Scholtz-Allee 5604,Home,Kamenz,\"Smith, Weaver and Holloway\",\"Martin, Ross and Wallace\",de,William,false,true,Garcia,+44 47 0138 1579,+499376680382,61305\r\nWulf-Boucsein-Ring 47/21,Gislinde-Freudenberger-Platz 2390,Home,Lörrach,Kramer Inc,Raymond PLC,de,Daniel,false,true,Barrett,+44 76 0430 9548,+493938751777,20900\r\nMeyergasse 9105,Langegasse 4697,Home,Freital,Branch Group,Browning Inc,de,Dana,false,true,Taylor,+44 69 8502 8860,+493967666891,85777\r\nMahmoud-Flantz-Straße 9,Benderallee 35/94,Home,Berchtesgaden,Mclean Inc,\"Rivera, Black and Reyes\",de,Jacqueline,false,true,Anderson,+44 99 5514 8775,+495513335945,12126\r\nRoman-Keudel-Allee 72/70,Heidrun-Möchlichen-Allee 2/5,Home,Gotha,Proctor LLC,\"Warner, Jones and Casey\",de,Cynthia,false,true,Key,+44 92 2323 0276,+496460677789,18641\r\nPatricia-Biggen-Ring 6,Betti-Langern-Platz 5/3,Home,Marktheidenfeld,Burns-Fitzgerald,Coleman PLC,de,Jonathon,false,true,Mercado,+44 39 6380 3858,+492681875084,38822\r\nAndres-Beer-Straße 5,Jüttnergasse 1-2,Home,Tirschenreuth,\"Nelson, Campbell and Roberts\",Wright PLC,de,Joshua,false,true,Gardner,+44 30 7950 0852,+497260162749,13518\r\nTrappallee 7140,Beatrice-Schäfer-Platz 69-10,Home,Steinfurt,Guzman Ltd,Kirby-Patrick,de,Thomas,false,true,Gray,+44 57 6908 9487,+492786202946,16468\r\nStriebitzweg 4/1,Roggegasse 7/7,Home,Lemgo,\"Flynn, Giles and Hernandez\",Morgan-Brown,de,Richard,false,true,Davenport,+44 46 4284 6408,+490325323961,73529\r\nSeipring 3/1,Erdogan-Dowerg-Weg 55-25,Home,Augsburg,Anderson-Freeman,Baker-Smith,de,Alicia,false,true,Roberts,+44 32 4191 7971,+494601793944,30607\r\nSorgatzplatz 148,Fiebigweg 2-1,Home,Regen,\"Ward, Fry and Woods\",\"Ware, Powell and Smith\",de,Mark,false,true,Pace,+44 81 1110 4033,+498500843687,76054\r\nNevenka-Johann-Allee 1/9,Wirthstraße 97,Home,Düren,Guzman Ltd,Sullivan Group,de,Kendra,false,true,Goodwin,+44 31 2382 2772,+491982019324,32156\r\nEnver-Neureuther-Straße 75-92,Plathstr. 92/31,Home,Mallersdorf,\"Smith, Vance and Davis\",Olson-Bishop,de,Joshua,false,true,Lopez,+44 68 5160 6641,+499936840878,34196\r\nKühnertstr. 14-40,Simon-Atzler-Straße 9,Home,Dresden,Maxwell-Smith,\"Luna, Barrett and Jones\",de,Amber,false,true,Johnson,+44 14 2781 6260,+496584543735,86318\r\nEbertring 933,Leokadia-Mies-Weg 19-25,Home,Tübingen,Hernandez Inc,Ford-Poole,de,Javier,false,true,Perkins,+44 82 0642 9716,+499760794865,96684\r\nHarriet-Reuter-Ring 4/8,Alban-Rohleder-Gasse 74/86,Home,Melle,Lee Group,Elliott-Thomas,de,Nicole,false,true,Henry,+44 32 1538 6208,+499573321514,41940\r\nThoralf-Etzold-Straße 6/3,Milena-Ladeck-Platz 99,Home,Bad Kissingen,\"Cross, Cox and Allen\",Jones-Stephens,de,Brandi,false,true,Miranda,+44 41 3108 7338,+499666537951,82578\r\nKargeweg 24-61,Ditmar-Hörle-Allee 4622,Home,Naila,\"Mitchell, Joseph and Brown\",King and Sons,de,Rachel,false,true,Bennett,+44 58 4848 3193,+496419128075,61351\r\nAhmet-Pergande-Gasse 20/67,Mielcarekweg 97-54,Home,Kassel,\"Dixon, Clark and Salinas\",Parker Inc,de,Danny,false,true,Norris,+44 33 6559 9520,+494867320577,20763\r\nMohauptstraße 9,Fritschring 0,Home,Staßfurt,Parker and Sons,Shelton-Villarreal,de,Barbara,false,true,Nguyen,+44 45 4197 1109,+497881947760,51990\r\nGesa-Albers-Gasse 3/7,Inna-Bauer-Gasse 18/26,Home,Zerbst,\"Ramirez, Lewis and Brown\",Rodriguez-Mason,de,Stephen,false,true,Brown,+44 20 8838 2959,+498426334663,32335\r\nVogtstraße 87,Irmengard-Krebs-Platz 95/90,Home,Bad Kissingen,Johnson Group,\"Bond, Mason and Wolf\",de,Monica,false,true,Wilkinson,+44 30 1221 9804,+494737764832,56096\r\nMehmet-Stiffel-Straße 3/1,Christophallee 3450,Home,Burglengenfeld,Martin Inc,\"Terry, Roy and Davis\",de,Natasha,false,true,Hall,+44 55 2599 3000,+497786518983,93142\r\nMelissa-Hofmann-Ring 3412,Hildburg-Matthäi-Platz 51,Home,Hammelburg,\"Garcia, Dean and Miller\",Tucker LLC,de,Yolanda,false,true,Johnson,+44 98 3256 3752,+491977231170,73730\r\nConcetta-Köhler-Gasse 82-27,Jähnallee 560,Home,Rudolstadt,\"Boone, Navarro and Davies\",\"Eaton, Townsend and Rowe\",de,Desiree,false,true,Ray,+44 02 8524 9674,+491809449474,30504\r\nNergerring 1504,Pölitzallee 93/79,Home,Coburg,Wright and Sons,\"Nguyen, Morrow and Moore\",de,Michael,false,true,Parsons,+44 23 9537 7358,+494060407903,31069\r\nHans-Uwe-Döring-Platz 7/1,Tamara-Stroh-Platz 7/9,Home,Scheinfeld,Richardson Ltd,Smith Ltd,de,Terri,false,true,Pham,+44 66 9152 7976,+490885073259,63880\r\nFörsterplatz 8-5,Textorstraße 11-52,Home,Sulzbach-Rosenberg,\"Taylor, Lawson and Ellis\",\"Jones, Vazquez and Fisher\",de,Dylan,false,true,Stout,+44 07 4731 7666,+499634620722,77632\r\nDussen vanweg 7,Mathilde-Jüttner-Platz 82-52,Home,Tübingen,Jennings-Salazar,\"Perez, Powell and Potter\",de,Daniel,false,true,Thompson,+44 68 0489 3385,+497717582429,98299\r\nBeierweg 89/90,Bergerstr. 2/6,Home,Schongau,Cook-Smith,Wells PLC,de,James,false,true,Andrews,+44 37 5745 6848,+495857630953,17732\r\nWellerstraße 4,Rörrichtweg 7/2,Home,Schwarzenberg,Mueller-Howard,Gomez-Patel,de,Raymond,false,true,Curry,+44 84 1912 3306,+497449734037,47748\r\nHorst-Peter-Peukert-Gasse 22-15,Weihmanngasse 346,Home,Hammelburg,Stevens-Gilbert,Lee-Jones,de,Jeffery,false,true,Beck,+44 89 0277 1803,+491515428092,34982\r\nThaddäus-Lachmann-Gasse 737,Gerd-Boucsein-Ring 82,Home,Neustrelitz,Johnson-Schneider,Hatfield Inc,de,Stephanie,false,true,Chavez,+44 49 0092 5311,+498631141079,29762\r\nStiffelallee 897,Zlatko-Börner-Weg 14-78,Home,Sömmerda,Farley PLC,Jones-Hughes,de,William,false,true,Vazquez,+44 47 1002 0086,+493271711872,97205\r\nTony-Heinrich-Straße 1-6,Ortmannstr. 1/9,Home,Stendal,Valentine-Carroll,Spencer-Allen,de,Angela,false,true,Boyd,+44 47 5946 8896,+499321492242,62944\r\nGierschnergasse 54,Bärbel-Heinz-Gasse 1-6,Home,Neunburg vorm Wald,Carroll Inc,\"Walker, Andrews and Perkins\",de,Samantha,false,true,Weaver,+44 11 5741 6753,+498197621012,47677\r\nKuhlstr. 30/80,Guido-Pölitz-Weg 92/17,Home,Delitzsch,Miller Ltd,Diaz Ltd,de,Joshua,false,true,Hartman,+44 03 9832 8901,+494128343528,78045\r\nJenny-Pärtzelt-Gasse 2,Loosplatz 15,Home,Weißenfels,Stevens-Allen,\"Mcclure, Adkins and Johnson\",de,Linda,false,true,Cook,+44 81 4259 9340,+498510080139,51394\r\nHarold-Koch-Straße 1,Junkenweg 0,Home,Neustrelitz,Solis-Zuniga,Castro-Pace,de,Jonathan,false,true,Salas,+44 65 5352 6168,+498024607758,34622\r\nVinzenz-Siering-Gasse 6246,Ayse-Neureuther-Gasse 27,Home,Iserlohn,Herrera-Freeman,Alvarado-Griffin,de,Anthony,false,true,Evans,+44 54 6559 6625,+492532702226,30127\r\nGeorgia-Heser-Platz 364,Beerweg 78/26,Home,Celle,Myers-Rangel,Morris-Tran,de,Chelsea,false,true,Henson,+44 66 7588 2735,+499047369881,30885\r\nLudmilla-Kade-Platz 769,Kadegasse 15/63,Home,Celle,\"Bennett, Mcdaniel and York\",Williams and Sons,de,Mary,false,true,Meyer,+44 04 1215 9343,+492701429669,25920\r\nHaeringring 12-78,Langernring 8327,Home,Mallersdorf,Hawkins-Ellis,Knight LLC,de,Christopher,false,true,Norris,+44 69 0947 1027,+490257366080,89402\r\nPärtzeltweg 813,Wieland-Fischer-Gasse 89,Home,Delitzsch,Brooks Ltd,\"Spears, Price and Hughes\",de,Shelby,false,true,White,+44 16 8251 5127,+496297411938,12087\r\nSwantje-Fliegner-Gasse 5322,Mirco-Schmidtke-Platz 4,Home,Arnstadt,Gonzalez-Gonzalez,Sanchez LLC,de,John,false,true,Nelson,+44 66 1134 7352,+496838130737,90983\r\nJanet-Rudolph-Straße 26/76,Schusterstraße 0,Home,Böblingen,\"Ruiz, Khan and Hart\",\"Nichols, Miller and Stewart\",de,Jeffrey,false,true,Lawrence,+44 83 4299 2458,+496378734633,94909\r\nGilda-Lübs-Ring 61-79,Marica-Müller-Gasse 6-4,Home,Nürtingen,\"Jackson, Sutton and Dominguez\",\"Mason, Snow and Miller\",de,Karen,false,true,Padilla,+44 14 3286 1133,+497613170090,78853\r\nAndrey-Mude-Allee 2/1,Liesa-Hecker-Weg 620,Home,Hohenstein-Ernstthal,Rodriguez-Quinn,Carter LLC,de,Jessica,false,true,Nelson,+44 72 2374 5086,+496696150059,36322\r\nOlivia-Schmidtke-Weg 2-2,Drubinweg 2225,Home,Hainichen,Sellers-Clark,Diaz Inc,de,Lori,false,true,Bradley,+44 93 7756 5990,+493538090517,55302\r\nRöhrdanzgasse 35/58,Oswald-Söding-Straße 1/7,Home,Finsterwalde,Perry Inc,Gray-Gray,de,Ian,false,true,Moore,+44 62 9515 0553,+493059207177,35980\r\n",
+          "bundle_evidenced": true,
+          "role": "data",
+          "identity_kind": null,
+          "label": "Address 1 & address 2 & address name & city & company & company name & country code & first name & is default billing & is default shipping & last name & phone & phone2 & postal code",
+          "description": null,
+          "separator": null,
+          "feed_records_count": null,
+          "jdbc_config": null,
+          "redis_config": null
+        }
+      ],
+      "request_sequence": [
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "register_identity",
+          "method": "POST",
+          "path": "/auth/customer/credentials/register",
+          "action_start": null,
+          "origin": null,
+          "headers": {
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": "{\"email\":\"#{email}\",\"password\":\"#{password}\"}",
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [
+            {
+              "name": null,
+              "check_type": "jsonPath",
+              "selector": "$.token",
+              "pattern": null,
+              "header_name": null,
+              "extraction_mode": null,
+              "index": null,
+              "random_count": null,
+              "fail_if_less": false,
+              "expected_value": null,
+              "expected_values": [],
+              "expected_count": null,
+              "save_as": "registration_token",
+              "validation_operator": null,
+              "optional": true,
+              "tolerance": null,
+              "recorded_fingerprint": null,
+              "default_value": null,
+              "with_default": null,
+              "extract_value_type": null,
+              "transform_expression": null,
+              "log_actual_value_in_error": null,
+              "check_if_el": null,
+              "check_if_condition": null,
+              "check_if_session_var": null,
+              "check_if_operator": null,
+              "check_if_value": null,
+              "compiled_expression": "jsonPath(\"$.token\").optional.saveAs(\"registration_token\")",
+              "condition_inputs": []
+            }
+          ],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": true,
+          "preflight": true,
+          "checks": [
+            "jsonPath(\"$.token\").optional.saveAs(\"registration_token\")",
+            "status.is(200)",
+            "jsonPath(\"$.token\").ofType[String].notNull"
+          ],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "token": "str"
+            },
+            "origin": "declared",
+            "required": ["token"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        },
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "create_customer",
+          "method": "POST",
+          "path": "/store/customers",
+          "action_start": {
+            "class": "api_call",
+            "key": "POST /store/customers"
+          },
+          "origin": null,
+          "headers": {
+            "Authorization": "Bearer {{registration_token}}",
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": "{\"company_name\":\"Example Ltd\",\"email\":\"#{email}\",\"first_name\":\"Jane\",\"last_name\":\"Doe\",\"metadata\":{\"source\":\"loadtest\"},\"phone\":\"+44 20 7946 0001\"}",
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [
+            {
+              "name": null,
+              "check_type": "jsonPath",
+              "selector": "$.customer.id",
+              "pattern": null,
+              "header_name": null,
+              "extraction_mode": null,
+              "index": null,
+              "random_count": null,
+              "fail_if_less": false,
+              "expected_value": null,
+              "expected_values": [],
+              "expected_count": null,
+              "save_as": "customer_id",
+              "validation_operator": null,
+              "optional": true,
+              "tolerance": null,
+              "recorded_fingerprint": null,
+              "default_value": null,
+              "with_default": null,
+              "extract_value_type": null,
+              "transform_expression": null,
+              "log_actual_value_in_error": null,
+              "check_if_el": null,
+              "check_if_condition": null,
+              "check_if_session_var": null,
+              "check_if_operator": null,
+              "check_if_value": null,
+              "compiled_expression": "jsonPath(\"$.customer.id\").optional.saveAs(\"customer_id\")",
+              "condition_inputs": []
+            }
+          ],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": true,
+          "preflight": true,
+          "checks": [
+            "jsonPath(\"$.customer.id\").optional.saveAs(\"customer_id\")",
+            "status.is(200)",
+            "jsonPath(\"$.customer\").ofType[Map[String, Any]].notNull"
+          ],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "customer": {
+                "id": "str",
+                "email": "str",
+                "has_account": "bool",
+                "first_name": "str",
+                "last_name": "str"
+              }
+            },
+            "origin": "declared",
+            "required": ["customer"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        },
+        {
+          "source_block_id": "ffffffffffffffffffffffffffffffff",
+          "name": "login_customer",
+          "method": "POST",
+          "path": "/auth/customer/credentials",
+          "action_start": {
+            "class": "api_call",
+            "key": "POST /auth/customer/credentials"
+          },
+          "origin": null,
+          "headers": {
+            "x-store-api-key": "#{target_key_storekey}"
+          },
+          "query_params": {},
+          "body": "{\"email\":\"#{email}\",\"password\":\"#{password}\"}",
+          "numeric_body_slots": [],
+          "graphql_query": null,
+          "graphql_variables": null,
+          "graphql_operation_name": null,
+          "soap_action": null,
+          "content_type": "application/json",
+          "form_params": {},
+          "files": [],
+          "silent": false,
+          "request_modifiers": [],
+          "request_checks": [
+            {
+              "name": null,
+              "check_type": "jsonPath",
+              "selector": "$.token",
+              "pattern": null,
+              "header_name": null,
+              "extraction_mode": null,
+              "index": null,
+              "random_count": null,
+              "fail_if_less": false,
+              "expected_value": null,
+              "expected_values": [],
+              "expected_count": null,
+              "save_as": "customer_token",
+              "validation_operator": null,
+              "optional": true,
+              "tolerance": null,
+              "recorded_fingerprint": null,
+              "default_value": null,
+              "with_default": null,
+              "extract_value_type": null,
+              "transform_expression": null,
+              "log_actual_value_in_error": null,
+              "check_if_el": null,
+              "check_if_condition": null,
+              "check_if_session_var": null,
+              "check_if_operator": null,
+              "check_if_value": null,
+              "compiled_expression": "jsonPath(\"$.token\").optional.saveAs(\"customer_token\")",
+              "condition_inputs": []
+            }
+          ],
+          "expected_status": null,
+          "expected_statuses": [200],
+          "exit_here_if_failed": true,
+          "preflight": true,
+          "checks": [
+            "jsonPath(\"$.token\").optional.saveAs(\"customer_token\")",
+            "status.is(200)",
+            "jsonPath(\"$.token\").ofType[String].notNull"
+          ],
+          "save_variables": {},
+          "save_variables_collection": {},
+          "pause_after": null,
+          "pause_after_source": null,
+          "pause_after_fixed": false,
+          "has_resources": false,
+          "resources": [],
+          "response_jsonpath_hints": {},
+          "response_schema": {
+            "format": "json",
+            "shape": {
+              "token": "str"
+            },
+            "origin": "declared",
+            "required": ["token"]
+          },
+          "retry_count": 0,
+          "retry_delay_ms": 0,
+          "auth": null,
+          "failure_boundary": null,
+          "is_async": false,
+          "poll_status_path": null,
+          "poll_result_path": null,
+          "poll_interval_ms": 1000,
+          "poll_timeout_ms": 30000,
+          "poll_status_field": null,
+          "poll_success_values": []
+        }
+      ]
+    },
+    "requests": [
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "register_identity",
+        "method": "POST",
+        "path": "/auth/customer/credentials/register",
+        "action_start": null,
+        "origin": null,
+        "headers": {
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": "{\"email\":\"#{email}\",\"password\":\"#{password}\"}",
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [
+          {
+            "name": null,
+            "check_type": "jsonPath",
+            "selector": "$.token",
+            "pattern": null,
+            "header_name": null,
+            "extraction_mode": null,
+            "index": null,
+            "random_count": null,
+            "fail_if_less": false,
+            "expected_value": null,
+            "expected_values": [],
+            "expected_count": null,
+            "save_as": "registration_token",
+            "validation_operator": null,
+            "optional": true,
+            "tolerance": null,
+            "recorded_fingerprint": null,
+            "default_value": null,
+            "with_default": null,
+            "extract_value_type": null,
+            "transform_expression": null,
+            "log_actual_value_in_error": null,
+            "check_if_el": null,
+            "check_if_condition": null,
+            "check_if_session_var": null,
+            "check_if_operator": null,
+            "check_if_value": null,
+            "compiled_expression": "jsonPath(\"$.token\").optional.saveAs(\"registration_token\")",
+            "condition_inputs": []
+          }
+        ],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": true,
+        "preflight": true,
+        "checks": [
+          "jsonPath(\"$.token\").optional.saveAs(\"registration_token\")",
+          "status.is(200)",
+          "jsonPath(\"$.token\").ofType[String].notNull"
+        ],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "token": "str"
+          },
+          "origin": "declared",
+          "required": ["token"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      },
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "create_customer",
+        "method": "POST",
+        "path": "/store/customers",
+        "action_start": {
+          "class": "api_call",
+          "key": "POST /store/customers"
+        },
+        "origin": null,
+        "headers": {
+          "Authorization": "Bearer {{registration_token}}",
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": "{\"company_name\":\"Example Ltd\",\"email\":\"#{email}\",\"first_name\":\"Jane\",\"last_name\":\"Doe\",\"metadata\":{\"source\":\"loadtest\"},\"phone\":\"+44 20 7946 0001\"}",
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [
+          {
+            "name": null,
+            "check_type": "jsonPath",
+            "selector": "$.customer.id",
+            "pattern": null,
+            "header_name": null,
+            "extraction_mode": null,
+            "index": null,
+            "random_count": null,
+            "fail_if_less": false,
+            "expected_value": null,
+            "expected_values": [],
+            "expected_count": null,
+            "save_as": "customer_id",
+            "validation_operator": null,
+            "optional": true,
+            "tolerance": null,
+            "recorded_fingerprint": null,
+            "default_value": null,
+            "with_default": null,
+            "extract_value_type": null,
+            "transform_expression": null,
+            "log_actual_value_in_error": null,
+            "check_if_el": null,
+            "check_if_condition": null,
+            "check_if_session_var": null,
+            "check_if_operator": null,
+            "check_if_value": null,
+            "compiled_expression": "jsonPath(\"$.customer.id\").optional.saveAs(\"customer_id\")",
+            "condition_inputs": []
+          }
+        ],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": true,
+        "preflight": true,
+        "checks": [
+          "jsonPath(\"$.customer.id\").optional.saveAs(\"customer_id\")",
+          "status.is(200)",
+          "jsonPath(\"$.customer\").ofType[Map[String, Any]].notNull"
+        ],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "customer": {
+              "id": "str",
+              "email": "str",
+              "has_account": "bool",
+              "first_name": "str",
+              "last_name": "str"
+            }
+          },
+          "origin": "declared",
+          "required": ["customer"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      },
+      {
+        "source_block_id": "ffffffffffffffffffffffffffffffff",
+        "name": "login_customer",
+        "method": "POST",
+        "path": "/auth/customer/credentials",
+        "action_start": {
+          "class": "api_call",
+          "key": "POST /auth/customer/credentials"
+        },
+        "origin": null,
+        "headers": {
+          "x-store-api-key": "#{target_key_storekey}"
+        },
+        "query_params": {},
+        "body": "{\"email\":\"#{email}\",\"password\":\"#{password}\"}",
+        "numeric_body_slots": [],
+        "graphql_query": null,
+        "graphql_variables": null,
+        "graphql_operation_name": null,
+        "soap_action": null,
+        "content_type": "application/json",
+        "form_params": {},
+        "files": [],
+        "silent": false,
+        "request_modifiers": [],
+        "request_checks": [
+          {
+            "name": null,
+            "check_type": "jsonPath",
+            "selector": "$.token",
+            "pattern": null,
+            "header_name": null,
+            "extraction_mode": null,
+            "index": null,
+            "random_count": null,
+            "fail_if_less": false,
+            "expected_value": null,
+            "expected_values": [],
+            "expected_count": null,
+            "save_as": "customer_token",
+            "validation_operator": null,
+            "optional": true,
+            "tolerance": null,
+            "recorded_fingerprint": null,
+            "default_value": null,
+            "with_default": null,
+            "extract_value_type": null,
+            "transform_expression": null,
+            "log_actual_value_in_error": null,
+            "check_if_el": null,
+            "check_if_condition": null,
+            "check_if_session_var": null,
+            "check_if_operator": null,
+            "check_if_value": null,
+            "compiled_expression": "jsonPath(\"$.token\").optional.saveAs(\"customer_token\")",
+            "condition_inputs": []
+          }
+        ],
+        "expected_status": null,
+        "expected_statuses": [200],
+        "exit_here_if_failed": true,
+        "preflight": true,
+        "checks": [
+          "jsonPath(\"$.token\").optional.saveAs(\"customer_token\")",
+          "status.is(200)",
+          "jsonPath(\"$.token\").ofType[String].notNull"
+        ],
+        "save_variables": {},
+        "save_variables_collection": {},
+        "pause_after": null,
+        "pause_after_source": null,
+        "pause_after_fixed": false,
+        "has_resources": false,
+        "resources": [],
+        "response_jsonpath_hints": {},
+        "response_schema": {
+          "format": "json",
+          "shape": {
+            "token": "str"
+          },
+          "origin": "declared",
+          "required": ["token"]
+        },
+        "retry_count": 0,
+        "retry_delay_ms": 0,
+        "auth": null,
+        "failure_boundary": null,
+        "is_async": false,
+        "poll_status_path": null,
+        "poll_result_path": null,
+        "poll_interval_ms": 1000,
+        "poll_timeout_ms": 30000,
+        "poll_status_field": null,
+        "poll_success_values": []
+      }
+    ],
+    "contract": {
+      "inputs": ["email", "password", "target_key_storekey"],
+      "outputs": [],
+      "session_vars": ["email", "password", "target_key_storekey"]
+    },
+    "scenario_contract_v2": {
+      "contract_version": 2,
+      "required_inputs": ["email", "password", "target_key_storekey"],
+      "exports": [],
+      "locals": [
+        "address_1",
+        "address_2",
+        "address_id",
+        "address_name",
+        "city",
+        "company",
+        "company_name",
+        "country_code",
+        "customer_id",
+        "customer_token",
+        "first_name",
+        "is_default_billing",
+        "is_default_shipping",
+        "last_name",
+        "loadcraft_thinkRandom",
+        "phone",
+        "phone2",
+        "postal_code",
+        "registration_token"
+      ],
+      "control_vars": [],
+      "session_vars": [
+        "address_1",
+        "address_2",
+        "address_id",
+        "address_name",
+        "city",
+        "company",
+        "company_name",
+        "country_code",
+        "customer_id",
+        "customer_token",
+        "email",
+        "first_name",
+        "is_default_billing",
+        "is_default_shipping",
+        "last_name",
+        "loadcraft_thinkRandom",
+        "password",
+        "phone",
+        "phone2",
+        "postal_code",
+        "registration_token",
+        "target_key_storekey"
+      ],
+      "source_metadata": {
+        "source_kind": "flow",
+        "source_flow_id": "0d0c7034-0003-4000-8000-000000001022",
+        "source_flow_version": 1
+      }
+    },
+    "feeders": [
+      {
+        "file": "users.csv",
+        "feeder_type": "csv",
+        "strategy": "circular",
+        "columns": ["email", "password", "target_key_storekey"],
+        "column_specs": [
+          {
+            "name": "email",
+            "type": "email"
+          },
+          {
+            "name": "password",
+            "type": "string"
+          },
+          {
+            "name": "target_key_storekey",
+            "type": "string"
+          }
+        ],
+        "column_fingerprints": {
+          "email": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "password": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "target_key_storekey": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "has_unique_columns": true,
+        "column_types": ["email", "string", "string"],
+        "record_count": null,
+        "bundle_evidenced": null,
+        "role": "auth",
+        "identity_kind": "fresh",
+        "label": "User accounts",
+        "description": "Accounts used to sign in.",
+        "separator": null,
+        "feed_records_count": null,
+        "jdbc_config": null,
+        "redis_config": null
+      },
+      {
+        "file": "scenario_auto_data.csv",
+        "feeder_type": "csv",
+        "strategy": "circular",
+        "columns": [
+          "address_1",
+          "address_2",
+          "address_name",
+          "city",
+          "company",
+          "company_name",
+          "country_code",
+          "first_name",
+          "is_default_billing",
+          "is_default_shipping",
+          "last_name",
+          "phone",
+          "phone2",
+          "postal_code"
+        ],
+        "column_specs": [
+          {
+            "name": "address_1",
+            "type": "string",
+            "example": "Examplestrasse 1"
+          },
+          {
+            "name": "address_2",
+            "type": "string",
+            "example": "Apt 2"
+          },
+          {
+            "name": "address_name",
+            "type": "string",
+            "example": "Home"
+          },
+          {
+            "name": "city",
+            "type": "string",
+            "example": "Berlin"
+          },
+          {
+            "name": "company",
+            "type": "string",
+            "example": "Example GmbH"
+          },
+          {
+            "name": "company_name",
+            "type": "string",
+            "example": "Example Ltd"
+          },
+          {
+            "name": "country_code",
+            "type": "string",
+            "example": "de"
+          },
+          {
+            "name": "first_name",
+            "type": "string",
+            "example": "Jane"
+          },
+          {
+            "name": "is_default_billing",
+            "type": "boolean",
+            "example": "false"
+          },
+          {
+            "name": "is_default_shipping",
+            "type": "boolean",
+            "example": "true"
+          },
+          {
+            "name": "last_name",
+            "type": "string",
+            "example": "Doe"
+          },
+          {
+            "name": "phone",
+            "type": "string",
+            "example": "+44 20 7946 0001"
+          },
+          {
+            "name": "phone2",
+            "type": "string",
+            "example": "+491700000000"
+          },
+          {
+            "name": "postal_code",
+            "type": "string",
+            "example": "10115"
+          }
+        ],
+        "column_fingerprints": {
+          "address_1": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address_2": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address_name": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "city": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "company": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "company_name": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "country_code": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "first_name": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "is_default_billing": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "is_default_shipping": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "last_name": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "phone": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "phone2": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "postal_code": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "has_unique_columns": false,
+        "column_types": [
+          "string",
+          "string",
+          "string",
+          "string",
+          "string",
+          "string",
+          "string",
+          "string",
+          "boolean",
+          "boolean",
+          "string",
+          "string",
+          "string",
+          "string"
+        ],
+        "record_count": null,
+        "bundle_evidenced": true,
+        "role": "data",
+        "identity_kind": null,
+        "label": "Address 1 & address 2 & address name & city & company & company name & country code & first name & is default billing & is default shipping & last name & phone & phone2 & postal code",
+        "description": null,
+        "separator": null,
+        "feed_records_count": null,
+        "jdbc_config": null,
+        "redis_config": null
+      }
+    ],
+    "modular_files": {
+      "src/gatling/scala/io/loadcraft/gatling/LoadCraftOTelPlugin.scala": "// LoadCraft OpenTelemetry Plugin for Gatling 3.14.x\n//\n// Captures ALL HTTP request metrics as OTel spans + native metrics and exports\n// them via OTLP to the OTel Collector. This is the traces-first approach\n// (ADR Option E) where every HTTP request becomes a span, and the Collector's\n// spanmetrics connector derives dashboard-driving metrics from those spans.\n//\n// Native SDK metrics (counters, histograms) are emitted as a redundant baseline.\n//\n// The SDK auto-configures from OTEL_* environment variables:\n//   OTEL_EXPORTER_OTLP_ENDPOINT=http://api.example.test (or otel-collector:4317 in k8s)\n//   OTEL_SERVICE_NAME=loadcraft-gatling-local\n//   OTEL_RESOURCE_ATTRIBUTES=loadcraft.execution_id=UUID,...\n//\n// IMPORTANT: this plugin is packaged into a Gatling fat-jar via shadowJar.\n// The shadowJar block MUST call mergeServiceFiles() so the autoconfigure SPI\n// ServiceLoader entries (OtlpSpanExporterProvider, OtlpMetricExporterProvider, ...)\n// survive the merge. Without that, the trace exporter silently falls back to\n// no-op while metrics keep working.\n\npackage io.loadcraft.gatling\n\nimport io.opentelemetry.api.OpenTelemetry\nimport io.opentelemetry.api.trace.{Tracer, Span, SpanKind, StatusCode}\nimport io.opentelemetry.api.metrics.{Meter, LongCounter, DoubleHistogram, ObservableLongGauge}\nimport io.opentelemetry.api.common.Attributes\nimport io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk\nimport io.gatling.http.client.body.bytearray.ByteArrayRequestBody\nimport io.gatling.http.client.body.file.FileRequestBody\nimport io.gatling.http.client.body.form.FormUrlEncodedRequestBody\nimport io.gatling.http.client.body.multipart.{ByteArrayPart, FilePart, MultipartFormDataRequestBody, Part, StringPart}\nimport io.gatling.http.client.body.string.StringRequestBody\nimport io.gatling.http.client.body.stringchunks.StringChunksRequestBody\nimport io.gatling.netty.util.StringWithCachedBytes\nimport io.netty.handler.codec.http.HttpHeaders\nimport java.lang.reflect.Method\nimport java.util.concurrent.ConcurrentHashMap\nimport java.util.concurrent.TimeUnit\nimport java.util.concurrent.atomic.AtomicLong\n\nobject LoadCraftOTelPlugin {\n\n  // Auto-configured from OTEL_* env vars, and registered as the global\n  // instance, as autoconfigure's own one-call initialisation does — with ONE\n  // difference: autoconfigure's JVM shutdown hook is disabled, so `shutdown()`\n  // below, which every generated simulation runs from its own\n  // `sys.addShutdownHook`, is the one thing that closes the SDK. The JVM runs\n  // shutdown hooks concurrently: with both registered, the SDK could close\n  // its batch span processor while `shutdown()` was still draining the\n  // ledgers, and every span ended by that drain — the last answered request\n  // of each VU the run cut short — would reach a processor that had already\n  // flushed, and never be exported.\n  private lazy val sdk: OpenTelemetry =\n    AutoConfiguredOpenTelemetrySdk.builder().setResultAsGlobal().disableShutdownHook().build().getOpenTelemetrySdk\n\n  lazy val tracer: Tracer = sdk.getTracer(\"loadcraft-gatling\", \"1.0.0\")\n  lazy val meter: Meter = sdk.getMeter(\"loadcraft-gatling\")\n\n  // Extract execution ID from OTEL_RESOURCE_ATTRIBUTES so we can set it\n  // as a span attribute (required for spanmetrics connector dimensions).\n  // Format: \"loadcraft.execution_id=UUID,service.instance.id=worker-0,...\"\n  lazy val executionId: String = {\n    val attrs = Option(System.getenv(\"OTEL_RESOURCE_ATTRIBUTES\")).getOrElse(\"\")\n    attrs.split(\",\")\n      .map(_.trim)\n      .find(_.startsWith(\"loadcraft.execution_id=\"))\n      .map(_.split(\"=\", 2).last)\n      .getOrElse(\"\")\n  }\n\n  // --- Metrics instruments ---\n  lazy val requestCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.http.requests\")\n    .setDescription(\"Total HTTP requests\")\n    .build()\n\n  // Explicit bucket boundaries (milliseconds). The OTel SDK default\n  // boundaries top out at 10,000ms — anything slower lands in the\n  // +Inf bucket, so Prometheus histogram_quantile() can't interpolate\n  // and pins p95/p99/max at 10,000 even when real response times run\n  // to 30s+. Load tests routinely exceed 10s, so extend the range to\n  // 2 minutes. Mean was always correct (sum/count); only the\n  // bucket-derived percentiles were clamped.\n  private val _durationBoundaries: java.util.List[java.lang.Double] =\n    java.util.Arrays.asList(\n      5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, 1000.0, 2500.0,\n      5000.0, 7500.0, 10000.0, 15000.0, 20000.0, 30000.0, 45000.0,\n      60000.0, 90000.0, 120000.0\n    )\n\n  lazy val responseTimeHistogram: DoubleHistogram = meter\n    .histogramBuilder(\"loadcraft.http.duration\")\n    .setDescription(\"HTTP request duration in milliseconds\")\n    .setUnit(\"ms\")\n    .setExplicitBucketBoundariesAdvice(_durationBoundaries)\n    .build()\n\n  lazy val errorCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.http.errors\")\n    .setDescription(\"Total HTTP errors (4xx or 5xx)\")\n    .build()\n\n  // --- The two limbs of KO that a response-shaped hook cannot see -------\n  //\n  // `recordRequest` below runs from `.transformResponse`, which Gatling\n  // invokes ONLY when a response exists. So it can neither see a request that\n  // never got one nor a check that failed on a perfectly good 200 — the first\n  // used to emit no series at all (a run that killed the target reported a\n  // SMALLER total and 0% errors) and the second was counted as a success.\n  //\n  // Both are settled from the per-VU ledger further down and land in their own\n  // counters. Each row carries `loadcraft.ko_limb`, which is what the panel's\n  // one grouped read tells a limb apart from a status row by; the values are\n  // the ones `ko_taxonomy.KoLimb` holds, and the contract gate compares the\n  // two sides.\n  lazy val noResponseCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.http.no_response\")\n    .setDescription(\"Requests that never received a response\")\n    .build()\n\n  lazy val checkFailureCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.http.check_failures\")\n    .setDescription(\"Requests answered but failing a per-request check\")\n    .build()\n\n  // THE KO DEFINITION, Scala side.\n  //\n  // The rule lives in Python, in `the generator`.\n  // This file cannot import it, so the two are held together by a contract\n  // gate (`the generator`) that reads BOTH sources: it\n  // lifts these two constants and the body of `isKo` out of this file,\n  // evaluates that body for every status a response can carry, and compares\n  // the answers with the Python authority's. Change either side alone and\n  // the gate goes red — agreement here is PINNED, never assumed.\n  //\n  // The range is closed on both ends on purpose: 400..599 is HTTP's error\n  // space. The old rule was a bare `>= 400`, which swept in anything above\n  // it, and the Python side used a leading-digit test, which did not — a\n  // disagreement nobody could see because nothing compared them.\n  //\n  // What is deliberately NOT here, and no longer a gap: a request that never\n  // got a response. `recordRequest` is only ever called from inside\n  // `.transformResponse`, so this method never sees a \"no status\" case and a\n  // branch for one would still be dead code. Such a request is counted by\n  // `noResponseCounter` off the per-VU ledger instead, and an\n  // unmet check by `checkFailureCounter` — a request whose status is already\n  // KO here is never counted by either, so no request is ever a failure twice\n  // over. The two limbs are NOT the same kind of row, though, and the\n  // difference is the whole arithmetic of the panel: a no-response is a\n  // request the duration counter never saw, while an unmet check rode in on a\n  // response the duration counter DID count. So the check limb carries the\n  // status of that response and the panel moves that one request from the\n  // status's bucket into ko, rather than counting a second request that never\n  // happened. See `ko_taxonomy.KO_LIMBS` and `ko_taxonomy.row_contribution`.\n  val KoStatusMin: Int = 400\n  val KoStatusMax: Int = 599\n\n  def isKo(httpStatus: Int): Boolean =\n    httpStatus >= KoStatusMin && httpStatus <= KoStatusMax\n\n  // --- Group instruments ---\n  // Gatling's own HTML/console report groups requests under their enclosing\n  // group(\"...\") { ... } block and shows per-group aggregate stats (entry\n  // count, %KO) — a dimension our OTel/Prometheus pipeline otherwise loses\n  // by flattening everything to per-request metrics.\n  //\n  // A group-level duration/%KO histogram+counter (paired with a groupExited\n  // exit bracket) used to live here too, but a group whose inner chain\n  // contains an `.exitHereIfFailed` (a common fail-fast pattern — see\n  // `scala_dsl.retry_block`) ends the VU's scenario BEFORE that exit bracket\n  // ever runs on the KO path, so the aggregate silently under-recorded\n  // exactly the failures it exists to count — a structural gap, not a fixable\n  // bug (the class-mix branch of `retry_block` already documented the same\n  // \"no single point after which the group is unconditionally done\" problem\n  // for its own shape). Removed rather than shipped half-working: the UI\n  // derives a group's duration/%KO from its child request rows instead,\n  // keyed by the `group` attribute every request span already carries (see\n  // `recordRequest` below) — that attribute is written at EVERY request,\n  // never conditioned on the group finishing cleanly.\n  lazy val groupEntryCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.gatling.group_entries\")\n    .setDescription(\"Times a group() block was entered\")\n    .build()\n\n  // A virtual user that picked a list element at random and had\n  // the write spending it refused with a 4xx takes another candidate; every\n  // such re-pick is counted here, per action step (the generated repick\n  // group's hook calls `repicked`). One attribute, the step name, so its\n  // series count is the scenario's write steps that close a repick group.\n  lazy val repickCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.gatling.repick\")\n    .setDescription(\"Times a virtual user picked another candidate after the action step refused one\")\n    .build()\n\n  // --- In-flight requests counter (legacy proxy) ---\n  // Incremented in the protocol's `.sign` hook just before sending, once per\n  // build (a re-write of a build in flight is not a new request),\n  // decremented at the top of `recordRequest()` (called from\n  // transformResponse). Kept so legacy generated simulations still\n  // compile, but it is NO LONGER what the active-users gauge reports:\n  // it drops to 0 during think-time pauses, so it badly understates\n  // the active-VU count for journeys with pauses.\n  val inFlight: AtomicLong = new AtomicLong(0L)\n\n  // --- Active sessions gauge (true active virtual users) ---\n  // Incremented when a VU enters the scenario chain (sessionStarted),\n  // decremented when it finishes (sessionEnded) — so it stays elevated\n  // through think-time pauses, matching Gatling's own active-user count.\n  // Generated simulations wrap the scenario chain with these calls.\n  val activeSessions: AtomicLong = new AtomicLong(0L)\n\n  // Eager `val` so the gauge callback is registered with the OTel\n  // SDK the moment LoadCraftOTelPlugin is first referenced from\n  // anywhere — even legacy generated simulations that never call\n  // init() get the metric. (`lazy val` would only register on first\n  // read, which is too late if the simulation skips init().)\n  val activeUsersGauge: ObservableLongGauge = meter\n    .gaugeBuilder(\"loadcraft.gatling.active_users\")\n    .ofLongs()\n    .setDescription(\"Active virtual users (sessions in flight, incl. think-time)\")\n    .buildWithCallback { m =>\n      m.record(activeSessions.get())\n    }\n\n  // --- Session starts and the instant injection began --------------------\n  //\n  // What the injector actually STARTED, per run: one count per virtual user\n  // entering the scenario chain (sessionStarted, the bracket every\n  // generated scenario opens with), and the epoch milliseconds of the first\n  // one. A run's injection plan is compared with these after the run: the\n  // first request of a journey cannot stand in for its start (an auth step,\n  // a CORS preflight, a group or a varied label can come first, and a\n  // request that gets no answer reaches the metrics only at the session's\n  // end), and when injection began is recorded nowhere else.\n  //\n  // The instant is observed only once it is set and never moves after: a\n  // one-shot value, exported as a gauge with NO unit (a unit would rename\n  // the series to ..._ms_milliseconds). The counter is a `lazy val`, like\n  // the other counters: it exists once a session starts. The gauge is an\n  // eager `val`, like activeUsersGauge above, so its callback is registered\n  // as soon as this object loads.\n  lazy val sessionsStartedCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.gatling.sessions_started\")\n    .setDescription(\"Virtual users that entered the scenario chain\")\n    .build()\n\n  val injectionStartedAtMs: AtomicLong = new AtomicLong(0L)\n\n  val injectionStartedAtGauge: ObservableLongGauge = meter\n    .gaugeBuilder(\"loadcraft.gatling.injection_started_at_ms\")\n    .ofLongs()\n    .setDescription(\"Epoch milliseconds at which the first virtual user started\")\n    .buildWithCallback { m =>\n      val startedAt = injectionStartedAtMs.get()\n      if (startedAt > 0L) m.record(startedAt)\n    }\n\n  // --- The instant the injection axis starts ------------------------------\n  //\n  // The origin a run's injection plan is laid out on: every generated\n  // simulation's setUp leads with one marker population (a reserved scenario\n  // name, injected atOnceUsers(1)) whose only action calls\n  // injectionAxisStarted(). Gatling 3.15.1 starts every setUp population in\n  // one Injector start and injects atOnceUsers at offset 0, so the stamp is\n  // the instant the plan's population starts injecting; the `before` hook\n  // would lead it, as it runs before the populations and the HTTP warm-up\n  // are built. The marker makes no request and never calls sessionStarted,\n  // so it is neither counted above nor an active user. It is NOT the first\n  // start above: a plan can open with steps of zero users, and its first\n  // busy step starts its arrivals at random points inside the step, so the\n  // first virtual user can come long after the axis began. Same one-shot\n  // shape as the gauge above: eager, NO unit, observed only once set, never\n  // moves.\n  val injectionAxisStartedAtMs: AtomicLong = new AtomicLong(0L)\n\n  val injectionAxisStartedAtGauge: ObservableLongGauge = meter\n    .gaugeBuilder(\"loadcraft.gatling.injection_axis_started_at_ms\")\n    .ofLongs()\n    .setDescription(\"Epoch milliseconds at which the injection axis started\")\n    .buildWithCallback { m =>\n      val axisAt = injectionAxisStartedAtMs.get()\n      if (axisAt > 0L) m.record(axisAt)\n    }\n\n  // --- Think time on the seams between actions (P1b) ---------------------\n  //\n  // A think-time site of the scenario calls thinkSiteEntered as its pause\n  // starts; the virtual user's NEXT requestStarted then records, under that\n  // site, the time from the end of its last response to now: the think time\n  // the target saw, injector overhead included. The boundaries are\n  // THINK_TIME_EDGES_V1 (the generator), pinned\n  // byte for byte by a test, because this file is static and cannot import\n  // the constant. Same rules as the recipe and the sampler: a negative gap\n  // (a clock step) is recorded as 0 and counted as a negative gap; a site\n  // whose path reaches no further request (the session ends there) is counted\n  // as no_next_request, one entered before any response of the virtual user\n  // (no gap to measure) as no_prior_response, and one still pending when the\n  // run is cut short (maxDuration) as cut, never as a sample.\n  private val _thinkTimeBoundaries: java.util.List[java.lang.Double] =\n    java.util.Arrays.asList(\n      100.0, 147.0, 215.0, 316.0, 464.0, 681.0, 1000.0, 1468.0, 2154.0, 3162.0,\n      4642.0, 6813.0, 10000.0, 15651.0, 24495.0, 38337.0, 60000.0, 91789.0,\n      140421.0, 214819.0, 328634.0, 502750.0, 769117.0, 1176609.0, 1800000.0\n    )\n\n  lazy val thinkTimeHistogram: DoubleHistogram = meter\n    .histogramBuilder(\"loadcraft.think.duration\")\n    .setDescription(\"Realized think time on a think-time site, in milliseconds\")\n    .setUnit(\"ms\")\n    .setExplicitBucketBoundariesAdvice(_thinkTimeBoundaries)\n    .build()\n\n  lazy val thinkUnmeasuredCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.think.unmeasured\")\n    .setDescription(\"Think-time sites entered and never measured, by outcome\")\n    .build()\n\n  lazy val thinkNegativeGapCounter: LongCounter = meter\n    .counterBuilder(\"loadcraft.think.negative_gaps\")\n    .setDescription(\"Think times measured below zero and recorded as zero\")\n    .build()\n\n  private def thinkAttributes(scenario: String, site: String): Attributes =\n    Attributes.builder()\n      .put(\"loadcraft.think_scenario\", scenario)\n      .put(\"loadcraft.think_site\", site)\n      .build()\n\n  private def countUnmeasuredLocked(l: VuLedger, outcome: String): Unit = {\n    if (l.pendingSite ne null) {\n      thinkUnmeasuredCounter.add(\n        1L,\n        Attributes.builder()\n          .put(\"loadcraft.think_scenario\", l.pendingScenario)\n          .put(\"loadcraft.think_site\", l.pendingSite)\n          .put(\"loadcraft.think_outcome\", outcome)\n          .build()\n      )\n      l.pendingSite = null\n      l.pendingScenario = null\n    }\n  }\n\n  /** A think-time site of the scenario starts its pause — called from the\n    * site's own pause expression in the scenario's Scala. The next request\n    * of this virtual user measures it. Exception-safe: never throws into the\n    * run.\n    */\n  def thinkSiteEntered(userId: Long, scenario: String, site: String): Unit = {\n    try {\n      val ledger = ledgerFor(userId)\n      ledger.synchronized {\n        countUnmeasuredLocked(ledger, \"no_next_request\")\n        ledger.pendingSite = site\n        ledger.pendingScenario = scenario\n      }\n    } catch { case _: Exception => () }\n    ()\n  }\n\n  private def measureThinkLocked(l: VuLedger, nowMs: Long): Unit = {\n    if (l.pendingSite ne null) {\n      if (l.lastResponseEndMs == 0L) {\n        // No response of this virtual user yet: no gap to measure.\n        countUnmeasuredLocked(l, \"no_prior_response\")\n      } else {\n        val attrs = thinkAttributes(l.pendingScenario, l.pendingSite)\n        val gap = nowMs - l.lastResponseEndMs\n        if (gap < 0L) thinkNegativeGapCounter.add(1L, attrs)\n        thinkTimeHistogram.record(math.max(gap, 0L).toDouble, attrs)\n        l.pendingSite = null\n        l.pendingScenario = null\n      }\n    }\n  }\n\n  // --- Per-VU ledger: what `.transformResponse` cannot answer ------------\n  //\n  // Gatling 3.14.5 offers no hook that fires when a response never arrives:\n  // `HttpProtocolBuilder` has `sign`, `transformResponse`, `check` and\n  // `checkIf`, and only `sign` runs before the wire. `StatsEngine` does carry\n  // the missing limbs (`logResponse`, `logRequestCrash`) but has no public\n  // injection point, and `DataWriterType` in the OSS build has exactly two\n  // subtypes (console, file), so a custom DataWriter cannot be registered\n  // from a generated bundle either. Verified with `javap` against the\n  // resolved 3.14.5 jars — the same methodology `extractHeaders` uses.\n  //\n  // So the plugin remembers, per virtual user, WHICH STEPS ARE STILL OPEN:\n  // `.sign` opens one, `.transformResponse` closes the one its response\n  // belongs to, and whatever is still open when the virtual user finishes\n  // (`sessionEnded`, or the shutdown drain for a VU the run cut short) is a\n  // request that got no response.\n  //\n  // ONE SLOT PER VU IS NOT ENOUGH, and that is the whole reason this is a\n  // multiset rather than a `pendingOpen` flag. A virtual user runs its steps\n  // sequentially only until it hits `.resources(...)`: Gatling fetches those\n  // siblings CONCURRENTLY (capped per domain by `maxConnectionsPerHost` over\n  // HTTP/1.1, uncapped over HTTP/2) and moves on only once all of them have\n  // finished. With a single slot, the second sibling's `.sign` closed the\n  // first sibling's step while it was still in flight and called it a\n  // no-response — a page with one primary and two resources published two\n  // phantom errors per block on a run where every request answered 200.\n  //\n  // The multiset is keyed by the METRIC IDENTITY of the step — the same\n  // (name, method, group) triple the limb attributes are written under — so\n  // `.sign` and `.transformResponse` open and close the same key without the\n  // plugin having to hold a reference to Gatling's request object. Two\n  // concurrent requests of one VU under the same name are two units of that\n  // key's count, and each response takes one away, so the arithmetic stays\n  // exact however they interleave.\n  //\n  // Deliberately not `started - completed`: a difference of two counters\n  // reports every in-flight request as a failure on every live tick, and the\n  // panel would show a constant phantom error count equal to the concurrency.\n  // A step here is settled only when ITS OWN outcome is known — a response\n  // arrived, or its virtual user is over.\n  //\n  // An entry is removed at `sessionEnded`, which a VU that leaves early\n  // reaches too: the codegen folds that call into every VU exit's own\n  // condition, made exactly when the exit fires. Only a VU the run cut\n  // short keeps its entry until the drain.\n  private final case class StepKey(name: String, method: String, group: String)\n\n  private final class VuLedger {\n    // Steps opened and not yet answered, as key -> how many are in flight.\n    val open = new java.util.LinkedHashMap[StepKey, java.lang.Long]()\n    var kos: Long = 0L\n    var noResponses: Long = 0L\n    var failedSeen: Boolean = false\n    // What was true at the last time this VU's session flag was OBSERVED.\n    var kosAtMark: Long = 0L\n    var noResponsesAtMark: Long = 0L\n    // The builds of this VU in flight, by IDENTITY: one entry per built\n    // request whose step is open, mapped to that step. Gatling signs a build\n    // on every write of it, so `requestStarted` sees a build more than once;\n    // the step is opened only the first time (see `requestStarted`). An\n    // entry leaves with its build's own response, and whatever is left when\n    // the VU is over leaves with the settle. Read and written under the\n    // ledger's monitor only.\n    val buildsInFlight = new java.util.IdentityHashMap[AnyRef, StepKey]()\n    // The step whose response was recorded most recently on this VU — the\n    // only request an unmet check can honestly be attributed to, since the\n    // failed flag is a session-level fact and names no step of its own. Its\n    // STATUS travels with it because the panel does not ADD an unmet check to\n    // the request count: that request is already in the duration counter\n    // under this status, so the check limb RE-DECIDES it, and the reader\n    // has to know which bucket to take it out of. See\n    // `ko_taxonomy.row_contribution`.\n    var answeredName: String = \"\"\n    var answeredMethod: String = \"\"\n    var answeredGroup: String = \"\"\n    var answeredStatus: Int = 0\n    // The span of that same request while its outcome is not known yet: a\n    // response that is not KO on the wire can still be re-decided by an unmet\n    // check, which this ledger learns only at the next observation of the\n    // session flag. Held with its own end timestamp and the response-body\n    // slice already charged to it, so ending it later changes neither its\n    // duration nor its text. At most one, and null once ended.\n    var heldSpan: Span = null\n    var heldEndMs: Long = 0L\n    var heldResponseBody: String = \"\"\n    // The think-time site entered and not yet measured, and the end of the\n    // last response, which its think time is measured from.\n    var pendingSite: String = null\n    var pendingScenario: String = null\n    var lastResponseEndMs: Long = 0L\n  }\n\n  private val vuLedgers = new ConcurrentHashMap[java.lang.Long, VuLedger]()\n\n  private def ledgerFor(userId: Long): VuLedger =\n    vuLedgers.computeIfAbsent(\n      java.lang.Long.valueOf(userId),\n      new java.util.function.Function[java.lang.Long, VuLedger] {\n        override def apply(key: java.lang.Long): VuLedger = new VuLedger\n      }\n    )\n\n  /** The request-name rule, in ONE place.\n    *\n    * Both seams need it and they must agree to the character: the ledger is\n    * keyed by VU while the metric series is keyed by `request.name`, so a step opened\n    * under one spelling and recorded under another would leave the limb\n    * counters pointing at names that the duration histogram never carries;\n    * prefer Gatling's own request name (template-stable, \"Get product\") and\n    * fall back to \"METHOD /path\" only when a builder left it blank.\n    */\n  /** The span name of one request: `HTTP <request name>`.\n    * A codegen request name already leads with its method (`GET /api/jobs`),\n    * so the method is only prefixed when the name does not carry it — the\n    * traces view used to read `HTTP GET GET /api/jobs`.\n    */\n  def spanName(method: String, requestName: String): String = {\n    val name = if (requestName == null) \"\" else requestName.trim\n    val m = if (method == null) \"\" else method.trim\n    if (m.nonEmpty && name.toUpperCase.startsWith(m.toUpperCase + \" \")) s\"HTTP $name\"\n    else s\"HTTP $m $name\"\n  }\n\n  def effectiveRequestName(rawName: String, method: String, path: String): String = {\n    val trimmed = if (rawName == null) \"\" else rawName.trim\n    if (trimmed.nonEmpty) trimmed else s\"$method $path\"\n  }\n\n  private def limbAttributes(\n    requestName: String,\n    method: String,\n    group: String,\n    limb: String,\n    status: Int\n  ): Attributes = {\n    // Same normaliser and same attribute names `recordRequest` uses, plus the\n    // limb — otherwise the panel could not put a limb row and a status row of\n    // the same endpoint side by side.\n    //\n    // The STATUS is written only when this limb's request HAS one, and the two\n    // limbs differ on exactly that. A no-response never reached a status, so\n    // its row carries none and the panel counts it as a request of its own —\n    // the duration counter never saw it. An unmet check rode in on a response\n    // that IS in the duration counter, under the status passed here, so its\n    // row names that status and the panel moves that one request out of the\n    // status's own bucket instead of adding a second request to the run.\n    // Passing 0 (no status) for a limb the reader expects to reclassify makes\n    // that reader REFUSE the row rather than guess which bucket it came from.\n    // Every `.put` below is chained through its RETURN VALUE, never called as\n    // a bare statement on the builder — the same rule `recordRequest`'s\n    // attribute block follows, so this is correct whether AttributesBuilder\n    // mutates in place or hands back a fresh builder per call.\n    val named = Attributes.builder()\n      .put(\"request.name\", normalizePath(requestName))\n      .put(\"http.method\", method)\n      .put(\"loadcraft.ko_limb\", limb)\n    val withStatus =\n      if (status > 0) named.put(\"http.status_code\", status.toLong) else named\n    if (group.nonEmpty) withStatus.put(\"group\", group).build() else withStatus.build()\n  }\n\n  /** Open one step of this VU: one more request in flight under this key. */\n  private def openLocked(l: VuLedger, key: StepKey): Unit = {\n    val already = l.open.get(key)\n    val opened = if (already == null) 1L else already.longValue() + 1L\n    l.open.put(key, java.lang.Long.valueOf(opened))\n    ()\n  }\n\n  /** Close one step of this VU: its response arrived, so it is not a\n    * no-response. A key that is not open closes to nothing — a bundle\n    * generated before the `.sign` hook existed calls only `recordRequest`,\n    * and it must publish no limb rather than a negative count.\n    */\n  private def closeLocked(l: VuLedger, key: StepKey): Unit = {\n    val already = l.open.get(key)\n    if (already != null) {\n      val left = already.longValue() - 1L\n      if (left <= 0L) l.open.remove(key) else l.open.put(key, java.lang.Long.valueOf(left))\n    }\n    ()\n  }\n\n  /** THE no-response rule: every step still open when its virtual user is\n    * over is a request that never got a response.\n    *\n    * This is the ONLY place `noResponseCounter` is written, and the amount\n    * it adds is the number of steps left open under that key — not one — so\n    * forty requests that never came back are forty increments however many\n    * of them were in flight together. A step is settled here and nowhere\n    * earlier because \"no response arrived\" is only decidable once nothing\n    * more can arrive: settling at the next `.sign`, as this plugin used to,\n    * called a concurrently-fetched `.resources(...)` sibling a failure while\n    * it was still on the wire.\n    *\n    * WHAT THAT COSTS, named rather than hidden: the increment lands when the\n    * virtual user finishes its journey, not on the tick the request timed\n    * out. `ko_taxonomy.KO_LIMBS` says so, and says where an operator reads\n    * the run's failures in the meantime.\n    *\n    * The caller holds the ledger's monitor.\n    */\n  private def settleOpenLocked(l: VuLedger): Unit = {\n    val iter = l.open.entrySet().iterator()\n    while (iter.hasNext) {\n      val entry = iter.next()\n      val key = entry.getKey\n      val opened = entry.getValue.longValue()\n      noResponseCounter.add(\n        opened,\n        limbAttributes(key.name, key.method, key.group, \"no_response\", 0)\n      )\n      l.noResponses += opened\n    }\n    l.open.clear()\n    // Nothing of this VU is in flight any more: the builds go with the steps.\n    l.buildsInFlight.clear()\n  }\n\n  /** THE settle rule: what does this VU's session flag flipping to failed\n    * mean, now that everything else about the steps in between is known.\n    *\n    * Four facts and nothing else, so the limbs cannot overlap:\n    *\n    *  - `sawKoStatus` — was a 4xx/5xx recorded since the last observation.\n    *    Then the status limb has those requests and this must not count them\n    *    again.\n    *  - `sawNoResponse` — was a step settled as a no-response since the last\n    *    observation. Gatling fails a virtual user whose request crashed, so\n    *    that flip belongs to the no-response limb, not to a check.\n    *  - `stepStillOpen` — is anything of this VU in flight right now. Then\n    *    the flip cannot be attributed yet: the request that caused it may be\n    *    a concurrent sibling that is about to come back 500, or one that will\n    *    never come back at all. The transition is left PENDING (the flag is\n    *    not marked seen) and re-decided at the next observation, by which\n    *    time `sessionEnded` has settled the open steps.\n    *  - `newlyFailed` — did the VU go from healthy to failed at all. Gatling\n    *    never clears a session's failed flag on its own, so without the\n    *    TRANSITION every step after the first failure would be counted.\n    *  - `attributable` — has anything answered this VU at all. The increment\n    *    RE-DECIDES a request the duration counter already holds, so it has\n    *    to name that request and its status; a VU whose flag flipped before\n    *    any response was recorded (an explicit `session.markAsFailed` ahead of\n    *    its first request) has no such request, and a row written against an\n    *    empty name and no status would be a failure the panel could not\n    *    subtract from anything. That VU is left to Gatling's own footer.\n    *\n    * WHAT THE COUNTER'S NUMBER THEREFORE MEANS. `checkFailureCounter` is NOT\n    * one increment per unmet check. The session's failed flag is the only\n    * thing a protocol hook can read about checks and nothing clears it, so\n    * this counter fires on the TRANSITION: a virtual user with forty unmet\n    * checks contributes ONE, and a virtual user whose first failure was a\n    * 4xx/5xx or a timeout contributes none (those requests belong to the\n    * other two limbs, and counting them here too would report twice the\n    * errors the run has). Read it as \"does this run have unmet checks, and on\n    * how many virtual users\" — Gatling's own console footer carries the full\n    * count, and it is the footer that lands on the stored run row.\n    *\n    * The increment is attributed to the step whose response was recorded\n    * most recently on this VU, AND to that response's status. The flag names\n    * no step, so no attribution is exact; the last answered request is the one\n    * whose checks ran last. The status travels with it because the panel does\n    * not add this increment to the request count — the request is already in\n    * the duration counter under that status — it moves it out of that status's\n    * bucket and into ko. One VU contributes at most one such increment and it\n    * names a response recorded on THAT VU, so the count of these rows can\n    * never exceed the duration counter's own count for the same\n    * (request, status), and the subtraction cannot go below zero.\n    *\n    * Clearing the flag here is the ONLY way to make every unmet check\n    * countable, and it is deliberately not done: generated simulations use\n    * that flag through `.exitHereIfFailed` and `session.markAsSucceeded` /\n    * `markAsFailed`, so a plugin that reset it would silently change what\n    * those steps do to a run — a heavier defect than an undercount that is\n    * written down.\n    *\n    * THE SPAN FOLLOWS THE COUNTER. The request this increment names is the\n    * one whose span the ledger holds (see `heldSpan`), so the same branch\n    * marks that span an error span and ends it; with the counter silent and\n    * nothing of the VU in flight, the held span ends as it is; while a step\n    * is still open the transition is pending, and so is the span. Same\n    * attribution, same blind spots: one mark per VU transition, nothing on an\n    * already-failed VU, nothing on a VU the run cut short.\n    *\n    * The caller holds the ledger's monitor.\n    */\n  private def observeLocked(l: VuLedger, failedNow: Boolean): Unit = {\n    val sawKoStatus = l.kos > l.kosAtMark\n    val sawNoResponse = l.noResponses > l.noResponsesAtMark\n    val stepStillOpen = !l.open.isEmpty\n    val newlyFailed = failedNow && !l.failedSeen\n    val ownedElsewhere = sawKoStatus || sawNoResponse\n    val transitionResolved = ownedElsewhere || !stepStillOpen\n    val attributable = l.answeredStatus > 0\n    if (newlyFailed && !ownedElsewhere && !stepStillOpen && attributable) {\n      checkFailureCounter.add(\n        1,\n        limbAttributes(\n          l.answeredName,\n          l.answeredMethod,\n          l.answeredGroup,\n          \"unmet_check\",\n          l.answeredStatus\n        )\n      )\n      failHeldLocked(l, \"unmet_check\")\n    } else if (!stepStillOpen) endHeldLocked(l)\n    l.failedSeen = failedNow && (l.failedSeen || transitionResolved)\n    l.kosAtMark = l.kos\n    l.noResponsesAtMark = l.noResponses\n  }\n\n  /** Hold this VU's newest answered span until its outcome is known.\n    *\n    * Called from `recordRequest` for a response that is not KO on the wire,\n    * after the span held before it has been ended: the ledger holds at most\n    * one span, the one of the request `answered*` names.\n    *\n    * The caller holds the ledger's monitor.\n    */\n  private def holdLocked(l: VuLedger, span: Span, endMs: Long, responseBody: String): Unit = {\n    l.heldSpan = span\n    l.heldEndMs = endMs\n    l.heldResponseBody = responseBody\n  }\n\n  /** End the held span as it is: nothing re-decided its request.\n    *\n    * At its own end timestamp, so its duration is the response's. The slot is\n    * emptied before the span is ended, so no later path can end it twice, and\n    * a failing end never reaches the run.\n    *\n    * The caller holds the ledger's monitor.\n    */\n  private def endHeldLocked(l: VuLedger): Unit = {\n    val span = l.heldSpan\n    if (span ne null) {\n      l.heldSpan = null\n      l.heldResponseBody = \"\"\n      try span.end(l.heldEndMs, TimeUnit.MILLISECONDS)\n      catch { case _: Exception => () }\n    }\n  }\n\n  /** THE error-span rule. A request the run counts KO has an error span: the\n    * request an unmet check re-decides, the one the check limb's increment\n    * names, gets an error status like a 4xx/5xx does, so every view built on\n    * the run's error traces, the AI analysis included, sees it with its\n    * response.\n    *\n    * The description and the `error` event's message are the limb's literal,\n    * the value the counter row carries in `loadcraft.ko_limb`: one vocabulary.\n    * The event republishes the response-body slice already charged to the\n    * span, as the KO path's event does, and the literal is shorter than\n    * `ErrorMessageCapChars`, so `SpanTextBudgetChars` bounds this span too.\n    * `errorCounter` is not touched: it counts the status limb.\n    *\n    * The caller holds the ledger's monitor.\n    */\n  private def failHeldLocked(l: VuLedger, limbLiteral: String): Unit = {\n    val span = l.heldSpan\n    if (span ne null) {\n      try {\n        span.setStatus(StatusCode.ERROR, limbLiteral)\n        // At the span's own end: the flag is observed a think time later, and\n        // an event stamped then would sit outside the span it belongs to.\n        span.addEvent(\"error\", Attributes.builder()\n          .put(\"error.message\", limbLiteral)\n          .put(\"response.body\", l.heldResponseBody)\n          .build(),\n          l.heldEndMs,\n          TimeUnit.MILLISECONDS\n        )\n      } catch { case _: Exception => () }\n      endHeldLocked(l)\n    }\n  }\n\n  /** Settle whatever the virtual users left open, at the end of the run.\n    *\n    * A VU the run cut short (maxDuration, a stopped load generator) runs no\n    * further `.sign` and never reaches `sessionEnded`, so its last steps are\n    * still open here. Only the no-response limb is settled: that one is\n    * decidable from the ledger alone (no response was recorded, full stop),\n    * whereas the session flag of a VU\n    * the run cut short cannot be told apart from one that failed a check —\n    * and guessing would invent errors on every truncated run. `ko_taxonomy`\n    * names that blind spot, and Gatling's own footer still counts it. For\n    * the same reason a span such a VU still holds ends as it is, here,\n    * before the SDK closes: never marked, and never left un-ended.\n    *\n    * Each ledger is drained inside its own `try`: one that throws neither\n    * skips the ledgers after it, whose held spans would stay un-ended, nor\n    * reaches `shutdown`, which closes the SDK after this either way.\n    *\n    * The drain ends up to one held span per VU in flight, all at once, into\n    * the batch span processor, whose queue holds 2048 spans and drops the\n    * rest. So the spans already queued are exported first, and again after\n    * every `DrainFlushEvery` ledgers (the processor's export batch): a run\n    * cut short with thousands of VUs in flight loses none of their spans.\n    */\n  private val DrainFlushEvery: Int = 512\n\n  private def flushSpans(): Unit =\n    try sdk match {\n      case s: io.opentelemetry.sdk.OpenTelemetrySdk =>\n        val _ = s.getSdkTracerProvider.forceFlush().join(10, TimeUnit.SECONDS)\n      case _ => ()\n    } catch { case _: Exception => () }\n\n  private def drainLedgers(): Unit = {\n    val iter = vuLedgers.values().iterator()\n    var drained = 0\n    flushSpans()\n    while (iter.hasNext) {\n      val ledger = iter.next()\n      try {\n        ledger.synchronized {\n          try {\n            settleOpenLocked(ledger)\n            // A site still pending when the run is cut short: its pause was\n            // cut, never a sample.\n            countUnmeasuredLocked(ledger, \"cut\")\n          } finally endHeldLocked(ledger)\n        }\n      } catch { case _: Exception => () }\n      drained += 1\n      if (drained % DrainFlushEvery == 0) flushSpans()\n    }\n    vuLedgers.clear()\n  }\n\n  /** Force eager init of the SDK and metric instruments — call this\n    * from the simulation's class body so everything is registered\n    * before the load phase starts.\n    */\n  def init(): Unit = {\n    val _ = sdk\n    val _ = activeUsersGauge\n    val _ = requestCounter\n    val _ = responseTimeHistogram\n  }\n\n  /** Open a step for this VU — called from the protocol's `.sign` hook just\n    * before each request leaves the client.\n    *\n    * `.sign` is the ONLY hook Gatling 3.14.5 runs before the wire, which makes\n    * it the only place a request that never gets a response is observable\n    * from. It is also where the session flag is next readable: the session it\n    * is handed carries `isFailed` for everything that has finished so far, so\n    * the step it OPENS is added to the ledger while the flag is OBSERVED for\n    * the steps that came before.\n    *\n    * It settles nothing. A `.sign` may be the second sibling of a\n    * `.resources(...)` block, in which case the steps already open are in\n    * flight rather than finished — see `settleOpenLocked`.\n    *\n    * Exception-safe like every other seam here: bookkeeping never throws into\n    * the run.\n    */\n  def requestStarted(\n    userId: Long,\n    failed: Boolean,\n    rawRequestName: String,\n    method: String,\n    path: String,\n    group: String\n  ): Unit = requestStarted(userId, failed, rawRequestName, method, path, group, null)\n\n  /** Open the step of a BUILT request, once per build.\n    *\n    * Gatling 3.15.1 runs this hook on every WRITE of a request, and one\n    * request can be written more than once:\n    *\n    *  - The fold. Gatling 3.13.x resolved ONE signature calculator\n    *    (`commonAttributes.signatureCalculator.orElse(protocol)`), so a\n    *    request-level `.sign` replaced the protocol-level one. Gatling 3.15.x\n    *    keeps a LIST and folds `protocol.signatureCalculators ::: request.signatureCalculators`\n    *    over the request, so a step wrapped in a request-level `.sign` (the\n    *    header-stripping login) reaches this hook twice in one write.\n    *  - The silent retry. A server that answers and closes the socket\n    *    without a `Connection: close` header (an HTTP/1.0 answer, or any\n    *    keep-alive timeout) leaves Gatling a dead connection in its pool, and\n    *    the next request is written on it: the response listener starts the\n    *    next fetch, a `.resources(...)` sibling included, in the same\n    *    callback that pooled the connection. The write fails, and Gatling\n    *    writes the request again on a new connection without a word\n    *    (`HttpAppHandler.channelInactive`, `DefaultHttpClient.retry`). An\n    *    HTTP/2 GOAWAY retry writes it again the same way.\n    *\n    * Every write signs a NEW copy of the request\n    * (`WritableRequestBuilder.signRequest` applies the calculator to\n    * `request.copyWithCopiedHeaders()`), and one response comes back\n    * however many writes it took. Keyed by the request object, the retried\n    * step was opened twice and closed once, so `sessionEnded` settled the\n    * leftover as a no-response on a request Gatling counted OK, and that\n    * leftover made the session's failure a no-response's even when it was\n    * an unmet check.\n    *\n    * `build` is what every write of one build shares: the seams pass the\n    * request's signature calculator. Gatling makes that one fold function\n    * when it builds the request (`RequestExpressionBuilder.build`), every\n    * copy written for that build carries it, and so does the request its\n    * response names. Not the URI either: a static URL shares one Uri object\n    * across builds, so a request that timed out would be closed by the next\n    * build's answer. `null` (a legacy caller) de-dups nothing.\n    *\n    * The observation of the session flag and the think-time measurement run\n    * on every call, a re-write included, exactly as on any other `.sign`.\n    */\n  def requestStarted(\n    userId: Long,\n    failed: Boolean,\n    rawRequestName: String,\n    method: String,\n    path: String,\n    group: String,\n    build: AnyRef\n  ): Unit = {\n    try {\n      val ledger = ledgerFor(userId)\n      ledger.synchronized {\n        observeLocked(ledger, failed)\n        measureThinkLocked(ledger, System.currentTimeMillis())\n        // A step is one built request: however many times Gatling writes it\n        // (a silent retry on a new connection, the double `.sign` fold), it\n        // is opened once, closed by its own response, and settled as a\n        // no-response only if that build never got one. So a build already\n        // in flight is a re-write: no open, and no `inFlight` increment.\n        val rewrite = (build ne null) && ledger.buildsInFlight.containsKey(build)\n        if (!rewrite) {\n          inFlight.incrementAndGet()\n          val key = StepKey(effectiveRequestName(rawRequestName, method, path), method, group)\n          openLocked(ledger, key)\n          if (build ne null) ledger.buildsInFlight.put(build, key)\n        }\n      }\n    } catch { case _: Exception => () }\n    ()\n  }\n\n  /** Increment the active-session counter and count the start — called\n    * once when a VU enters the scenario chain (generated as the first\n    * `.exec` step). The first start of the run also stamps the instant\n    * injection began.\n    */\n  def sessionStarted(): Unit = {\n    activeSessions.incrementAndGet()\n    sessionsStartedCounter.add(1L)\n    injectionStartedAtMs.compareAndSet(0L, System.currentTimeMillis())\n    ()\n  }\n\n  /** Stamp the instant the injection axis starts — called once, by the one\n    * virtual user of the simulation's injection-axis marker population. A\n    * second call changes nothing: the axis is set once and never moves.\n    */\n  def injectionAxisStarted(): Unit = {\n    injectionAxisStartedAtMs.compareAndSet(0L, System.currentTimeMillis())\n    ()\n  }\n\n  /** Decrement the active-session counter and settle the VU's last step —\n    * called once per VU: when it finishes the scenario chain (generated as\n    * the last `.exec` step), or as it leaves the chain early (the codegen\n    * renders every VU exit as an `exitHereIf` whose condition makes this\n    * call exactly when it decides to leave, so a VU that settles there exits\n    * and never reaches the last step). Floored at 0 so a stray extra call\n    * can never drive the gauge negative.\n    *\n    * This is where a virtual user's unanswered requests become numbers:\n    * nothing more can arrive for it, so every step still open is settled as a\n    * no-response, and the session flag is observed once more afterwards — in\n    * that order, so a flip caused by a crashed request is attributed to the\n    * no-response limb rather than to a check. The ledger entry is dropped\n    * here, so a run holds one entry per VU currently in flight rather than\n    * one per VU it has ever injected. The span of the VU's last answered\n    * request ends here too, AFTER that observation: a check it failed is\n    * still marked on it, and nothing of the VU is left held.\n    */\n  def sessionEnded(userId: Long, failed: Boolean): Unit = {\n    activeSessions.updateAndGet { v => if (v > 0) v - 1 else 0L }\n    try {\n      val ledger = vuLedgers.remove(java.lang.Long.valueOf(userId))\n      if (ledger != null) {\n        ledger.synchronized {\n          // The entry is already out of the map: whatever throws above the\n          // end, the held span must not be left un-ended.\n          try {\n            settleOpenLocked(ledger)\n            observeLocked(ledger, failed)\n            countUnmeasuredLocked(ledger, \"no_next_request\")\n          } finally endHeldLocked(ledger)\n        }\n      }\n    } catch { case _: Exception => () }\n    ()\n  }\n\n  // --- Group entry instrumentation ---\n  //\n  // `session.groups.lastOption.getOrElse(\"\")` (the \"which group is this\n  // request inside\" signal every transformResponse seam passes as\n  // recordRequest's `group` argument) targets Gatling 3.14.5 (the\n  // `io.gatling.gradle` plugin version pinned in this project's\n  // build.gradle, the generator). Confirmed against the ACTUAL\n  // resolved `gatling-core-3.14.5.jar` via `javap` — the same methodology as\n  // extractHeaders/extractRequestBody above, since Context7's gatling.io\n  // docs don't cover this low-level session accessor either:\n  //\n  //   $ javap -p -classpath gatling-core-3.14.5.jar io.gatling.core.session.Session\n  //   public scala.collection.immutable.List<java.lang.String> groups();\n  //\n  // There is NO `groupHierarchy` accessor on Session — `groups` is the real\n  // (and only) name. Confirmed both by javap (signature above) and by\n  // reading Gatling's own OSS `Session.scala`: `def groups: List[String] =\n  // blockStack.collectFirst { case g: GroupBlock => g.groups\n  // }.getOrElse(Nil)`. The enclosing block builds it as `existing :+\n  // groupName` (append at the tail), so the list is OUTERMOST-FIRST and\n  // `.lastOption` is the CURRENT (innermost) group.\n\n  /** Record a `group()` block entry — called once per VU-iteration when the\n    * generated chain enters a `group(\"name\") { ... }` block. Exception-safe:\n    * never throws into the run.\n    */\n  def groupEntered(name: String): Unit = {\n    try {\n      groupEntryCounter.add(1, Attributes.builder().put(\"group\", name).build())\n    } catch { case _: Exception => () }\n  }\n\n  /** Record one re-pick of a repick group — called from the\n    * generated group's hook when `step`, the group's action, refused the\n    * candidate with a 4xx and another one is drawn. Exception-safe like\n    * `groupEntered`: never throws into the run.\n    */\n  def repicked(step: String): Unit = {\n    try {\n      repickCounter.add(1, Attributes.builder().put(\"step\", step).build())\n    } catch { case _: Exception => () }\n  }\n\n  // Heuristic path-template normaliser. Generated simulations may\n  // pass a fully resolved URI (\"GET /api/products/1\") as\n  // requestName when the protocol's transformResponse predates the\n  // getName() fallback. We collapse numeric and UUID-shaped path\n  // segments into \"{id}\" so /api/products/1 and /api/products/2\n  // land in the same series rather than exploding the dashboard.\n  private val numericSegmentRe = \"/[0-9]+(?=/|$)\".r\n  private val uuidSegmentRe =\n    \"/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?=/|$)\".r\n\n  private def normalizePath(name: String): String = {\n    var s = name\n    s = uuidSegmentRe.replaceAllIn(s, \"/{id}\")\n    s = numericSegmentRe.replaceAllIn(s, \"/{id}\")\n    s\n  }\n\n  // What one span may carry as text, and what each attribute\n  // keeps of its own.\n  //\n  // Before this card every payload-derived attribute was truncated on its\n  // own, with no combined limit at all: 10240 (response.body) + 10240\n  // (request.body) + 4096 (request.headers) + 4096 (response.headers) + 2048\n  // (the diagnostic attribute) = ~28 KB of attributes, plus a second,\n  // INDEPENDENTLY truncated copy of the response body on the error event and\n  // an uncapped error message on both the status and that event — ~39 KB per\n  // failing span, paid for out of the same network budget the load itself\n  // needs.\n  //\n  // A ceiling is an anti-regression constraint in BOTH directions, and the\n  // second direction is the one this card got wrong twice:\n  //\n  //   * NEVER SHORTER than before the card. Each attribute keeps the exact\n  //     per-attribute cap it already had (`*CapChars` below are the pre-card\n  //     `take(...)` arguments, unchanged). `response.body` is the binding\n  //     one — `run_aggregate/tempo_capture` json.loads it, and a truncated\n  //     body does not raise there, it silently degrades every run-aggregate\n  //     invariant to \"insufficient data\".\n  //   * NEVER LONGER than before the card either. A shared allowance chosen\n  //     only from below is a licence to grow: with no cap of its own,\n  //     `response.body` reached 19680 on the DEFAULT (capture OFF) track\n  //     where the pre-card code hard-capped it at 10240, and the error event\n  //     republished all of it — the card about the cost of capture made the\n  //     default track 88% more expensive.\n  //\n  // So: per-attribute caps bound each attribute from above, and the shared\n  // ceiling bounds their sum. The ceiling is exactly what the caps ahead of\n  // the opt-in request body leave it (see the identity at\n  // SpanAttributeBudgetChars), which is what makes every guarantee below\n  // simultaneously payable without any reservation bookkeeping.\n\n  // Per-attribute cap for the two header attributes — the same 4096 the\n  // pre-card `requestHeaders.take` / `responseHeaders.take` applied.\n  private val HeaderAttributeCapChars: Int = 4096\n\n  // ...for the response body — the same 10240 the pre-card\n  // `responseBody.take` applied. Its consumers: the run-aggregate\n  // validators, the error event (which republishes THIS slice instead of\n  // truncating a second copy) and `analysis/input_builder._summarise_trace`.\n  private val ResponseBodyCapChars: Int = 10240\n\n  // ...for the opt-in request body — the same 10240 the pre-card\n  // `requestBody.take` applied.\n  private val RequestBodyCapChars: Int = 10240\n\n  // ...for the error message, which rides BOTH the span status and the error\n  // event. The plugin caps it itself rather than trusting the caller: the\n  // generated seam already trims it to 256 (`respBody.take(256)` in\n  // the generator), and a ceiling that depends on a caller is not a\n  // ceiling.\n  private val ErrorMessageCapChars: Int = 256\n\n  // What the opt-in request body is GUARANTEED once everything ahead of it\n  // is at its own cap. It is spent last on purpose: it is the only attribute\n  // a project has to opt into, and the only one the shared ceiling ever\n  // truncates below its own cap.\n  private val RequestBodyFloorChars: Int = 2048\n\n  // The ceiling on the sum of the payload-derived text attributes. It is not\n  // a free number: it is exactly\n  //   2 * HeaderAttributeCapChars + ResponseBodyCapChars + RequestBodyFloorChars\n  // = 4096 + 4096 + 10240 + 2048 = 20480,\n  // i.e. every attribute ahead of the request body at its full cap, plus the\n  // request body's guarantee. That identity is what makes the caps and the\n  // ceiling one design instead of two constants that can drift apart: the\n  // three attributes spent before the request body can never be truncated by\n  // the ceiling, and the request body can never be starved below its floor.\n  // (Metadata attributes — method, url, request name, execution id, group —\n  // are NOT payload text and were never part of the ~28 KB this card is\n  // about; capping them would shorten values the pre-card code passed\n  // through whole.)\n  private val SpanAttributeBudgetChars: Int = 20480\n\n  // ...and the ceiling on ALL payload-derived text one span puts on the\n  // wire, the error event included — which is the number the pre-card ~39 KB\n  // has to be compared against. A failing span republishes the response-body\n  // slice on its error event and the error message twice (status\n  // description + event attribute), so\n  //   SpanAttributeBudgetChars + ResponseBodyCapChars + 2 * ErrorMessageCapChars\n  // = 20480 + 10240 + 512 = 31232.\n  private val SpanTextBudgetChars: Int = 31232\n\n  /**\n   * Record a single HTTP request as both a span and metric data points.\n   * Called from transformResponse hook in generated simulations.\n   *\n   * @param userId       Gatling virtual-user id, the key of the per-VU\n   *                     ledger the no-response / unmet-check limbs are\n   *                     settled from\n   * @param requestName  Gatling request name (e.g. \"POST /api/login\")\n   * @param requestUrl   Full request URL\n   * @param method       HTTP method (GET, POST, PUT, DELETE, etc.)\n   * @param httpStatus   HTTP status code (e.g. 200, 500)\n   * @param startMs      Request start time in epoch milliseconds\n   * @param endMs        Request end time in epoch milliseconds\n   * @param responseBody Raw response body (truncated by caller)\n   * @param errorMessage Error description (empty for success)\n   * @param build        The identity of the build this response answers, the\n   *                     one `requestStarted` opened its step under: the\n   *                     signature calculator its request carries; it leaves\n   *                     the VU's builds in flight here. `null` for a response\n   *                     no `.sign` opened a step for (a redirect hop, which\n   *                     Gatling builds with no calculator) and from a legacy\n   *                     seam: then nothing leaves.\n   */\n  // Sentinel for \"this request class has no getBody()\". ConcurrentHashMap\n  // forbids null values, and Object#hashCode is never a request's getBody.\n  private val NoBodyAccessor: Method = classOf[Object].getMethod(\"hashCode\")\n\n  // request class -> its `getBody()` handle (or NoBodyAccessor).\n  private val requestBodyGetterCache = new ConcurrentHashMap[Class[_], Method]()\n\n  // body class -> its one text accessor, or an EMPTY array for a body class\n  // with none. A negative result is cached too, so a body shape we do not\n  // read costs one lookup per run rather than one per request.\n  private val bodyAccessorCache = new ConcurrentHashMap[Class[_], Array[Method]]()\n\n  // Body class -> the ONE accessor that reads what the request sends, for\n  // every RequestBody implementation of gatling-http-client 3.15.1. A list of\n  // what is allowed, because a no-arg signature says nothing about what a\n  // method costs: MultipartFormDataRequestBody#getBytes RENDERS the body\n  // through a fresh MultipartChunkedInput it never closes, so every part's\n  // pooled buffers leaked on every request. In that version's source none of\n  // these allocates anything it does not release:\n  //   ByteArrayRequestBody#getBytes            the byte[] it sends\n  //   StringRequestBody#getContent             the String it sends\n  //   StringChunksRequestBody#getContent       its chunks, each a cached String\n  //   FormUrlEncodedRequestBody#getBytes       the url-encoded params, a heap copy\n  //   FileRequestBody#getBytes                 the file, read and closed\n  //   MultipartFormDataRequestBody#getContent  its parts, one line each (partText)\n  // InputStreamRequestBody has no entry: its getBytes throws, and its\n  // getContent is the stream the request is about to send, which reading\n  // would consume. It yields \"\", which the value ledger reports as a body\n  // that could not be read.\n  private val bodyTextAccessorNames: Map[Class[_], String] = Map(\n    classOf[ByteArrayRequestBody] -> \"getBytes\",\n    classOf[StringRequestBody] -> \"getContent\",\n    classOf[StringChunksRequestBody] -> \"getContent\",\n    classOf[FormUrlEncodedRequestBody] -> \"getBytes\",\n    classOf[FileRequestBody] -> \"getBytes\",\n    classOf[MultipartFormDataRequestBody] -> \"getContent\"\n  )\n\n  /** Cold path: one call per never-before-seen request class. */\n  private def resolveRequestBodyGetter(requestClass: Class[_]): Method =\n    try requestClass.getMethod(\"getBody\")\n    catch { case _: Exception => NoBodyAccessor }\n\n  /** Cold path: one call per never-before-seen body class. */\n  private def enumerateBodyAccessors(bodyClass: Class[_]): Array[Method] = {\n    bodyTextAccessorNames.get(bodyClass) match {\n      case Some(name) => Array(bodyClass.getMethod(name))\n      case None => Array.empty[Method]\n    }\n  }\n\n  // One line per multipart part. A string part gives `name=value`. A\n  // byte-array part gives `name; filename=<file name>=<content>`, and session\n  // values DO reach it: in gatling-http 3.15.1 (BodyPart.stringBodyPartBuilder)\n  // a StringBodyPart, ElFileBodyPart or Pebble part that carries a file name\n  // is built as a ByteArrayPart of the session-resolved text, and the\n  // generator gives every recorded file upload a file name. Its content is\n  // the part's own in-memory array, decoded in the part's charset; Gatling\n  // encodes a text part in its default charset, UTF-8, when the part sets\n  // none. A file part gives its name and file name only: Gatling builds one\n  // from a raw resource file it did not cache, which no session value\n  // reaches, and reading it would be file I/O on every request. Every part\n  // then adds its content type and its custom headers, which ARE interpolated.\n  // Part's constructor is package-private: StringPart, ByteArrayPart and\n  // FilePart are all of its subclasses.\n  private def partText(part: Part[_]): String = {\n    val line = new StringBuilder(String.valueOf(part.getName))\n    part match {\n      case string: StringPart => line.append('=').append(string.getContent)\n      case bytes: ByteArrayPart =>\n        val charset =\n          if (bytes.getCharset != null) bytes.getCharset\n          else java.nio.charset.StandardCharsets.UTF_8\n        line.append(\"; filename=\").append(bytes.getFileName)\n          .append('=').append(new String(bytes.getContent, charset))\n      case file: FilePart => line.append(\"; filename=\").append(file.getFileName)\n    }\n    if (part.getContentType != null) line.append(\"; Content-Type: \").append(part.getContentType)\n    val headers = part.getCustomHeaders\n    if (headers != null) {\n      val iter = headers.iterator()\n      while (iter.hasNext) {\n        val header = iter.next()\n        line.append(\"; \").append(header.getName).append(\": \").append(header.getValue)\n      }\n    }\n    line.append('\\n').toString()\n  }\n\n  // The elements of the two list-valued accessors above: a string-chunks\n  // body's chunks and a multipart body's parts.\n  private def elementText(element: Any): String = element match {\n    case chunk: StringWithCachedBytes => chunk.string\n    case part: Part[_] => partText(part)\n  }\n\n  // What the allowed accessors return: byte[], String, or a java.util.List.\n  private def bodyValueToText(raw: AnyRef): String = raw match {\n    case null => \"\"\n    case bs: Array[Byte] => new String(bs, java.nio.charset.StandardCharsets.UTF_8)\n    case s: String => s\n    case it: java.lang.Iterable[_] =>\n      val sb = new StringBuilder\n      val iter = it.iterator()\n      while (iter.hasNext) sb.append(elementText(iter.next()))\n      sb.toString()\n  }\n\n  /**\n   * The text of the body a Gatling request SENDS, for the value ledger and\n   * the opt-in `request.body` attribute; \"\" for a request without a body or\n   * with a body this plugin does not read.\n   *\n   * Each body class is read by the one accessor `bodyTextAccessorNames`\n   * allows it, never by discovery. Discovery called every public no-arg\n   * method returning byte[], String or an Iterable, on the theory that such\n   * a method has no side effects; MultipartFormDataRequestBody#getBytes\n   * renders the whole body and leaked its parts' pooled buffers on every\n   * request.\n   *\n   * The accessor is resolved once per body CLASS, never per request: this\n   * runs on every request of every virtual user, and reflection on that path\n   * spent the generator's own throughput ceiling. The lookup happens inside\n   * the cache-fill lambda of a ConcurrentHashMap; the per-request path only\n   * invokes an already-resolved Method handle.\n   *\n   * Exception-safe: a failing accessor yields \"\" and never propagates to the\n   * simulation.\n   */\n  def extractRequestBody(request: AnyRef): String = {\n    if (request == null) return \"\"\n    try {\n      val requestClass: Class[_] = request.getClass\n      val getBody = requestBodyGetterCache.computeIfAbsent(\n        requestClass,\n        new java.util.function.Function[Class[_], Method] {\n          override def apply(cls: Class[_]): Method = resolveRequestBodyGetter(cls)\n        }\n      )\n      if (getBody eq NoBodyAccessor) return \"\"\n      val body = getBody.invoke(request)\n      if (body == null) return \"\"\n      val bodyClass: Class[_] = body.getClass\n      val accessors = bodyAccessorCache.computeIfAbsent(\n        bodyClass,\n        new java.util.function.Function[Class[_], Array[Method]] {\n          override def apply(cls: Class[_]): Array[Method] = enumerateBodyAccessors(cls)\n        }\n      )\n      if (accessors.isEmpty) \"\" else bodyValueToText(accessors(0).invoke(body))\n    } catch { case _: Exception => \"\" }\n  }\n\n  /**\n   * Best-effort HTTP header extraction for span attributes, redacted so no\n   * secret ever reaches Tempo. Tempo already carries method/url/status and\n   * request/response bodies (see extractRequestBody above); headers were\n   * the one diagnostic gap — closing it here is what lets the shipped\n   * `logback.xml` drop the per-request wire log to INFO/WARN without losing\n   * per-request header visibility.\n   *\n   * Targets Gatling 3.14.5 (the `io.gatling.gradle` plugin version pinned in\n   * this project's build.gradle). Verified by decompiling the actual\n   * gatling-http-client-3.14.5.jar / gatling-http-3.14.5.jar bytecode\n   * (Context7's Gatling docs don't cover this lower-level accessor — same as\n   * extractRequestBody above, we don't guess Gatling's API):\n   * `io.gatling.http.client.Request#getHeaders()` (request headers) and\n   * `io.gatling.http.response.Response#headers()` (response headers) both\n   * return `io.netty.handler.codec.http.HttpHeaders`.\n   *\n   * `HttpHeaders#entries()` yields one `Map.Entry[String, String]` per\n   * occurrence, so a repeated header (e.g. multiple `Set-Cookie`) becomes\n   * multiple lines rather than being collapsed into one.\n   *\n   * `protectedNames` are the lower-cased header names whose VALUE must never\n   * reach the span. This plugin keeps no list of its own: codegen judges every\n   * header name of the scenario with the repository's one masking authority\n   * and the generated protocol seam hands the result in, so a name the\n   * scenario sends is redacted exactly when everything else in LoadCraft\n   * masks it. `authorization` keeps its scheme prefix (e.g. \"Bearer\") so a\n   * missing or expired-token failure is still diagnosable without leaking\n   * the token.\n   *\n   * Exception-safe like extractRequestBody: any failure returns \"\" rather\n   * than breaking the response path.\n   */\n  def extractHeaders(headers: AnyRef, protectedNames: Set[String]): String = {\n    if (headers == null) return \"\"\n    try {\n      headers match {\n        case h: HttpHeaders =>\n          val sb = new StringBuilder\n          val iter = h.entries().iterator()\n          while (iter.hasNext) {\n            val entry = iter.next()\n            val name = entry.getKey\n            val rawValue = Option(entry.getValue).getOrElse(\"\")\n            val lower = name.toLowerCase(java.util.Locale.ROOT)\n            val value =\n              if (!protectedNames.contains(lower)) rawValue\n              else if (lower == \"authorization\") {\n                val trimmed = rawValue.trim\n                val spaceAt = trimmed.indexOf(' ')\n                if (spaceAt > 0) s\"${trimmed.substring(0, spaceAt)} <redacted>\"\n                else \"<redacted>\"\n              } else \"<redacted>\"\n            if (sb.nonEmpty) sb.append(\"\\n\")\n            sb.append(name).append(\": \").append(value)\n          }\n          sb.toString()\n        case _ => \"\"\n      }\n    } catch { case _: Exception => \"\" }\n  }\n\n  def recordRequest(\n    userId: Long,\n    requestName: String,\n    requestUrl: String,\n    method: String,\n    httpStatus: Int,\n    startMs: Long,\n    endMs: Long,\n    responseBody: String = \"\",\n    errorMessage: String = \"\",\n    requestBody: String = \"\",\n    requestHeaders: String = \"\",\n    responseHeaders: String = \"\",\n    group: String = \"\",\n    build: AnyRef = null\n  ): Unit = {\n    // Mirror the .sign-time increment from requestStarted(), made once per\n    // build however many times it was written. Guarded\n    // against underflow because legacy generated simulations (pre-\n    // .sign hook) only ever call recordRequest, so without the floor\n    // inFlight would walk negative on every request and the gauge\n    // would report nonsense.\n    inFlight.updateAndGet { v => if (v > 0) v - 1 else 0L }\n\n    val normalizedName = normalizePath(requestName)\n    val durationMs = (endMs - startMs).toDouble\n    // One definition of KO, declared once above.\n    val isError = isKo(httpStatus)\n\n    // --- Span (trace signal) ---\n    val spanBuilder = tracer.spanBuilder(spanName(method, requestName))\n      .setSpanKind(SpanKind.CLIENT)\n      .setStartTimestamp(startMs, TimeUnit.MILLISECONDS)\n      .setAttribute(\"http.method\", method)\n      .setAttribute(\"http.status_code\", httpStatus.toLong)\n      .setAttribute(\"http.url\", requestUrl)\n      .setAttribute(\"request.name\", normalizedName)\n      .setAttribute(\"loadcraft.request.name\", normalizedName)\n\n    // Set execution_id as span attribute for spanmetrics connector dimensions\n    if (executionId.nonEmpty) {\n      spanBuilder.setAttribute(\"loadcraft.execution.id\", executionId)\n    }\n\n    // Tag the span with its enclosing Gatling group() (if any) — see the\n    // \"Group entry/exit instrumentation\" comment above `groupEntered` for\n    // how the caller derives this from `session.groups.lastOption`. Lets\n    // the Requests tab nest a request under the same group Gatling's own\n    // report shows it under.\n    if (group.nonEmpty) {\n      spanBuilder.setAttribute(\"group\", group)\n    }\n\n    // --- Text attributes: per-attribute caps under ONE shared ceiling ---\n    // Each payload-derived attribute is trimmed to the cap it already had\n    // before this card (never longer than the pre-card `take(...)`, never\n    // shorter than it either) and charged to one shared allowance, spent in\n    // this order: headers, response body, request body. The identity at\n    // SpanAttributeBudgetChars is what makes the order safe — the three\n    // attributes ahead of the request body cannot exhaust the allowance\n    // between them, so none of them is ever cut by the ceiling and the\n    // request body still keeps RequestBodyFloorChars in the worst case.\n    var spanAttributeBudget = SpanAttributeBudgetChars\n    def capTo(value: String, cap: Int): String =\n      if (value == null) \"\"\n      else if (value.length <= cap) value\n      else value.substring(0, cap)\n    def spendBudget(value: String, cap: Int): String = {\n      val allowance = if (cap < spanAttributeBudget) cap else spanAttributeBudget\n      val slice = capTo(value, allowance)\n      spanAttributeBudget -= slice.length\n      slice\n    }\n\n    // Headers first: they are small, bounded by the wire, and are what makes\n    // a 4xx diagnosable.\n    val cappedRequestHeaders = spendBudget(requestHeaders, HeaderAttributeCapChars)\n    if (cappedRequestHeaders.nonEmpty) {\n      spanBuilder.setAttribute(\"request.headers\", cappedRequestHeaders)\n    }\n    val cappedResponseHeaders = spendBudget(responseHeaders, HeaderAttributeCapChars)\n    if (cappedResponseHeaders.nonEmpty) {\n      spanBuilder.setAttribute(\"response.headers\", cappedResponseHeaders)\n    }\n    // Run-aggregate validators (Phase 5) need successful responses too, not\n    // only errors — so the response body rides every span, ahead of the\n    // opt-in request body: it is the attribute the error event republishes\n    // and the one the run analysis is built from.\n    val cappedResponseBody = spendBudget(responseBody, ResponseBodyCapChars)\n    if (cappedResponseBody.nonEmpty) {\n      spanBuilder.setAttribute(\"response.body\", cappedResponseBody)\n    }\n    // Mirror the request body so debugging a failing assertion / 4xx /\n    // unexpected response actually shows what we sent. Empty whenever the\n    // project has not opted into body capture (or the response was not\n    // sampled) — the generated protocol seam decides that, not this method.\n    val cappedRequestBody = spendBudget(requestBody, RequestBodyCapChars)\n    if (cappedRequestBody.nonEmpty) {\n      spanBuilder.setAttribute(\"request.body\", cappedRequestBody)\n    }\n    // Not a span attribute: it rides the span STATUS and the error event.\n    // Capped here so the wire ceiling holds whatever the caller passes.\n    val cappedErrorMessage = capTo(errorMessage, ErrorMessageCapChars)\n\n    val span = spanBuilder.startSpan()\n\n    if (isError) {\n      span.setStatus(StatusCode.ERROR, cappedErrorMessage)\n      // The event reuses the slices already charged above — a second,\n      // independently-truncated copy of the response body was what pushed a\n      // failing span past ~38 KB.\n      span.addEvent(\"error\", Attributes.builder()\n        .put(\"error.message\", cappedErrorMessage)\n        .put(\"response.body\", cappedResponseBody)\n        .build()\n      )\n      errorCounter.add(1, Attributes.builder()\n        .put(\"request.name\", normalizedName)\n        .put(\"http.status_code\", httpStatus.toLong)\n        .build()\n      )\n    }\n\n    // --- Ledger: the step, the attribution, and the span's outcome ---\n    //\n    // CLOSE the step this response belongs to, and tell this VU's ledger\n    // whether the wire already called it a failure. The open multiset is what\n    // `settleOpenLocked` turns into no-response increments, so without the\n    // close every step would look like a request that got no response and the\n    // limb would count the whole run; the KO tally is what stops\n    // `observeLocked` charging a 4xx/5xx to the check limb as well.\n    //\n    // Then the span. A KO response is decided on the wire and its span ends\n    // below, at once. Any other response can still be re-decided by an unmet\n    // check, which this ledger learns only at the VU's next observation, so\n    // its span is HELD: the span held before it ends as it is first (a newer\n    // response was recorded), and this one is held in its place, in the same\n    // monitor acquisition that makes it the request `answered*` names.\n    var held = false\n    try {\n      val ledger = ledgerFor(userId)\n      ledger.synchronized {\n        if (isError) ledger.kos += 1L\n        closeLocked(ledger, StepKey(requestName, method, group))\n        // This build got its response: it is no longer in flight.\n        if (build ne null) ledger.buildsInFlight.remove(build)\n        ledger.answeredName = requestName\n        ledger.answeredMethod = method\n        ledger.answeredGroup = group\n        ledger.answeredStatus = httpStatus\n        // The end of the latest response, which the next think-time site is\n        // measured from (P1b).\n        ledger.lastResponseEndMs = math.max(ledger.lastResponseEndMs, endMs)\n        endHeldLocked(ledger)\n        if (!isError) {\n          holdLocked(ledger, span, endMs, cappedResponseBody)\n          held = true\n        }\n      }\n    } catch { case _: Exception => () }\n\n    // A KO span, or one the ledger could not take, ends here at its own end.\n    if (!held) span.end(endMs, TimeUnit.MILLISECONDS)\n\n    // --- Native metrics (redundant baseline alongside spanmetrics) ---\n    val baseAttrsBuilder = Attributes.builder()\n      .put(\"request.name\", normalizedName)\n      .put(\"http.method\", method)\n      .put(\"http.status_code\", httpStatus.toLong)\n    // Tagging the shared request-count/duration attrs with `group` (when\n    // present) is what lets Prometheus expose\n    // loadcraft_http_duration{group=\"...\"} so the UI can nest requests\n    // under the same group Gatling's own report groups them under. Always\n    // uses the RETURN VALUE of the final `.put` (never a bare-statement\n    // call on the builder) so this is correct whether AttributesBuilder\n    // mutates in place or returns a fresh builder per call.\n    val attrs =\n      if (group.nonEmpty) baseAttrsBuilder.put(\"group\", group).build()\n      else baseAttrsBuilder.build()\n    requestCounter.add(1, attrs)\n    responseTimeHistogram.record(durationMs, attrs)\n  }\n\n  /**\n   * Graceful shutdown — flush pending spans and metrics.\n   * Called from JVM shutdown hook in generated simulations.\n   *\n   * The ledger drain runs FIRST: closing the SDK flushes what has been\n   * recorded, so a limb settled or a held span ended after the close would\n   * never reach the collector. This is the only place the SDK is closed (its\n   * own JVM hook is disabled where it is built), so the close is in\n   * `finally`: whatever the drain throws, what was recorded is flushed.\n   */\n  def shutdown(): Unit = {\n    try drainLedgers()\n    finally sdk match {\n      case closeable: java.io.Closeable => closeable.close()\n      case _ => ()\n    }\n  }\n}\n",
+      "src/gatling/scala/util/HttpConfig.scala": "package util\n\nimport config.Environment\nimport io.gatling.core.Predef._\nimport io.gatling.http.Predef._\nimport io.gatling.http.protocol.HttpProtocolBuilder\nimport io.gatling.http.request.builder.HttpRequestBuilder\n\nobject HttpConfig {\n\n  // Generic, app-agnostic auth wiring: the per-request auth header value is\n  // computed per session. A refreshed token stored in util.SharedState (keyed\n  // by the session's own token) wins; otherwise the session's token is used.\n  // Option-safe: a flow that never sets authToken sends no bearer instead of\n  // KO-ing every request (a non-Option session read fails on a missing key).\n  // Both the session key and the header name are generic by default — no\n  // vendor header — but a flow whose OWN captured carrier is ALSO named\n  // \"Authorization\" rebinds this key to that carrier's real session variable\n  // (see generate_http_config_scala) instead of stacking a second\n  // registration: Gatling ships every registered header on the wire even\n  // when the name repeats, and the FIRST one is what the app reads, so a\n  // generic empty default ahead of the real carrier would 401 every request.\n  private val authTokenKey: String = \"authToken\"\n  private val otelProtectedHeaderNames: Set[String] = Set(\"authorization\", \"cookie\", \"proxy-authorization\", \"set-cookie\", \"x-store-api-key\")\n\n  def httpProtocol(target: String = Environment.baseUrl): HttpProtocolBuilder = {\n    val base = http\n      .baseUrl(target)\n      .warmUp(target)\n      // #772: a relative WebSocket block url has nothing to resolve\n      // against without wsBaseUrl declared on the protocol — Gatling does\n      // not derive it from baseUrl. Derivation lives once, in\n      // Environment.scala, not re-implemented per track.\n      .wsBaseUrl(Environment.wsBaseUrl)\n      // Replay must match the RECORDING: every request block in a flow was a\n      // real network request in the capture (a browser cache hit produces no\n      // HAR entry). Gatling's client cache silently SKIPS a repeated GET to\n      // the same resolved URL — together with its checks, so a correlation\n      // extraction riding the second fetch never runs and the consumer aborts\n      // with \"No attribute named 'orderId' is defined\" (the EL-abort family).\n      .disableCaching\n      // Browser-shaped protocol headers, matching the flat single-file path.\n      // A missing/automation User-Agent is a common WAF/bot-detection trigger,\n      // so the generated load test presents as a browser.\n      .acceptHeader(\"application/json\")\n      .userAgentHeader(\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0 Safari/537.36\")\n      .header(\"x-store-api-key\", session => sys.env.get(\"LC_HDR_X_store_API_KEY\").filter(_.trim.nonEmpty) match {\n        case Some(fromEnvironment) => fromEnvironment\n        case None => session(\"target_key_storekey\").asOption[String] match {\n          case Some(v) => v\n          case None    => \"\"\n        }\n      })\n    // A project-seeded default must never shadow a session-computed\n    // auth registration for the same name (e.g. a placeholder\n    // Authorization value) — skip any default whose name this\n    // protocol already computes above.\n    val computedAuthHeaderNames: Set[String] = Set(\"x-store-api-key\")\n    val withHeaders = Environment.defaultHeaders.foldLeft(base) { case (protocol, (name, value)) =>\n      if (computedAuthHeaderNames.contains(name.toLowerCase)) protocol else protocol.header(name, value)\n    }\n    // OTel request seam (mirrors the flat SIMULATION_TEMPLATE, the generator):\n    // every request rides this single protocol, so per-request metrics are\n    // captured centrally — requestStarted on send, one record per response in\n    // transformResponse. No per-step recorder (avoids double count). The pair\n    // is also what settles the no-response and unmet-check limbs: `.sign`\n    // opens a step in the\n    // plugin's per-VU ledger, `.transformResponse` records the response\n    // against it, and the next `.sign` decides which limb the step belonged to.\n    withHeaders\n      .sign { (request, session) =>\n        // `.sign` is the ONE hook Gatling 3.14.5 runs BEFORE the request leaves\n        // the client, so it is the only seam a request that never gets a response\n        // can be seen from. It opens this VU's step in the plugin's ledger and,\n        // with `isFailed`, settles the step before it. The name is derived by the\n        // plugin so this seam and `.transformResponse` below open and record one\n        // and the same metric series; the signature calculator is the identity\n        // of the request's BUILD: every write of it (a retry on a new\n        // connection included) carries the same one, so the step opens once\n        io.loadcraft.gatling.LoadCraftOTelPlugin.requestStarted(\n          session.userId,\n          session.isFailed,\n          request.getName,\n          request.getMethod.toString,\n          request.getUri.getPath,\n          session.groups.lastOption.getOrElse(\"\"),\n          request.getSignatureCalculator\n        )\n        io.gatling.commons.validation.Success(request)\n      }\n      .transformResponse { (response, session) =>\n        try {\n          val respBody = try { response.body.string } catch { case _: Exception => \"\" }\n          // Capturing the request body means reflection\n          // plus a full materialization of the body on EVERY response,\n          // paid for out of the load budget. Opt-in per project\n          // (gatling_projects.capture_request_bodies); OFF here.\n          val reqBody = \"\"\n          val reqHeaders = io.loadcraft.gatling.LoadCraftOTelPlugin.extractHeaders(response.request.getHeaders, otelProtectedHeaderNames)\n          val respHeaders = io.loadcraft.gatling.LoadCraftOTelPlugin.extractHeaders(response.headers, otelProtectedHeaderNames)\n          val errorMessage = if (response.status.code() >= 400) respBody.take(256) else \"\"\n          // Prefer the Gatling request name (template-stable) over the\n          // resolved URI path so /api/products/1 and /api/products/2\n          // aggregate under one metric name, not one per id. The rule lives\n          // in the plugin, so the `.sign` seam opens the same metric series\n          val effectiveName = io.loadcraft.gatling.LoadCraftOTelPlugin.effectiveRequestName(\n            response.request.getName,\n            response.request.getMethod.toString,\n            response.request.getUri.getPath\n          )\n          // Current (innermost) enclosing group() block, if any — session.groups\n          // is outermost-first (Gatling's Session#groups, NOT groupHierarchy —\n          // that accessor does not exist), so .lastOption is the group this\n          // request executes inside. Tags the span + request metrics so the\n          // Requests tab can nest requests under the same group Gatling's own\n          // report groups them under.\n          val grp = session.groups.lastOption.getOrElse(\"\")\n          io.loadcraft.gatling.LoadCraftOTelPlugin.recordRequest(\n            userId = session.userId,\n            requestName = effectiveName,\n            requestUrl = response.request.getUri.toString,\n            method = response.request.getMethod.toString,\n            httpStatus = response.status.code(),\n            startMs = response.startTimestamp,\n            endMs = response.endTimestamp,\n            responseBody = respBody,\n            errorMessage = errorMessage,\n            requestBody = reqBody,\n            requestHeaders = reqHeaders,\n            responseHeaders = respHeaders,\n            group = grp,\n            build = response.request.getSignatureCalculator\n          )\n        } catch {\n          case _: Exception => // skip metrics for this request\n        }\n        response\n      }\n  }\n\n  // Removes protocol-hoisted headers from a request that never sent them in the\n  // source flow (e.g. a pre-auth login), keeping its effective headers\n  // byte-faithful. The DSL cannot un-set a protocol default header; the sign\n  // hook runs on the fully built request, where removal is possible.\n  //\n  // IT OPENS THE STEP ITSELF, and the plugin de-duplicates by build identity.\n  // Gatling 3.13.x resolved ONE signature calculator\n  // (`commonAttributes.signatureCalculator.orElse(httpProtocol.requestPart.signatureCalculator)`):\n  // a request-level `.sign` REPLACED the protocol-level one, so a wrapper that\n  // only stripped headers left its step unopened in the per-VU ledger and a\n  // timeout on it settled as nothing. Gatling 3.15.x keeps a LIST and folds\n  // `protocol ::: request` over the request, so BOTH seams run and this call\n  // reaches requestStarted a second time for the same wire request — which\n  // used to leave a phantom no_response on the login at the end of every VU.\n  // Passing the request's signature calculator, the one fold function both\n  // seams see for this build, lets the plugin open the step exactly once\n  // under either resolution. The step this typically wraps is\n  // the pre-auth login, exactly the request a degraded target stops answering\n  // first; the session is threaded through because the ledger is per VU.\n  def stripHeaders(rb: HttpRequestBuilder, names: Seq[String]): HttpRequestBuilder =\n    rb.sign { (request, session) =>\n      io.loadcraft.gatling.LoadCraftOTelPlugin.requestStarted(\n        session.userId,\n        session.isFailed,\n        request.getName,\n        request.getMethod.toString,\n        request.getUri.getPath,\n        session.groups.lastOption.getOrElse(\"\"),\n        request.getSignatureCalculator\n      )\n      names.foreach(n => request.getHeaders.remove(n))\n      io.gatling.commons.validation.Success(request)\n    }\n}\n"
+    }
+  },
+  "feeder_slots": [
+    {
+      "slot": "users",
+      "label": "User accounts",
+      "columns": ["email", "password", "target_key_storekey"],
+      "strategy": "circular",
+      "column_specs": [
+        {
+          "name": "email",
+          "type": "email"
+        },
+        {
+          "name": "password",
+          "type": "string"
+        },
+        {
+          "name": "target_key_storekey",
+          "type": "string"
+        }
+      ],
+      "identity_kind": "fresh",
+      "default_file": "users.csv",
+      "role": "auth",
+      "generated": false,
+      "generated_rows": null
+    },
+    {
+      "slot": "scenario_auto_data",
+      "label": "Address 1 & address 2 & address name & city & company & company name & country code & first name & is default billing & is default shipping & last name & phone & phone2 & postal code",
+      "columns": [
+        "address_1",
+        "address_2",
+        "address_name",
+        "city",
+        "company",
+        "company_name",
+        "country_code",
+        "first_name",
+        "is_default_billing",
+        "is_default_shipping",
+        "last_name",
+        "phone",
+        "phone2",
+        "postal_code"
+      ],
+      "strategy": "circular",
+      "column_specs": [
+        {
+          "name": "address_1",
+          "type": "string",
+          "example": "Examplestrasse 1"
+        },
+        {
+          "name": "address_2",
+          "type": "string",
+          "example": "Apt 2"
+        },
+        {
+          "name": "address_name",
+          "type": "string",
+          "example": "Home"
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "example": "Berlin"
+        },
+        {
+          "name": "company",
+          "type": "string",
+          "example": "Example GmbH"
+        },
+        {
+          "name": "company_name",
+          "type": "string",
+          "example": "Example Ltd"
+        },
+        {
+          "name": "country_code",
+          "type": "string",
+          "example": "de"
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "example": "Jane"
+        },
+        {
+          "name": "is_default_billing",
+          "type": "boolean",
+          "example": "false"
+        },
+        {
+          "name": "is_default_shipping",
+          "type": "boolean",
+          "example": "true"
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "example": "Doe"
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "example": "+44 20 7946 0001"
+        },
+        {
+          "name": "phone2",
+          "type": "string",
+          "example": "+491700000000"
+        },
+        {
+          "name": "postal_code",
+          "type": "string",
+          "example": "10115"
+        }
+      ],
+      "identity_kind": null,
+      "default_file": "scenario_auto_data.csv",
+      "role": "data",
+      "generated": true,
+      "generated_rows": 200
+    }
+  ],
+  "sensitive_headers_missing_registration": [],
+  "auth_credentials_without_consumer": [],
+  "slot_bindings": {
+    "users": "0d0c7034-0003-4000-8000-000000001023",
+    "scenario_auto_data": "0d0c7034-0003-4000-8000-000000001024"
+  },
+  "slot_binding_states": [
+    {
+      "slot": "users",
+      "feeder_id": "0d0c7034-0003-4000-8000-000000001023",
+      "state": "pinned"
+    },
+    {
+      "slot": "scenario_auto_data",
+      "feeder_id": "0d0c7034-0003-4000-8000-000000001024",
+      "state": "pinned"
+    }
+  ],
+  "assertion_thresholds": null,
+  "project_assertion_thresholds": null,
+  "assertion_threshold_view": {
+    "effective_tier": "default",
+    "declared_at": {
+      "scenario": false,
+      "project": false
+    },
+    "thresholds": {
+      "response_time_p95_ms": {
+        "value": 2000,
+        "tier": "default"
+      },
+      "success_rate_pct": {
+        "value": 99,
+        "tier": "default"
+      }
+    },
+    "declared_not_consumed": [],
+    "in_artifact": {
+      "global_slo": [
+        "global.responseTime.percentile(95).lt(2000)",
+        "global.successfulRequests.percent.gte(99)"
+      ],
+      "tier": "default",
+      "matches_effective_tier": true
+    }
+  },
+  "scenario_contract_v2": {
+    "contract_version": 2,
+    "required_inputs": ["email", "password", "target_key_storekey"],
+    "exports": [],
+    "locals": [
+      "address_1",
+      "address_2",
+      "address_id",
+      "address_name",
+      "city",
+      "company",
+      "company_name",
+      "country_code",
+      "customer_id",
+      "customer_token",
+      "first_name",
+      "is_default_billing",
+      "is_default_shipping",
+      "last_name",
+      "loadcraft_thinkRandom",
+      "phone",
+      "phone2",
+      "postal_code",
+      "registration_token"
+    ],
+    "control_vars": [],
+    "session_vars": [
+      "address_1",
+      "address_2",
+      "address_id",
+      "address_name",
+      "city",
+      "company",
+      "company_name",
+      "country_code",
+      "customer_id",
+      "customer_token",
+      "email",
+      "first_name",
+      "is_default_billing",
+      "is_default_shipping",
+      "last_name",
+      "loadcraft_thinkRandom",
+      "password",
+      "phone",
+      "phone2",
+      "postal_code",
+      "registration_token",
+      "target_key_storekey"
+    ],
+    "source_metadata": {
+      "source_kind": "flow",
+      "source_flow_id": "0d0c7034-0003-4000-8000-000000001022",
+      "source_flow_version": 1
+    }
+  },
+  "self_check": {
+    "status": "passed",
+    "scenario_version": 1,
+    "execution_ids": ["0d0c7034-0003-4000-8000-000000001025"],
+    "failure": null,
+    "notes": [],
+    "missing_slots": [],
+    "repairs": [],
+    "max_repair_rounds": null,
+    "runs": [],
+    "started_at": "2026-11-26T16:35:30.407979Z",
+    "finished_at": "2026-11-26T16:35:50.684172Z"
+  },
+  "generator_state": "built_with_older_generator",
+  "session_seconds": null,
+  "session_seconds_kind": "unknown",
+  "pause_source_mix": {
+    "recording": {
+      "count": 0.0,
+      "mean_ms": null
+    },
+    "default_human": {
+      "count": 5.0,
+      "mean_ms": 2000.0
+    },
+    "manual": {
+      "count": 0.0,
+      "mean_ms": null
+    },
+    "machine_wait": {
+      "count": 0.0,
+      "mean_ms": null
+    },
+    "unknown": {
+      "count": 0.0,
+      "mean_ms": null
+    }
+  },
+  "requests_per_session": 6,
+  "is_active": true,
+  "tags": ["generated"],
+  "created_at": "2026-11-26T16:04:37.847944+00:00",
+  "updated_at": "2026-11-26T20:00:57.980754+00:00"
+}

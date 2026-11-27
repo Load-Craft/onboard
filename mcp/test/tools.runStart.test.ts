@@ -779,7 +779,7 @@ describe('run_start', () => {
     ] as const;
 
     /**
-     * Peak of every phase the backend injects, per limit family (`config_generator.py:664-765`):
+     * Peak of every phase the backend injects, per limit family:
      * users or concurrency bounded by `max_vu`, arrivals per second bounded by `max_rps`.
      */
     function peaks(workload: { type: string; vusers: number }): { vu: number[]; rps: number[] } {

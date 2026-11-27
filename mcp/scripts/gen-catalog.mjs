@@ -11,6 +11,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import { EXCLUDED_OPERATIONS } from './sync-api/excluded.ts';
+
 const ROOT = resolve(import.meta.dirname, '..');
 export const CATALOG_FILE = resolve(ROOT, 'catalog', 'katalog.json');
 export const OUT = resolve(ROOT, 'src', 'catalog.generated.ts');
@@ -369,7 +371,10 @@ export function render(catalog) {
       ),
       ...catalog.excluded.operations.map((op) => op.operationId),
     ]),
-  ].sort();
+  ]
+    // An operation the public snapshot leaves out (sync-api/excluded.ts) has no client type.
+    .filter((id) => !EXCLUDED_OPERATIONS.some((entry) => entry.operationId === id))
+    .sort();
   const catalogChannelIds = [
     ...new Set([
       ...catalog.modules.flatMap((module) => module.tools.flatMap((tool) => tool.channels ?? [])),
@@ -444,7 +449,8 @@ export const CURRENT_TO_TOOLS: Readonly<Record<CurrentToolName, readonly [ToolNa
       names((tool) => tool.tier === 'extended'),
     )}`,
     `/**
- * Every backend operation the catalog names (tools and excluded). \`satisfies\` makes the compiler refuse an
+ * Every backend operation the catalog names (tools and excluded), but those the public snapshot leaves
+ * out (scripts/sync-api/excluded.ts). \`satisfies\` makes the compiler refuse an
  * operationId that is not a key of the generated client's operations.
  */
 export const CATALOG_OPERATION_IDS = ${json(catalogOperationIds)} as const satisfies readonly OperationId[];\n`,

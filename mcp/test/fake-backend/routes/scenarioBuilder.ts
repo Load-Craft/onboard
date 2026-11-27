@@ -1,8 +1,7 @@
 // Scenario-builder route of the fake backend: one turn of the traffic-split chat. The fake plays the
 // language model from a script a test sets with `scriptBuilderModel`; without a script the model
-// answers in prose and proposes nothing. Answer shape and 404 texts follow loadcraft @ d93e08d80
-// `api/routes/scenario_builder.py` (send message :212-248, flow ownership :116-133) and the
-// proposal model `domain/services/scenario_builder/proposal.py:29-44`. Registration is idempotent
+// answers in prose and proposes nothing. Answer shape and 404 texts follow the backend's
+// route (send message, flow ownership) and its proposal model. Registration is idempotent
 // per fake, so every test that needs the route can call it.
 
 import type { components } from '../../../src/http/generated/api.js';

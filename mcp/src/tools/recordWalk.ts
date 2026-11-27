@@ -1,10 +1,9 @@
 // The walk of a plan: the second part of a run "from a description" (`flows_record_journeys`). LoadCraft's
 // browser walks the approved paths one after another, builds a flow of each, and saves the flows
 // once, at the end. The approval itself is a message on the run's channel (`split_resume`); the
-// channel sends the proposal again to every new socket while the run waits for it
-// (`scenario_from_description_ws.py:229-239`), so the answer goes on the socket that hears the
-// question, and a socket that connects to a walk already under way is told where it stands
-// (`drive_snapshot`, `:53-117`) and asked nothing.
+// channel sends the proposal again to every new socket while the run waits for it, so the answer
+// goes on the socket that hears the question, and a socket that connects to a walk already under
+// way is told where it stands (`drive_snapshot`) and asked nothing.
 //
 // The state comes from the channel's frames, and through REST when the channel fails: the state of
 // the run and its paths (`GET …/runs/{id}`), and the help the agent asked for (`GET …/timeline`).
@@ -49,6 +48,7 @@ import type { ClientMessage } from '../ws/channel.js';
 import { ChannelLost, ChannelUnavailable } from '../ws/channel.js';
 import type { ParsedFrame } from '../ws/frames.js';
 import { readBuilt } from './flows/fromSuggestions.js';
+import { content } from './moduleCall.js';
 
 /**
  * What `flows_record_journeys` saves with the run: the paths it follows and the plan it shows progress by.
@@ -281,6 +281,62 @@ export function reduceWalk(state: WalkState, frame: ParsedFrame<'describe'>): Wa
       return { ...state, end: { kind: 'cancelled', detail: null } };
     case 'interrupted':
       return { ...state, end: { kind: 'interrupted', detail: frame.data.error ?? null } };
+  }
+}
+
+/** A name, a label or a sentence of the walk, as it enters the state of the call: masked (FIX-77). */
+const shownText = (ctx: ToolContext, text: string): string => content(ctx, text, 200);
+
+/**
+ * A frame of the walk with the texts of the planner and the browser agent masked: the names of the
+ * paths, the label of a step, the reason and the words of a request for help. The names of the paths
+ * of the saved walk are masked the same way (`flows_record_journeys`), so a name still finds its count
+ * of steps.
+ */
+export function acceptWalkFrame(
+  ctx: ToolContext,
+  frame: ParsedFrame<'describe'>,
+): ParsedFrame<'describe'> {
+  switch (frame.type) {
+    case 'drive_snapshot':
+      return {
+        ...frame,
+        data: {
+          ...frame.data,
+          paths: frame.data.paths.map((path) =>
+            path.name == null ? path : { ...path, name: shownText(ctx, path.name) },
+          ),
+        },
+      };
+    case 'agent_step':
+      return {
+        ...frame,
+        data: {
+          ...frame.data,
+          step: { ...frame.data.step, label: shownText(ctx, frame.data.step.label) },
+        },
+      };
+    case 'path_done':
+      return frame.data.path_name === undefined
+        ? frame
+        : { ...frame, data: { ...frame.data, path_name: shownText(ctx, frame.data.path_name) } };
+    case 'path_failed':
+      return frame.data.path_name === undefined
+        ? frame
+        : { ...frame, data: { ...frame.data, path_name: shownText(ctx, frame.data.path_name) } };
+    case 'help_requested':
+      return {
+        ...frame,
+        data: {
+          ...frame.data,
+          reason: shownText(ctx, frame.data.reason),
+          ...(frame.data.agent_says == null
+            ? {}
+            : { agent_says: shownText(ctx, frame.data.agent_says) }),
+        },
+      };
+    default:
+      return frame;
   }
 }
 

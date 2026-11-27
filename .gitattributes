@@ -1,2 +1,9 @@
-mcp/dist/server.mjs linguist-generated=true -diff
-mod/register.js linguist-generated=true -diff
+# Built files: never merged as text. Two branches that both rebuilt one of them conflict, and the
+# conflict is resolved by building again (`npm run build`, `npm run build:mod` or
+# `npm run build:skills` in mcp/) and adding the rebuilt file: a text merge of two bundles can glue
+# them into a file that does not run. `-diff` where the file is a bundle nobody reads line by line.
+mcp/dist/server.mjs linguist-generated=true -diff -merge
+mcp/dist/demo-backend.mjs linguist-generated=true -diff -merge
+mcp/dist/tools.json linguist-generated=true -merge
+mod/register.js linguist-generated=true -diff -merge
+skills/*/scripts/validate_*.mjs linguist-generated=true -diff -merge

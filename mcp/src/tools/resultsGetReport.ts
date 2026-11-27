@@ -42,13 +42,14 @@ import {
 import { createResolver } from '../resolve/handles.js';
 import { readRunLoad } from './run/saved.js';
 import type { ToolContext } from '../context.js';
+import { settleAll } from '../http/operation.js';
 
 /** Requests listed under the per-request p95. */
 const MAX_REQUESTS = 8;
 /** Error groups counted in the report. */
 const MAX_ERROR_GROUPS = 5;
 const LABEL_LIMIT = 60;
-/** The series cover at most the last hour of a run (`SERIES_WINDOW_CAP_S`, `prometheus_query.py:171`). */
+/** The series cover at most the last hour of a run (`SERIES_WINDOW_CAP_S`). */
 const SERIES_WINDOW_S = 3600;
 
 /** Standard reason phrases of the statuses a load test meets; the name of a status, not a message. */
@@ -126,7 +127,7 @@ function p95Limit(assertions: readonly SlaAssertion[]): number | undefined {
   const found = assertions.find(
     (assertion) =>
       assertion.scope === 'run' &&
-      // The series is in milliseconds; response-time assertions are always `ms` (`domain/services/sla/assertions.py:195-202`, `unit()`), and a bound in any other unit is not held against it.
+      // The series is in milliseconds; response-time assertions are always `ms` (`unit()`), and a bound in any other unit is not held against it.
       assertion.unit === 'ms' &&
       assertion.metric.kind === 'response_time' &&
       assertion.metric.stat === 'percentile' &&
@@ -146,7 +147,7 @@ type Capped = NonNullable<ReportData['run']['capped']>;
 /**
  * The environment's limit cut the load: said by the run the plugin started (the workspace keeps
  * what was asked for and what was sent, also after the run is over), else by the sentence
- * the backend put among the warnings of the run (`executor.py:860-874`, matched by its prefix).
+ * the backend put among the warnings of the run (matched by its prefix).
  */
 function cappedOf(
   ctx: ToolContext,
@@ -323,7 +324,7 @@ async function comparisonOf(
       params: { execution: resolver.shortExecution(current.id) },
     });
   }
-  const [previousFacts, previousResult, comparison] = await Promise.all([
+  const [previousFacts, previousResult, comparison] = await settleAll([
     getExecutionFacts(ctx, projectId, previousId),
     getRunResult(ctx, projectId, previousId),
     compareRuns(ctx, projectId, previousId, current.id).catch((error: unknown) => {
@@ -390,7 +391,7 @@ export async function reportOf(
     });
   }
 
-  const [result, requests, groups] = await Promise.all([
+  const [result, requests, groups] = await settleAll([
     getRunResult(ctx, projectId, executionId),
     getRunRequests(ctx, projectId, executionId),
     readGroups(ctx, projectId, executionId),
@@ -478,6 +479,8 @@ export const resultsGetReport = defineTool({
     'instructions. It changes nothing.',
   input,
   annotations: { readOnlyHint: true },
+  // names and texts of LoadCraft's answers in the data are shown masked (FIX-76)
+  maskNames: true,
   async run(ctx, args): Promise<ToolOutcome<ReportData>> {
     await getCompat(ctx);
     const resolver = createResolver(ctx);

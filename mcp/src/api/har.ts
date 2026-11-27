@@ -14,13 +14,14 @@ import { openAllowedForUpload, type AllowedFile } from '../workspace/uploads.js'
 import { reads, type ResponseOf } from '../contract/reads.js';
 import { callOperation } from '../http/operation.js';
 import { must, stopRequest, type ApiContext, type SecretApiContext } from './context.js';
+import { content } from '../tools/moduleCall.js';
 
 /** Time limit of the upload and of the analysis; both wait for the language model. */
 export const HAR_CALL_TIMEOUT_MS = 300_000;
 
 /**
  * Part of the backend's refusal of a recording saved without response bodies
- * (`flow_postprocessor.py:249-258` `sanitized_export_refusal`, backend `d93e08d80`).
+ * (`sanitized_export_refusal`).
  */
 export const SANITIZED_MARKER = 'Allow generating HAR with sensitive data';
 
@@ -82,7 +83,7 @@ export interface HarUpload {
   readonly noiseEntries: number;
   /** Address the recording was made against, as the backend detected it. */
   readonly baseUrl: string;
-  /** `bearer_token`, `cookie_session`, `basic_auth`, or null (`har_parser.py:4739`). */
+  /** `bearer_token`, `cookie_session`, `basic_auth`, or null. */
   readonly authPattern: string | null;
   readonly warningCodes: readonly string[];
 }
@@ -266,7 +267,10 @@ export async function getDefaultEnvironment(
   );
   const found = data.items.find((item) => item.is_default);
   if (found === undefined) return null;
-  return { name: found.name, hosts: [...hostOf(found.base_url), ...hostOf(found.frontend_url)] };
+  return {
+    name: content(api, found.name, 120),
+    hosts: [...hostOf(found.base_url), ...hostOf(found.frontend_url)],
+  };
 }
 
 /** A flow LoadCraft saved from a recording. */

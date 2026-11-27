@@ -5,9 +5,11 @@
 import type { Translator } from '../../context.js';
 import type { DataDemand } from '../../api/data.js';
 import type { SlaThreshold } from '../../api/executions.js';
+import type { SpentPool } from '../../contract/spentPool.js';
 import type { ClampNote, EnvironmentCaps } from '../../profiles/caps.js';
 import type { Profile, ProfileType } from '../../profiles/presets.js';
 import { clock, decimal, inline, ms, num, percent, VIEW_WIDTH, wrap } from '../primitives.js';
+import { slotCause } from '../slotCause.js';
 import { slotRef } from '../slotRef.js';
 
 /** One data slot of the check made with the load that was sent. */
@@ -68,7 +70,7 @@ export interface RunConfirmData {
 /** Profiles whose `vusers` is an arrival rate (users per second), not a number of users. */
 const RATE_TYPES: ReadonlySet<ProfileType> = new Set(['constant', 'stress']);
 
-/** The stairs climb by `max(vusers / 5, 1)`, so the top is at least 5 (`config_generator.py:676-683`). */
+/** The stairs climb by `max(vusers / 5, 1)`, so the top is at least 5. */
 const STRESS_LEVELS = 5;
 
 /** Longest name from LoadCraft drawn in a line; a refusal sentence may be longer. */
@@ -108,17 +110,19 @@ function confirmationReason(
 export function dataShortage(demand: DataDemand, t: Translator): string {
   const short = demand.slots
     .filter((slot) => slot.blocking)
-    .map((slot) =>
-      slot.have === null || slot.need === null
-        ? t('runStart.data.slotNone', {
-            label: slotRef(slot.label, slot.slot, t, NAME_LIMIT),
-            status: slot.status,
-          })
-        : t('runStart.data.slotShort', {
-            label: slotRef(slot.label, slot.slot, t, NAME_LIMIT),
-            have: num(slot.have, t.locale),
-            need: num(slot.need, t.locale),
-          }),
+    .map(
+      (slot) =>
+        slotCause(slot, t, NAME_LIMIT) ??
+        (slot.have === null || slot.need === null
+          ? t('runStart.data.slotNone', {
+              label: slotRef(slot.label, slot.slot, t, NAME_LIMIT),
+              status: slot.status,
+            })
+          : t('runStart.data.slotShort', {
+              label: slotRef(slot.label, slot.slot, t, NAME_LIMIT),
+              have: num(slot.have, t.locale),
+              need: num(slot.need, t.locale),
+            })),
     );
   if (short.length > 0) return short.join('; ');
   return demand.refusal === null
@@ -388,6 +392,14 @@ export interface DryRunSlot extends RunDataSlot {
   /** Status of the slot in the check (`ok`, `short_rows`, `missing`, …). */
   readonly status: string;
   readonly blocking: boolean;
+  /** The backend's sentence for the slot (its cause); null when it has none. */
+  readonly message: string | null;
+  /** The backend's verdict on the kind of identities the slot holds; null when it gave none. */
+  readonly identity_kind: 'existing' | 'fresh' | null;
+  /** The dataset the backend says to make again (its name masked); absent when it says none. */
+  readonly regenerate?: { readonly dataset_id: string; readonly dataset: string | null };
+  /** What earlier runs took from the pool (from the backend's sentence); absent when it says nothing. */
+  readonly spent?: SpentPool;
 }
 
 /** A test that holds the environment: the handle to follow it with. */
@@ -434,17 +446,37 @@ export interface DryRunData {
 function dryRunShortage(data: DryRunData['data'], t: Translator): string {
   const short = data.slots
     .filter((slot) => slot.blocking)
-    .map((slot) =>
-      slot.have === null || slot.need === null
-        ? t('runStart.data.slotNone', {
-            label: slotRef(slot.slot, slot.key, t, NAME_LIMIT),
-            status: inline(slot.status, NAME_LIMIT),
-          })
-        : t('runStart.data.slotShort', {
-            label: slotRef(slot.slot, slot.key, t, NAME_LIMIT),
-            have: num(slot.have, t.locale),
-            need: num(slot.need, t.locale),
-          }),
+    .map(
+      (slot) =>
+        slotCause(
+          {
+            slot: slot.key,
+            label: slot.slot,
+            status: slot.status,
+            dataset: slot.dataset,
+            have: slot.have,
+            need: slot.need,
+            message: slot.message,
+            identityKind: slot.identity_kind,
+            regenerate:
+              slot.regenerate === undefined
+                ? null
+                : { datasetId: slot.regenerate.dataset_id, dataset: slot.regenerate.dataset },
+            spent: slot.spent ?? null,
+          },
+          t,
+          NAME_LIMIT,
+        ) ??
+        (slot.have === null || slot.need === null
+          ? t('runStart.data.slotNone', {
+              label: slotRef(slot.slot, slot.key, t, NAME_LIMIT),
+              status: inline(slot.status, NAME_LIMIT),
+            })
+          : t('runStart.data.slotShort', {
+              label: slotRef(slot.slot, slot.key, t, NAME_LIMIT),
+              have: num(slot.have, t.locale),
+              need: num(slot.need, t.locale),
+            })),
     );
   if (short.length > 0) return short.join('; ');
   return data.refusal === null ? t('runStart.data.notReady') : inline(data.refusal, SENTENCE_LIMIT);

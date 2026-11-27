@@ -24,6 +24,8 @@ export interface PlanSlot {
   readonly exclusive: boolean;
   /** Scenarios of the target that read the slot; empty for a single scenario. */
   readonly usedBy: string[];
+  /** The backend judged the slot to hold new identities: a sign-up creates them, each is used once. */
+  readonly fresh?: true;
 }
 
 export type PlanFix =
@@ -36,9 +38,12 @@ export type PlanFix =
       readonly environment: string;
     }
   | {
-      readonly kind: 'dataset_missing' | 'data_missing' | 'data_generate' | SlotFault;
+      readonly kind:
+        'dataset_missing' | 'data_missing' | 'data_generate' | 'slot_mixed' | SlotFault;
       readonly slot: string;
       readonly label: string;
+      /** The slot holds new identities (data_generate only): they are made again after a run. */
+      readonly fresh?: true;
     }
   | {
       /** A slot of plain data no tool can make the rows of: a file with its columns can fill it. */
@@ -99,6 +104,7 @@ function detailParts(slot: PlanSlot, t: Translator): string[] {
   return [
     ...(slot.columns.length === 0 ? [] : [columnsText(slot.columns)]),
     ...slot.sources.map((source) => inline(source)),
+    ...(slot.fresh === true ? [t('data.identity.fresh')] : []),
     ...(slot.exclusive ? [t('data.exclusive')] : []),
   ];
 }
@@ -160,21 +166,19 @@ function fixText(fix: PlanFix, t: Translator): string {
           : t('data.fix.data_from_file.hub', { reply: inline(fix.hub, DETAIL_LIMIT) }),
     });
   }
-  return t(`data.fix.${fix.kind}`, { label: slotName(fix, t) });
+  const fresh = fix.kind === 'data_generate' && fix.fresh === true;
+  return t(`data.fix.${fix.kind}${fresh ? '.fresh' : ''}`, { label: slotName(fix, t) });
 }
 
-/** The last lines of a plan: that the test can start, or what must be fixed first. */
+/** The last lines of a plan: that every slot is filled (not that the rows suffice), or what must be fixed first. */
 function planClosing(data: DataPlanView, t: Translator): string[] {
-  return data.ready
-    ? [t(data.slots.length === 0 ? 'data.ready.noSlots' : 'data.ready')]
-    : wrap(
-        t.plural('data.fixes', data.fixes.length, {
-          fixes: data.fixes.map((fix) => fixText(fix, t)).join('; '),
-        }),
-        VIEW_WIDTH,
-        // Continuation lines are indented: a line at column 0 that starts with `↗` reads as a link.
-        CONTINUATION.length,
-      );
+  const closing = data.ready
+    ? t(data.slots.length === 0 ? 'data.ready.noSlots' : 'data.ready')
+    : t.plural('data.fixes', data.fixes.length, {
+        fixes: data.fixes.map((fix) => fixText(fix, t)).join('; '),
+      });
+  // Continuation lines are indented: a line at column 0 that starts with `↗` reads as a link.
+  return wrap(closing, VIEW_WIDTH, CONTINUATION.length);
 }
 
 /**
@@ -540,7 +544,11 @@ export type DatasetSource =
       readonly rows: number;
     }
   | { readonly kind: 'rules'; readonly handle: string }
-  | { readonly kind: 'slot' };
+  | {
+      readonly kind: 'slot';
+      /** The slot holds new identities (the backend's verdict): the rows are new, each used once. */
+      readonly fresh?: true;
+    };
 
 /** The card of `data_create_dataset`: nothing is saved before the user's yes. */
 export interface CreateCardView extends CardBase {
@@ -620,8 +628,18 @@ export function renderCreateCard(data: CreateCardView, t: Translator): string {
               target: inline(data.slot.target),
             }),
           ]),
-      ...(data.revision ? [t('data.card.revision')] : []),
-      ...(data.source.kind === 'slot' ? [t('data.card.cost.slot')] : []),
+      ...(data.revision
+        ? [
+            t(
+              data.source.kind === 'slot' && data.source.fresh === true
+                ? 'data.card.regenerate'
+                : 'data.card.revision',
+            ),
+          ]
+        : []),
+      ...(data.source.kind === 'slot'
+        ? [t(data.source.fresh === true ? 'data.card.cost.fresh' : 'data.card.cost.slot')]
+        : []),
     ]),
     ...cardClosing(data, 'data_create_dataset', t),
   ].join('\n');

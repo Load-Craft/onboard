@@ -14,7 +14,13 @@
 // call and the same value is masked wherever else it appears.
 
 import { REDACTED } from '../secret.js';
-import { isSecretField, isSecretParameter } from './secretFields.js';
+import {
+  VARIABLE_REFERENCE,
+  holdsOwnSecret,
+  isSecretField,
+  isSecretParameter,
+  SCHEMA_CONTAINERS,
+} from './secretFields.js';
 
 export interface Masked {
   readonly text: string;
@@ -43,6 +49,13 @@ const MAX_DEPTH = 3;
 
 class Found {
   readonly #values = new Set<string>();
+
+  /**
+   * The text is documentation of LoadCraft's own contract (a summary, a description): a word of a
+   * sentence after a keyword is a word, not a value. Text of a third party (a log line, a body, an
+   * error of the target) is read without this, by the stricter rule.
+   */
+  constructor(readonly documentation = false) {}
 
   add(value: string): void {
     const trimmed = value.trim();
@@ -225,9 +238,13 @@ function maskShapes(text: string, found: Found): string {
 const JSON_PAIR = /"((?:[^"\\]|\\.)*)"(\s*:\s*)("(?:[^"\\]|\\.)*(?:"|$)|-?\d[\d.eE+-]*)/gu;
 /** A quoted value, or a bare one up to the end of the line (a password may hold commas and spaces). */
 const QUOTED = String.raw`"(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?`;
-/** `name=value` and `name = value` in a query, a form or a line; a bare value ends at `&` or `;`. */
+/**
+ * `name=value` and `name = value` in a query, a form or a line; a bare value ends at `&` or `;`. A
+ * name may follow a slash (`conf/token=…` in a path a sender wrote): without it there the pair was
+ * not read and a value with text after it was masked only in part.
+ */
 const EQUALS_PAIR = new RegExp(
-  String.raw`(^|[\s?&;,("'#{[])([\w.[\]-]+)(\s*=\s*)(${QUOTED}|[^\s&;"'][^\n\r&;]*)`,
+  String.raw`(^|[\s?&;,("'#{[/])([\w.[\]-]+)(\s*=\s*)(${QUOTED}|[^\s&;"'][^\n\r&;]*)`,
   'gu',
 );
 /** `name: value` in a log line, YAML or a header written into a text. */
@@ -239,7 +256,8 @@ const COLON_PAIR = new RegExp(
 const AUTH_SCHEME =
   /^(?:Bearer|Basic|Token|ApiKey|Api-Key|Digest|Negotiate|NTLM|HMAC|MAC|AWS4-HMAC-SHA256)$/iu;
 /** Bearer, Basic, Token and ApiKey take one word as the credential. */
-const WORD_CREDENTIAL = /\b(Bearer|Basic|Token|ApiKey|Api-Key)\s+([^\s"',;)]{4,})/gu;
+const WORD_CREDENTIAL =
+  /\b(Bearer|Basic|Token|ApiKey|Api-Key)\s+(?!<[A-Za-z_ -]+>)([^\s"',;)]{4,})/gu;
 /** Digest, Negotiate, NTLM and the signed schemes take the rest of the line. */
 const LINE_CREDENTIAL = /\b(Digest|Negotiate|NTLM|HMAC|MAC|AWS4-HMAC-SHA256)\s+([^\n\r]+)/gu;
 /** The password of an address (`scheme://user:password@host`). */
@@ -309,6 +327,32 @@ const FILLER = new Set([
   'wymagany',
   'wygasł',
 ]);
+/** A segment of an address path: up to the next `/`, query, fragment, space or quote. */
+const PATH_SEGMENT = /^[^/?#\s"'<>]*/u;
+/** A word of a route (`reset`, `forgot-password`, `v2`), digits only as a short suffix. */
+const ROUTE_WORD = /^[A-Za-z]+(?:[-_.][A-Za-z]+)*\d{0,3}$/u;
+const ROUTE_WORD_MAX = 32;
+const MIXED_CASE_MIN = 16;
+
+/**
+ * Whether the segment after a keyword in a path names a route, not a value: nothing (the end of the
+ * path), a parameter (`{token}`, `:token`) or a route word. A long word of mixed case is a random
+ * value, not a route.
+ */
+function isRouteSegment(segment: string): boolean {
+  if (segment === '' || segment.startsWith('{') || segment.startsWith(':')) return true;
+  if (!ROUTE_WORD.test(segment) || segment.length > ROUTE_WORD_MAX) return false;
+  return !(segment.length >= MIXED_CASE_MIN && /[a-z]/u.test(segment) && /[A-Z]/u.test(segment));
+}
+
+/**
+ * A word of a sentence (`should`, `payload`, `Same`): letters only, lowercase after its first. In the
+ * documentation of LoadCraft's own contract ("the token payload contains…", "Password should be a
+ * string", DOKTOR-03) such a word after a keyword is a word; a value has a digit, a sign or a capital
+ * inside. Text of a third party keeps the stricter rule: there `password is hunter` is a password.
+ */
+const PLAIN_WORD = /^[A-Za-z][a-z]*$/u;
+
 /** How many filler words may stand between a keyword and its value. */
 const FILLER_WORDS = 3;
 const WORD = /[\p{L}\p{N}_+/=.-]+/gu;
@@ -320,7 +364,20 @@ const WORD = /[\p{L}\p{N}_+/=.-]+/gu;
 function maskNearKeywords(text: string, found: Found): string {
   const hits: [number, number][] = [];
   for (const keyword of text.matchAll(KEYWORD)) {
-    const from = (keyword.index ?? 0) + keyword[0].length;
+    const at = keyword.index ?? 0;
+    const from = at + keyword[0].length;
+    // A segment of an address path (`/auth/password/reset`): the slash is no separator of a value.
+    // The segment after the keyword is a route word, a parameter or nothing; anything else (the
+    // code of `/verify/token/9f8e7d6c5b4a3928`) is the secret itself and is replaced alone.
+    // A property of a path into a document (`$.token`, `response.token`) is a name, not a keyword.
+    if (text.charAt(at - 1) === '.') continue;
+    if (text.charAt(at - 1) === '/' || text.charAt(from) === '/') {
+      if (text.charAt(from) === '/') {
+        const segment = PATH_SEGMENT.exec(text.slice(from + 1))?.[0] ?? '';
+        if (!isRouteSegment(segment)) hits.push([from + 1, from + 1 + segment.length]);
+      }
+      continue;
+    }
     WORD.lastIndex = from;
     for (let words = 0; words <= FILLER_WORDS; words += 1) {
       const word = WORD.exec(text);
@@ -332,7 +389,12 @@ function maskNearKeywords(text: string, found: Found): string {
         break;
       const value = word[0].replace(/[.,]+$/u, '');
       if (FILLER.has(value.toLowerCase())) continue;
-      if (value.length >= 4 && !AUTH_SCHEME.test(value) && !value.includes(REDACTED.slice(1, -1))) {
+      if (
+        value.length >= 4 &&
+        !AUTH_SCHEME.test(value) &&
+        !value.includes(REDACTED.slice(1, -1)) &&
+        !(found.documentation && PLAIN_WORD.test(value))
+      ) {
         hits.push([word.index, word.index + value.length]);
       }
       break;
@@ -343,22 +405,30 @@ function maskNearKeywords(text: string, found: Found): string {
   let at = 0;
   for (const [start, end] of hits.sort((a, b) => a[0] - b[0])) {
     if (start < at) continue;
-    found.add(text.slice(start, end));
+    // A plain word after a keyword is masked here, in this text, but not registered: registered, it
+    // was scrubbed from every text of the call (a check state "passed" after "token" in generated
+    // code turned the state of the scenario into "[redacted]", DOKTOR-03 S1).
+    const value = text.slice(start, end);
+    if (!PLAIN_WORD.test(value)) found.add(value);
     out += `${text.slice(at, start)}${REDACTED}`;
     at = end;
   }
   return out + text.slice(at);
 }
 
+/** A value that only refers to a variable (`#{password}`, `{{token}}`): a name, never a secret. */
+const isReference = (value: string): boolean => VARIABLE_REFERENCE.test(unquoted(value));
+
 function maskPairs(text: string, found: Found, depth: number): string {
-  const credential = (_all: string, scheme: string, value: string): string => {
+  const credential = (all: string, scheme: string, value: string): string => {
+    if (isReference(value)) return all;
     found.add(value);
     return `${scheme} ${REDACTED}`;
   };
   return text
     .replace(URL_IN_TEXT, (url) => maskAddress(url, found, depth + 1))
     .replace(JSON_PAIR, (all, key: string, colon: string, value: string) => {
-      if (!isSecretField(key)) return all;
+      if (!isSecretField(key) || isReference(value)) return all;
       found.add(unquoted(value));
       return `"${key}"${colon}"${REDACTED}"`;
     })
@@ -370,7 +440,7 @@ function maskPairs(text: string, found: Found, depth: number): string {
     )
     .replace(EQUALS_PAIR, (all, before: string, key: string, eq: string, value: string) => {
       const bare = unquoted(value);
-      if (!isSecretParameter(decoded(key)) || bare === REDACTED) return all;
+      if (!isSecretParameter(decoded(key)) || bare === REDACTED || isReference(bare)) return all;
       found.add(bare);
       found.add(decoded(bare));
       return `${before}${key}${eq}${redactedValue(value)}`;
@@ -378,7 +448,14 @@ function maskPairs(text: string, found: Found, depth: number): string {
     .replace(COLON_PAIR, (all, before: string, key: string, colon: string, value: string) => {
       const bare = unquoted(value);
       const first = bare.split(/\s+/u)[0] ?? '';
-      if (!isSecretField(key) || bare === REDACTED || bare === `"${REDACTED}"`) return all;
+      if (
+        !isSecretField(key) ||
+        bare === REDACTED ||
+        bare === `"${REDACTED}"` ||
+        isReference(bare)
+      ) {
+        return all;
+      }
       // `Authorization: Bearer [redacted]`: the scheme stays, its credential is already hidden.
       if (AUTH_SCHEME.test(first) && bare.endsWith(REDACTED)) return all;
       found.add(bare);
@@ -391,8 +468,8 @@ function maskPairs(text: string, found: Found, depth: number): string {
  * `name: value` (quoted, or up to the end of the line), a credential after its scheme, the secrets
  * of an address inside the text, values that decode to a secret and values of a secret shape.
  */
-export function maskText(text: string): Masked {
-  const found = new Found();
+export function maskText(text: string, options: { readonly documentation?: boolean } = {}): Masked {
+  const found = new Found(options.documentation === true);
   return found.done(maskString(text, found, 0));
 }
 
@@ -422,7 +499,7 @@ function maskBase64(value: string, found: Found, depth: number): string | null {
     found.add(plain);
     return REDACTED;
   }
-  const inner = new Found();
+  const inner = new Found(found.documentation);
   if (maskString(plain, inner, depth) !== plain || inner.size > 0) {
     found.add(value);
     return REDACTED;
@@ -474,7 +551,7 @@ function maskParams(params: string, found: Found, depth: number): string {
       if (at < 0) return pair;
       const name = pair.slice(0, at);
       const value = pair.slice(at + 1);
-      if (isSecretParameter(decoded(name))) {
+      if (isSecretParameter(decoded(name)) && !isReference(decoded(value))) {
         found.add(value);
         found.add(decoded(value));
         return `${name}=${REDACTED}`;
@@ -565,7 +642,7 @@ function secretIn(record: { readonly [key: string]: Json }, key: string): boolea
   return CARD_NUMBER.test(key) && keys.some((other) => CARD_KEYS.test(other));
 }
 
-function hideInJson(value: Json, found: Found, depth: number): Json {
+function hideInJson(value: Json, found: Found, depth: number, names = false): Json {
   if (typeof value === 'string') return maskString(value, found, depth);
   if (typeof value === 'number') {
     const digits = String(value);
@@ -577,10 +654,18 @@ function hideInJson(value: Json, found: Found, depth: number): Json {
   }
   if (Array.isArray(value)) return value.map((item) => hideInJson(item, found, depth));
   if (!isRecord(value)) return value;
+  // In LoadCraft's own documentation the keys of a schema container are names, and a field of a
+  // secret name that holds names (`session_vars`, `locals`) is not redacted (DOKTOR-03 S2).
+  const secret = (key: string, item: Json): boolean =>
+    found.documentation
+      ? !names && holdsOwnSecret(key, item)
+      : secretIn(value, key) && !(typeof item === 'string' && isReference(item));
   return Object.fromEntries(
     Object.entries(value).map(([key, item]) => [
       key,
-      secretIn(value, key) ? redactAll(item, found) : hideInJson(item, found, depth),
+      secret(key, item)
+        ? redactAll(item, found)
+        : hideInJson(item, found, depth, found.documentation && SCHEMA_CONTAINERS.has(key)),
     ]),
   );
 }
@@ -682,8 +767,9 @@ export function maskBody(
   text: string,
   type: string | null = null,
   side: 'request' | 'response' = 'response',
+  options: { readonly documentation?: boolean } = {},
 ): MaskedBody {
-  const found = new Found();
+  const found = new Found(options.documentation === true);
   const trimmed = text.trim();
   const hidden = (): MaskedBody => ({
     kind: 'hidden',

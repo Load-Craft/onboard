@@ -10,7 +10,6 @@ import { flowsDescribeJourneys } from './flowsDescribeJourneys.js';
 import { flowsGenerateFromEndpoints } from './flowsGenerateFromEndpoints.js';
 import { flowsGenerateFromHar } from './flowsGenerateFromHar.js';
 import { flowsGenerateFromSuggestions } from './flowsGenerateFromSuggestions.js';
-import { flowsGet } from './flowsGet.js';
 import { flowsImportHar } from './flowsImportHar.js';
 import { flowsMigrateDocs } from './flowsMigrateDocs.js';
 import { flowsRecordJourneys } from './flowsRecordJourneys.js';
@@ -48,7 +47,6 @@ export const LEGACY_TOOLS: readonly Tool[] = [
   scenarioGenerate,
   flowsDescribeJourneys,
   resultsAnalyzeRun,
-  flowsGet,
   resultsGetReport,
   flowsImportHar,
   projectCreate,

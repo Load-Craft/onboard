@@ -10,7 +10,7 @@ interface Case {
 
 const table = JSON.parse(
   readFileSync(new URL('./fixtures/verdict-cases.json', import.meta.url), 'utf8'),
-) as { _source: { commit: string }; cases: Case[] };
+) as { _source: { note: string; repo: string }; cases: Case[] };
 
 const ALL_STATES: VerdictState[] = [
   'sla_passed',
@@ -24,8 +24,9 @@ const ALL_STATES: VerdictState[] = [
 ];
 
 describe('runVerdict (table copied from the frontend rule)', () => {
-  it('names the frontend commit the table comes from', () => {
-    expect(table._source.commit).toMatch(/^[0-9a-f]{40}$/);
+  it('says which rule the table copies, without a commit of the private frontend', () => {
+    expect(table._source.note).toContain('LoadCraft frontend');
+    expect(JSON.stringify(table._source)).not.toMatch(/[0-9a-f]{40}|frontend\/src\//u);
   });
 
   it.each(table.cases.map((c) => [c.name, c] as const))('%s', (_name, c) => {

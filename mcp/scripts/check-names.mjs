@@ -63,6 +63,8 @@ const MAP_FILE = join('mcp', 'src', 'catalog.generated.ts');
 const EXCLUDED_PREFIXES = [
   'mcp/gate-reports',
   'contracts',
+  // Answers recorded from a real backend: their field names (`self_check`, …) are the backend's, not tool names.
+  'mcp/test/fixtures/real-answers',
   'mcp/dist',
   MAP_FILE,
   'mcp/catalog',
