@@ -1,0 +1,11 @@
+{
+  "phase": "running",
+  "waitedS": 418,
+  "elapsedS": 400,
+  "plannedS": 600,
+  "numbers": {
+    "rps": 18,
+    "p95Ms": 205,
+    "errorRate": 0
+  }
+}

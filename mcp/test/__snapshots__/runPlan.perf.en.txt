@@ -1,0 +1,23 @@
+Load profiles for 2,000 users on perf
+perf has no load limits.
+  1. Smoke                   1 user, one pass (default)
+  2. Ramp                    2,000 spread over 10 min
+  3. Constant rate           4 new/s for 15 min
+  4. Ramp + hold             4 in 1 min, then 4 new/s for 15 min
+  5. Stress stairs           5 steps of 3 min, up to 10 new/s
+  6. Constant load (closed)  2,000 concurrent for 15 min
+  7. Ramp load (closed)      0 → 2,000 concurrent over 10 min
+  8. Spike                   1,000 at once, 1 min pause, then 2,000
+  9. Soak                    1,000 concurrent for 2 h
+  The "profile" argument of run_start, per number above:
+    1. {"type":"smoke","vusers":1}
+    2. {"type":"ramp","vusers":2000,"ramp":600}
+    3. {"type":"constant","vusers":4,"hold":900}
+    4. {"type":"ramp_hold","vusers":4,"ramp":60,"hold":900}
+    5. {"type":"stress","vusers":10,"ramp":180}
+    6. {"type":"constant_concurrency","vusers":2000,"hold":900}
+    7. {"type":"ramp_concurrency","vusers":2000,"ramp":600}
+    8. {"type":"spike","vusers":1000,"ramp":60,"hold":60}
+    9. {"type":"soak","vusers":1000,"ramp":60,"hold":7200}
+Next: run_start with the profile you pick, passing its line above as
+  "profile".

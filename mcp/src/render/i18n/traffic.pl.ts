@@ -1,0 +1,122 @@
+// Texts of the tools of module traffic, Polish. The annotation makes a missing or an extra key a
+// compile error.
+
+import type { Entry } from './core.js';
+import type { trafficEn } from './traffic.en.js';
+
+export const trafficPl: { readonly [K in keyof typeof trafficEn]: Entry } = {
+  'traffic_get_push_setup.header': 'Konfiguracja wysyłania ruchu produkcyjnego',
+  'traffic_get_push_setup.warning': 'uwaga: {text}',
+  'traffic_get_push_setup.no_address':
+    'Adres serwera LoadCraft nie jest ustawiony, więc nadawcy nie mogą jeszcze wysyłać: ustaw LOADCRAFT_PUBLIC_BASE_URL (http(s)://host[:port]) w pliku .env serwera LoadCraft (nie aplikacji, którą testujesz) i uruchom serwer ponownie. Do tego czasu skrypty poniżej mają https://YOUR-LOADCRAFT-ADDRESS: zastąp go tym adresem.',
+  'traffic_get_push_setup.address': 'adres: {url}',
+  'traffic_get_push_setup.command': 'polecenie: {command}',
+  'traffic_get_push_setup.scripts': 'skrypty ({count}):',
+  'traffic_get_push_setup.script_run': 'Uruchom: {command}',
+  'traffic_get_push_setup.count': '{count}',
+  'traffic_get_push_setup.count_first': '{count}, pierwsze {shown}',
+  'traffic_get_push_setup.windows': 'wykluczone okna przebiegów ({counted}): {windows}',
+  'traffic_get_push_setup.runs': 'przebiegi bez okna ({counted}): {runs}',
+  'traffic_get_push_setup.run': '{run} od {at}',
+  'traffic_get_push_setup.run_on': '{run} od {at} na {target}',
+  'traffic_get_push_setup.tokens': 'tokeny wysyłania ({count}, aktywne {active}):',
+  'traffic_get_push_setup.tokens_none':
+    'tokeny wysyłania: brak (token tworzy się w aplikacji LoadCraft, nie w tej wtyczce)',
+  'traffic_get_push_setup.tokens_unavailable': 'tokeny wysyłania: niedostępne',
+  'traffic_get_push_setup.tokens_more': '(+{count} więcej)',
+  'traffic_get_push_setup.token': '{label} ({prefix}…)',
+  'traffic_get_push_setup.token_created': 'utworzony {day}',
+  'traffic_get_push_setup.token_revoked': 'unieważniony {day}',
+  'traffic_get_push_setup.token_used': 'ostatnio użyty {at}',
+  'traffic_get_push_setup.token_unused': 'nieużywany',
+  'traffic_get_push_setup.limits':
+    'limity: {packets} paczek na token na godzinę, okno do {days} dni, do {rows} wierszy i {routes} tras, paczka do {mb} MB',
+  'traffic_list_snapshots.header': 'Migawki ruchu ({count}, od najnowszej):',
+  'traffic_list_snapshots.file': 'wgrana z pliku',
+  'traffic_list_snapshots.pushed': 'wysłana',
+  'traffic_list_snapshots.pushed_by': 'wysłana przez {label}',
+  'traffic_list_snapshots.counts':
+    '{unit} co {bucket}, tras {routes}, wierszy {rows}, łącznie {total}',
+  'traffic_list_snapshots.unit.requests': 'żądania',
+  'traffic_list_snapshots.unit.sessions': 'sesje',
+  'traffic_list_snapshots.id_quality': 'id {id}; jakość: {quality}',
+  'traffic_list_snapshots.buckets': {
+    one: 'kubełków {count}',
+    few: 'kubełków {count}',
+    many: 'kubełków {count}',
+    other: 'kubełków {count}',
+  },
+  'traffic_list_snapshots.gaps': {
+    one: 'luk {count}',
+    few: 'luk {count}',
+    many: 'luk {count}',
+    other: 'luk {count}',
+  },
+  'traffic_list_snapshots.partials': 'częściowych {count}',
+  'traffic_list_snapshots.resets': 'resetów {count}',
+  'traffic_list_snapshots.unusable': 'nieużytecznych {count}',
+  'traffic_list_snapshots.session_profile': 'z profilem sesji',
+  'traffic_list_snapshots.more': 'pokazano pierwsze {shown} z {total}',
+  'traffic_list_snapshots.limits': 'limity: do {kept} migawek na nadawcę, okno do {days} dni',
+  'traffic_list_snapshots.empty':
+    'Nie ma jeszcze migawek ruchu; traffic_get_push_setup pokazuje, jak nadawca ją wysyła.',
+  'traffic_list_snapshots.format': 'format paczki:',
+  'traffic_list_snapshots.format_named': 'format paczki ({title}):',
+  'traffic_list_snapshots.fields': 'pola: {fields}',
+  'traffic_list_snapshots.csv': 'kolumny CSV: {columns}',
+  'traffic_list_snapshots.format_unavailable': 'format paczki: niedostępny',
+  'traffic_get_snapshot.header': 'Migawka {window}, {arrival}',
+  'traffic_get_snapshot.id': 'id {id}',
+  'traffic_get_snapshot.counts':
+    'liczy {unit} co {bucket} ({timezone}): tras {routes}, wierszy {rows}, łącznie {total}{entry}',
+  'traffic_get_snapshot.entry': '; trasa wejścia {route}',
+  'traffic_get_snapshot.source': 'źródło: {kind}',
+  'traffic_get_snapshot.source_query': 'źródło: {kind} — {query}',
+  'traffic_get_snapshot.quality': 'jakość: {quality}',
+  'traffic_get_snapshot.count': '{count}',
+  'traffic_get_snapshot.count_first': '{count}, pierwsze {shown}',
+  'traffic_get_snapshot.gaps': 'luki ({counted}):',
+  'traffic_get_snapshot.unusable': 'nieużyteczne ({counted}):',
+  'traffic_get_snapshot.excluded': 'okna wykluczone przez nadawcę ({counted}):',
+  'traffic_get_snapshot.session_profile':
+    'profil sesji: sygnał nawigacji {signal}, kluczy tras {keys}, przejść {transitions}, następnych {next} (pominiętych poniżej progu: {cut_transitions} i {cut_next})',
+  'traffic_get_snapshot.routes': 'trasy ({count}, według sumy):',
+  'traffic_get_snapshot.routes_first': 'trasy ({count}, według sumy, pierwsze {shown}):',
+  'traffic_get_snapshot.route': '{points}{gaps}, min {min}, maks {max}, suma {sum}',
+  'traffic_get_snapshot.points': {
+    one: 'punktów {count}',
+    few: 'punktów {count}',
+    many: 'punktów {count}',
+    other: 'punktów {count}',
+  },
+  'traffic_get_snapshot.gap_points': {
+    one: '(luk {count})',
+    few: '(luk {count})',
+    many: '(luk {count})',
+    other: '(luk {count})',
+  },
+  'traffic_get_snapshot.values_more': '(+{count} więcej)',
+  'traffic_get_snapshot.no_route': '(bez trasy)',
+  // traffic_delete
+  'traffic_delete.card.title.snapshot': 'Usunięcie zrzutu ruchu {name}',
+  'traffic_delete.card.title.token': 'Unieważnienie tokenu wysyłki „{name}”',
+  'traffic_delete.card.item.snapshot': 'zrzut ruchu {id} razem z seriami',
+  'traffic_delete.card.item.token': 'token wysyłki {id}, który przestaje być przyjmowany',
+  'traffic_delete.card.snapshot_holds': 'okno {window}, wierszy: {rows}, tras: {routes}',
+  'traffic_delete.card.snapshot_sender': 'wysłany tokenem „{sender}”',
+  'traffic_delete.card.snapshot_chosen':
+    'to zrzut wybrany do przebiegów tego katalogu: wybór zostanie zdjęty',
+  'traffic_delete.card.token_used': 'utworzony {created}, ostatnio użyty {used}',
+  'traffic_delete.card.token_never_used': 'utworzony {created}, nigdy nieużyty',
+  'traffic_delete.card.stays.snapshot':
+    'zostają: tokeny wysyłki oraz przebiegi, których użycie zrzutu nie jest sprawdzane, i ich wyniki',
+  'traffic_delete.card.stays.token': 'zostają: zrzuty, które wysłał, i pozostałe tokeny',
+  'traffic_delete.card.undo.snapshot': 'znika na stałe; paczkę trzeba wysłać od nowa',
+  'traffic_delete.card.undo.token':
+    'unieważniony token jest martwy na stałe; dla nadawcy trzeba zrobić nowy',
+  'traffic_delete.done.snapshot': 'Zrzut ruchu {name} usunięty ({count}).',
+  'traffic_delete.done.token': 'Token wysyłki „{name}” unieważniony ({count}).',
+  'traffic_delete.stays.snapshot': 'Tokeny i przebiegi zostają. Tego nie da się cofnąć.',
+  'traffic_delete.stays.token': 'Zrzuty, które wysłał, zostają. Tego nie da się cofnąć.',
+  'traffic_delete.already': 'Token wysyłki „{name}” jest już unieważniony: nic do zrobienia.',
+};

@@ -1,0 +1,10 @@
+3 flows ready
+zakupy · 7 steps (4 requests · 3 pauses)
+  1  POST   /auth/login            → token
+  2  PAUSE  3–8 s                  assumed · form
+  3  GET    /products?q=#{q}       uses: token · → productId
+  4  PAUSE  10–30 s                assumed · in-page action
+  5  POST   /cart/items            uses: token, productId · → cartId
+  6  PAUSE  20–45 s                assumed · form
+  7  POST   /checkout              uses: token, cartId · ✓ 201 · 409
+przeglądanie · 3 steps     konto · 3 steps

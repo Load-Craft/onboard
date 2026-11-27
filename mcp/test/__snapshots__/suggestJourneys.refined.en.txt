@@ -1,0 +1,11 @@
+4 journey proposals from the API documentation:
+  Steps joined by · are a set: the generator sets the order of steps when it
+  builds.
+zakupy              [journey] Log in and get a token · Search products · Add
+                    an item to the cart · Place an order
+przeglądanie        [journey] List categories · Get a product
+konto               [journey] Log in and get a token · List my orders
+status zamówienia   [polling] Place an order → Poll the status of an order
+8 of 42 operations · 34 outside the journeys
+outside the journeys: Register an account, Log out, Refresh the token,
+  Request a password reset, Current user and 29 more

@@ -1,0 +1,1 @@
+Check before a test, nothing was started: checkout on qa · protected, limit 100 users / 20 new/s · Ramp load (closed) 2,000 → 100 (clamped) · consent needed before a real test · data ready · planned 10:00 · environment free

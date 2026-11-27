@@ -1,22 +1,24 @@
 {
-  "name": "loadcraft-preparation-skills",
-  "version": "0.2.0",
-  "description": "Source-grounded OpenAPI, AsyncAPI, journey and project-overview preparation for LoadCraft.",
+  "name": "loadcraft",
+  "version": "1.0.0-alpha.1",
+  "description": "Run load tests on LoadCraft from your editor: prepare source-grounded OpenAPI, AsyncAPI, journey and project-overview artifacts, then create, run and read load tests.",
   "author": {
     "name": "LoadCraft"
   },
   "keywords": [
     "loadcraft",
+    "load-testing",
+    "performance-testing",
+    "mcp",
     "openapi",
     "asyncapi",
-    "load-testing",
     "user-journeys",
     "project-overview"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "LoadCraft Preparation Skills",
-    "shortDescription": "Prepare validated LoadCraft source artifacts.",
+    "displayName": "LoadCraft",
+    "shortDescription": "Prepare artifacts and run load tests.",
     "longDescription": "Inspect customer repositories and prepare a validated OpenAPI file, AsyncAPI file, grounded frontend journey descriptions, or a project overview for LoadCraft.",
     "developerName": "LoadCraft",
     "category": "Developer Tools",

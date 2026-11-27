@@ -1,0 +1,70 @@
+{
+  "target": {
+    "kind": "composition",
+    "name": "checkout"
+  },
+  "environment": "perf",
+  "slots": [
+    {
+      "slot": "search_phrases",
+      "label": "Search terms",
+      "state": "auto",
+      "columns": [
+        {
+          "name": "q",
+          "qualifier": null
+        }
+      ],
+      "sources": ["Samples a model wrote"],
+      "exclusive": false,
+      "usedBy": ["zakupy"]
+    },
+    {
+      "slot": "order_details",
+      "label": "Quantity & cardnumber",
+      "state": "auto",
+      "columns": [
+        {
+          "name": "quantity",
+          "qualifier": "1–5"
+        },
+        {
+          "name": "cardNumber",
+          "qualifier": "Visa, Mastercard"
+        }
+      ],
+      "sources": [],
+      "exclusive": false,
+      "usedBy": ["zakupy"]
+    },
+    {
+      "slot": "accounts",
+      "label": "User accounts",
+      "state": "missing",
+      "columns": [
+        {
+          "name": "email",
+          "qualifier": null
+        },
+        {
+          "name": "password",
+          "qualifier": null
+        }
+      ],
+      "sources": [],
+      "exclusive": true,
+      "usedBy": ["zakupy", "konto"]
+    }
+  ],
+  "fixes": [
+    {
+      "kind": "accounts_must_exist",
+      "slot": "accounts",
+      "label": "User accounts",
+      "environment": "perf"
+    }
+  ],
+  "ready": false,
+  "proposed": [],
+  "steps": []
+}

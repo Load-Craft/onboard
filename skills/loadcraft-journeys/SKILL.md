@@ -76,7 +76,7 @@ Do not add a heading before the first instruction or an evidence appendix after 
 Run the validator on the entire output directory:
 
 ```bash
-python3 <skill-root>/scripts/validate_journeys.py loadcraft/journeys
+node <skill-root>/scripts/validate_journeys.mjs loadcraft/journeys
 ```
 
 Fix every reported error and rerun. The validator checks the transport dialect, not semantic grounding; separately re-check every quoted label, role assumption, route, and finish condition against source evidence.

@@ -1,0 +1,217 @@
+{
+  "tools": [
+    {
+      "name": "results_check_production",
+      "title": "Check a production-replay run",
+      "description": "Check a production-replay run: achieved load against the plan, and the think-time verdict.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run: its handle (e-1a2b3c4d) from run_test or process_get_status, or its UUID; default: the last run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "results_compare_runs",
+      "title": "Compare two runs",
+      "description": "Compare two runs metric by metric; compare_to=baseline uses the pinned baseline.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run: its handle (e-1a2b3c4d) from run_test or process_get_status, or its UUID; default: the last run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "compare_to": {
+            "description": "The run to compare with (handle or UUID), or \"baseline\" for the pinned baseline of this run; default: the choice of this workspace.",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+              },
+              {
+                "type": "string",
+                "const": "baseline"
+              }
+            ]
+          },
+          "include": {
+            "description": "\"errors\": the console errors only in one run and in both.",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["errors"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "results_export_report",
+      "title": "Export the Gatling report of a run",
+      "description": "Export the archived Gatling HTML report to a local folder and return its path.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "overwrite": {
+            "default": false,
+            "description": "true: replace a report of this run exported earlier; without it an existing folder is refused.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "results_get_logs",
+      "title": "Get the log lines of a run",
+      "description": "Get Gatling log lines of a run (masked, truncated).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run, as a handle (e-xxxxxxxx) or UUID; default: the run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "level": {
+            "description": "Only lines of this level: error, warn, info or debug.",
+            "type": "string",
+            "enum": ["error", "warn", "info", "debug"]
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many lines to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "results_get_request",
+      "title": "Get one request of a run",
+      "description": "Get one request's metrics and latency percentiles in a run.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run: its handle (e-1a2b3c4d) from run_test or process_get_status, or its UUID; default: the last run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "The request as the run names it (POST /checkout), as results_get_report lists it."
+          },
+          "include": {
+            "description": "\"series\": the request over time, at the step of the run; without it, totals only.",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["series"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["request"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "results_set_baseline",
+      "title": "Set a run as the baseline for its scenario and environment pair",
+      "description": "Set a run as the baseline for its scenario and environment pair.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "The run: its handle (e-1a2b3c4d) from run_test or process_get_status, or its UUID; default: the last run of this workspace.",
+            "type": "string",
+            "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|e-[0-9a-f]{8})$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

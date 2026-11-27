@@ -1,0 +1,14 @@
+{
+  "name": "loadcraft",
+  "owner": {
+    "name": "LoadCraft"
+  },
+  "description": "LoadCraft plugin catalog.",
+  "plugins": [
+    {
+      "name": "loadcraft",
+      "source": "./",
+      "description": "Run load tests on LoadCraft from your editor: prepare source-grounded OpenAPI, AsyncAPI, journey and project-overview artifacts, then create, run and read load tests."
+    }
+  ]
+}

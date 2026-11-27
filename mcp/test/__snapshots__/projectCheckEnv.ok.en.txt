@@ -1,0 +1,1 @@
+connection ok: perf, qa, dev, prod (API and frontend)

@@ -1,0 +1,11 @@
+signed in as user@example.com · LoadCraft 0.0.0-fake · API 1 ✓
+Project “sklep” · setup complete ✓
+perf ★  default
+qa      protected · limit 100 users / 20 requests/s
+dev     no limit
+prod    protected · limit 20 users / 5 requests/s
+3 flows · 3 scenarios · 1 composition
+recent runs
+  e-3f9a12c4  checkout  SLA FAILED  30 min ago
+next: choose the environment and the profile, then run_start — the last run
+  has an analysis; run another after a fix

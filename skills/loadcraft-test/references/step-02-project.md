@@ -1,0 +1,132 @@
+# Step 2 · Project, environments, protection, logs
+
+Goal: a LoadCraft project with the documentation, every environment the repository reveals (addresses, the default one, caps on the shared ones), the application logs connected when the user has a log server, and the environment the user chose to test on, together with the code version running there.
+
+LoadCraft does not know where the application runs or which code runs there. You find that out in the repository; the tools only record and check what you pass them. Read the tool results themselves: you see only the text of a result, never the progress shown to the user, so take every name, state and handle from that text and copy the `↗` lines under your summary (see [conventions.md](conventions.md)).
+
+If the status from the start of the session shows a bound project, the project exists: never call `project_create` again to "check" it, and do not repeat the setup (`project_save_env`, `project_analyze_setup`, `project_apply_setup`) unless the user asks to add or change an environment or the status says the setup is incomplete. Establish the versions (section 2), then choose the environment (section 8). The status shows the setup, not the log source. A bound project keeps the log source connected when it was set up, and `project_connect_telemetry` replaces it: on a bound project never call it again unless the user asks to connect or change the log server.
+
+## 1. Find the environments and their addresses
+
+Search the repository for the API address and the frontend address of each environment. Good sources, in this order: deployment configuration (per-environment values files, manifests, a versions or environments file), CI and CD pipelines, committed examples such as `.env.example`, then `.env.*` files.
+
+- Search by key names with a pattern for every key ending in `_URL`, `_HOST` or `_ORIGIN`, not only the names listed here, and list the matching **files** first. Note which file defines which key for which environment.
+- API addresses usually sit under `API_URL`, `BASE_URL`, `API_BASE_URL` or `BACKEND_URL`. Frontend addresses usually sit under `WEB_URL`, `FRONTEND_URL`, `APP_URL`, `SITE_URL`, `PUBLIC_URL`, `UI_URL` or `CLIENT_URL`, also with a framework prefix such as `NEXT_PUBLIC_` or `VITE_`.
+- Skip keys of databases, caches and queues (`DATABASE_URL`, `REDIS_URL`): LoadCraft does not test them and their values often carry credentials, so never print their lines.
+- In committed configuration, read the address values you need.
+- In `.env.*` files, which may hold secrets, never open or print the whole file. Print only the lines of the exact address keys you found (anchor the key name at the start of the line), never a credential key.
+- An address can itself carry credentials: sign-in details before the host (`user:pass@`), a token in the query (`?…`) or in the fragment (`#access_token=`), and a line can carry a trailing comment (`# token=…`). Filter out every line with `@` before the host, a `?` or a `#` in the same command, before anything is printed, and count what was filtered. Never print, pass or shorten such a value, not even with the credentials cut out. For each filtered key, tell the user which file and key hold an address with credentials and ask the user for an address without them.
+- Skip local addresses (`localhost`, `127.0.0.1`, container names): LoadCraft tests from its own servers and cannot reach them.
+- Keep the frontend address next to the API address when there is one; building flows from a description needs it later.
+- When no key names the frontend address of an environment, ask the user for it in plain text; never take it from a HAR recording, a log or the API address, and never pass a guessed address to a tool.
+
+Show the user what you found as a short table: environment, API, frontend, version (section 2). Ask in plain text only about what is ambiguous, such as two candidate addresses for one environment.
+
+## 2. Find the code version on each environment
+
+LoadCraft never learns versions; you keep them for every summary of a result.
+
+- Read the version deployed on each environment from the deployment configuration as a file, with the file-reading tools (`Read`, `Glob`, `Grep`). Look for what is deployed where: a versions file such as `deploy/versions.yaml`, image tags or `ref` values in helm values, a `docker-compose` file, a Kubernetes manifest, the CI or CD job that deploys each environment, release tags with environment names. Glob for the file names first, then read the file; do not wait for a shell.
+- Git only resolves a tag or a branch to a commit and counts the distance (`git rev-parse <tag>^{commit}`); it is never the way to find what runs on an environment. Without a shell or without git you still read the files: that is not a reason to leave the version unknown.
+- Take the documented commit from step 1 (the `commit` of `info.x-loadcraft-source` in `loadcraft/openapi.json`) and count the distance to each deployed version: `git rev-list --count <documented>..<deployed>`. Check the direction with `git merge-base --is-ancestor`: an environment can run newer code than the documentation, older code (an earlier release), or a branch that diverged.
+- Only when no file in the repository names the version of an environment that matters to the request, ask the user in plain text for a tag or commit, before you write that it is unknown. Do not guess and do not fetch or check out anything to find it.
+- If the user does not give it, the version stays unknown, and you write it as "version unknown: the user did not give it". That is a valid answer; "I could not establish it" without having read the deployment files and asked is not.
+- Without documentation (the user declined it in step 1), skip the distances; versions are still worth knowing for the summaries.
+
+Tell the user in one or two sentences which environment matches the documentation and how far the others are from it.
+
+## 3. Nothing found
+
+If the repository reveals no usable environment, ask the user in plain text for the address of the environment to test on (and the frontend address, if the application has one). Then ask with the panel `shared-environment` from [panels.md](panels.md): a shared environment gets a cap, so ask for it in plain text; a private one goes without. Ask the same panel when the repository reveals exactly one environment and you cannot tell whether others use it.
+
+## 4. Propose protection
+
+A cap makes an environment protected: LoadCraft cuts every test on it down to the cap, so a load test cannot overload a system other people depend on. With two or more environments, explain this in one sentence, then ask with the panel `protect-environments` from [panels.md](panels.md).
+
+- Shared means other people or customers use it: production, staging, QA, demo. An environment dedicated to performance testing, or a personal one, is usually not shared. When unsure, treat it as shared.
+- The product has no default caps. Propose the numbers yourself (virtual users and requests per second for each environment), keep production the lowest, and say plainly that they are your proposal, not a measured capacity. The user confirms them or types their own; a custom answer may change the set or the numbers.
+- Do not apply a rule such as "full load only on the performance environment, smoke elsewhere". Protection and the user's later choice decide where and how hard a test runs.
+
+## 5. Create the project
+
+Before the first call, tell the user in one sentence that you create or reuse the project, add the environments, test the connection to each and analyse the documentation, which can take minutes on a large API. Then call, in this order, with everything you know:
+
+1. `project_create` with `name`, `environment` and the project text.
+   - `name`: the application's name in LoadCraft, for example `sklep`. If the user or an earlier session named it, use that name exactly.
+   - `environment`: the default environment, `{ name, api, frontend }` (`frontend` when known). LoadCraft creates a project together with one environment. Mark the unprotected environment that runs the documented code, never production: the default is where LoadCraft later checks that the documented GET operations exist. Marking a default is not choosing where to test: section 8 still asks.
+   - Without documentation: `description` (or `overview`) with a few sentences on what the application does for its users, written by you from behavior, never from code.
+   - The call finds the project of that exact name or creates it, and binds this repository to it (`loadcraft/project.json`).
+2. `project_save_env` with `environments`: the full list, the default one too, each with `name`, `api`, `frontend` when known, `limit` as `[max virtual users, max requests per second]` for the protected ones, and `default` set to `true` on exactly one. It adds the missing environments, tightens protection and sets headers and the default.
+   - `headers` on an environment, with `env_file`: only when the application needs a fixed header in every request. That is the case when the documentation requires one (a header parameter marked required on most operations, or an `apiKey` security scheme in a header, such as `x-api-key`), or when the connection test of an environment answers 400 or 401 for an address that otherwise responds. Then ask the user in plain text for the name of the variable in the env file that holds the key, and for the file when it is not `.env`; never ask for the value and never read the file yourself. Pass `headers: [{ name, from_env }]` on that environment and `env_file` in the call. Never write a value in the call: the tool refuses a literal value. The result shows the header name and the variable, never the value. When the application needs no such header, omit both. After `project_save_env` added or changed the headers of an environment, call `project_check_env` again before you go on.
+3. `project_check_env`, with no arguments: it tests the connection of every environment from LoadCraft's servers (pass `environment` to test one). A project that already has documentation also gets the conformance of its default environment here; a new one gets it from `project_apply_setup`, because its documentation arrives with the analysis. Read it before you go on (section 6).
+4. `project_analyze_setup` with `openapi`: `loadcraft/openapi.json` when step 1 delivered it (pass `asyncapi` only for a validated AsyncAPI document of the same application), or, without documentation, the same `description` (or `overview`) you gave `project_create`. A document sent here becomes the documentation of the project. The analysis applies nothing: it proposes the profile and ends with a line `→ next: project_apply_setup with analysis "setup_analysis:<id>"`, or with `without analysis` when there was nothing to analyse or the project is already analysed.
+   - If it returns `status: "running"` with a handle, continue with `process_wait` and that handle, again after every `running`; never call `project_analyze_setup` again for the same project while it runs.
+   - If the result lists fields the analysis was unsure of, ask the user about them before step 5 (section 6, **Unsure profile fields**).
+5. `project_apply_setup` with `analysis`: the handle from the `→ next` line of the analysis, copied as it stands; without `analysis` when the line says `without analysis`. It applies the proposed profile and adds the default validators and test types.
+
+Each call is safe to repeat. A repeated `project_create` for a bound repository finds the project again and creates nothing; a repeated `project_save_env` adds only the missing environments. A name taken by a project the user cannot see comes back as an error: ask for another name.
+
+To add an environment later, call `project_save_env` with the full list again (the existing ones included); the other calls are not needed.
+
+To rename the project or change its description, call `project_update` with `name`, `description` or both; it sends only what differs. To take the change back, call it again with the previous values, which the data of the result (`format: "data"`) holds under `previous`.
+
+## 6. Read the results
+
+Retell each result briefly in the user's language, keeping names, paths and numbers as returned.
+
+- **Unsure profile fields** (the result of `project_analyze_setup`, before `project_apply_setup`). It lists the fields the analysis was unsure of (low confidence, or sources that disagree) with the proposed value. Ask the user about each in plain text, one short question per field, and say what the analysis proposed; never answer these questions yourself from the code. Then apply the setup (step 5). When an answer differs from the proposal, call `project_set_profile` with `fields` holding the user's values: the first call writes nothing and returns a card with the current and the new values; show it to the user, and only after a yes repeat the call with the same `fields` and `confirm` set to the token of the card. A field the result marks as one that needs the user's confirmation is not applied by `project_apply_setup`: ask the user, and only after a yes set it with `project_set_profile` and its card. When `app_architecture` is `unknown` (not determined), always ask the user how the client is built. `project_get` shows the profile, where its values came from and the fields still unsure.
+- **Profile fields to check** (the result of `project_apply_setup`). It lists further fields worth a look (a model wrote them, or the evidence is weak). Ask only about those that concern login (how users sign in, the token endpoint, identity providers, CSRF) and the application's architecture or protocol. Others are worth a mention at most. Correct a field the same way, with `project_set_profile` and its card.
+- **Environments** (`project_get_envs`). Lists the environments of the bound project with their flags, caps and the names of fixed headers and variables; `env` reads one (or `default`), and `effective` with `env` resolves what it inherits. It never shows a value of a header, a variable or the authentication: to see which fixed header an environment has, read the names there, and never ask the user or the file for the value.
+- **Team** (`project_list_team`). Lists the members of the project with their roles; with `me: true` it shows the role and the permissions of the caller. Read it when a call is refused for lack of permission, and tell the user who can change the role; the answer holds user ids and roles, never an address.
+  To add a person or change a role, only on the user's word: `project_save_member` with `user_id` (as `project_list_team` shows; the API takes no address) and `role` (`owner`, `editor`, `viewer`). The first call only makes a card: tell the user what it says, then call it again with the same arguments; the user confirms in a dialog, and only their yes writes. A changed role is undone with the previous role; an added person is removed with `project_delete`.
+- **HTTP settings** (`project_get_http_settings`). Shows the base URL, the names of the fixed headers, the protocol options and the pauses LoadCraft uses in generated tests, never a header value. Read it when a generated test sends a request the environment does not expect; change the headers of an environment with `project_save_env`, never ask for a value.
+  To change them, only on the user's word: `project_set_http_settings` with `base_url`, `protocol` (a few options such as `http2_enabled` or `request_timeout_ms`; never a proxy) and `headers_env_file` (an env file of the project directory whose `Header-Name=value` lines become the default headers; the values never pass through you). The first call only makes a card: tell the user what it says, then call it again with the same arguments; the user confirms in a dialog, and only their yes writes. A file with headers is asked on its own. The undo is the same tool with the previous base URL and options; header values are not kept, so the user puts them in the file again.
+- **Pushing production traffic** (`traffic_get_push_setup`). Shows where a sender pushes counts of production traffic, the command and the scripts to run, the windows of LoadCraft's own runs the packets leave out, the push tokens by label (never a token) and the limits a packet is held to. Read it when the user wants the load shaped by real traffic; the sender itself runs on the user's side, never start it.
+- **Traffic snapshots** (`traffic_list_snapshots`). Lists the snapshots of production traffic the project holds, newest first: the window, how each arrived, what it counts per bucket and its quality in counts; `include: ["format_sample"]` adds the packet format by example (field names and types, no values) for a user who writes a sender.
+- **One snapshot** (`traffic_get_snapshot`). Shows one snapshot (by `snapshot_id`, else the one chosen for runs): what it counts, its source, its quality (gaps, unusable intervals, the windows the sender excluded) and per route the points, min, max and total; `series: "points"` adds the values. Read it before a run shaped by real traffic, and tell the user about gaps and unusable intervals instead of hiding them.
+- **Deleting a snapshot or a push token** (`traffic_delete`). Only on the user's word: `kind` (`snapshot` or `token`) and `item_id`. The first call is a card, not a deletion: tell the user what it says (the window and rows of the snapshot, the label of the token), then call again with the same arguments; the user confirms in a dialog. Runs that used a snapshot are not checked. A token that is revoked already is answered without a card. It cannot be undone: say so.
+- **Projects** (`project_list`). Lists the projects the token sees, with their type, whether they are active, how many flows, test types and validators each has, and marks the one this workspace is bound to; with `query` it searches projects, flows, scenarios, runs and pages by a text instead. Use it to find a project before binding one, or an object by name.
+- **Activity** (`project_get_activity`). Shows the runs in progress and the latest events across the projects the token sees (a project or a flow made, a run that ended with its thresholds met or not). Use it to find out what is running before starting a test on a shared environment; `limit` sets how many events.
+- **GitHub link** (`github_get_status`). Says whether the project is linked to a repository, which one (never a token in its address), the branch and how the sync stands; `include: ["history"]` adds the latest pushes and pulls. Read it before anything that would push to the repository.
+- **Repository changes** (`github_get_changes`). Lists the files that changed in the repository since the last sync, as a list only (nothing is imported). It moves the sync marker: a second call returns nothing, so retell the list at once and do not call it again to see it. A project with no linked repository is refused.
+- **Push plan** (`github_plan_push`). Shows which files the push of a composition would change, with the lines added and removed; `diffs: true` adds a short diff per file. It writes nothing: show it to the user before any push and let them decide.
+  To push, only on the user's word and after showing the plan: `github_push` with the composition, a `message` and `create_pr` (true: a pull request instead of a commit on the branch). The first call only makes a card, which names the repository, the branch, the message and every file: tell the user what it says, then call it again with the same arguments; the user confirms in a dialog, and only their yes sends the code outside LoadCraft. It cannot be undone from here: say that the user reverts the commit in the repository. Nothing to push is answered at once.
+  To remove the link, only on the user's word: `github_disconnect` (no arguments). The first call only makes a card: tell the user what it says, then call it again with the same arguments; the user confirms in a dialog, and only their yes writes. It deletes for good: linking again needs a token, which the user gives in the LoadCraft application, so tell the user that. A project that is not linked is answered at once.
+- **Connection** (the result of `project_check_env`). An environment marked `blocked` has a private address LoadCraft cannot reach; `unreachable`, a TLS error or too many redirects mean the address does not answer properly from LoadCraft's servers. Tell the user what that means: no test can run there, and neither the documentation check nor the LoadCraft browser can use it. Flows can still come from the documentation or a recording. Offer to choose another environment, to correct the address, or to make the environment reachable from the internet.
+- **Conformance** (`project_apply_setup` after an analysis that imported the documentation, `project_check_env` for a project that already had it). On the default environment the result counts documented GET operations that answered and names missing ones. Missing operations mean the environment runs other code than the documentation describes: compare with the versions from section 2 and say so. Skipped means the environment is protected; that is expected. Undecided (no documented GET answered, for example every probe got 400, 401 or 403) is neither a pass nor a block: the result shows the statuses of the probes, so check the fixed headers and the authentication of the environment, set the headers with `project_save_env` and call `project_check_env` again.
+- **Differences** (`project_save_env`). A warning that an existing environment has another address or limit than requested means LoadCraft kept its value. Tell the user and point them to the environment settings in LoadCraft to change it; repeating `project_save_env` will not.
+- **Setup incomplete** (`project_apply_setup`). If the result says what is still missing, tell the user which later step fills it; without documentation, the recording or description in step 3 fills the profile.
+
+## 7. Connect the logs
+
+Only for a new project. On a bound project skip this section unless the user asks to connect or change the log server (see the start of this file).
+
+The diagnosis in step 8 is far stronger with the application's logs from the time of the test. Look for a log server in the project's MCP configuration (`.mcp.json` at the repository root).
+
+- A server whose name or description points to logs, metrics or observability, configured with an `https` address reachable from the internet: tell the user in one sentence that you connect it so LoadCraft can fetch logs from the test window, then call `project_connect_telemetry` with a short `label` and the `url`. Whether Claude Code itself connected to that server says nothing about whether LoadCraft can reach it: call `project_connect_telemetry` anyway, because it checks the address from LoadCraft's servers. Leave `enabled_tools` out unless the user asks for specific tools. With several candidates, ask in plain text which one.
+- A local server (started by a command over stdio), an address on `localhost` or a private network, or one that needs credentials in headers: LoadCraft cannot call it. Never copy header values or tokens anywhere.
+- To remove a connected log server, only on the user's word: `project_disconnect_telemetry` (no arguments). The first call only makes a card: tell the user what it says, then call it again with the same arguments; the user confirms in a dialog, and only their yes writes. Connecting it again with `project_connect_telemetry` needs its credentials, so tell the user that.
+- None found, or the call failed: tell the user that the diagnosis will run without evidence from logs, only from the test's own measurements, and how to change that: expose a log server speaking MCP over HTTPS that LoadCraft can reach, then connect it with `project_connect_telemetry` any time before step 8. Do not retry a failed address.
+
+Retell the result: which tools LoadCraft will call after the test and which it will never call. If the log server covers only one environment, say that the evidence fits runs on that environment only.
+
+## 8. Choose the environment
+
+Always ask with the panel `choose-environment` from [panels.md](panels.md): one option per environment, each with the code version (section 2), the cap from the `project_save_env` result, and how far the documentation is from that code. Mark an environment the connection test could not reach as such, and never recommend it. Never pick the environment yourself, not even when only one option is sensible: the test puts real load on a real system. With exactly one environment do not call `AskUserQuestion` (it rejects one option): write its name, address, cap, protection and documentation age as plain text, ask the user to confirm it or to add another environment, and stop until the answer; a confirmed single environment is the user's decision, not your default. If the user's request already named the environment, take it, say so, and skip the panel.
+
+When `AskUserQuestion` is unavailable, ask the same question as plain text with numbered options, then stop and wait for the answer; never continue on a default.
+
+After the answer:
+
+- The environment runs other code than the documentation describes: read [protected-env.md](protected-env.md) and offer the panel `refresh-docs`, but only when `project_import_docs` is among the loaded tools. Otherwise tell the user the test runs against the documented code and name the mismatch in every summary.
+- The environment is protected: the cap applies to every test there; step 6 asks for consent before a capped run.
+
+## 9. Remember the version
+
+Keep the chosen environment and the code version running there (commit or tag, or "unknown") for the rest of the session. Name it before `run_start` and in every summary of a result, so the numbers are tied to the code they describe.
+
+When a call of this step fails or comes back partial, do not stop at the error: follow the loop of [troubleshooting.md](troubleshooting.md) (read the cause, repair it, repeat once, otherwise report).
+
+## Done when
+
+The project exists and is bound, every environment is registered with the caps the user approved, the logs are connected or the user knows the diagnosis runs without them, and the user chose the environment. Tick step 2 and move on to step 3.

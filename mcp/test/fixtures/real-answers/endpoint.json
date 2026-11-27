@@ -1,0 +1,110 @@
+{
+  "id": "0d0c7034-0003-4000-8000-000000001000",
+  "path": "/auth/customer/credentials",
+  "method": "post",
+  "operation_id": "loginCustomer",
+  "summary": "Log in a customer with email and password",
+  "description": "Authenticates an existing credentials auth identity and returns a JWT for the customer actor. Concrete instance of the core route POST /auth/{actor_type}/{auth_provider} with actor_type=customer and auth_provider=credentials. No store API key is required on /auth routes and no bearer token is needed. The request body is not validated by a zod schema: unknown fields are ignored; the credentials provider only checks that `email` and `password` are strings. Every authentication failure (missing/non-string password or email, unknown email, wrong password) returns 401 with type \"unauthorized\". The returned token is signed with the project's JWT secret and expires after jwtExpiresIn (default \"1d\"; this repository does not override it). If the auth identity has not yet been linked to a customer (registered via /auth/customer/credentials/register but POST /store/customers was never called), the call still succeeds with 200, but the token carries an empty actor_id: it is accepted by POST /store/customers but rejected with 401 by /store/customers/me. Password verification runs scrypt (N=2^15, r=8, p=1) on the libuv threadpool, so this endpoint is CPU/memory heavy compared to other store calls; an unknown email returns without running scrypt.",
+  "tags": ["Auth"],
+  "parameters": [],
+  "request_body": {
+    "content_type": "application/json",
+    "schema_def": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email the credentials identity was registered with (the identity's entity_id). Matched exactly.",
+          "example": "user@example.com"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "description": "Plain-text password; verified against the stored scrypt hash."
+        }
+      },
+      "required": ["email", "password"]
+    },
+    "required": true,
+    "example": {
+      "email": "user@example.com"
+    },
+    "examples": null,
+    "description": null
+  },
+  "responses": [
+    {
+      "status_code": 200,
+      "content_type": "application/json",
+      "response_type": "json",
+      "schema_def": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Signed JWT (HS256 with the project's jwtSecret unless jwtOptions override it)."
+          }
+        },
+        "required": ["token"]
+      },
+      "example": {
+        "token": "<token>"
+      },
+      "description": "Authenticated. Body carries the JWT to send as `Authorization: Bearer <token>` on /store/* calls. The token payload contains actor_id (the customer id, or \"\" when the identity has no customer yet), actor_type \"customer\", auth_identity_id, auth_provider \"credentials\", app_metadata and user_metadata. Expires after 1 day by default (jwtExpiresIn \"1d\"). The `location` (OAuth redirect) and `mfa_required` / `verification_required` variants of this route are not reachable for credentials with this repository's configuration (no MFA factors, no authVerificationsPerActor)."
+    },
+    {
+      "status_code": 400,
+      "content_type": "application/json",
+      "response_type": "json",
+      "schema_def": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["not_allowed"]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["type", "message"]
+      },
+      "example": {
+        "type": "not_allowed",
+        "message": "The actor type customer is not allowed to use the auth provider credentials"
+      },
+      "description": "The customer actor is not allowed to use the credentials provider (only when projectConfig.http.authMethodsPerActor.customer is configured without \"credentials\"; not the case in this repository, whose config sets no authMethodsPerActor for customer)."
+    },
+    {
+      "status_code": 401,
+      "content_type": "application/json",
+      "response_type": "json",
+      "schema_def": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["unauthorized"]
+          },
+          "message": {
+            "type": "string",
+            "description": "Known literals: \"Invalid email or password\", \"Password should be a string\", \"Email should be a string\"."
+          }
+        },
+        "required": ["type", "message"]
+      },
+      "example": {
+        "type": "unauthorized",
+        "message": "Invalid email or password"
+      },
+      "description": "Authentication failed. Unknown email or wrong password → \"Invalid email or password\" (same message for both). Missing or non-string `password` → \"Password should be a string\" (checked first); missing or non-string `email` → \"Email should be a string\". Any other provider error is also returned here with its own message."
+    }
+  ],
+  "security": [],
+  "async_pattern": "sync",
+  "is_crud": true,
+  "crud_operation": "create",
+  "is_paginated": false,
+  "deprecated": false
+}

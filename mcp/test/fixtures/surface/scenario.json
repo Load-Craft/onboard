@@ -1,0 +1,694 @@
+{
+  "tools": [
+    {
+      "name": "scenario_ask_copilot",
+      "title": "Ask the scenario copilot what to fix",
+      "description": "Ask the scenario copilot what to fix, or run its readiness review. Proposes actions, applies none.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario (id or name); default: the only one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "message": {
+            "description": "The question for the scenario copilot.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "review": {
+            "description": "true: the standard readiness review instead of a question (not with message).",
+            "type": "boolean"
+          },
+          "profile": {
+            "description": "The load profile to discuss; default: the chosen one.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_check_composition",
+      "title": "Check a composition",
+      "description": "Check a composition: contract issues between members and version drift. Changes no user data (stores the verdict).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_check_drift",
+      "title": "Check whether a scenario still matches its reference",
+      "description": "Check whether a scenario still matches its reference (HAR or API docs); returns a staleness score and a drift report.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario to check (id or name); default: the only one in this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "reference_source": {
+            "type": "string",
+            "enum": ["har", "openapi"],
+            "description": "What to compare the scenario with: a recorded HAR session or a documentation version."
+          },
+          "reference_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "The HAR session id or the documentation version id to compare with."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["reference_source", "reference_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_compile_composition",
+      "title": "Compile the Gatling project a run would ship",
+      "description": "Compile the Gatling project a run would ship, without running it (up to 2 min).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_delete",
+      "title": "Delete a scenario or a composition",
+      "description": "Delete a scenario or a composition. Past runs stay.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario to delete; give this or composition_id.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "composition_id": {
+            "description": "The composition to delete; give this or scenario_id.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_export",
+      "title": "Export the scenario's Gatling project",
+      "description": "Export the scenario's Gatling project as a local ZIP without dataset values; returns its path and what to add to run it.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_get",
+      "title": "Get a scenario",
+      "description": "Get a scenario: status, self-check, data slots; include adds the variable contract, drift and stored artifact (masked).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "include": {
+            "description": "contract: the session-variable contract; drift: the drift score; artifact: the stored scenario artifact (literals masked).",
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["contract", "drift", "artifact"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_get_composition",
+      "title": "Get a composition",
+      "description": "Get a composition: members, weights, pinned versions, load profile, status, drift. Header values masked.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_get_composition_code",
+      "title": "Get the Gatling project generated for a composition",
+      "description": "Get the Gatling project generated for a composition: the file tree, or one file by path (literals masked).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "path": {
+            "description": "One file of the project by its path in the tree (as listed); without it, the file tree.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_get_copilot_history",
+      "title": "Get a copilot conversation",
+      "description": "Get a copilot conversation: the traffic-split planner or a scenario's copilot.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "A scenario's copilot conversation (not with draft_id).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "draft_id": {
+            "description": "The traffic-split planner draft; default: the draft of this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many of the latest messages to return (1-100).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_get_templates",
+      "title": "Get built-in scenario templates",
+      "description": "Get scenario templates; for one, its generic draft (the template's own scenarios and load, not fitted to the project).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "description": "One template with its scenarios and data files (id or name); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "include": {
+            "description": "\"draft\": its composition config for this project, nothing saved (with template only).",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["draft"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_get_versions",
+      "title": "Get a scenario's versions",
+      "description": "Get a scenario's versions: the list, or one with its code (literals masked).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario; default: the only one in this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "version": {
+            "description": "One version with its stored artifact (literals masked); without it, the list.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_list",
+      "title": "List the project's scenarios",
+      "description": "List the project's scenarios: name, source flow, version, self-check state.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "default": 50,
+            "description": "How many scenarios to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_list_compositions",
+      "title": "List the project's compositions",
+      "description": "List the project's compositions: name, status, member count.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "List only compositions with this status.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many compositions to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_restore_version",
+      "title": "Restore a scenario version as the newest one",
+      "description": "Restore a scenario version as the newest one; its self-check is cleared.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario: its id or name; default: the only one in this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000,
+            "description": "The version to make current."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["version"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_save",
+      "title": "Save a scenario's name, tags, active flag or SLO thresholds",
+      "description": "Save a scenario's name, tags, active flag or SLO thresholds (no id: create an empty one).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "description": "The scenario to change (id or name); without it, a new empty scenario is created.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "name": {
+            "description": "The name; required for a new scenario.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "tags": {
+            "description": "Tags, comma-separated (at most 20); replaces the list, an empty text clears it.",
+            "type": "string",
+            "maxLength": 1000
+          },
+          "is_active": {
+            "description": "Whether the scenario is active.",
+            "type": "boolean"
+          },
+          "slo_thresholds": {
+            "description": "SLO thresholds (key: number); {} sets the standard SLO.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "slo_from_project": {
+            "description": "true: drop the scenario's own SLO thresholds; it inherits the project's.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_save_composition",
+      "title": "Save a composition",
+      "description": "Save a composition (members, weights, load profile; no id: create), validating it. Direct edit, only on request; see scenario_suggest_split.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition to change (id or name); without it, a new one is created.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "name": {
+            "description": "The name; required for a new composition.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "members": {
+            "description": "Scenario (id or name) -> its share in percent (0-100); replaces the member list, a member that stays keeps its settings. Required for a new composition.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "profile": {
+            "description": "The composition's load profile (users, ramp, duration), as scenario_get_composition shows it.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_set_composition_type",
+      "title": "Set a composition's load test type",
+      "description": "Set a composition's load test type; members are re-linked and data re-sized.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "load_test",
+              "stress_test",
+              "soak_test",
+              "spike_test",
+              "breakpoint_test",
+              "capacity_test"
+            ],
+            "description": "The kind of test the composition runs."
+          },
+          "spec": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "The parameters of that kind; LoadCraft checks them. All kinds take target_users and duration_seconds (positive whole numbers, required) and optionally ramp_up_seconds, think_time_ms, max_duration_seconds. By kind: load_test ramp_down_seconds; stress_test stress_multiplier (above 1); spike_test spike_users (required) and spike_duration_seconds; breakpoint_test step_users, step_duration_seconds, max_steps; capacity_test target_rps. Do not repeat type here; other fields are refused."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["type", "spec"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scenario_update_pins",
+      "title": "Update every drifted member of a composition to its scenario’s current version",
+      "description": "Update every drifted member of a composition to its scenario's current version.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "composition_id": {
+            "description": "The composition: its id or name; default: the one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+data plan · 3 slots
+Search terms (slot: search_phrases) pinned
+  q · Samples a model wrote · zakupy
+Quantity & cardnumber (slot: order_details) pinned
+  quantity 1–5 · cardNumber Visa, Mastercard · zakupy
+User accounts (slot: accounts) pinned
+  email, password · exclusive · zakupy, konto
+every slot is bound and filled · whether the rows suffice for a profile,
+  run_plan with a profile checks

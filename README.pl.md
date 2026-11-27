@@ -19,18 +19,36 @@ nie zmieniają, nie instalują ani nie uruchamiają), nigdy nie zgadują — cze
 nie mogą potwierdzić, to wypisują w raporcie jako pytanie do wyjaśnienia — a
 hasła, tokeny i dane klientów nie trafiają do plików.
 
+## Plugin dla Claude Code
+
+W Claude Code to samo repozytorium jest też **pluginem**: oprócz powyższych skilli dodaje serwer rozmawiający z
+LoadCraftem, więc jedno zdanie (*„zrób test obciążeniowy tej aplikacji”*) prowadzi od kodu do gotowego testu i
+jego diagnozy. Wymaga instancji LoadCrafta z tokenami API.
+
+```text
+/plugin marketplace add Load-Craft/onboard
+/plugin install loadcraft@loadcraft
+```
+
+- [Instalacja pluginu](docs/plugin/INSTALL.pl.md) — wymagania, token, konfiguracja, reguły uprawnień.
+- [Używanie pluginu](docs/plugin/USAGE.pl.md) — co dzieje się w ośmiu krokach i o co pyta Claude.
+- [Bezpieczeństwo](docs/plugin/SECURITY.pl.md) — co opuszcza Twój komputer i czego asystent nigdy nie widzi.
+
 ## Układ repozytorium
 
 - **[`skills/`](skills/)** — źródło skilli + [przewodnik użytkownika](skills/README.pl.md)
   i [instalacja](skills/INSTALL.pl.md). Każdy skill: `SKILL.md` +
-  `references/` + `scripts/` (walidator w czystym Pythonie, bez zależności).
+  `references/` + `scripts/` (samodzielny walidator uruchamiany gołym `node`, bez instalacji;
+  jego źródło w TypeScripcie jest w [`validators/`](validators/)).
+- **[`validators/`](validators/)** — źródło czterech walidatorów w TypeScripcie; `npm run build:skills`
+  (w `mcp/`) buduje je do `skills/*/scripts/validate_*.mjs`.
 - **`dist/`** — gotowe ZIP-y do pobrania (jeden na skill). Odśwież po zmianach:
   `./scripts/package.sh`.
 - **`.claude-plugin/`, `.codex-plugin/`** — manifesty pluginów; po publikacji
   repo skille można też instalować przez
   `npx skills add <owner>/<repo> --skill loadcraft-openapi`.
-- **`tests/`** — testy walidatorów na neutralnych fixture'ach. Uruchamianie:
-  `python3 -m unittest discover -s tests -v`.
+- **`tests/`** — testy walidatorów i skilli na neutralnych fixture'ach (vitest). Uruchamianie:
+  `cd mcp && npm run test:skills`.
 - **[`AGENTS.md`](AGENTS.md)** — zasady utrzymania pakietu (zmiany kontraktu
   test-first, wersjonowanie, checklist przed wydaniem).
 - **[`EVALUATION.md`](EVALUATION.md)** — raport z ewaluacji skilli na projekcie

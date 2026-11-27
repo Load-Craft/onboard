@@ -1,0 +1,7 @@
+Konta dla slotu accounts: serwer wtyczki zakłada je dalej po tym wywołaniu.
+Wywołaj process_wait z operation
+"account_provision:<id>", żeby śledzić
+postęp; nie wołaj dla nich ponownie data_create_accounts.
+450 / 2 000 kont
+Operacja wciąż trwa w LoadCraft: account_provision:<id>.
+→ Wywołaj process_wait z operation „account_provision:<id>”, żeby czekać dalej; LoadCraft w tym czasie pracuje.

@@ -1,0 +1,17 @@
+plan danych · 3 sloty
+Search terms (slot: search_phrases)          auto   q · Samples a model wrote
+                                                    · zakupy
+Quantity & cardnumber (slot: order_details)  auto   quantity 1–5 · cardNumber
+                                                    Visa, Mastercard · zakupy
+User accounts (slot: accounts)               brak   email, password ·
+                                                    wyłączne · zakupy, konto
+1 poprawka przed testem: konta muszą istnieć na perf
+wywołania, które stosują propozycję, w tej kolejności:
+1. data_set_bindings scenario: "checkout",
+   bindings: {"search_phrases": "frazy wyszukiwania"}
+2. data_create_dataset rules: "data_suggestion:0f5d72f6/2"
+pominięto 3:
+  zbiór „konta” ma kolumny z hasłami · konta z pliku (data_create_dataset z
+  file i slot) albo data_create_accounts
+  zakładanie kont wymaga osobnego narzędzia (data_create_accounts)
+  slot accounts: zbioru nie ma w projekcie

@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "suggestions": {
+    "5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61": {
+      "savedAt": 1795344600000,
+      "value": {
+        "journeys": [
+          {
+            "name": "checkout"
+          }
+        ]
+      }
+    }
+  },
+  "harSessions": {
+    "rec-1": {
+      "savedAt": 1795344700000,
+      "value": {
+        "sessionId": "s-1",
+        "data": {
+          "entries": 2
+        }
+      }
+    }
+  },
+  "drafts": {
+    "checkout": {
+      "savedAt": 1795344800000,
+      "value": {
+        "flows": ["f1"]
+      }
+    }
+  },
+  "operations": {
+    "test_run:3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42": {
+      "savedAt": 1795345180000,
+      "value": {
+        "kind": "test_run",
+        "id": "3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42",
+        "startedAt": 1795345180000,
+        "saved": {
+          "project": {
+            "id": "5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61",
+            "name": "sklep"
+          },
+          "target": {
+            "kind": "scenario",
+            "id": "9d1e5c30-7a2b-4c64-8e0f-5b3a1d9c7e22",
+            "name": "checkout"
+          },
+          "environment": {
+            "id": "e4a7b2d1-3c9f-4e58-a016-8d2b6f0c5a73",
+            "name": "perf",
+            "protected": false,
+            "caps": {}
+          },
+          "label": "checkout on perf",
+          "requested": {
+            "type": "ramp_concurrency",
+            "vusers": 2000,
+            "ramp": 600
+          },
+          "effective": {
+            "type": "ramp_concurrency",
+            "vusers": 2000,
+            "ramp": 600
+          },
+          "clamped": false,
+          "thresholds": [],
+          "dataCheck": [],
+          "startedAt": 1795345180000
+        }
+      }
+    },
+    "accounts-series:a1": {
+      "savedAt": 1795344900000,
+      "value": {
+        "baseline": 10,
+        "count": 50
+      }
+    }
+  },
+  "runLoads": {
+    "3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42": {
+      "savedAt": 1795345180000,
+      "value": {
+        "execution_id": "3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42",
+        "requested_vu": 5000,
+        "effective_vu": 2000
+      }
+    }
+  },
+  "progress": {
+    "test_run:3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42": {
+      "savedAt": 1795345199000,
+      "value": {
+        "call": "run_start:1:1",
+        "tool": "run_start",
+        "handle": "test_run:3f9a12c4-6b7d-4e21-a8f3-0c5d9e7b1a42",
+        "message": "building (10%)",
+        "fraction": 0.1,
+        "startedAt": 1795345180000,
+        "updatedAt": 1795345199000,
+        "open": false
+      }
+    }
+  },
+  "notes": {
+    "owner": {
+      "savedAt": 1795345100000,
+      "value": "kept for a later version"
+    }
+  }
+}

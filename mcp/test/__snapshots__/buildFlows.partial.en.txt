@@ -1,0 +1,7 @@
+2 of 3 flows ready
+zakupy · 7 steps (4 requests · 3 pauses)
+przeglądanie · 3 steps
+✕ konto: error (can be retried)
+question · zakupy: Which account logs in?
+→ To retry, call flows_generate_from_suggestions again with suggestions:
+  "konto".

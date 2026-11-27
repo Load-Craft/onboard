@@ -1,0 +1,185 @@
+{
+  "target": {
+    "kind": "composition",
+    "name": "checkout"
+  },
+  "environment": {
+    "name": "qa",
+    "protected": true,
+    "caps": {
+      "maxVu": 100,
+      "maxRps": 20
+    }
+  },
+  "targetUsers": 2000,
+  "dataCheck": "off",
+  "profiles": [
+    {
+      "n": 1,
+      "type": "smoke",
+      "label": "Smoke",
+      "isDefault": true,
+      "profile": {
+        "type": "smoke",
+        "vusers": 1
+      },
+      "applied": {
+        "type": "smoke",
+        "vusers": 1
+      },
+      "clamped": false,
+      "plannedSeconds": null
+    },
+    {
+      "n": 2,
+      "type": "ramp",
+      "label": "Ramp",
+      "isDefault": false,
+      "profile": {
+        "type": "ramp",
+        "vusers": 2000,
+        "ramp": 600
+      },
+      "applied": {
+        "type": "ramp",
+        "vusers": 100,
+        "ramp": 600
+      },
+      "clamped": true,
+      "plannedSeconds": 600
+    },
+    {
+      "n": 3,
+      "type": "constant",
+      "label": "Constant rate",
+      "isDefault": false,
+      "profile": {
+        "type": "constant",
+        "vusers": 4,
+        "hold": 900
+      },
+      "applied": {
+        "type": "constant",
+        "vusers": 4,
+        "hold": 900
+      },
+      "clamped": false,
+      "plannedSeconds": 900
+    },
+    {
+      "n": 4,
+      "type": "ramp_hold",
+      "label": "Ramp + hold",
+      "isDefault": false,
+      "profile": {
+        "type": "ramp_hold",
+        "vusers": 4,
+        "ramp": 60,
+        "hold": 900
+      },
+      "applied": {
+        "type": "ramp_hold",
+        "vusers": 4,
+        "ramp": 60,
+        "hold": 900
+      },
+      "clamped": false,
+      "plannedSeconds": 960
+    },
+    {
+      "n": 5,
+      "type": "stress",
+      "label": "Stress stairs",
+      "isDefault": false,
+      "profile": {
+        "type": "stress",
+        "vusers": 10,
+        "ramp": 180
+      },
+      "applied": {
+        "type": "stress",
+        "vusers": 10,
+        "ramp": 180
+      },
+      "clamped": false,
+      "plannedSeconds": 900
+    },
+    {
+      "n": 6,
+      "type": "constant_concurrency",
+      "label": "Constant load (closed)",
+      "isDefault": false,
+      "profile": {
+        "type": "constant_concurrency",
+        "vusers": 2000,
+        "hold": 900
+      },
+      "applied": {
+        "type": "constant_concurrency",
+        "vusers": 100,
+        "hold": 900
+      },
+      "clamped": true,
+      "plannedSeconds": 900
+    },
+    {
+      "n": 7,
+      "type": "ramp_concurrency",
+      "label": "Ramp load (closed)",
+      "isDefault": false,
+      "profile": {
+        "type": "ramp_concurrency",
+        "vusers": 2000,
+        "ramp": 600
+      },
+      "applied": {
+        "type": "ramp_concurrency",
+        "vusers": 100,
+        "ramp": 600
+      },
+      "clamped": true,
+      "plannedSeconds": 600
+    },
+    {
+      "n": 8,
+      "type": "spike",
+      "label": "Spike",
+      "isDefault": false,
+      "profile": {
+        "type": "spike",
+        "vusers": 1000,
+        "ramp": 60,
+        "hold": 60
+      },
+      "applied": {
+        "type": "spike",
+        "vusers": 50,
+        "ramp": 60,
+        "hold": 60
+      },
+      "clamped": true,
+      "note": "second_burst_doubles",
+      "plannedSeconds": 120
+    },
+    {
+      "n": 9,
+      "type": "soak",
+      "label": "Soak",
+      "isDefault": false,
+      "profile": {
+        "type": "soak",
+        "vusers": 1000,
+        "ramp": 60,
+        "hold": 7200
+      },
+      "applied": {
+        "type": "soak",
+        "vusers": 100,
+        "ramp": 60,
+        "hold": 7200
+      },
+      "clamped": true,
+      "plannedSeconds": 7260
+    }
+  ]
+}

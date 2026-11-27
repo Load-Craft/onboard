@@ -1,0 +1,17 @@
+data plan · 3 slots
+Search terms (slot: search_phrases) auto
+  q · Samples a model wrote · zakupy
+Quantity & cardnumber (slot: order_details) auto
+  quantity 1–5 · cardNumber Visa, Mastercard · zakupy
+User accounts (slot: accounts) missing
+  email, password · exclusive · zakupy, konto
+1 fix before the test: konta must exist on perf
+the calls that apply the suggestion, in this order:
+1. data_set_bindings scenario: "checkout",
+   bindings: {"search_phrases": "frazy wyszukiwania"}
+2. data_create_dataset rules: "data_suggestion:0f5d72f6/2"
+left out 3:
+  dataset "konta" has password columns · accounts from a file
+  (data_create_dataset with file and slot) or data_create_accounts
+  creating accounts needs a tool of its own (data_create_accounts)
+  slot accounts: the dataset is not in the project

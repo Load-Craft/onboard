@@ -1,0 +1,8 @@
+perf ★  default
+qa      protected · limit 100 users / 20 requests/s
+dev     no limit
+prod    protected · limit 20 users / 5 requests/s
+local   no limit
+warning: environment qa has another API address than requested:
+  https://api.qa.example.com (requested https://api-v2.qa.example.com) —
+  unchanged

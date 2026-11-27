@@ -1,0 +1,36 @@
+{
+  "environments": [
+    {
+      "name": "perf",
+      "default": true,
+      "protected": false,
+      "created": false
+    },
+    {
+      "name": "qa",
+      "default": false,
+      "protected": true,
+      "created": true,
+      "caps": {
+        "maxVu": 100,
+        "maxRps": 20
+      }
+    },
+    {
+      "name": "dev",
+      "default": false,
+      "protected": false,
+      "created": true
+    },
+    {
+      "name": "prod",
+      "default": false,
+      "protected": true,
+      "created": true,
+      "caps": {
+        "maxVu": 20,
+        "maxRps": 5
+      }
+    }
+  ]
+}

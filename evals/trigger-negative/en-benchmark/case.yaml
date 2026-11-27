@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: trigger-negative-en-benchmark
+context:
+  scaffold_script: scaffold.sh

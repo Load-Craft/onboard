@@ -1,0 +1,4 @@
+perf ★  default
+qa      protected · limit 100 users / 20 requests/s
+dev     no limit
+prod    protected · limit 20 users / 5 requests/s

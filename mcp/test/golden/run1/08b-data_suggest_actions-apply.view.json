@@ -1,0 +1,149 @@
+{
+  "target": {
+    "kind": "composition",
+    "name": "checkout"
+  },
+  "environment": "perf",
+  "slots": [
+    {
+      "slot": "search_phrases",
+      "label": "Search terms",
+      "state": "auto",
+      "columns": [
+        {
+          "name": "q",
+          "qualifier": null
+        }
+      ],
+      "sources": ["Samples a model wrote"],
+      "exclusive": false,
+      "usedBy": ["zakupy"]
+    },
+    {
+      "slot": "order_details",
+      "label": "Quantity & cardnumber",
+      "state": "auto",
+      "columns": [
+        {
+          "name": "quantity",
+          "qualifier": "1–5"
+        },
+        {
+          "name": "cardNumber",
+          "qualifier": "Visa, Mastercard"
+        }
+      ],
+      "sources": [],
+      "exclusive": false,
+      "usedBy": ["zakupy"]
+    },
+    {
+      "slot": "accounts",
+      "label": "User accounts",
+      "state": "missing",
+      "columns": [
+        {
+          "name": "email",
+          "qualifier": null
+        },
+        {
+          "name": "password",
+          "qualifier": null
+        }
+      ],
+      "sources": [],
+      "exclusive": true,
+      "usedBy": ["zakupy", "konto"]
+    }
+  ],
+  "fixes": [
+    {
+      "kind": "accounts_must_exist",
+      "slot": "accounts",
+      "label": "User accounts",
+      "dataset": "konta",
+      "environment": "perf"
+    }
+  ],
+  "ready": false,
+  "proposed": [
+    {
+      "kind": "bind",
+      "slot": "search_phrases",
+      "dataset": "8b4e2c70-5f1a-4d93-9e06-a1c7d3f8b254",
+      "name": null,
+      "count": null,
+      "strategy": null
+    },
+    {
+      "kind": "create_dataset",
+      "slot": "order_details",
+      "dataset": null,
+      "name": "rozmiary",
+      "count": 300,
+      "strategy": null
+    },
+    {
+      "kind": "create_dataset",
+      "slot": "accounts",
+      "dataset": null,
+      "name": "konta",
+      "count": 2000,
+      "strategy": null
+    },
+    {
+      "kind": "provision_accounts",
+      "slot": null,
+      "dataset": "8b4e2c70-5f1a-4d93-9e06-a1c7d3f8b254",
+      "name": null,
+      "count": 2000,
+      "strategy": null
+    },
+    {
+      "kind": "bind",
+      "slot": "accounts",
+      "dataset": "gone-dataset",
+      "name": null,
+      "count": null,
+      "strategy": null
+    }
+  ],
+  "steps": [
+    {
+      "tool": "data_set_bindings",
+      "args": {
+        "scenario": "checkout",
+        "bindings": {
+          "search_phrases": "frazy wyszukiwania"
+        }
+      }
+    },
+    {
+      "tool": "data_create_dataset",
+      "args": {
+        "rules": "data_suggestion:0f5d72f6/2"
+      }
+    }
+  ],
+  "asked": true,
+  "skipped": [
+    {
+      "reason": "secret_columns",
+      "kind": "create_dataset",
+      "name": "konta",
+      "slot": "accounts"
+    },
+    {
+      "reason": "separate_call",
+      "kind": "provision_accounts",
+      "name": null,
+      "slot": null
+    },
+    {
+      "reason": "dataset_gone",
+      "kind": "bind",
+      "name": null,
+      "slot": "accounts"
+    }
+  ]
+}

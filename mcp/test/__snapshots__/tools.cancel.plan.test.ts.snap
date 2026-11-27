@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cancel with the plan handle > draws the ended message in en and pl 1`] = `
+"The run of record_run:2481a3f0-9e6c-4d5b-b7a2-1f8e3c0d6a94 has already ended
+  (cancelled), so there was nothing to stop.
+→ Nothing is left running in LoadCraft for it. Call process_wait with
+  record_run:2481a3f0-9e6c-4d5b-b7a2-1f8e3c0d6a94 to see how it ended, or
+  flows_describe_journeys to plan again."
+`;

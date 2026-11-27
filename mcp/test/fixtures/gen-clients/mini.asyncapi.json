@@ -1,0 +1,390 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Mini shop events",
+    "version": "1.0.0"
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "main": {
+      "host": "shop.example.com",
+      "protocol": "ws"
+    }
+  },
+  "channels": {
+    "orders": {
+      "address": "/ws/orders/{order_id}",
+      "parameters": {
+        "order_id": {
+          "description": "Order id."
+        }
+      },
+      "messages": {
+        "OrdersProgress": {
+          "$ref": "#/components/messages/OrdersProgress"
+        },
+        "OrdersDone": {
+          "$ref": "#/components/messages/OrdersDone"
+        },
+        "OrdersFailed": {
+          "$ref": "#/components/messages/OrdersFailed"
+        }
+      }
+    },
+    "chat": {
+      "address": "/ws/shops/{shop_id}/chat/{room}",
+      "parameters": {
+        "shop_id": {},
+        "room": {}
+      },
+      "messages": {
+        "ChatSay": {
+          "$ref": "#/components/messages/ChatSay"
+        },
+        "ChatLine": {
+          "$ref": "#/components/messages/ChatLine"
+        },
+        "ChatPing": {
+          "$ref": "#/components/messages/ChatPing"
+        },
+        "ChatPong": {
+          "$ref": "#/components/messages/ChatPong"
+        },
+        "ChatImage": {
+          "$ref": "#/components/messages/ChatImage"
+        }
+      }
+    }
+  },
+  "operations": {
+    "ordersSend": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/orders"
+      },
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerToken"
+        }
+      ],
+      "messages": [
+        {
+          "$ref": "#/channels/orders/messages/OrdersProgress"
+        },
+        {
+          "$ref": "#/channels/orders/messages/OrdersDone"
+        },
+        {
+          "$ref": "#/channels/orders/messages/OrdersFailed"
+        }
+      ]
+    },
+    "chatSend": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/chat"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/chat/messages/ChatLine"
+        },
+        {
+          "$ref": "#/channels/chat/messages/ChatPong"
+        },
+        {
+          "$ref": "#/channels/chat/messages/ChatImage"
+        }
+      ]
+    },
+    "chatReceive": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/chat"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/chat/messages/ChatSay"
+        },
+        {
+          "$ref": "#/channels/chat/messages/ChatPing"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerToken": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "messages": {
+      "OrdersProgress": {
+        "name": "orders:progress",
+        "summary": "Each time the order moves to a new stage.",
+        "payload": {
+          "type": "object",
+          "required": ["type", "payload"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "orders:progress"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["order_id", "progress", "stage"],
+              "properties": {
+                "order_id": {
+                  "type": "string"
+                },
+                "progress": {
+                  "type": "integer",
+                  "description": "Percent, 0-100."
+                },
+                "stage": {
+                  "type": "string",
+                  "enum": ["packing", "shipping"]
+                },
+                "eta_seconds": {
+                  "type": ["number", "null"]
+                },
+                "labels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "examples": [
+          {
+            "name": "packing",
+            "payload": {
+              "type": "orders:progress",
+              "payload": {
+                "order_id": "o1",
+                "progress": 10,
+                "stage": "packing"
+              }
+            }
+          }
+        ]
+      },
+      "OrdersDone": {
+        "name": "orders:done",
+        "summary": "The order was delivered.",
+        "payload": {
+          "type": "object",
+          "required": ["type", "payload"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "orders:done"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["order_id", "lines"],
+              "properties": {
+                "order_id": {
+                  "type": "string"
+                },
+                "lines": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["sku", "qty"],
+                    "properties": {
+                      "sku": {
+                        "type": "string"
+                      },
+                      "qty": {
+                        "type": "integer"
+                      },
+                      "note": {
+                        "type": ["string", "null"]
+                      }
+                    }
+                  }
+                },
+                "totals": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "extra": {
+                  "description": "Any JSON value."
+                }
+              }
+            }
+          }
+        },
+        "examples": [
+          {
+            "name": "done",
+            "payload": {
+              "type": "orders:done",
+              "payload": {
+                "order_id": "o1",
+                "lines": [
+                  {
+                    "sku": "a",
+                    "qty": 1
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "OrdersFailed": {
+        "name": "orders:failed",
+        "summary": "The order failed.",
+        "payload": {
+          "type": "object",
+          "required": ["type", "payload"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "orders:failed"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["error"],
+              "properties": {
+                "error": {
+                  "type": ["string", "null"]
+                }
+              }
+            }
+          }
+        },
+        "examples": [
+          {
+            "name": "failed",
+            "payload": {
+              "type": "orders:failed",
+              "payload": {
+                "error": "lost"
+              }
+            }
+          }
+        ]
+      },
+      "ChatSay": {
+        "name": "say",
+        "summary": "Client posts a line.",
+        "payload": {
+          "type": "object",
+          "required": ["type", "text"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "say"
+            },
+            "text": {
+              "type": "string"
+            },
+            "reply_to": {
+              "type": ["integer", "null"]
+            }
+          }
+        },
+        "examples": [
+          {
+            "name": "say",
+            "payload": {
+              "type": "say",
+              "text": "hi"
+            }
+          }
+        ]
+      },
+      "ChatLine": {
+        "name": "line",
+        "summary": "A line was posted in the room.",
+        "payload": {
+          "type": "object",
+          "required": ["type", "text", "payload_size"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "line"
+            },
+            "text": {
+              "type": "string"
+            },
+            "payload_size": {
+              "type": "integer"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "who": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "examples": [
+          {
+            "name": "line",
+            "payload": {
+              "type": "line",
+              "text": "hi",
+              "payload_size": 2
+            }
+          }
+        ]
+      },
+      "ChatPing": {
+        "name": "ping",
+        "summary": "Client keep-alive.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "const": "ping"
+        },
+        "examples": [
+          {
+            "name": "ping",
+            "payload": "ping"
+          }
+        ]
+      },
+      "ChatPong": {
+        "name": "pong",
+        "summary": "Reply to ping.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "const": "pong"
+        },
+        "examples": [
+          {
+            "name": "pong",
+            "payload": "pong"
+          }
+        ]
+      },
+      "ChatImage": {
+        "name": "image",
+        "summary": "Binary picture.",
+        "contentType": "application/octet-stream",
+        "payload": {
+          "type": "string",
+          "format": "binary"
+        },
+        "examples": [
+          {
+            "name": "image",
+            "payload": "AAAA"
+          }
+        ]
+      }
+    }
+  }
+}

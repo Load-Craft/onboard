@@ -1,0 +1,4 @@
+plan r-2481a3f0 · 3 paths · shared sign-in for all
+zakupy        logowanie → wyszukanie → koszyk → kod rabatowy → płatność
+przeglądanie  kategoria → produkt
+konto         logowanie → zamówienia

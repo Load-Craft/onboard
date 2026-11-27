@@ -1,0 +1,606 @@
+{
+  "tools": [
+    {
+      "name": "project_disconnect_telemetry",
+      "title": "Disconnect the project's log server",
+      "description": "Disconnect the project's log server.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_get_activity",
+      "title": "Get recent activity and the runs in progress across all pro…",
+      "description": "Get recent activity and the runs in progress across all projects.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "How many recent events to return (1-50).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_get_apimap",
+      "title": "Get the API map",
+      "description": "Get the API map: areas and operation kinds of the project's API.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_get_docs",
+      "title": "Get the project's active API docs",
+      "description": "Get the project's active API docs (OpenAPI or AsyncAPI), the stored versions, or one version by id.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "default": "openapi",
+            "description": "Which documentation: openapi (default) or asyncapi.",
+            "type": "string",
+            "enum": ["openapi", "asyncapi"]
+          },
+          "docs_id": {
+            "description": "One stored version by its id; without it, the active documentation.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "versions": {
+            "default": false,
+            "description": "true: the list of stored versions instead (not with docs_id).",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_get_endpoints",
+      "title": "Get the endpoints of the API docs",
+      "description": "Get the endpoints of the API docs: the list, or one with its schema and validator bindings.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "docs_id": {
+            "description": "The documentation version; default: the one of this workspace (see project_get_docs).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "endpoint": {
+            "description": "One endpoint: its id, operationId or \"METHOD /path\" (POST /checkout); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "include": {
+            "description": "\"bindings\": expected statuses, response schemas in short and suggested assertions (with endpoint only).",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["bindings"]
+            }
+          },
+          "method": {
+            "description": "List only endpoints of this method.",
+            "type": "string",
+            "enum": ["get", "post", "put", "patch", "delete", "head", "options"]
+          },
+          "query": {
+            "description": "List only endpoints whose path, summary or operationId contains this text (any case).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many endpoints of the list to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_get_envs",
+      "title": "Get the project's environments",
+      "description": "Get the project's environments: the list, or one (effective=true resolves inherited values). Header and variable values are masked.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "env": {
+            "description": "One environment: its id, or \"default\" for the default one; without it, the list.",
+            "type": "string",
+            "pattern": "^(?:default|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$"
+          },
+          "effective": {
+            "default": false,
+            "description": "true: values inherited from the parent environment are resolved (with env only).",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_get_http_settings",
+      "title": "Get the project's HTTP settings for generated tests",
+      "description": "Get the project's HTTP settings for generated tests: base URL, protocol options, default headers (values masked).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_list",
+      "title": "List projects",
+      "description": "List projects, or search projects, flows, scenarios and runs by text.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Search projects, flows, scenarios and runs by this text; without it, the list of projects.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "is_active": {
+            "description": "Only active (true) or inactive (false) projects (the list, not the search).",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many projects or search hits to return (1-100).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_list_notes",
+      "title": "List the notes the agent learned about the project",
+      "description": "List the notes the agent learned about the project.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_list_team",
+      "title": "List project members",
+      "description": "List project members; me=true returns your own role and permissions.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "me": {
+            "default": false,
+            "description": "true: your own role and permissions instead of the list.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_save_member",
+      "title": "Save a project member",
+      "description": "Save a project member: add one, or change a member's role.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The person to add or whose role changes (their user id, as project_list_team shows)."
+          },
+          "role": {
+            "type": "string",
+            "enum": ["owner", "editor", "viewer"],
+            "description": "The role the person gets."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["user_id", "role"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_set_active_docs",
+      "title": "Set a stored docs version as the active one",
+      "description": "Set a stored docs version as the active one.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "default": "openapi",
+            "description": "Which documentation: openapi (default) or asyncapi.",
+            "type": "string",
+            "enum": ["openapi", "asyncapi"]
+          },
+          "docs_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The stored version to make active (project_get_docs versions=true lists them)."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["docs_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_set_apimap",
+      "title": "Set the URL prefixes that define the project's API areas",
+      "description": "Set the URL prefixes that define the project's API areas.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prefixes": {
+            "description": "Path prefixes of the areas, comma-separated (at most 64); not with detected.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          },
+          "detected": {
+            "default": false,
+            "description": "true: go back to the areas LoadCraft detects (not with prefixes).",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_set_http_settings",
+      "title": "Set the project's HTTP settings for generated tests",
+      "description": "Set the project's HTTP settings for generated tests (created on first use).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "base_url": {
+            "description": "The base URL of the tested application.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "protocol": {
+            "description": "Protocol options to change (no proxy credentials); the rest stays.",
+            "type": "object",
+            "properties": {
+              "async_name_resolution": {
+                "type": "boolean"
+              },
+              "disable_auto_referer": {
+                "type": "boolean"
+              },
+              "disable_caching": {
+                "type": "boolean"
+              },
+              "disable_warm_up": {
+                "type": "boolean"
+              },
+              "http2_enabled": {
+                "type": "boolean"
+              },
+              "http2_prior_knowledge": {
+                "type": "boolean"
+              },
+              "infer_html_resources": {
+                "type": "boolean"
+              },
+              "per_user_name_resolution": {
+                "type": "boolean"
+              },
+              "share_connections": {
+                "type": "boolean"
+              },
+              "silent_resources": {
+                "type": "boolean"
+              },
+              "connection_timeout_ms": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3600000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "request_timeout_ms": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3600000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "max_connections_per_host": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "user_agent_header": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "headers_env_file": {
+            "description": "An env file of the project directory whose KEY=VALUE lines become the default headers.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 260
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_update",
+      "title": "Update a project's name or description",
+      "description": "Update a project's name or description.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The new name; another project with the same name makes the backend refuse it.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "description": "The new description; an empty text clears it.",
+            "type": "string",
+            "maxLength": 8000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "project_update_note",
+      "title": "Update the text or scope of a project note",
+      "description": "Update the text or scope of a project note.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "note_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-fA-F]{32}$",
+            "description": "The note id (32 hex characters) from project_list_notes."
+          },
+          "text": {
+            "description": "The note's new text.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "scope": {
+            "description": "Where the note applies: a page path or a plan step (a step can only become a page).",
+            "type": "string",
+            "enum": ["url_path", "plan_step"]
+          },
+          "at": {
+            "description": "The page path (url_path) or words of the step (plan_step); with scope.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["note_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

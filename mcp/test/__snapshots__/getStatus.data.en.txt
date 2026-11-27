@@ -1,0 +1,15 @@
+signed in as user@example.com · LoadCraft 0.0.0-fake · API 1 ✓
+Project “sklep” · setup complete ✓
+perf ★  default
+qa      protected · limit 100 users / 20 requests/s
+dev     no limit
+prod    protected · limit 20 users / 5 requests/s
+3 flows · 3 scenarios · 1 composition
+no test has run yet
+data slots
+  zakupy  Search terms (slot: search_phrases) · Quantity & cardnumber (slot:
+          order_details) · User accounts (slot: accounts) ✕
+  konto   User accounts (slot: accounts) ✕
+  ✓ dataset pinned · ✕ missing, the self-check waits for it
+next: data_check_readiness — the scenarios wait for data: User accounts
+  (slot: accounts)

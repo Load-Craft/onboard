@@ -1,0 +1,8 @@
+perf ★  domyślne
+qa      chronione · limit 100 użytkowników / 20 zapytań/s
+dev     bez limitu
+prod    chronione · limit 20 użytkowników / 5 zapytań/s
+local   bez limitu
+uwaga: środowisko qa ma inny adres API niż w żądaniu:
+  https://api.qa.example.com (żądano https://api-v2.qa.example.com) — bez
+  zmian

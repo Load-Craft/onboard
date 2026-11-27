@@ -1,0 +1,175 @@
+{
+  "environment": "perf",
+  "scenarios": [
+    {
+      "name": "zakupy",
+      "status": "passed_after_repair",
+      "steps": [],
+      "requests": 5,
+      "responseMs": 1400,
+      "failure": null,
+      "notes": [],
+      "missingSlots": [],
+      "repairs": [
+        {
+          "round": 1,
+          "changes": "dodano nagłówek X-CSRF-Token",
+          "refused": null,
+          "refusedMessage": null,
+          "refusedCode": null,
+          "version": 2,
+          "verdict": "passed"
+        }
+      ],
+      "runs": [
+        {
+          "version": 1,
+          "status": "failed",
+          "stepsOmitted": 0,
+          "steps": [
+            {
+              "name": "logowanie",
+              "group": null,
+              "planIndex": 0,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "wyszukanie",
+              "group": null,
+              "planIndex": 1,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "koszyk",
+              "group": null,
+              "planIndex": 2,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "podgląd koszyka",
+              "group": null,
+              "planIndex": 3,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "zamówienie",
+              "group": null,
+              "planIndex": 4,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "failed",
+              "httpStatus": 403,
+              "reason": "HTTP 403 Forbidden"
+            }
+          ]
+        },
+        {
+          "version": 2,
+          "status": "passed",
+          "stepsOmitted": 0,
+          "steps": [
+            {
+              "name": "logowanie",
+              "group": null,
+              "planIndex": 0,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "wyszukanie",
+              "group": null,
+              "planIndex": 1,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "koszyk",
+              "group": null,
+              "planIndex": 2,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "podgląd koszyka",
+              "group": null,
+              "planIndex": 3,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            },
+            {
+              "name": "zamówienie",
+              "group": null,
+              "planIndex": 4,
+              "isPreflight": false,
+              "method": null,
+              "path": null,
+              "result": "ok",
+              "httpStatus": 200,
+              "reason": null
+            }
+          ]
+        }
+      ],
+      "maxRepairRounds": 2
+    },
+    {
+      "name": "konto",
+      "status": "passed",
+      "steps": [
+        {
+          "name": "logowanie",
+          "ok": true,
+          "failedRequest": null
+        },
+        {
+          "name": "zamówienia",
+          "ok": true,
+          "failedRequest": null
+        }
+      ],
+      "requests": 2,
+      "responseMs": 400,
+      "failure": null,
+      "notes": [],
+      "missingSlots": [],
+      "repairs": []
+    }
+  ]
+}

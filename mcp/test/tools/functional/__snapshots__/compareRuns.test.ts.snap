@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`functional_compare_runs > answers in Polish with every key of the view 1`] = `
+"przebiegi funkcjonalne 6e2a4f51-0001-4f00-8000-000000000001 i 6e2a4f51-0002-4f00-8000-000000000002: różni się 3 z 4 bloków
+Przebiegi użyły różnych wersji flowów: różnice mogą pochodzić z flowów, nie z celu.
+Przebiegi poszły na różne środowiska.
+ostrzeżenie: flow f1 was built on another docs version
+  POST /cart    zmiana statusu               success → failed   201 → 500  120 → 1 800 ms
+  GET /cart     zmiana kształtu              success → success  200 → 200  40 → 42 ms
+  DELETE /cart  tylko w pierwszym przebiegu  success → —        — → —      —
+  GET /cart: pojawiły się w drugim przebiegu: items[].code (string); brak w drugim przebiegu: items[].sku (string); zmiana typu: total (number → string)"
+`;
+
+exports[`functional_compare_runs > shows the blocks that differ with what changed, and counts the same ones; one request, a then b 1`] = `
+"functional runs 6e2a4f51-0001-4f00-8000-000000000001 and 6e2a4f51-0002-4f00-8000-000000000002: 3 of 4 blocks differ
+The runs used different versions of their flows: differences may come from the flows, not from the target.
+The runs ran on different environments.
+warning: flow f1 was built on another docs version
+  POST /cart    status changed         success → failed   201 → 500  120 → 1,800 ms
+  GET /cart     shape changed          success → success  200 → 200  40 → 42 ms
+  DELETE /cart  only in the first run  success → —        — → —      —
+  GET /cart: appeared in the other run: items[].code (string); missing in the other run: items[].sku (string); type changed: total (number → string)"
+`;

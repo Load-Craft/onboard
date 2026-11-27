@@ -3,12 +3,20 @@
 # Installation — one-time setup
 
 Do this once, before first use. Pick your tool below and run the commands in
-**your project's root directory**. The commands install all three skills; each
+**your project's root directory**. The commands install all four preparation skills; each
 skill folder stays complete (`SKILL.md` + `references/` + `scripts/`), which
 is required for it to work. (Prefer ZIPs? Ready ones are in
 [`dist/`](../dist/) — unzip them into the same target folder.)
 
 ## Claude Code
+
+**Recommended: install the plugin.** It contains the four preparation skills and, on top of them, the guiding
+skill `loadcraft-test`, the commands `/loadcraft:status` and `/loadcraft:doctor` and the server that talks to
+LoadCraft. Follow the [plugin installation guide](../docs/plugin/INSTALL.md); it takes a few minutes and needs a
+LoadCraft API token.
+
+**Only the preparation skills, without the plugin:** copy the folders as below. The guiding skill
+`loadcraft-test` is not among them: it needs the plugin's MCP server and does not work when copied.
 
 ```bash
 rm -rf /tmp/onboard
@@ -45,6 +53,8 @@ Read this instruction and execute the described workflow for this project.
 ```
 
 ## Codex (OpenAI)
+
+The plugin is for Claude Code. In Codex the preparation skills are installed by copying, as below.
 
 ```bash
 rm -rf /tmp/onboard

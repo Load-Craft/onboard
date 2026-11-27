@@ -1,0 +1,31 @@
+{
+  "verdict": { "state": "sla_failed", "reasons": ["sla_failed"] },
+  "thresholds": [
+    {
+      "kind": "percentile",
+      "percentile": 95,
+      "unit": "ms",
+      "value": 1120,
+      "limit": 400,
+      "pass": false
+    },
+    { "kind": "failed_percent", "unit": "percent", "value": 0.6, "limit": 1, "pass": true }
+  ],
+  "run": {
+    "durationS": 597.5,
+    "planned": { "type": "ramp_concurrency", "vusers": 2000, "ramp": 600 },
+    "peak": { "unavailable": "no_capability" }
+  },
+  "requests": { "total": 412300, "perSecond": 690 },
+  "latency": { "p50": 180, "p95": 1120, "p99": 2900 },
+  "errors": [
+    { "status": 504, "label": "Gateway Timeout", "count": 2480, "endpoint": "POST /checkout" }
+  ],
+  "endpoints": [
+    { "name": "POST /checkout", "p95Estimate": 1840 },
+    { "name": "POST /cart/items", "p95Estimate": 620 },
+    { "name": "GET /products", "p95Estimate": 290 },
+    { "name": "GET /categories", "p95Estimate": 110 }
+  ],
+  "breach": { "offsetS": 370, "sustained": true }
+}

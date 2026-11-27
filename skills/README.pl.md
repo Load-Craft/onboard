@@ -18,6 +18,15 @@ czytać kodu.
 | `loadcraft-asyncapi` | Twoje API zdarzeń/wiadomości (WebSockety, Kafka, MQTT…) | `loadcraft/asyncapi.json` + raport |
 | `loadcraft-overview` | cały projekt (o czym jest) | `loadcraft/overview.md` + raport |
 
+Tabela wymienia cztery samodzielne skille przygotowawcze; każdy działa sam,
+wystarczy Twój asystent AI. Plugin dodaje trzy kolejne: `loadcraft-test` to
+skill prowadzący, który przeprowadza przez cały test obciążeniowy — dokumentację,
+projekt, flowy, scenariusz, dane, uruchomienie, raport i diagnozę — oraz
+komendy `/loadcraft:status` i `/loadcraft:doctor`. Rozmawiają z LoadCraftem
+przez serwer MCP pluginu, więc istnieją tylko w pluginie, nie jako osobne
+pobrania. Żeby ich używać, zainstaluj plugin LoadCraft w Claude Code (komenda
+`/plugin`); pełny przewodnik po pluginie ukazuje się osobno.
+
 ## Twoje kroki
 
 ### 1. Zainstaluj skille (raz)
@@ -88,13 +97,13 @@ użyteczny, ale traktuj go jako niekompletny, dopóki nie zostaną wyjaśnione.
 ## Samodzielne sprawdzenie wyniku (opcjonalne)
 
 Skill waliduje swój wynik sam, zanim go dostarczy — to jest więc dodatkowa
-kontrola, nie obowiązkowy krok. W katalogu głównym projektu:
+kontrola, nie obowiązkowy krok. Potrzebny jest Node.js 22.17 lub nowszy, nic poza tym nie trzeba instalować. W katalogu głównym projektu:
 
 ```bash
-python3 .claude/skills/loadcraft-openapi/scripts/validate_openapi.py loadcraft/openapi.json
-python3 .claude/skills/loadcraft-journeys/scripts/validate_journeys.py loadcraft/journeys
-python3 .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.py loadcraft/asyncapi.json
-python3 .claude/skills/loadcraft-overview/scripts/validate_overview.py loadcraft/overview.md
+node .claude/skills/loadcraft-openapi/scripts/validate_openapi.mjs loadcraft/openapi.json
+node .claude/skills/loadcraft-journeys/scripts/validate_journeys.mjs loadcraft/journeys
+node .claude/skills/loadcraft-asyncapi/scripts/validate_asyncapi.mjs loadcraft/asyncapi.json
+node .claude/skills/loadcraft-overview/scripts/validate_overview.mjs loadcraft/overview.md
 ```
 
 (Jeśli instalowałeś skille do `skills/` — Cursor, Codex, Copilot — dostosuj

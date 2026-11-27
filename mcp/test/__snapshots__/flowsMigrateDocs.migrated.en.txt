@@ -1,0 +1,17 @@
+Migrated 2 of 3 flows to docs version 2.16.0 (2026-11-22, f3c9ebfd): 5
+  matched, 1 changed, 0 unmatched
+konto refused: steps lost their endpoint in the target version
+  (allow_unmatched was not set) — Steps lost their endpoint; pass
+  allow_unmatched.
+przeglądanie v1 → v2 · undo: restore v1
+  2 steps: 2 matched, 0 changed, 0 unmatched
+  scenarios now stale: przeglądanie
+zakupy v1 → v2 · 1 value adopted · undo: restore v1
+  4 steps: 3 matched, 1 changed, 0 unmatched
+  scenarios now stale: zakupy
+To undo a migration, restore the version named after "undo" in the history of
+  the flow in LoadCraft; it moves the docs pin back too.
+→ The stale scenarios still run the code built from the older docs: build
+  them again with scenario_generate (same name and flows) before a test.
+→ Tell the user which flows stayed and why; repeat only what the refusal
+  allows (for example allow_unmatched: true after a yes).

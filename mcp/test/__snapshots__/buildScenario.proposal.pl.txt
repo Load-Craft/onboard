@@ -1,0 +1,4 @@
+propozycja podziału ruchu:
+przeglądanie   60%  ████████████
+zakupy         30%  ██████
+konto          10%  ██

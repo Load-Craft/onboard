@@ -1,0 +1,6 @@
+consent card · create dataset "konta"
+  Source: the file data/konta.csv · 120 bytes · sha256 8e6b839796092203
+  2 rows from data/konta.csv
+  For slot: accounts of checkout
+→ ask the user; only after their yes call data_create_dataset again with the
+  same arguments and confirm: "<token>"

@@ -1,0 +1,1315 @@
+{
+  "tools": [
+    {
+      "name": "functional_compare_runs",
+      "title": "Compare two functional runs block by block",
+      "description": "Compare two functional runs block by block: status, response shape, timing.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The functional run."
+          },
+          "other": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The run to compare with."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["run_id", "other"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_delete",
+      "title": "Delete a functional item",
+      "description": "Delete one functional flow, template, test type, validator, run or catalog entry (kind + item_id).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "flow",
+              "template",
+              "test_type",
+              "validator",
+              "run",
+              "catalog_test_type",
+              "catalog_validator",
+              "catalog_assertion_type"
+            ],
+            "description": "What to delete."
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The item to delete (one per call)."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["kind", "item_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_generate_payloads",
+      "title": "Generate request payloads for flows and test types",
+      "description": "Generate request payloads for flows and test types; saves the ZIP to a local file and returns its path.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_ids": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            },
+            "description": "The flows to generate for (key: flow id; value: {}); 1-50."
+          },
+          "test_types": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "description": "The test types to use (key: test type id; value: number of cases per flow, 1-20); 1-50."
+          },
+          "file": {
+            "description": "Where to save the ZIP: a relative path inside the project directory; default: loadcraft/payloads/<run>.zip. Never overwrites a file.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 260
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["flow_ids", "test_types"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_generate_test_types",
+      "title": "Generate the missing base test types",
+      "description": "Generate all missing base test types for the project; the LLM fills their expected outcomes.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include_categories": {
+            "description": "Comma-separated categories to generate (e.g. functional, security); default: all.",
+            "type": "string",
+            "maxLength": 300
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_analytics",
+      "title": "Get validator quality over N days",
+      "description": "Get validator quality over N days: dashboard, flaky validators, failure patterns, accuracy, trend, threshold suggestion (view).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "view": {
+            "default": "dashboard",
+            "description": "Which analysis; default: dashboard.",
+            "type": "string",
+            "enum": [
+              "dashboard",
+              "flaky",
+              "failure_patterns",
+              "accuracy",
+              "trend",
+              "threshold_suggestion"
+            ]
+          },
+          "days": {
+            "default": 30,
+            "description": "How many past days (1-365).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "validator": {
+            "description": "The validator (id or name); needed for accuracy, trend and threshold_suggestion.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "threshold_pct": {
+            "default": 20,
+            "description": "With view flaky: the flakiness threshold in percent.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_catalog",
+      "title": "Get the global catalog of base test types",
+      "description": "Get the global catalog of base test types, base validators or assertion types: list, one item, categories, built-in seed status.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["test_types", "validators", "assertion_types"],
+            "description": "Which global catalog."
+          },
+          "entry_id": {
+            "description": "One entry (id; for assertion types also the name); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "category": {
+            "description": "Only this category.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "is_active": {
+            "description": "Only active (true) or inactive (false) entries; not for assertion types.",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many entries to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["kind"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_flows",
+      "title": "Get functional test flows",
+      "description": "Get functional test flows (block graphs, per docs version): list, one, or version history.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow": {
+            "description": "One functional flow (id); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "view": {
+            "default": "list",
+            "description": "list (default) or the versions of one flow.",
+            "type": "string",
+            "enum": ["list", "versions"]
+          },
+          "docs_id": {
+            "description": "Only flows of this documentation version; default: the one of this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many flows to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_results",
+      "title": "Get the results of a functional run",
+      "description": "Get the results of a functional run: summary with flow results, one flow result, or the captured HTTP log (secrets masked).",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The functional run."
+          },
+          "view": {
+            "default": "summary",
+            "description": "summary (default), per flow, one result, or the HTTP log.",
+            "type": "string",
+            "enum": ["summary", "flows", "one", "http_log"]
+          },
+          "result_id": {
+            "description": "With view one: the result.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "log_type": {
+            "description": "With view http_log: which part.",
+            "type": "string",
+            "enum": ["request", "response", "log"]
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many entries to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["run_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_runs",
+      "title": "Get functional runs",
+      "description": "Get functional runs: list (filter by status or type), by run template, or one with its status.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "description": "One functional run; without it, the list.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "view": {
+            "default": "list",
+            "description": "list (default), one run, or the runs of a template.",
+            "type": "string",
+            "enum": ["list", "one", "by_template"]
+          },
+          "template": {
+            "description": "With view by_template: the template.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "status": {
+            "description": "Only runs in this status.",
+            "type": "string",
+            "enum": ["pending", "running", "completed", "failed", "cancelled"]
+          },
+          "type": {
+            "description": "Only ad hoc or template runs.",
+            "type": "string",
+            "enum": ["adhoc", "template"]
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many runs to return (1-100).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "default": 0,
+            "description": "The first run of the list.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_templates",
+      "title": "Get functional test templates",
+      "description": "Get functional test templates: list (by docs version or tags) or one.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "description": "One template (id or name); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "docs_id": {
+            "description": "Only templates of this documentation version; default: the one of this workspace.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "tags": {
+            "description": "Only templates with these tags, comma-separated (at most 10).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many templates to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_test_types",
+      "title": "Get the project's test types",
+      "description": "Get the project's test types: list, one, or expected-outcome candidates.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "test_type": {
+            "description": "One test type (name or id); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "view": {
+            "default": "list",
+            "description": "expected_outcomes: values that count as success, seen in the project's flows and its spec.",
+            "type": "string",
+            "enum": ["list", "expected_outcomes"]
+          },
+          "is_enabled": {
+            "description": "Only enabled (true) or disabled (false) test types.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_get_validators",
+      "title": "Get the project's validators",
+      "description": "Get the project's validators: list, one, applicable catalog validators, or Gatling enforcement levels.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "validator": {
+            "description": "One validator (id or name); without it, the list.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "view": {
+            "default": "list",
+            "description": "list (default), the applicable ones, or how load runs enforce them.",
+            "type": "string",
+            "enum": ["list", "applicable", "gatling_enforcement"]
+          },
+          "is_enabled": {
+            "description": "Only enabled (true) or disabled (false) ones.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_restore_flow",
+      "title": "Restore a functional flow to a saved version",
+      "description": "Restore a functional flow to a saved version; the current state is snapshotted first.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The functional flow."
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "The saved version to restore (its label)."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["flow_id", "version"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_save_catalog",
+      "title": "Save a custom catalog entry",
+      "description": "Save a custom catalog entry (base test type, base validator or assertion type; no id: create). The catalog is shared by all projects.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["catalog_test_type", "catalog_validator", "catalog_assertion_type"],
+            "description": "Which shared catalog: base test type, base validator or assertion type."
+          },
+          "entry_id": {
+            "description": "The entry to change; without it, a new one is created.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "name": {
+            "description": "The entry's name; required for a new one.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "fields": {
+            "description": "Fields to set: the create or update body of that catalog.",
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "expected_outcome": {
+                "type": "string"
+              },
+              "input_generation_prompt": {
+                "type": "string"
+              },
+              "input_schema": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "example_inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "is_active": {
+                "type": "boolean"
+              },
+              "validator_type": {
+                "type": "string",
+                "enum": ["assertion", "ai_semantic"]
+              },
+              "activation": {
+                "type": "string"
+              },
+              "group": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "requires_profile_flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ai_prompt_template": {
+                "type": "string"
+              },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "prompt_template": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["kind"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_save_flow",
+      "title": "Save a functional test flow",
+      "description": "Save a functional test flow (blocks and edges; no id: create), or snapshot it as a version.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow to change; without it, a new flow is created.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "name": {
+            "description": "The flow's name; required for a new flow.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "docs_id": {
+            "description": "The API docs of a new flow; default: the active docs.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "fields": {
+            "description": "Fields to set: blocks, edges, entry_block_id, description, tags, variables, timeout_ms, retry_count, retry_delay_ms, is_active.",
+            "type": "object",
+            "properties": {
+              "blocks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "edges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "entry_block_id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variables": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "timeout_ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "retry_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "retry_delay_ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "is_active": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "version": {
+            "description": "Save a named snapshot of the current blocks and edges instead (not with name or fields).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "reason": {
+            "description": "With version: why the snapshot is taken.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_save_template",
+      "title": "Save a functional test template",
+      "description": "Save a functional test template (no id: create).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "description": "The template to change; without it, a new template is created.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "name": {
+            "description": "The template's name; required for a new one.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "docs_id": {
+            "description": "The API docs the template belongs to, if any.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "fields": {
+            "description": "Fields to set: api_description (10-5000 characters) and flow_definition (required for a new one), assertions, endpoint_ids, tags, description, is_active.",
+            "type": "object",
+            "properties": {
+              "api_description": {
+                "type": "string"
+              },
+              "flow_definition": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "assertions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type_id": {
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "type_name": {
+                      "type": ["string", "null"]
+                    },
+                    "parameters": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": ["type_id", "enabled"],
+                  "additionalProperties": false
+                }
+              },
+              "endpoint_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              },
+              "is_active": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_save_test_types",
+      "title": "Save test types in the project",
+      "description": "Save test types in the project: add custom ones, catalog ones in bulk or accepted AI suggestions, or update one.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "description": "custom: new items; catalog: catalog entries to add; suggestions: accepted AI items.",
+            "type": "string",
+            "enum": ["custom", "catalog", "suggestions"]
+          },
+          "items": {
+            "description": "The items to add (key: name or id; value: its fields, {} for catalog ids); 1-50.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "display_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "input_prompt": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "example_inputs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "expected_outcome": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "default_count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "priority": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "poll_completion_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "poll_timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3600000
+                },
+                "is_enabled": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "test_type_id": {
+            "description": "Change this test type of the project instead (not with source or items).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "fields": {
+            "description": "With test_type_id: the fields to set.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "category": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "input_prompt": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "example_inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "expected_outcome": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "default_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "priority": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "poll_completion_values": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "poll_timeout_ms": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3600000
+              },
+              "is_enabled": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_save_validators",
+      "title": "Save validators in the project",
+      "description": "Save validators in the project: add custom ones, catalog ones in bulk or accepted proposals, or update one.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "description": "custom: new items; catalog: catalog entries to add; proposals: accepted AI items.",
+            "type": "string",
+            "enum": ["custom", "catalog", "proposals"]
+          },
+          "items": {
+            "description": "The items to add (key: name or id; value: its fields, {} for catalog ids); 1-50.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                },
+                "display_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "ai_prompt": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "parameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "validator_type": {
+                  "type": "string",
+                  "enum": ["assertion", "ai_semantic"]
+                },
+                "default_params": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                "scope": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "template": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "rationale": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "priority": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "is_enabled": {
+                  "type": "boolean"
+                },
+                "needs_review": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "validator_id": {
+            "description": "Change this validator of the project instead (not with source or items).",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "fields": {
+            "description": "With validator_id: the fields to set.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "ai_prompt": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "validator_type": {
+                "type": "string",
+                "enum": ["assertion", "ai_semantic"]
+              },
+              "default_params": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "scope": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "template": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "rationale": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "priority": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "is_enabled": {
+                "type": "boolean"
+              },
+              "needs_review": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_suggest_test_types",
+      "title": "Suggest custom test types from the project's API docs",
+      "description": "Suggest custom test types from the project's API docs (LLM); nothing is saved until accepted.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "docs_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The API docs to read (project_get_docs lists them)."
+          },
+          "focus_areas": {
+            "description": "Comma-separated areas to prioritize (e.g. security, limits); default: none.",
+            "type": "string",
+            "maxLength": 300
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["docs_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "functional_suggest_validators",
+      "title": "Suggest validators from the API docs and recorded runs",
+      "description": "Suggest project-specific validators from the API docs and recorded runs (LLM); nothing is saved.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "docs_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$",
+            "description": "The API docs to read (project_get_docs lists them)."
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["docs_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

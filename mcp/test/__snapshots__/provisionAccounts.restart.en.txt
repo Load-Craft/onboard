@@ -1,0 +1,5 @@
+konta  450 of 2,000 accounts exist · the plugin server stopped before the
+       creation ended
+       passwords masked
+the test is not ready · data_create_accounts for slot accounts with count
+2000 adds only the missing accounts

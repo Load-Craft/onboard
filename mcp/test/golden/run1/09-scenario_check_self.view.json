@@ -1,0 +1,35 @@
+{
+  "environment": "perf",
+  "scenarios": [
+    {
+      "name": "zakupy",
+      "status": "passed",
+      "steps": [
+        { "name": "logowanie", "ok": true, "failedRequest": null },
+        { "name": "wyszukanie", "ok": true, "failedRequest": null },
+        { "name": "koszyk", "ok": true, "failedRequest": null },
+        { "name": "zamówienie", "ok": true, "failedRequest": null }
+      ],
+      "requests": 4,
+      "responseMs": 1200,
+      "failure": null,
+      "notes": [],
+      "missingSlots": [],
+      "repairs": []
+    },
+    {
+      "name": "konto",
+      "status": "passed",
+      "steps": [
+        { "name": "logowanie", "ok": true, "failedRequest": null },
+        { "name": "zamówienia", "ok": true, "failedRequest": null }
+      ],
+      "requests": 2,
+      "responseMs": 400,
+      "failure": null,
+      "notes": [],
+      "missingSlots": [],
+      "repairs": []
+    }
+  ]
+}

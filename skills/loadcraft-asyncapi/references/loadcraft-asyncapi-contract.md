@@ -13,9 +13,9 @@ Use this profile for artifacts meant to be imported into the current LoadCraft A
 ## Servers
 
 - At least one entry under `servers`.
-- Every server has a non-empty `url` — the current importer reads the 2.x-style `url` field, not 3.0's `host`/`pathname`; a server without `url` is silently dropped. Provide `url`; `host`/`pathname` may be added as extras.
+- Every server has a non-empty `host` and the AsyncAPI 3.0 fields only (`protocol`, optional `pathname`). `url` is the 2.x field: the official parser rejects it, so the validator does too. The importer builds the address from `protocol`, `host` and `pathname`; a server without `host` is dropped.
 - Every server has an explicit `protocol` (`ws`, `wss`, `http`, `https`, `kafka`, `mqtt`, `amqp`, …). Protocol detection falls back to a channel-address heuristic only when no server declares one — never rely on it.
-- Use placeholder-free synthetic hosts (e.g. `ws://app.example.com/ws`) grounded in deployment evidence; never embed credentials in URLs.
+- Use placeholder-free synthetic hosts (e.g. `host: app.example.com`, `pathname: /ws`) grounded in deployment evidence; never embed credentials in the host or pathname.
 
 ## Channels
 
@@ -29,11 +29,11 @@ Use this profile for artifacts meant to be imported into the current LoadCraft A
 - `action` is exactly `send` or `receive`, written lowercase. The importer lowercases the value before matching, but any other action is silently dropped — the profile pins the lowercase spelling for determinism.
 - Describe actions from the **application under test's perspective** (standard AsyncAPI semantics). LoadCraft plays the other side: an operation the application `receive`s becomes a message the generated load client sends, and vice versa.
 - `channel` is `{"$ref": "#/channels/<id>"}` and must resolve — operations with an unresolvable channel are silently dropped.
-- List `messages` explicitly as `#/components/messages/` refs; an operation with no resolvable message falls back to the channel's messages. At least one resolvable message per operation.
+- List `messages` as refs to messages of the operation's own channel, `#/channels/<id>/messages/<key>` (AsyncAPI 3.0; a ref to `#/components/messages/...` is rejected by the official parser). Leave `messages` out to use all of the channel's messages. At least one resolvable message per operation. Fields the 3.0 object does not define are rejected; `x-` extensions are allowed.
 
 ## Messages
 
-- Define **every** message under `components.messages` and reference it from channels and operations. Messages defined only inline in a channel do not exist for the importer's operation binding.
+- Define **every** message under `components.messages` and reference it from the channels (`#/components/messages/<name>`); operations then reference the channel's entries. Messages defined only inline in a channel do not exist for the importer.
 - `payload` is a JSON Schema object (non-object payload degrades to `{}`).
 - Give every message at least one `examples` entry with a realistic synthetic payload — the **first example's payload is used verbatim as the generated message body**. Schema-synthesized fallbacks drop optional properties when a message has more than four, so mark `required` accurately.
 - Expose value-driven branches through the example set. When the application's receiving logic branches on a value carried by this message (a threshold, a discriminant string, a status enum), the **first example is the primary/most common path** and additional examples are **one per distinct grounded behavior branch**. Only the first example's payload is sent, but every example's `name` and `summary` survive import, so each additional example must carry a self-explanatory `name` and a `summary` that names the triggering value and the behavior it causes (e.g. `quantity above 10 routes the order to manual review instead of auto-confirmation`). This keeps the changed performance profile of a value legible from the examples alone. Each branch must trace to a real code path; a branch that cannot be exemplified is a report blocker, never an invented example.

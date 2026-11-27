@@ -1,0 +1,6 @@
+zakupy        czeka na dane: User accounts (slot: accounts)
+              → odczytaj data_check_readiness: nazywa, co wypełnia slot
+              (data_create_dataset dla zwykłych danych albo pliku CSV,
+              data_create_accounts dla kont po zgodzie użytkownika); potem
+              scenario_check_self jeszcze raz.
+przeglądanie  kategorie ✓ → produkt ✓ · 2 żądania · 0,4 s

@@ -1,0 +1,18 @@
+{
+  "source": "file",
+  "name": "konta",
+  "rows": 2,
+  "slot": "accounts",
+  "file": "data/konta.csv",
+  "revision": false,
+  "masked": true,
+  "next": {
+    "tool": "data_set_bindings",
+    "args": {
+      "scenario": "checkout",
+      "bindings": {
+        "accounts": "konta"
+      }
+    }
+  }
+}

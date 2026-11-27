@@ -1,0 +1,426 @@
+{
+  "propose": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/scenario-builder/:id/messages",
+        "body": {
+          "message": "Propose how to split the virtual users between the selected flows, as a whole percentage for each flow. Give one plan entry per flow, with proportions that add up to 100.",
+          "kind": "chat",
+          "selected_flow_ids": [":id", ":id", ":id"]
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      }
+    ],
+    "channel": []
+  },
+  "propose-single": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      }
+    ],
+    "channel": []
+  },
+  "generate-after-proposal": {
+    "note": "Differs from the first recording of the single tool in one place: the read of the requests of a check's run asks for `order=run` (the order the run made them, for the self-check view); the request itself, its place in the order and the count are the same.",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/test-types",
+        "query": {
+          "is_enabled": "true"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/compositions",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "przeglądanie",
+          "class_name": "GeneratedSimulation",
+          "class_mix": {
+            "happy_path": 95,
+            "invalid_input": 4,
+            "boundary_values": 1
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "zakupy",
+          "class_name": "GeneratedSimulation",
+          "class_mix": {
+            "happy_path": 95,
+            "invalid_input": 4,
+            "boundary_values": 1
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "konto",
+          "class_name": "GeneratedSimulation",
+          "class_mix": {
+            "happy_path": 95,
+            "invalid_input": 4,
+            "boundary_values": 1
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/compositions",
+        "body": {
+          "name": "checkout",
+          "composition_mode": "parallel",
+          "pause_distribution": "uniform",
+          "normal_pause_std_dev_percent": 20,
+          "scenarios": [
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.4,
+              "enabled": true
+            },
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.5,
+              "enabled": true
+            },
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.1,
+              "enabled": true
+            }
+          ]
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/environments"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/executions/:id/endpoints",
+        "query": {
+          "order": "run"
+        }
+      }
+    ],
+    "channel": [[], [], []]
+  },
+  "generate-named": {
+    "note": "Differs from the first recording of the single tool in one place: the read of the requests of a check's run asks for `order=run` (the order the run made them, for the self-check view); the request itself, its place in the order and the count are the same.",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/compositions",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "przeglądanie",
+          "class_name": "GeneratedSimulation"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "zakupy",
+          "class_name": "GeneratedSimulation"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "konto",
+          "class_name": "GeneratedSimulation"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/compositions",
+        "body": {
+          "name": "checkout",
+          "composition_mode": "parallel",
+          "pause_distribution": "uniform",
+          "normal_pause_std_dev_percent": 20,
+          "scenarios": [
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.4,
+              "enabled": true
+            },
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.5,
+              "enabled": true
+            },
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.1,
+              "enabled": true
+            }
+          ]
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/environments"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/executions/:id/endpoints",
+        "query": {
+          "order": "run"
+        }
+      }
+    ],
+    "channel": [[], [], []]
+  },
+  "generate-existing": {
+    "note": "Differs from the first recording of the single tool in one place: the read of the requests of a check's run asks for `order=run` (the order the run made them, for the self-check view); the request itself, its place in the order and the count are the same.",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/v1/meta"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/flows",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/compositions",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios",
+        "query": {
+          "limit": "100"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/compositions/:id"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "przeglądanie",
+          "class_name": "GeneratedSimulation"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "zakupy",
+          "class_name": "GeneratedSimulation"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/projects/:id/gatling/scenarios/generate-async",
+        "body": {
+          "flow_id": ":id",
+          "scenario_name": "konto",
+          "class_name": "GeneratedSimulation"
+        }
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/projects/:id/gatling/compositions/:id",
+        "body": {
+          "scenarios": [
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.3,
+              "enabled": true
+            },
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.6,
+              "enabled": true
+            },
+            {
+              "scenario_id": ":id",
+              "variant_label": "",
+              "proportion": 0.1,
+              "enabled": true
+            }
+          ]
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/environments"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/scenarios/:id"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/projects/:id/gatling/executions/:id/endpoints",
+        "query": {
+          "order": "run"
+        }
+      }
+    ],
+    "channel": [[], [], []]
+  }
+}

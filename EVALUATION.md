@@ -42,7 +42,7 @@ Final artifact:
 - OpenAPI version: `3.0.3`
 - Server: `http://localhost:8081`, supplied as authoritative environment context
 
-The protected operations are `POST /api/cart/items`, `GET /api/cart`, `POST /api/checkout`, and `GET /api/orders`. Their guard is grounded in `shopcraft/backend/app/auth.py:31-42`; the route dependencies are in `shopcraft/backend/app/main.py:194-298`.
+The protected operations are `POST /api/cart/items`, `GET /api/cart`, `POST /api/checkout`, and `GET /api/orders`. Their guard is grounded in the app's bearer-token dependency, and the routes declare it as their dependency.
 
 The structural validator passes all 15 operations. The real LoadCraft parser projects:
 
@@ -51,7 +51,7 @@ The structural validator passes all 15 operations. The real LoadCraft parser pro
 - `1` security scheme;
 - the expected four protected operations.
 
-Route evidence is in `shopcraft/backend/app/main.py:87-297`, request and response models in `shopcraft/backend/app/schemas.py:8-90`, and the global chaos `503` behavior in `shopcraft/backend/app/main.py:67-81`.
+Route evidence is in the app's route module, request and response models in its schema module, and the global chaos `503` behavior in its middleware.
 
 ### Semantic blockers retained in the delivery report
 
@@ -118,7 +118,7 @@ Withheld candidates were reported rather than guessed:
 
 ## Existing baseline `journeys-workspace` versus the new journeys
 
-LoadCraft's scenario endpoint accepts one raw `description: str` (`backend/api/routes/scenario_from_description.py:52-63`). The frontend trims and sends that text unchanged (`frontend/src/features/scenario-description/api/scenarioDescriptionApi.ts:113-132`). Therefore the whole contents of a selected journey file become model input.
+LoadCraft's scenario endpoint accepts one raw `description: str`. The frontend trims and sends that text unchanged. Therefore the whole contents of a selected journey file become model input.
 
 | Concern | Existing workspace | New skill output |
 |---|---|---|
@@ -193,7 +193,7 @@ outside the scope of the evaluation run:
 - README/INSTALL documentation was rewritten for non-technical users
   (English primary, Polish variants);
 - a third skill `loadcraft-asyncapi` was added (AsyncAPI 3.0 compatibility
-  profile derived from LoadCraft's `asyncapi_parser.py` and flow generator),
+  profile derived from LoadCraft's AsyncAPI parser and flow generator),
   with a bundled validator, rule tests, and a forward-test on a synthetic
   WebSocket+Kafka fixture whose artifact was golden-tested through the real
   LoadCraft `AsyncAPIParser` with full channel/operation/message parity;

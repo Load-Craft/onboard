@@ -1,0 +1,8 @@
+load clamped to 100 (limit of environment qa)
+data check for the profile ✓ · konta 2,000 ≥ needed ~60
+test started · Ramp load (closed) · 0 → 100 concurrent
+↗ https://app.loadcraft.io/projects/5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61/gatling/executions/8c2d4f17-5e9a-4b3c-9d06-7a1e3f5b2c88/live
+build ✓ 0 s · test 0:00 / 10:00 · p95≈ 1,120 ms · errors 0.6%
+▁▅█
+clamped to 100: this result says nothing about the full load
+test finished · run e-8c2d4f17 · next: results_get_report

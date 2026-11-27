@@ -1,0 +1,14 @@
+# What runs where. The API address of each environment is in the matching .env.* file.
+environments:
+  perf:
+    ref: v2.14.0
+    note: release candidate under load test
+  qa:
+    ref: develop
+    note: next release, rebuilt on every merge
+  dev:
+    ref: dev
+    note: latest integration branch
+  prod:
+    ref: v2.13.2
+    note: previous release, still serving customers

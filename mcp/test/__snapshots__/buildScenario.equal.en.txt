@@ -1,0 +1,6 @@
+proposed traffic split:
+przeglądanie   34%  ███████
+zakupy         33%  ███████
+konto          33%  ███████
+The model gave no split, so the traffic is divided equally; tell me if you
+want other shares.

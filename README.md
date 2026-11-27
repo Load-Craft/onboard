@@ -19,18 +19,36 @@ modified, installed or started), they never guess — anything they cannot
 confirm is listed in the report as a question to resolve — and no passwords,
 tokens or customer data end up in the files.
 
+## Plugin for Claude Code
+
+In Claude Code the same repository is also a **plugin**: on top of the skills above it adds a server that
+talks to LoadCraft, so one sentence (*"run a load test of this application"*) takes you from your code to a
+finished test and its diagnosis. It needs a LoadCraft instance with API tokens.
+
+```text
+/plugin marketplace add Load-Craft/onboard
+/plugin install loadcraft@loadcraft
+```
+
+- [Install the plugin](docs/plugin/INSTALL.md) — requirements, token, configuration, permission rules.
+- [Use the plugin](docs/plugin/USAGE.md) — what happens in the eight steps and what Claude asks you.
+- [Security](docs/plugin/SECURITY.md) — what leaves your computer and what the assistant never sees.
+
 ## Repository layout
 
 - **[`skills/`](skills/)** — skill sources + the [user guide](skills/README.md)
   and [installation](skills/INSTALL.md). Each skill: `SKILL.md` +
-  `references/` + `scripts/` (a validator in pure Python, no dependencies).
+  `references/` + `scripts/` (a stand-alone validator run with plain `node`, no install
+  step; its TypeScript source is in [`validators/`](validators/)).
+- **[`validators/`](validators/)** — TypeScript source of the four validators; `npm run build:skills`
+  (in `mcp/`) builds them into `skills/*/scripts/validate_*.mjs`.
 - **`dist/`** — ready-to-download ZIPs (one per skill). Refresh after changes:
   `./scripts/package.sh`.
 - **`.claude-plugin/`, `.codex-plugin/`** — plugin manifests; once the repo is
   published, the skills can also be installed with
   `npx skills add <owner>/<repo> --skill loadcraft-openapi`.
-- **`tests/`** — validator tests on neutral fixtures. Run with:
-  `python3 -m unittest discover -s tests -v`.
+- **`tests/`** — validator and skill tests on neutral fixtures (vitest). Run with:
+  `cd mcp && npm run test:skills`.
 - **[`AGENTS.md`](AGENTS.md)** — package maintenance rules (test-first contract
   changes, versioning, pre-release checklist).
 - **[`EVALUATION.md`](EVALUATION.md)** — evaluation report of the skills on the

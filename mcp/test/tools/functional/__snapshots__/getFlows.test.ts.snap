@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`functional_get_flows > answers in Polish with every key of the view 1`] = `
+"2 flowy funkcjonalne:
+  Checkout  2.16.0  2 bloki  aktywny  2026-11-22
+  Login     2.16.0  2 bloki  aktywny  2026-11-22"
+`;
+
+exports[`functional_get_flows > answers in Polish with every key of the view 2`] = `
+"flow funkcjonalny „Checkout”
+wersja dokumentacji  2.16.0
+bloki                2
+krawędzie            1
+stan                 aktywny
+limity               limit czasu 30 s, ponowień: 2 co 500 ms
+tagi                 smoke, cart
+zmienne              cart_id, token
+opis                 Checkout through the API
+bloki:
+  1  request  POST /cart
+  2  assert   status is 201"
+`;
+
+exports[`functional_get_flows > answers in Polish with every key of the view 3`] = `
+"2 zapisane wersje flowu „Checkout”, od najnowszej:
+  2.16.0  2026-11-22 10:00  Migrated to docs 2.16.0
+  2.15.0  2026-11-20 10:00  —"
+`;
+
+exports[`functional_get_flows > lists the flows without a docs filter when the workspace names none, in one request 1`] = `
+"2 functional flows:
+  Checkout  2.16.0  2 blocks  active  2026-11-22
+  Login     2.16.0  2 blocks  active  2026-11-22"
+`;
+
+exports[`functional_get_flows > shows one flow by name (list, then the record) with its blocks and limits 1`] = `
+"functional flow "Checkout"
+docs version  2.16.0
+blocks        2
+edges         1
+state         active
+limits        timeout 30 s, retries: 2 every 500 ms
+tags          smoke, cart
+variables     cart_id, token
+description   Checkout through the API
+blocks:
+  1  request  POST /cart
+  2  assert   status is 201"
+`;

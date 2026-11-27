@@ -1,0 +1,1 @@
+połączenie ok: perf, qa, dev, prod (API i frontend)

@@ -1,0 +1,8 @@
+werdykt        fail · pewność wysoka
+przyczyna      POST /checkout: transakcja bazy obejmuje wywołanie
+               bramki płatności · blokada wiersza w tabeli orders
+zmiana skokowa T+6:10 · POST /checkout średnio 240 → 1 310 ms
+błędy          504 × 2 480 · tylko POST /checkout
+dowody (via MCP · sklep-logs, cały test)
+               „Lock wait timeout exceeded; try restarting transaction”
+rekomendacja   zapis zamówienia poza transakcją płatności

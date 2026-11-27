@@ -1,0 +1,52 @@
+{
+  "project": {
+    "id": "5b1c7e20-8d4a-4f6b-9c3e-2a7f0d9e4b61",
+    "name": "sklep"
+  },
+  "setup": {
+    "docs": {
+      "title": "Sklep API",
+      "operations": 42,
+      "areas": 6
+    },
+    "analysis": "analyzed",
+    "analysisPct": 100,
+    "fieldsTotal": 9,
+    "needsReview": [
+      {
+        "field": "app_architecture",
+        "value": "spa",
+        "source": "llm"
+      },
+      {
+        "field": "has_async_operations",
+        "value": true,
+        "source": "openapi"
+      }
+    ],
+    "auth": {
+      "method": "bearer_jwt",
+      "tokenEndpoint": "POST /auth/login"
+    },
+    "profileApplied": true,
+    "validators": 5,
+    "testTypes": 3,
+    "testTypesToReview": 3,
+    "complete": true,
+    "missing": []
+  },
+  "conformance": {
+    "environment": "perf",
+    "result": {
+      "state": "checked",
+      "exists": 18,
+      "missing": 0,
+      "missingPaths": [],
+      "missingMore": 0,
+      "inconclusive": 0,
+      "notProbedMethods": 24,
+      "skippedParams": 0
+    }
+  },
+  "unsure": ["uses_csrf"]
+}

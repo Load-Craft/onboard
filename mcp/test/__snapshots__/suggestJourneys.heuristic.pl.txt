@@ -1,0 +1,8 @@
+1 propozycja ścieżki z dokumentacji API:
+  Kroki rozdzielone znakiem · to zbiór: kolejność kroków ustala generator
+  przy budowie.
+cart and orders   [funkcja] Get the cart · Place an order
+2 z 42 operacji · 40 poza ścieżkami
+poza ścieżkami: Log in and get a token, Register an account, Log out, Refresh
+  the token, Request a password reset i jeszcze 35
+propozycje heurystyczne, nie doprecyzowane przez model (refine: false)

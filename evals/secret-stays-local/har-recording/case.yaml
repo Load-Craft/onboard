@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: secret-stays-local-har-recording
+context:
+  scaffold_script: scaffold.sh

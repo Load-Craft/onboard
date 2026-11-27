@@ -1,0 +1,1205 @@
+{
+  "id": "0d0c7034-0003-4000-8000-000000001000",
+  "project_id": "0d0c7034-0003-4000-8000-000000001001",
+  "title": "Shop — Store API (shopping path)",
+  "version": "2.21.2",
+  "endpoints": [
+    {
+      "id": "0d0c7034-0003-4000-8000-000000001002",
+      "path": "/auth/customer/credentials",
+      "method": "post",
+      "operation_id": "loginCustomer",
+      "summary": "Log in a customer with email and password",
+      "description": "Authenticates an existing credentials auth identity and returns a JWT for the customer actor. Concrete instance of the core route POST /auth/{actor_type}/{auth_provider} with actor_type=customer and auth_provider=credentials. No store API key is required on /auth routes and no bearer token is needed. The request body is not validated by a zod schema: unknown fields are ignored; the credentials provider only checks that `email` and `password` are strings. Every authentication failure (missing/non-string password or email, unknown email, wrong password) returns 401 with type \"unauthorized\". The returned token is signed with the project's JWT secret and expires after jwtExpiresIn (default \"1d\"; this repository does not override it). If the auth identity has not yet been linked to a customer (registered via /auth/customer/credentials/register but POST /store/customers was never called), the call still succeeds with 200, but the token carries an empty actor_id: it is accepted by POST /store/customers but rejected with 401 by /store/customers/me. Password verification runs scrypt (N=2^15, r=8, p=1) on the libuv threadpool, so this endpoint is CPU/memory heavy compared to other store calls; an unknown email returns without running scrypt.",
+      "tags": ["Auth"],
+      "parameters": [],
+      "request_body": {
+        "content_type": "application/json",
+        "schema_def": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "Email the credentials identity was registered with (the identity's entity_id). Matched exactly.",
+              "example": "user@example.com"
+            },
+            "password": {
+              "type": "string",
+              "format": "password",
+              "description": "Plain-text password; verified against the stored scrypt hash."
+            }
+          },
+          "required": ["email", "password"]
+        },
+        "required": true,
+        "example": {
+          "email": "user@example.com"
+        },
+        "examples": null,
+        "description": null
+      },
+      "responses": [
+        {
+          "status_code": 200,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "Signed JWT (HS256 with the project's jwtSecret unless jwtOptions override it)."
+              }
+            },
+            "required": ["token"]
+          },
+          "description": "Authenticated. Body carries the JWT to send as `Authorization: Bearer <token>` on /store/* calls. The token payload contains actor_id (the customer id, or \"\" when the identity has no customer yet), actor_type \"customer\", auth_identity_id, auth_provider \"credentials\", app_metadata and user_metadata. Expires after 1 day by default (jwtExpiresIn \"1d\"). The `location` (OAuth redirect) and `mfa_required` / `verification_required` variants of this route are not reachable for credentials with this repository's configuration (no MFA factors, no authVerificationsPerActor)."
+        },
+        {
+          "status_code": 400,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["not_allowed"]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["type", "message"]
+          },
+          "description": "The customer actor is not allowed to use the credentials provider (only when projectConfig.http.authMethodsPerActor.customer is configured without \"credentials\"; not the case in this repository, whose config sets no authMethodsPerActor for customer)."
+        },
+        {
+          "status_code": 401,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["unauthorized"]
+              },
+              "message": {
+                "type": "string",
+                "description": "Known literals: \"Invalid email or password\", \"Password should be a string\", \"Email should be a string\"."
+              }
+            },
+            "required": ["type", "message"]
+          },
+          "description": "Authentication failed. Unknown email or wrong password → \"Invalid email or password\" (same message for both). Missing or non-string `password` → \"Password should be a string\" (checked first); missing or non-string `email` → \"Email should be a string\". Any other provider error is also returned here with its own message."
+        }
+      ],
+      "suggested_required_fields": []
+    },
+    {
+      "id": "0d0c7034-0003-4000-8000-000000001003",
+      "path": "/auth/customer/credentials/register",
+      "method": "post",
+      "operation_id": "registerCustomerIdentity",
+      "summary": "Register a customer email/password auth identity",
+      "description": "Creates an auth identity for the `customer` actor with the `credentials` provider and returns a registration JWT. This does NOT create a customer: the returned token has an empty `actor_id` and is only accepted by `POST /store/customers` (which runs authenticate with allowUnregistered), sent as `Authorization: Bearer <token>` together with the store key. After the customer is created, obtain a customer token with `POST /auth/customer/credentials` (login), because this registration token keeps `actor_id` empty. No store key is required on /auth routes. The body is not validated by zod: unknown fields are ignored. The password is hashed with scrypt (logN 15, r 8, p 1, about 32 MiB of memory per hash, runs in the libuv thread pool), so each call is CPU and memory heavy. `email` is stored as-is (no lower-casing, no format check here) and must be unique per call: a load-test feeder must supply a fresh email for every iteration (e.g. a unique suffix per virtual user and iteration such as `perf+<vu>-<iter>@example.com`).",
+      "tags": ["Auth"],
+      "parameters": [],
+      "request_body": {
+        "content_type": "application/json",
+        "schema_def": {
+          "type": "object",
+          "required": ["email", "password"],
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "Identifier of the auth identity (stored as provider identity entity_id, unique per provider). Must be a non-empty string. Must be unique per call; take it from a feeder that yields a fresh address each iteration (shape: local-part@domain)."
+            },
+            "password": {
+              "type": "string",
+              "format": "password",
+              "description": "Plain password; must be a non-empty string. Hashed with scrypt before storage."
+            }
+          }
+        },
+        "required": true,
+        "example": null,
+        "examples": null,
+        "description": null
+      },
+      "responses": [
+        {
+          "status_code": 200,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "required": ["token"],
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "Registration JWT (actor_id empty)."
+              }
+            }
+          },
+          "description": "Auth identity created (or an existing identity with no app_metadata and a matching password was found). Returns a registration JWT whose actor_id is empty (payload: actor_id \"\", actor_type \"customer\", auth_identity_id, auth_provider \"credentials\"); default expiry 1d. Use it only for POST /store/customers."
+        },
+        {
+          "status_code": 400,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["not_allowed"]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "The customer actor type is restricted by projectConfig.http.authMethodsPerActor and credentials is not in its allowlist (not the case with the default config used by this project: only `user` gets a default allowlist)."
+        },
+        {
+          "status_code": 401,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["unauthorized"]
+              },
+              "message": {
+                "type": "string",
+                "description": "One of \"Identity with email already exists\", \"Password should be a string\", \"Email should be a string\", or an internal error message."
+              }
+            }
+          },
+          "description": "Registration failed. Triggers: an auth identity with this email already exists and either already has app_metadata (a customer was created for it) or the password does not match -> \"Identity with email already exists\"; missing or non-string password -> \"Password should be a string\" (checked first); missing or non-string email -> \"Email should be a string\"; a concurrent register with the same email can hit the unique index on (entity_id, provider) and returns 401 with the database error message."
+        }
+      ],
+      "suggested_required_fields": []
+    },
+    {
+      "id": "0d0c7034-0003-4000-8000-000000001004",
+      "path": "/store/carts",
+      "method": "post",
+      "operation_id": "createCart",
+      "summary": "Create a cart",
+      "description": "Creates a cart and returns it with the default store cart fields. The work is finished when the 200 arrives (synchronous createCartWorkflow; only the cart.created event is async). Sales channel: if sales_channel_id is omitted/null and the store key has exactly one sales channel, that channel is used; a key with several channels requires sales_channel_id; a sales_channel_id not linked to the key is rejected (400, body {errors, message}). A key with no channels falls back to the store's default_sales_channel_id. Region: region_id omitted/null uses the store's default region; the seed never sets default_region_id, so the undefined filter is dropped and the first region (seed: only \"Europe\", eur) is used. Customer: a valid customer bearer token attaches that customer (customer_id = token actor_id; email defaults to the customer's email); without a token, a given email attaches a registered customer with that email, or reuses/creates a guest customer. Items are priced in the region currency and stock-checked against stock locations linked to the cart's sales channel; product-to-sales-channel membership is NOT checked. No payment collection and no shipping methods are created here. The returned cart.id is the {id} for all /store/carts/{id}/... operations.",
+      "tags": ["Carts"],
+      "parameters": [
+        {
+          "name": "fields",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Comma-separated fields of the returned cart. Prefix with + to add to or - to remove from the defaults; without a prefix it replaces the defaults. Allowed: the default fields plus allowedStoreCartExtraFields (e.g. items.total, payment_collection.status)."
+        }
+      ],
+      "request_body": {
+        "content_type": "application/json",
+        "schema_def": {
+          "type": "object",
+          "description": "All fields optional. Strict: any key not listed here is rejected with 400 \"Invalid request: Unrecognized fields: '<key>'\".",
+          "additionalProperties": false,
+          "properties": {
+            "region_id": {
+              "type": "string",
+              "nullable": true,
+              "description": "Region id. Omitted/null: the store's default_region_id is looked up; the seed never sets it, so the region filter is undefined and dropped, and the first region found (seed: the only region \"Europe\", eur) is used. Unknown id: 404 \"No regions found\" (or a pricing error first if items are sent without currency_code).",
+              "example": "reg_01EXAMPLEEUROPE"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "nullable": true,
+              "description": "Cart email. When given, a customer is looked up by email: a registered customer (has_account) is attached as is; otherwise an existing guest customer is reused or a new guest customer is created and attached (cart.customer gets an id).",
+              "example": "user@example.com"
+            },
+            "currency_code": {
+              "type": "string",
+              "nullable": true,
+              "description": "Optional; defaults to the region currency. If given it must equal the region currency (case-insensitive), else 400 \"Currency code <x> does not match the region's currency code <y>\".",
+              "example": "eur"
+            },
+            "sales_channel_id": {
+              "type": "string",
+              "nullable": true,
+              "description": "Optional. Omitted/null: taken from the store key when the key has exactly one sales channel (seed: Default Sales Channel); a key with several channels makes it mandatory. A value not linked to the key: 400.",
+              "example": "sc_01EXAMPLEDEFAULT"
+            },
+            "items": {
+              "type": "array",
+              "description": "Initial line items, priced in the region currency.",
+              "items": {
+                "type": "object",
+                "required": ["variant_id", "quantity"],
+                "properties": {
+                  "variant_id": {
+                    "type": "string",
+                    "description": "Product variant id. Must exist, belong to a published product, have a price in the region currency and have stock in a stock location linked to the cart's sales channel (when inventory is managed).",
+                    "example": "variant_01EXAMPLESHIRTSBLACK"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Must be > 0 (zod gt(0)).",
+                    "example": 1
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "nullable": true,
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "shipping_address": {
+              "type": "object",
+              "description": "Strict: unknown keys are rejected. The field may instead be a string (id of an existing address); that variant is not modelled here.",
+              "additionalProperties": false,
+              "properties": {
+                "first_name": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Jane"
+                },
+                "last_name": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Doe"
+                },
+                "phone": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "+4512345678"
+                },
+                "company": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "address_1": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Example Street 1"
+                },
+                "address_2": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "city": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Copenhagen"
+                },
+                "country_code": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "ISO 3166-1 alpha-2, lower case; must belong to the cart's region for later shipping steps.",
+                  "example": "dk"
+                },
+                "province": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "postal_code": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "2100"
+                },
+                "metadata": {
+                  "type": "object",
+                  "nullable": true,
+                  "additionalProperties": true
+                }
+              }
+            },
+            "billing_address": {
+              "type": "object",
+              "description": "Strict: unknown keys are rejected. The field may instead be a string (id of an existing address); that variant is not modelled here.",
+              "additionalProperties": false,
+              "properties": {
+                "first_name": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Jane"
+                },
+                "last_name": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Doe"
+                },
+                "phone": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "+4512345678"
+                },
+                "company": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "address_1": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Example Street 1"
+                },
+                "address_2": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "city": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Copenhagen"
+                },
+                "country_code": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "ISO 3166-1 alpha-2, lower case; must belong to the cart's region for later shipping steps.",
+                  "example": "dk"
+                },
+                "province": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "postal_code": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "2100"
+                },
+                "metadata": {
+                  "type": "object",
+                  "nullable": true,
+                  "additionalProperties": true
+                }
+              }
+            },
+            "promo_codes": {
+              "type": "array",
+              "description": "Promotion codes to apply. Any code that does not exist: 400 \"The promotion code <code> is invalid\" and the cart is rolled back.",
+              "items": {
+                "type": "string",
+                "example": "WELCOME10"
+              }
+            },
+            "metadata": {
+              "type": "object",
+              "nullable": true,
+              "additionalProperties": true
+            },
+            "locale": {
+              "type": "string",
+              "nullable": true,
+              "description": "Locale used to translate line item titles.",
+              "example": "en-US"
+            },
+            "additional_data": {
+              "type": "object",
+              "nullable": true,
+              "additionalProperties": true,
+              "description": "Free-form data passed to workflow hooks (WithAdditionalData). The repository registers no hooks."
+            }
+          }
+        },
+        "required": false,
+        "example": {
+          "region_id": "reg_01EXAMPLEEUROPE",
+          "items": [
+            {
+              "variant_id": "variant_01EXAMPLESHIRTSBLACK",
+              "quantity": 1
+            }
+          ]
+        },
+        "examples": {
+          "region_with_items": {
+            "summary": "Normal success: region + one item (200)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "items": [
+                {
+                  "variant_id": "variant_01EXAMPLESHIRTSBLACK",
+                  "quantity": 1
+                }
+              ]
+            }
+          },
+          "empty_body_default_region": {
+            "summary": "No region_id: falls back to the first region (seed: Europe/eur) and the key's sales channel (200)",
+            "value": {}
+          },
+          "guest_email": {
+            "summary": "Guest email: a guest customer is found or created and attached (200)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "email": "user@example.com"
+            }
+          },
+          "explicit_sales_channel": {
+            "summary": "Explicit sales_channel_id linked to the key (200; mandatory when the key has several channels)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "sales_channel_id": "sc_01EXAMPLEDEFAULT"
+            }
+          },
+          "sales_channel_not_in_key": {
+            "summary": "sales_channel_id not linked to the store key (400, errors[] body)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "sales_channel_id": "sc_01EXAMPLEOTHER"
+            }
+          },
+          "unknown_region": {
+            "summary": "Unknown region_id without items (404 No regions found)",
+            "value": {
+              "region_id": "reg_01EXAMPLEUNKNOWN"
+            }
+          },
+          "currency_mismatch": {
+            "summary": "currency_code differs from the region currency (400)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "currency_code": "usd"
+            }
+          },
+          "unknown_variant": {
+            "summary": "Variant does not exist or its product is not published (400)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "items": [
+                {
+                  "variant_id": "variant_01EXAMPLEMISSING",
+                  "quantity": 1
+                }
+              ]
+            }
+          },
+          "variant_without_price": {
+            "summary": "Variant has no price in the region currency (400)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "items": [
+                {
+                  "variant_id": "variant_01EXAMPLENOPRICE",
+                  "quantity": 1
+                }
+              ]
+            }
+          },
+          "out_of_stock": {
+            "summary": "Quantity above available stock (seed stock 1000000) (400 insufficient_inventory)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "items": [
+                {
+                  "variant_id": "variant_01EXAMPLESHIRTSBLACK",
+                  "quantity": 2000000
+                }
+              ]
+            }
+          },
+          "invalid_promo_code": {
+            "summary": "Unknown promotion code (400; cart creation rolled back)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "promo_codes": ["NOSUCHCODE"]
+            }
+          },
+          "zero_quantity": {
+            "summary": "quantity 0 fails validation (400 Invalid request)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "items": [
+                {
+                  "variant_id": "variant_01EXAMPLESHIRTSBLACK",
+                  "quantity": 0
+                }
+              ]
+            }
+          },
+          "unknown_field": {
+            "summary": "Unknown top-level key rejected by the strict validator (400)",
+            "value": {
+              "region_id": "reg_01EXAMPLEEUROPE",
+              "customer_id": "cus_01EXAMPLE"
+            }
+          }
+        },
+        "description": "JSON body; may be empty ({}). Body fields select the branches listed in examples."
+      },
+      "responses": [
+        {
+          "status_code": 200,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "required": ["cart"],
+            "properties": {
+              "cart": {
+                "type": "object",
+                "description": "Trimmed: the real body carries every field of defaultStoreCartFields (all total/subtotal/tax/discount breakdowns, promotions, shipping_methods, region.countries, payment_collection, credit_lines...).",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "cart_01EXAMPLE"
+                  },
+                  "currency_code": {
+                    "type": "string",
+                    "example": "eur"
+                  },
+                  "email": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "user@example.com"
+                  },
+                  "locale": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "region_id": {
+                    "type": "string",
+                    "example": "reg_01EXAMPLEEUROPE"
+                  },
+                  "sales_channel_id": {
+                    "type": "string",
+                    "example": "sc_01EXAMPLEDEFAULT"
+                  },
+                  "completed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true,
+                    "description": "Always null on create."
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "total": {
+                    "type": "number",
+                    "description": "Grand total incl. tax.",
+                    "example": 10
+                  },
+                  "subtotal": {
+                    "type": "number",
+                    "example": 10
+                  },
+                  "tax_total": {
+                    "type": "number",
+                    "example": 10
+                  },
+                  "item_total": {
+                    "type": "number",
+                    "example": 10
+                  },
+                  "shipping_total": {
+                    "type": "number",
+                    "description": "0 on create (no shipping methods yet).",
+                    "example": 0
+                  },
+                  "discount_total": {
+                    "type": "number",
+                    "example": 0
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "nullable": true,
+                    "additionalProperties": true
+                  },
+                  "items": {
+                    "type": "array",
+                    "description": "Empty when no items were sent.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "cali_01EXAMPLE"
+                        },
+                        "variant_id": {
+                          "type": "string",
+                          "example": "variant_01EXAMPLESHIRTSBLACK"
+                        },
+                        "product_id": {
+                          "type": "string",
+                          "example": "prod_01EXAMPLESHIRT"
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "S / Black"
+                        },
+                        "product_title": {
+                          "type": "string",
+                          "example": "shop T-Shirt"
+                        },
+                        "quantity": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "unit_price": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "requires_shipping": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "is_tax_inclusive": {
+                          "type": "boolean"
+                        },
+                        "variant": {
+                          "type": "object",
+                          "description": "Variant snapshot (nested product data); not expanded."
+                        },
+                        "product": {
+                          "type": "object",
+                          "description": "Product snapshot; not expanded."
+                        },
+                        "tax_lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "description": "Tax line {id, code, rate, provider_id, ...}."
+                          }
+                        },
+                        "adjustments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "description": "Promotion adjustment {id, code, promotion_id, amount, ...}."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "region": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "reg_01EXAMPLEEUROPE"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Europe"
+                      },
+                      "currency_code": {
+                        "type": "string",
+                        "example": "eur"
+                      },
+                      "automatic_taxes": {
+                        "type": "boolean"
+                      },
+                      "countries": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Country {iso_2, name, ...}."
+                        }
+                      }
+                    }
+                  },
+                  "customer": {
+                    "type": "object",
+                    "nullable": true,
+                    "description": "Set when a customer token was sent or an email was given (guest customer); otherwise null/absent.",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "cus_01EXAMPLE"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "user@example.com"
+                      }
+                    }
+                  },
+                  "shipping_address": {
+                    "type": "object",
+                    "nullable": true,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "caaddr_01EXAMPLE"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "address_1": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "city": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "postal_code": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "country_code": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "dk"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    }
+                  },
+                  "billing_address": {
+                    "type": "object",
+                    "nullable": true,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "caaddr_01EXAMPLE"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "address_1": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "city": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "postal_code": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "country_code": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "dk"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    }
+                  },
+                  "promotions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "is_automatic": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "shipping_methods": {
+                    "type": "array",
+                    "description": "Always empty on create.",
+                    "items": {
+                      "type": "object",
+                      "description": "Shipping method {shipping_option_id, amount, ...}."
+                    }
+                  },
+                  "payment_collection": {
+                    "type": "object",
+                    "nullable": true,
+                    "description": "Not created by this operation (null/absent); created later by POST /store/payment-collections."
+                  }
+                }
+              }
+            }
+          },
+          "description": "Cart created. The real body carries more fields than modelled (all totals breakdowns, region countries, promotions...)."
+        },
+        {
+          "status_code": 400,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "description": "Validation/workflow errors: {code?, type, message}. Sales-channel middleware errors instead: {errors: [string], message: \"Provided request body contains errors. Please check the data and retry the request\"} with no type.",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "\"insufficient_inventory\" for the stock failure; absent otherwise."
+              },
+              "type": {
+                "type": "string",
+                "enum": ["invalid_data", "not_allowed"]
+              },
+              "message": {
+                "type": "string"
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Only for the store-key / sales-channel mismatch errors."
+              }
+            },
+            "required": ["message"]
+          },
+          "description": "Bad request. Triggers: missing/invalid x-store-api-key (type not_allowed); body validation (\"Invalid request: ...\": unknown key, quantity <= 0, missing variant_id, invalid email); sales_channel_id not linked to the key (errors[]: \"Sales channel ID in payload <id> is not associated with the store API Key in the header.\"); key with several sales channels and no sales_channel_id (errors[]: \"Cannot assign sales channel to cart. The store API Key in the header has multiple associated sales channels. Please provide a sales channel ID in the request body.\"); disabled sales channel (\"Unable to assign cart to disabled Sales Channel: <name>\"); currency_code differs from region currency (\"Currency code <x> does not match the region's currency code <y>\"); unknown variant / unpublished product (\"Variants <ids> do not exist or belong to a product that is not published\"); variant without price in the currency (\"Variants with IDs <ids> do not have a price\"); items sent with an unknown region_id and no currency_code (\"Method calculatePrices requires currency_code in the pricing context\"); sales channel without stock location for a managed variant (\"Sales channel <id> is not associated with any stock location for variant <id>.\"); insufficient stock (code insufficient_inventory, type not_allowed, \"Some variant does not have the required inventory\"); unknown promotion code (\"The promotion code <code> is invalid\")."
+        },
+        {
+          "status_code": 404,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Present for some errors, e.g. \"insufficient_inventory\"."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "invalid_data",
+                  "not_allowed",
+                  "not_found",
+                  "unauthorized",
+                  "unknown_error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["message"]
+          },
+          "description": "region_id does not match any region (\"No regions found\"); also when the store has no region at all, or a sales_channel_id/customer id cannot be found."
+        }
+      ],
+      "suggested_required_fields": [
+        "currency_code",
+        "customer_id",
+        "email",
+        "items",
+        "promo_codes",
+        "region_id",
+        "sales_channel_id"
+      ]
+    },
+    {
+      "id": "0d0c7034-0003-4000-8000-000000001005",
+      "path": "/store/carts/{id}",
+      "method": "get",
+      "operation_id": "getCart",
+      "summary": "Retrieve a cart by id",
+      "description": "Reads the cart through remote query (refetchCart). No customer check, no sales-channel check, no completed-cart guard: open and completed carts are both returned with 200 (completed_at distinguishes them).",
+      "tags": ["Carts"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Cart id (cart_...) returned by POST /store/carts."
+        },
+        {
+          "name": "fields",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Comma-separated field selection. Prefix '+' adds to the default fields, '-' removes, a plain list replaces the defaults. Fields outside the allowed list are stripped silently."
+        }
+      ],
+      "request_body": null,
+      "responses": [
+        {
+          "status_code": 200,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "cart": {
+                "type": "object",
+                "description": "Trimmed: the real body also carries all original_*/item_*/shipping_*/credit_line_* totals, promotions, items[].tax_lines/adjustments/product, shipping_methods[].tax_lines/adjustments, billing_address, region.countries, customer, credit_lines, metadata, locale.",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "region_id": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "currency_code": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "sales_channel_id": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "completed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true,
+                    "description": "null while the cart is open; set once POST /store/carts/{id}/complete created an order. A completed cart is still returned with 200."
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "subtotal": {
+                    "type": "number"
+                  },
+                  "tax_total": {
+                    "type": "number"
+                  },
+                  "shipping_total": {
+                    "type": "number"
+                  },
+                  "discount_total": {
+                    "type": "number"
+                  },
+                  "item_total": {
+                    "type": "number"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "variant_id": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "product_id": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "quantity": {
+                          "type": "number"
+                        },
+                        "unit_price": {
+                          "type": "number"
+                        },
+                        "requires_shipping": {
+                          "type": "boolean"
+                        },
+                        "variant": {
+                          "type": "object",
+                          "nullable": true,
+                          "description": "Full variant row (items.variant)."
+                        }
+                      }
+                    }
+                  },
+                  "shipping_methods": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "Not in the default cart fields: returned only when the request adds ?fields=+shipping_methods.id (the query layer prunes nested relations to the requested fields). No Store route consumes it."
+                        },
+                        "shipping_option_id": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "is_tax_inclusive": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "shipping_address": {
+                    "type": "object",
+                    "nullable": true,
+                    "description": "id, first_name, last_name, company, address_1, address_2, city, postal_code, country_code, region_code, province, phone."
+                  },
+                  "region": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "currency_code": {
+                        "type": "string"
+                      },
+                      "automatic_taxes": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "payment_collection": {
+                    "type": "object",
+                    "nullable": true,
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "currency_code": {
+                        "type": "string"
+                      },
+                      "amount": {
+                        "type": "number"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "not_paid",
+                          "awaiting",
+                          "authorized",
+                          "partially_authorized",
+                          "canceled",
+                          "failed",
+                          "partially_captured",
+                          "completed"
+                        ]
+                      },
+                      "payment_sessions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "provider_id": {
+                              "type": "string"
+                            },
+                            "amount": {
+                              "type": "number"
+                            },
+                            "currency_code": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "pending",
+                                "requires_more",
+                                "authorized",
+                                "captured",
+                                "error",
+                                "canceled",
+                                "pending_authorization"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["id", "currency_code", "items"]
+              }
+            },
+            "required": ["cart"]
+          },
+          "description": "The cart. The real body carries more fields than listed (all totals, promotions, tax lines, adjustments, billing address, customer, region countries)."
+        },
+        {
+          "status_code": 400,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["type", "message"]
+          },
+          "description": "Missing x-store-api-key header (shown) or unknown/revoked key (message \"A valid store key is required to proceed with the request\")."
+        },
+        {
+          "status_code": 404,
+          "content_type": "application/json",
+          "response_type": "json",
+          "schema_def": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["type", "message"]
+          },
+          "description": "No cart with this id."
+        }
+      ],
+      "suggested_required_fields": []
+    }
+  ],
+  "uploaded_at": "2026-11-26T15:37:57.978710Z",
+  "source_url": null,
+  "spec_content": {
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Shop — Store API (shopping path)",
+      "version": "2.21.2"
+    },
+    "paths": {}
+  }
+}

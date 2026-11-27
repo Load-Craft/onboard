@@ -1,0 +1,10 @@
+wysłano 1 KB · 2 żądania · 0 odfiltrowanych jako szum
+logowanie: token · adres: shop.other.example
+2 grupy akcji w nagraniu: auth, shop
+korelacje: nie znaleziono
+⚠ Nagranie nie ma treści odpowiedzi (ani ciasteczek), więc nie da się z niego
+  wygenerować flow. Nagraj je ponownie w Chrome DevTools z włączoną opcją
+  „Allow generating HAR with sensitive data”, zapisz jako HAR i wyślij
+  jeszcze raz.
+⚠ Adres z nagrania (shop.other.example) to nie domyślne środowisko (perf).
+  Sprawdź, które środowisko chcesz testować.

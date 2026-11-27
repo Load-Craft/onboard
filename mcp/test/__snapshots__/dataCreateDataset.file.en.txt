@@ -1,0 +1,3 @@
+konta  2 rows from data/konta.csv · passwords masked
+→ next: data_set_bindings scenario: "checkout",
+  bindings: {"accounts": "konta"}

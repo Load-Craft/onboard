@@ -15,6 +15,8 @@ For each endpoint follow:
 7. exception handlers and documented material errors;
 8. tests that confirm boundary behavior.
 
+Follow each value through further calls and files, including dependency packages at the version in the lockfile, until every type, constraint, default and branch you emit has evidence in code. What you could not establish, report as a blocker in your findings; do not guess it.
+
 Source closer to the executable boundary normally outweighs prose documentation, but conflicts must be reported rather than silently resolved.
 
 ## The transformation layer is the response contract
@@ -82,6 +84,8 @@ Never infer a success schema solely from a service's internal domain object when
 Unknown contract facts are blockers. Keep the known operation and known status codes, omit only the unverified nested fragment, and withhold the ready verdict. Do not invent values and do not encode placeholders such as `x-todo`, `[TODO]`, `TBD`, or fictional error bodies in the import artifact. Never remove a source route merely to make validation green.
 
 Use synthetic examples that demonstrate shape without revealing repository or customer data. Suitable neutral values include `app.example.com`, `/api/orders`, `order-example`, and `user@example.com`.
+
+A synthetic example is input to the test-data generator, which may repeat it as a format pattern in every row: make it valid for the code and consistent with the fields that describe the same thing, in the convention the code expects. A field the code does not validate gets no example that looks like a code from a standard vocabulary; a field validated against a vocabulary gets one from it. An optional field gets one only when a journey sends it and you can ground the value; otherwise leave it without an example. See [loadcraft-contract.md](loadcraft-contract.md), section "Request bodies".
 
 An illustrative value is not automatically safe load data. For a field that must be unique, valid in an external identity system, or secret, omit the fixed example and record the provisioning/feeder requirement in the delivery report.
 

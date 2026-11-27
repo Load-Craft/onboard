@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`project_get_activity > answers in Polish with every key of the view 1`] = `
+"2 przebiegi w toku:
+  e-3f9a12c4  sklep  checkout  trwa 42%  120,5 req/s  KO 0,8%
+  e-8c2d4f17  sklep  konto     trwa 0%
+  e-8c2d4f17 nie jest już prowadzony przez serwer (porzucony).
+3 ostatnie zdarzenia:
+  2026-11-27 10:40  przebieg zakończony  e-3f9a12c4 checkout  sklep  completed · SLA NIE dotrzymane
+  2026-11-27 09:00  flow utworzony       Checkout flow        sklep
+  2026-11-26 09:00  projekt utworzony    sklep                sklep"
+`;
+
+exports[`project_get_activity > lists the runs in progress and the recent events; two requests, no project needed 1`] = `
+"2 runs in progress:
+  e-3f9a12c4  sklep  checkout  running 42%  120.5 req/s  KO 0.8%
+  e-8c2d4f17  sklep  konto     running 0%
+  e-8c2d4f17 is not driven by the server any more (abandoned).
+3 recent events:
+  2026-11-27 10:40  run completed    e-3f9a12c4 checkout  sklep  completed · SLA NOT met
+  2026-11-27 09:00  flow created     Checkout flow        sklep
+  2026-11-26 09:00  project created  sklep                sklep"
+`;

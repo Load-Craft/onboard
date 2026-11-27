@@ -1,0 +1,73 @@
+{
+  "scenario_id": "0d0c7034-0003-4000-8000-000000001001",
+  "scenario_name": "Customer registration and account setup journey",
+  "artifact_version": 1,
+  "contract_v2": {
+    "contract_version": 2,
+    "required_inputs": ["email", "password", "target_key_storekey"],
+    "exports": [],
+    "locals": [
+      "address_1",
+      "address_2",
+      "address_id",
+      "address_name",
+      "city",
+      "company",
+      "company_name",
+      "country_code",
+      "customer_id",
+      "customer_token",
+      "first_name",
+      "is_default_billing",
+      "is_default_shipping",
+      "last_name",
+      "loadcraft_thinkRandom",
+      "phone",
+      "phone2",
+      "postal_code",
+      "registration_token"
+    ],
+    "control_vars": [],
+    "session_vars": [
+      "address_1",
+      "address_2",
+      "address_id",
+      "address_name",
+      "city",
+      "company",
+      "company_name",
+      "country_code",
+      "customer_id",
+      "customer_token",
+      "email",
+      "first_name",
+      "is_default_billing",
+      "is_default_shipping",
+      "last_name",
+      "loadcraft_thinkRandom",
+      "password",
+      "phone",
+      "phone2",
+      "postal_code",
+      "registration_token",
+      "target_key_storekey"
+    ],
+    "source_metadata": {
+      "source_kind": "flow",
+      "source_flow_id": "0d0c7034-0003-4000-8000-000000001002",
+      "source_flow_version": 1
+    }
+  },
+  "input_variables": [
+    {
+      "name": "email"
+    },
+    {
+      "name": "password"
+    },
+    {
+      "name": "target_key_storekey"
+    }
+  ],
+  "output_variables": []
+}

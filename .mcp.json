@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "lc": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/dist/server.mjs"
+      ],
+      "env": {
+        "LOADCRAFT_URL": "${user_config.loadcraft_url}",
+        "LOADCRAFT_API_URL": "${user_config.api_url}",
+        "LOADCRAFT_API_TOKEN": "${user_config.api_token}",
+        "LOADCRAFT_DEMO": "${user_config.demo}",
+        "LOADCRAFT_LOCALE": "${user_config.locale}",
+        "LOADCRAFT_WORKSPACE": "${CLAUDE_PROJECT_DIR}"
+      }
+    }
+  }
+}

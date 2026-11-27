@@ -1,0 +1,5 @@
+konta  450 z 2 000 kont istnieje · serwer wtyczki zakończył pracę przed
+       końcem zakładania
+       hasła zamaskowane
+test nie jest gotowy · data_create_accounts dla slotu accounts z count 2000
+dołoży tylko brakujące konta

@@ -1,0 +1,326 @@
+{
+  "_source": {
+    "note": "Second copy of a rule owned by the LoadCraft frontend. Derived from the branches and tests of the verdict of its results page; when that rule changes, this table and src/report/verdict.ts must be re-checked.",
+    "repo": "loadcraft",
+    "mapping": "ok -> sla_passed (sla_verdict.status passed) or sla_not_judged (no verdict or refused); sla_fail and sla_and_invariants_fail -> sla_failed (invariants named in reasons); run_fail -> run_failed; sla_not_judged and the invariants_not_evaluated warning are the only additions to the frontend vocabulary"
+  },
+  "cases": [
+    {
+      "name": "pending is in progress",
+      "execution": { "status": "pending" },
+      "expect": { "state": "in_progress", "reasons": [] }
+    },
+    {
+      "name": "building is in progress",
+      "execution": { "status": "building" },
+      "expect": { "state": "in_progress", "reasons": [] }
+    },
+    {
+      "name": "running is in progress even with a failed exit code on the row",
+      "execution": { "status": "running", "run_exit_code": 2 },
+      "expect": { "state": "in_progress", "reasons": [] }
+    },
+    {
+      "name": "cancelled wins over any SLA fact",
+      "execution": {
+        "status": "cancelled",
+        "run_exit_code": 2,
+        "sla_verdict": { "status": "failed" }
+      },
+      "expect": { "state": "cancelled", "reasons": [] }
+    },
+    {
+      "name": "failed without exit code is a run failure",
+      "execution": { "status": "failed" },
+      "expect": { "state": "run_failed", "reasons": [] }
+    },
+    {
+      "name": "failed with exit code 1 is a run failure",
+      "execution": { "status": "failed", "run_exit_code": 1 },
+      "expect": { "state": "run_failed", "reasons": [] }
+    },
+    {
+      "name": "exit code 127 is not an SLA failure",
+      "execution": { "status": "failed", "run_exit_code": 127 },
+      "expect": { "state": "run_failed", "reasons": [] }
+    },
+    {
+      "name": "failed with a refused exact verdict is a run failure naming the refusal",
+      "execution": {
+        "status": "failed",
+        "run_exit_code": 2,
+        "sla_verdict": { "status": "refused", "reason": "simulation_log_missing" }
+      },
+      "expect": { "state": "run_failed", "reasons": ["sla_refused:simulation_log_missing"] }
+    },
+    {
+      "name": "legacy failed row with exit code 2 is an SLA failure",
+      "execution": { "status": "failed", "run_exit_code": 2 },
+      "expect": { "state": "sla_failed", "reasons": ["sla_exit_code_2_legacy"] }
+    },
+    {
+      "name": "failed with exact failed verdict is an SLA failure",
+      "execution": { "status": "failed", "sla_verdict": { "status": "failed" } },
+      "expect": { "state": "sla_failed", "reasons": ["sla_failed"] }
+    },
+    {
+      "name": "completed with exact passed verdict passes the SLA",
+      "execution": {
+        "status": "completed",
+        "run_exit_code": 0,
+        "sla_verdict": { "status": "passed" }
+      },
+      "expect": { "state": "sla_passed", "reasons": [] }
+    },
+    {
+      "name": "completed without any verdict is not judged",
+      "execution": { "status": "completed", "run_exit_code": 0 },
+      "expect": { "state": "sla_not_judged", "reasons": [] }
+    },
+    {
+      "name": "completed with a refused verdict is not judged, naming the refusal",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "refused", "reason": "simulation_log_undecodable" }
+      },
+      "expect": { "state": "sla_not_judged", "reasons": ["sla_refused:simulation_log_undecodable"] }
+    },
+    {
+      "name": "completed with exit code 2 and no exact verdict is an SLA failure (karta 134)",
+      "execution": { "status": "completed", "run_exit_code": 2 },
+      "expect": { "state": "sla_failed", "reasons": ["sla_exit_code_2_legacy"] }
+    },
+    {
+      "name": "the exact verdict decides over the exit code: passed beats exit 2",
+      "execution": {
+        "status": "completed",
+        "run_exit_code": 2,
+        "sla_verdict": { "status": "passed" }
+      },
+      "expect": { "state": "sla_passed", "reasons": [] }
+    },
+    {
+      "name": "the exact verdict decides over the exit code: failed beats exit 0",
+      "execution": {
+        "status": "completed",
+        "run_exit_code": 0,
+        "sla_verdict": { "status": "failed" }
+      },
+      "expect": { "state": "sla_failed", "reasons": ["sla_failed"] }
+    },
+    {
+      "name": "completed with an SLA pass but request errors completes with errors",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "result_has_errors": true
+      },
+      "expect": { "state": "completed_with_errors", "reasons": ["result_has_errors"] }
+    },
+    {
+      "name": "completed without a verdict but with errors completes with errors",
+      "execution": { "status": "completed", "result_has_errors": true },
+      "expect": { "state": "completed_with_errors", "reasons": ["result_has_errors"] }
+    },
+    {
+      "name": "a missed SLA names the run before its errors",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "failed" },
+        "result_has_errors": true
+      },
+      "expect": { "state": "sla_failed", "reasons": ["sla_failed"] }
+    },
+    {
+      "name": "a violated invariant names the run before its errors",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "result_has_errors": true,
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [{ "name": "no duplicate ids", "status": "evaluated", "passed": false }]
+        }
+      },
+      "expect": {
+        "state": "invariants_violated",
+        "reasons": ["invariant_violated:no duplicate ids"]
+      }
+    },
+    {
+      "name": "violated invariant on a completed run with a passed SLA",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [
+            { "name": "orders match", "status": "evaluated", "passed": false },
+            { "name": "totals add up", "status": "evaluated", "passed": true }
+          ]
+        }
+      },
+      "expect": { "state": "invariants_violated", "reasons": ["invariant_violated:orders match"] }
+    },
+    {
+      "name": "every violated invariant is named",
+      "execution": {
+        "status": "completed",
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [
+            { "name": "a", "status": "evaluated", "passed": false },
+            { "name": "b", "status": "evaluated", "passed": false }
+          ]
+        }
+      },
+      "expect": {
+        "state": "invariants_violated",
+        "reasons": ["invariant_violated:a", "invariant_violated:b"]
+      }
+    },
+    {
+      "name": "SLA failed and invariant violated together stay sla_failed and name both",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "failed" },
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [{ "name": "orders match", "status": "evaluated", "passed": false }]
+        }
+      },
+      "expect": {
+        "state": "sla_failed",
+        "reasons": ["sla_failed", "invariant_violated:orders match"]
+      }
+    },
+    {
+      "name": "an insufficient-data row with passed false is not a violation",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [{ "name": "orders match", "status": "insufficient_data", "passed": false }]
+        }
+      },
+      "expect": { "state": "sla_passed", "reasons": ["invariants_not_evaluated"] }
+    },
+    {
+      "name": "a failed invariant evaluation is a warning, not a verdict",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": {
+          "state": "evaluation_failed",
+          "error_type": "RuntimeError",
+          "error_message": "boom"
+        }
+      },
+      "expect": { "state": "sla_passed", "reasons": ["invariants_not_evaluated"] }
+    },
+    {
+      "name": "an unfinished invariant evaluation is a warning, not a verdict",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": { "state": "evaluating" }
+      },
+      "expect": { "state": "sla_passed", "reasons": ["invariants_not_evaluated"] }
+    },
+    {
+      "name": "a summary listing no invariant carries no signal",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": { "state": "evaluated", "results": [] }
+      },
+      "expect": { "state": "sla_passed", "reasons": [] }
+    },
+    {
+      "name": "a null invariant summary carries no signal",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": null
+      },
+      "expect": { "state": "sla_passed", "reasons": [] }
+    },
+    {
+      "name": "a value ledger row that failed is a violated invariant naming its variable",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [],
+          "value_ledger": {
+            "state": "measured",
+            "rows": [{ "variable": "csrf", "verdict": "stale", "outcome": "fail" }]
+          }
+        }
+      },
+      "expect": { "state": "invariants_violated", "reasons": ["value_ledger_failed:csrf"] }
+    },
+    {
+      "name": "an undecided value ledger row warns beside the verdict",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [],
+          "value_ledger": {
+            "state": "measured",
+            "rows": [{ "variable": "csrf", "verdict": "unknown", "outcome": "undecided" }]
+          }
+        }
+      },
+      "expect": { "state": "sla_passed", "reasons": ["invariants_not_evaluated"] }
+    },
+    {
+      "name": "an unmeasured value ledger warns beside the verdict",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "passed" },
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [],
+          "value_ledger": { "state": "no_records", "rows": [] }
+        }
+      },
+      "expect": { "state": "sla_passed", "reasons": ["invariants_not_evaluated"] }
+    },
+    {
+      "name": "the not-evaluated warning rides beside a failed SLA",
+      "execution": {
+        "status": "completed",
+        "sla_verdict": { "status": "failed" },
+        "invariant_summary": { "state": "evaluating" }
+      },
+      "expect": { "state": "sla_failed", "reasons": ["sla_failed", "invariants_not_evaluated"] }
+    },
+    {
+      "name": "invariants are not read for a run failure",
+      "execution": {
+        "status": "failed",
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [{ "name": "orders match", "status": "evaluated", "passed": false }]
+        }
+      },
+      "expect": { "state": "run_failed", "reasons": [] }
+    },
+    {
+      "name": "invariants are not read while running",
+      "execution": {
+        "status": "running",
+        "invariant_summary": {
+          "state": "evaluated",
+          "results": [{ "name": "orders match", "status": "evaluated", "passed": false }]
+        }
+      },
+      "expect": { "state": "in_progress", "reasons": [] }
+    }
+  ]
+}

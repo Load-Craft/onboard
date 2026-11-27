@@ -1,0 +1,3 @@
+connected ✓ · no tool the backend can call on its own
+never called, it needs more than start and end: trace_search
+available but not enabled: logs_summary, container_events

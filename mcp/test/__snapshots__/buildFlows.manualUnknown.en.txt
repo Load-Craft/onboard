@@ -1,0 +1,2 @@
+[unknown_endpoints] LoadCraft does not know the endpoint "POST:/auth/logn". Closest known: POST:/auth/logn → POST:/auth/login, POST:/auth/logout.
+→ Pass endpoints as "METHOD /path" (for example "POST /auth/login"), a UUID or an operationId that the API documentation lists.

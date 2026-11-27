@@ -55,9 +55,9 @@ Build or update `loadcraft/asyncapi.json` directly. Keep message and channel nam
 
 - non-empty `info.title`, `info.version`, `servers`, `channels`, and `operations`;
 - `defaultContentType`, or an explicit `contentType` on every message;
-- every server with explicit `url` and `protocol`;
+- every server with `host` and `protocol` (AsyncAPI 3.0: no `url`);
 - every channel with an explicit `address`;
-- one operation for every in-scope source-grounded interaction, with `action` from the application's perspective and resolvable channel and message references;
+- one operation for every in-scope source-grounded interaction, with `action` from the application's perspective and resolvable channel references and messages `#/channels/<id>/messages/<key>` of the operation's own channel;
 - every message defined under `components.messages` with an object payload schema and at least one synthetic example; where the receiving logic branches on a payload value, one example per distinct traced behavior branch, the first being the primary path and each other naming its trigger and behavior in `name` and `summary`;
 - only internal, resolvable, acyclic references;
 - a provenance stamp `info.x-loadcraft-source` (`commit`, `dirty`, `method` — see the contract reference) when the repository is under git; omit it otherwise and note that in the report.
@@ -69,10 +69,10 @@ Do not preserve invalid legacy constructs merely to avoid changing the file. Fai
 Run:
 
 ```bash
-python3 <skill-root>/scripts/validate_asyncapi.py loadcraft/asyncapi.json
+node <skill-root>/scripts/validate_asyncapi.mjs loadcraft/asyncapi.json
 ```
 
-Fix every reported error and rerun. Do not substitute a generic AsyncAPI linter for this LoadCraft-specific gate.
+The result must be `PASS` before the document goes to LoadCraft. On an error, fix the document and rerun. Do not substitute a generic AsyncAPI linter for this LoadCraft-specific gate.
 
 For a full generation or update, also compare the final channel/operation inventory with the source inventory. Zero validator errors do not prove parity by themselves.
 

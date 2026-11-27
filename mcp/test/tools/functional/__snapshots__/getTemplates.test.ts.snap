@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`functional_get_templates > answers in Polish with every key of the view 1`] = `
+"2 szablony funkcjonalne:
+  Smoke       2 asercje  smoke             aktywny  2026-11-22
+  Regression  2 asercje  regression, cart  aktywny  2026-11-22"
+`;
+
+exports[`functional_get_templates > answers in Polish with every key of the view 2`] = `
+"szablon funkcjonalny „Regression”
+stan         aktywny
+endpointy    3
+bloki flowu  2
+tagi         regression, cart
+opis         Regression checks
+opis API     Shop API
+2 asercje:
+  status_code  expected=200
+  body_contains (wyłączona)  text=ok
+2 parametry przebiegu:
+  expected_status (integer, domyślnie 200): The status the call returns
+  mode (enum, strict|loose)"
+`;
+
+exports[`functional_get_templates > lists the templates with their assertions and tags, in one request 1`] = `
+"2 functional templates:
+  Smoke       2 assertions  smoke             active  2026-11-22
+  Regression  2 assertions  regression, cart  active  2026-11-22"
+`;
+
+exports[`functional_get_templates > shows one template by name (list, then the record) with assertions and parameters; by id in one request 1`] = `
+"functional template "Regression"
+state            active
+endpoints        3
+flow blocks      2
+tags             regression, cart
+description      Regression checks
+api description  Shop API
+2 assertions:
+  status_code  expected=200
+  body_contains (off)  text=ok
+2 runtime parameters:
+  expected_status (integer, default 200): The status the call returns
+  mode (enum, strict|loose)"
+`;

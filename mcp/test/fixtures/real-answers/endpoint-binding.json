@@ -1,0 +1,86 @@
+{
+  "endpoint_id": "0d0c7034-0003-4000-8000-000000001000",
+  "path": "/auth/customer/credentials",
+  "method": "POST",
+  "response_schemas": {
+    "200": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "description": "Signed JWT (HS256 with the project's jwtSecret unless jwtOptions override it)."
+        }
+      },
+      "required": ["token"]
+    },
+    "400": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["not_allowed"]
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": ["type", "message"]
+    },
+    "401": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["unauthorized"]
+        },
+        "message": {
+          "type": "string",
+          "description": "Known literals: \"Invalid email or password\", \"Password should be a string\", \"Email should be a string\"."
+        }
+      },
+      "required": ["type", "message"]
+    }
+  },
+  "expected_status_codes": [200, 400, 401],
+  "suggested_assertions": [
+    {
+      "type": "status_code",
+      "config": {
+        "expected": 200
+      },
+      "description": "Response returns 200"
+    },
+    {
+      "type": "json_schema",
+      "config": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "token": {
+              "type": "string",
+              "description": "Signed JWT (HS256 with the project's jwtSecret unless jwtOptions override it)."
+            }
+          },
+          "required": ["token"]
+        },
+        "status_code": 200
+      },
+      "description": "Response matches JSON schema for 200"
+    },
+    {
+      "type": "field_exists",
+      "config": {
+        "path": "$.token"
+      },
+      "description": "Required field \"token\" exists"
+    },
+    {
+      "type": "field_type",
+      "config": {
+        "path": "$.token",
+        "expected_type": "string"
+      },
+      "description": "Field \"token\" is of type string"
+    }
+  ]
+}

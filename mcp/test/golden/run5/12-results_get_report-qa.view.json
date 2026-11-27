@@ -1,0 +1,23 @@
+{
+  "verdict": { "state": "sla_passed", "reasons": [] },
+  "thresholds": [
+    {
+      "kind": "percentile",
+      "percentile": 95,
+      "unit": "ms",
+      "value": 210,
+      "limit": 400,
+      "pass": true
+    },
+    { "kind": "failed_percent", "unit": "percent", "value": 0, "limit": 1, "pass": true }
+  ],
+  "run": {
+    "durationS": 600,
+    "planned": { "type": "ramp_concurrency", "vusers": 100, "ramp": 600 },
+    "peak": { "unavailable": "no_capability" },
+    "capped": { "from": 2000, "to": 100 }
+  },
+  "requests": { "total": 10900, "perSecond": 18 },
+  "errors": [],
+  "endpoints": []
+}

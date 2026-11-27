@@ -1,0 +1,630 @@
+{
+  "tools": [
+    {
+      "name": "flows_apply_copilot_changes",
+      "title": "Apply the accepted copilot changes to a flow as one new ver…",
+      "description": "Apply the accepted copilot changes to a flow as one new version and record what was rejected.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow (id or name); default: the only one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "message_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The copilot turn the changes come from: message_id of flows_ask_copilot or flows_get_copilot_history."
+          },
+          "accept": {
+            "description": "Ids of the changes to apply, comma-separated (at most 50).",
+            "type": "string",
+            "maxLength": 2000
+          },
+          "reject": {
+            "description": "Ids of the changes to record as rejected, comma-separated (at most 50).",
+            "type": "string",
+            "maxLength": 2000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["message_id"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_ask_copilot",
+      "title": "Ask the flow copilot for changes to a flow",
+      "description": "Ask the flow copilot for changes to a flow; without a message it runs its standard review. Returns a proposal, changes nothing.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow (id or name); default: the only one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "message": {
+            "description": "What to ask; without it the copilot runs its standard review.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_duplicate",
+      "title": "Duplicate flows, or copy one flow onto another docs version",
+      "description": "Duplicate flows, or copy one flow onto another docs version (docs_id).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_ids": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "The flows to copy, ids or names, comma-separated (1-20; exactly one with docs_id)."
+          },
+          "docs_id": {
+            "description": "Copy the flow onto this documentation version.",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F-]{36}$"
+          },
+          "name": {
+            "description": "The name of the copy (with docs_id).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["flow_ids"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_export_walk_image",
+      "title": "Export a walk image to a local file",
+      "description": "Export a walk image to a local file and return its path: a live snapshot of a path attempt, or a timeline still.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "walk_id": {
+            "description": "The walk: its handle or id; default: the walk of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "path_index": {
+            "description": "The step of the walk to capture live (not with still_id).",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "attempt": {
+            "default": 1,
+            "description": "The attempt of that step (with path_index).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "still_id": {
+            "description": "A still of the review timeline (not with path_index).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "overwrite": {
+            "default": false,
+            "description": "true: replace an image saved earlier under the same name.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_get",
+      "title": "Get one flow as a numbered outline with variables",
+      "description": "Get one flow as a numbered outline with variables, pauses and open questions.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow: its id or name; default: the only flow of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_get_copilot_history",
+      "title": "Get a flow's copilot conversation",
+      "description": "Get a flow's copilot conversation, or its improvement suggestions.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow: its id or name; default: the only flow of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "suggestions": {
+            "default": false,
+            "description": "true: the copilot's open suggestions instead of the conversation.",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many of the latest turns to return (1-50).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_get_versions",
+      "title": "Get a flow's stored versions",
+      "description": "Get a flow's stored versions: the list, or one version as an outline.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow: its id or name; default: the only flow of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "version": {
+            "description": "One version as an outline; without it, the list (newest first).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many versions of the list to return (1-100).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_get_walks",
+      "title": "Get description runs",
+      "description": "Get description runs (browser walks): the list, or one with its paths and optional review timeline.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "walk_id": {
+            "description": "One walk: its handle or id; without it, the list of your walks.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many walks of the list to return (1-50).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "include": {
+            "description": "\"timeline\": the review timeline of the walk (with walk_id only).",
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["timeline"]
+            }
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_list",
+      "title": "List the project's flows",
+      "description": "List the project's flows: name, type, version, step count.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Only flows whose name contains this text (any case).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "limit": {
+            "default": 50,
+            "description": "How many flows to return (1-200).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_merge",
+      "title": "Merge several flows into one new flow",
+      "description": "Merge several flows into one new flow (the first kept whole, later ones lose their leading reads).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_ids": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "The flows to merge, ids or names, comma-separated (2-20)."
+          },
+          "name": {
+            "description": "The name of the merged flow.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["flow_ids"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_regenerate",
+      "title": "Regenerate a flow from its recorded sources",
+      "description": "Regenerate a flow from its recorded sources; saved as a new version.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow (id or name); default: the only one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "description": "What the flow should do; default: the description it was generated from.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "skip_validators": {
+            "default": false,
+            "description": "true: do not generate validators for the new version.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_restore_version",
+      "title": "Restore an older flow version as the newest one",
+      "description": "Restore an older flow version as the newest one.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow: its id or name; default: the only flow of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000,
+            "description": "The version to bring back (flows_get_versions lists them)."
+          },
+          "reason": {
+            "description": "Why the version is restored (kept with the new version).",
+            "type": "string",
+            "maxLength": 200
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["version"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_save",
+      "title": "Save a flow from blocks",
+      "description": "Save a flow from blocks (flow_id: new version; none: new flow). Direct edit, only on the user's request; normally use flows_ask_copilot.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow to change (id or name); without it, a new flow is created.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "name": {
+            "description": "The flow's name; required for a new flow.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "description": "The flow's description.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "graph": {
+            "description": "The whole graph {blocks, edges, entry_block_id} (no variables); a new flow or a full replacement.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "drop_steps": {
+            "description": "Step numbers to remove, as flows_get numbers them, comma-separated (at most 50); with flow_id, not with graph.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "reason": {
+            "description": "Why the graph changes (with graph or drop_steps); kept on the new version.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_save_walk_note",
+      "title": "Save a note at a step of a walk",
+      "description": "Save a note at a step of a walk (new or changed); notes steer the next retry.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "walk_id": {
+            "description": "The walk: its handle or id; default: the walk of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "step": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "The step of the walk (from flows_get_walks include timeline)."
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "The note."
+          },
+          "note_id": {
+            "description": "An existing note to change; without it, a new note.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "remember": {
+            "default": false,
+            "description": "true: also keep it as a note of the project for later walks.",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["step", "text"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "flows_set_poll_terminals",
+      "title": "Set the success and failure terminal statuses that answer a…",
+      "description": "Set the success and failure terminal statuses that answer a flow's open poll-loop questions.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "description": "The flow (id or name); default: the only one of this workspace.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The status field of an open poll question: the field of a poll_status item in flows_get."
+          },
+          "success_terminals": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "description": "The statuses that mean the job succeeded, comma-separated (at most 20)."
+          },
+          "failure_terminals": {
+            "description": "The statuses that mean it failed, comma-separated (at most 20); without it, none.",
+            "type": "string",
+            "maxLength": 1000
+          },
+          "format": {
+            "default": "text",
+            "description": "Read-only choice of the answer: \"text\" (default) is the view; \"data\" is the same facts as one JSON block, for a client that parses them.",
+            "type": "string",
+            "enum": ["text", "data"]
+          }
+        },
+        "required": ["field", "success_terminals"],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`project_list > answers in Polish with every key of the view 1`] = `
+"2 projekty:
+  * sklep    API  aktywny     0 flowów, 0 typów testów, 0 walidatorów  2026-11-22
+    archive  API  nieaktywny  0 flowów, 0 typów testów, 0 walidatorów  2026-01-01
+* projekt, z którym jest związana ta przestrzeń"
+`;
+
+exports[`project_list > answers in Polish with every key of the view 2`] = `
+"3 trafienia dla „check”:
+  strona               Checkout settings  Settings
+  flow lub scenariusz  Checkout flow      sklep
+  przebieg             e-3f9a12c4         checkout run"
+`;
+
+exports[`project_list > lists the projects with their counts, the current one marked, in one request 1`] = `
+"2 projects:
+  * sklep    API  active    0 flows, 0 test types, 0 validators  2026-11-22
+    archive  API  inactive  0 flows, 0 test types, 0 validators  2026-01-01
+* the project this workspace is bound to"
+`;
+
+exports[`project_list > with a query searches projects, flows, scenarios, runs and pages; a run by its handle 1`] = `
+"3 hits for "check":
+  page              Checkout settings  Settings
+  flow or scenario  Checkout flow      sklep
+  run               e-3f9a12c4         checkout run"
+`;

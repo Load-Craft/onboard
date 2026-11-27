@@ -1,0 +1,64 @@
+{
+  "environments": [
+    {
+      "name": "perf",
+      "default": true,
+      "protected": false,
+      "api": {
+        "status": "ok",
+        "ms": 42
+      },
+      "frontend": {
+        "status": "ok",
+        "ms": 58
+      }
+    },
+    {
+      "name": "qa",
+      "default": false,
+      "protected": true,
+      "caps": {
+        "maxVu": 100,
+        "maxRps": 20
+      },
+      "api": {
+        "status": "ok",
+        "ms": 42
+      },
+      "frontend": {
+        "status": "ok",
+        "ms": 58
+      }
+    },
+    {
+      "name": "dev",
+      "default": false,
+      "protected": false,
+      "api": {
+        "status": "ok",
+        "ms": 42
+      },
+      "frontend": {
+        "status": "ok",
+        "ms": 58
+      }
+    },
+    {
+      "name": "prod",
+      "default": false,
+      "protected": true,
+      "caps": {
+        "maxVu": 20,
+        "maxRps": 5
+      },
+      "api": {
+        "status": "ok",
+        "ms": 42
+      },
+      "frontend": {
+        "status": "ok",
+        "ms": 58
+      }
+    }
+  ]
+}

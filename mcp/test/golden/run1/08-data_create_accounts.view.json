@@ -1,0 +1,78 @@
+{
+  "slot": "accounts",
+  "dataset": "konta",
+  "requested": 2000,
+  "created": 2000,
+  "earlier": 0,
+  "failed": 0,
+  "batches": 40,
+  "batchSize": 50,
+  "registerOperation": "POST:/auth/register",
+  "environment": null,
+  "masked": true,
+  "aborted": false,
+  "ready": true,
+  "failures": [],
+  "plan": {
+    "target": {
+      "kind": "composition",
+      "name": "checkout"
+    },
+    "environment": "perf",
+    "slots": [
+      {
+        "slot": "search_phrases",
+        "label": "Search terms",
+        "state": "auto",
+        "columns": [
+          {
+            "name": "q",
+            "qualifier": null
+          }
+        ],
+        "sources": ["Samples a model wrote"],
+        "exclusive": false,
+        "usedBy": ["zakupy"]
+      },
+      {
+        "slot": "order_details",
+        "label": "Quantity & cardnumber",
+        "state": "auto",
+        "columns": [
+          {
+            "name": "quantity",
+            "qualifier": "1–5"
+          },
+          {
+            "name": "cardNumber",
+            "qualifier": "Visa, Mastercard"
+          }
+        ],
+        "sources": [],
+        "exclusive": false,
+        "usedBy": ["zakupy"]
+      },
+      {
+        "slot": "accounts",
+        "label": "User accounts",
+        "state": "bound",
+        "columns": [
+          {
+            "name": "email",
+            "qualifier": null
+          },
+          {
+            "name": "password",
+            "qualifier": null
+          }
+        ],
+        "sources": [],
+        "exclusive": true,
+        "usedBy": ["zakupy", "konto"]
+      }
+    ],
+    "fixes": [],
+    "ready": true,
+    "proposed": []
+  }
+}

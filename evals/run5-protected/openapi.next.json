@@ -1,0 +1,754 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sklep API",
+    "version": "2.15.0",
+    "x-loadcraft-source": {
+      "commit": "DEVELOP_COMMIT",
+      "dirty": false,
+      "method": "static-trace"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.perf.example.com"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "operationId": "registerUser",
+        "summary": "Register a customer",
+        "description": "Creates a customer account. The password must have at least 8 characters.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "user-example-1",
+                  "email": "user@example.com"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Sign in",
+        "description": "Exchanges the email and password for a session identifier, sent afterwards as the bearer credential of every secured route.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                },
+                "example": {
+                  "session_id": "session-example-1"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/products": {
+      "get": {
+        "operationId": "listProducts",
+        "summary": "Search products",
+        "description": "Lists products whose name contains the search phrase; without a phrase lists all of them.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "mug"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductList"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "product-example-1",
+                      "name": "Mug",
+                      "price_cents": 1900,
+                      "stock": 40
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "operationId": "getProduct",
+        "summary": "Read a product",
+        "description": "Returns one product by its identifier.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "product-example-1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                },
+                "example": {
+                  "id": "product-example-1",
+                  "name": "Mug",
+                  "price_cents": 1900,
+                  "stock": 40
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/cart/items": {
+      "post": {
+        "operationId": "addCartItem",
+        "summary": "Add a product to the cart",
+        "description": "Adds a line to the signed-in customer's cart and returns the whole cart.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartItem"
+              },
+              "example": {
+                "product_id": "product-example-1",
+                "quantity": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cart after the change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                },
+                "example": {
+                  "lines": [
+                    {
+                      "product_id": "product-example-1",
+                      "quantity": 2
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cart": {
+      "get": {
+        "operationId": "getCart",
+        "summary": "Read the cart",
+        "description": "Returns the signed-in customer's cart.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                },
+                "example": {
+                  "lines": [
+                    {
+                      "product_id": "product-example-1",
+                      "quantity": 2
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/checkout": {
+      "post": {
+        "operationId": "checkout",
+        "summary": "Pay for the cart",
+        "description": "Charges the card for the whole cart and creates an order. The payment provider call takes about 800 ms and the stock rows stay locked meanwhile, so concurrent checkouts are serialized.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              },
+              "example": {
+                "card_number": "4111111111111111"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                },
+                "example": {
+                  "id": "order-1",
+                  "user_id": "user-example-1",
+                  "lines": [
+                    {
+                      "product_id": "product-example-1",
+                      "quantity": 2
+                    }
+                  ],
+                  "total_cents": 3800,
+                  "status": "paid"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders": {
+      "get": {
+        "operationId": "listOrders",
+        "summary": "List my orders",
+        "description": "Lists the signed-in customer's orders.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderList"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "order-1",
+                      "user_id": "user-example-1",
+                      "lines": [
+                        {
+                          "product_id": "product-example-1",
+                          "quantity": 2
+                        }
+                      ],
+                      "total_cents": 3800,
+                      "status": "paid"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/status": {
+      "get": {
+        "operationId": "getOrderStatus",
+        "summary": "Order status",
+        "description": "Returns the status of one of the signed-in customer's orders.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "order-1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "paid",
+                        "shipped"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ]
+                },
+                "example": {
+                  "id": "order-1",
+                  "status": "paid"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Credentials": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "Token": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "price_cents",
+          "stock"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price_cents": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "required": [
+          "product_id",
+          "quantity"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "required": [
+          "lines"
+        ],
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "product_id",
+                "quantity"
+              ],
+              "properties": {
+                "product_id": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "required": [
+          "card_number"
+        ],
+        "properties": {
+          "card_number": {
+            "type": "string"
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "lines",
+          "total_cents",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "product_id",
+                "quantity"
+              ],
+              "properties": {
+                "product_id": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "total_cents": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "paid"
+            ]
+          }
+        }
+      },
+      "OrderList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

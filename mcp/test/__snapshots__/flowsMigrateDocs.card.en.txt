@@ -1,0 +1,10 @@
+Migrate 3 flows to the current docs version
+  Flows                  konto, przeglądanie, zakupy
+  Target docs version    2.16.0 (2026-11-22, f3c9ebfd)
+  Adopt example values   all
+  ALLOW UNMATCHED steps  no
+  Docs version           2.16.0 (2026-11-22, f3c9ebfd)
+  Outdated flows         3
+Nothing was migrated yet; ask the user. Each flow keeps its id and gets a new
+  version; its scenarios stay attached and go stale.
+→ Only after a yes: the same call with confirm: "<token>".

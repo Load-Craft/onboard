@@ -1,0 +1,7 @@
+2 z 3 flowów gotowe
+zakupy · 7 kroków (4 żądania · 3 pauzy)
+przeglądanie · 3 kroki
+✕ konto: błąd (można ponowić)
+pytanie · zakupy: Which account logs in?
+→ Żeby ponowić, wywołaj flows_generate_from_suggestions jeszcze raz z
+  suggestions: "konto".

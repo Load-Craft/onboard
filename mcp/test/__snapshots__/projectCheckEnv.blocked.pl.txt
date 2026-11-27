@@ -1,0 +1,8 @@
+połączenie ok: perf, qa, dev, prod (API i frontend)
+połączenie local: API zablokowane: adres prywatny, LoadCraft go nie osiągnie
+→ LoadCraft nie dosięgnął adresu powyżej: sprawdź go z użytkownikiem i popraw
+  (adres zablokowany jest prywatny, więc LoadCraft go nie dosięgnie), potem
+  popraw go w ustawieniach środowiska w LoadCraft (project_save_env dodaje
+  środowiska, nigdy nie zmienia adresu istniejącego) i wywołaj
+  project_check_env jeszcze raz; do czasu odpowiedzi nie uruchamiaj na tym
+  środowisku testu ani nie zakładaj kont.

@@ -51,7 +51,7 @@ Compose `loadcraft/overview.md` per the contract: H1 title, then the six content
 Run:
 
 ```bash
-python3 <skill-root>/scripts/validate_overview.py loadcraft/overview.md
+node <skill-root>/scripts/validate_overview.mjs loadcraft/overview.md
 ```
 
 Fix every reported error and rerun. The validator checks the dialect, not the truth of the content; separately re-check that each section's statements match the evidence.
